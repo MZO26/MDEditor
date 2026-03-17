@@ -1,0 +1,298 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <meta name="description" content="notetaking app" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Note App</title>
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/buttons.css" />
+    <link rel="stylesheet" href="css/toast.css" />
+    <link rel="stylesheet" href="css/sidebar.css" />
+    <link rel="stylesheet" href="css/editor.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <div class="note-info">
+            <p>Notes</p>
+            <span id="notes-count">3</span>
+          </div>
+          <div class="sidebar-header-btns">
+            <button class="add-note-btn" title="add new note">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                class="bi bi-plus-lg"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="notes-container">
+          <div class="noteItem">
+            Note 1
+            <p>Content</p>
+          </div>
+          <div class="noteItem">
+            Note 2
+            <p>Content</p>
+          </div>
+          <div class="noteItem">
+            Note 3
+            <p>Content</p>
+          </div>
+          <div class="noteItem">
+            Note 4
+            <p>Content</p>
+          </div>
+          <div class="noteItem">
+            Note 5
+            <p>Content</p>
+          </div>
+          <div class="noteItem">
+            Note 6
+            <p>Content</p>
+          </div>
+          <div class="noteItem">
+            Note 7
+            <p>Content</p>
+          </div>
+          <div class="noteItem">
+            Note 8
+            <p>Content</p>
+          </div>
+          <div class="noteItem">
+            Note 9
+            <p>Content</p>
+          </div>
+          <div class="noteItem">
+            Note 10
+            <p>Content</p>
+          </div>
+          <div class="noteItem">
+            Note 11
+            <p>Content</p>
+          </div>
+          <div class="noteItem">
+            Note 12
+            <p>Content</p>
+          </div>
+          <div class="noteItem">
+            Note 13
+            <p>Content</p>
+          </div>
+        </div>
+
+        <div class="sidebar-footer">
+          <button class="settings-btn">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-sliders2"
+              viewBox="0 0 16 16"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4H1.5a.5.5 0 0 1 0-1H10V1.5a.5.5 0 0 1 .5-.5M12 3.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m-6.5 2A.5.5 0 0 1 6 6v1.5h8.5a.5.5 0 0 1 0 1H6V10a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5M1 8a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 1 8m9.5 2a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V13H1.5a.5.5 0 0 1 0-1H10v-1.5a.5.5 0 0 1 .5-.5m1.5 2.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <main class="editor-container">
+        <div class="editor-header">
+          <div class="editor-header-top-list">
+            <time id="datetime-display"></time>
+
+            <div class="editor-header-btns">
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  placeholder="filter"
+                  class="search-input"
+                  name="search-input"
+                  title="search note / toDo titles"
+                />
+                <div id="dropdown" class="dropdown"></div>
+              </div>
+              <button title="light / dark" class="dark-mode-btn">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-brightness-high-fill"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M12 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708"
+                  />
+                </svg>
+              </button>
+              <button class="pin-btn">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-pin-angle"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1 0 .707c-.48.48-1.072.588-1.503.588-.177 0-.335-.018-.46-.039l-3.134 3.134a6 6 0 0 1 .16 1.013c.046.702-.032 1.687-.72 2.375a.5.5 0 0 1-.707 0l-2.829-2.828-3.182 3.182c-.195.195-1.219.902-1.414.707s.512-1.22.707-1.414l3.182-3.182-2.828-2.829a.5.5 0 0 1 0-.707c.688-.688 1.673-.767 2.375-.72a6 6 0 0 1 1.013.16l3.134-3.133a3 3 0 0 1-.04-.461c0-.43.108-1.022.589-1.503a.5.5 0 0 1 .353-.146m.122 2.112v-.002zm0-.002v.002a.5.5 0 0 1-.122.51L6.293 6.878a.5.5 0 0 1-.511.12H5.78l-.014-.004a5 5 0 0 0-.288-.076 5 5 0 0 0-.765-.116c-.422-.028-.836.008-1.175.15l5.51 5.509c.141-.34.177-.753.149-1.175a5 5 0 0 0-.192-1.054l-.004-.013v-.001a.5.5 0 0 1 .12-.512l3.536-3.535a.5.5 0 0 1 .532-.115l.096.022c.087.017.208.034.344.034q.172.002.343-.04L9.927 2.028q-.042.172-.04.343a1.8 1.8 0 0 0 .062.46z"
+                  />
+                </svg>
+              </button>
+              <button class="search-btn">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-search"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"
+                  />
+                </svg>
+              </button>
+              <button class="export-btn">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-box-arrow-up"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M3.5 6a.5.5 0 0 0-.5.5v8a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5v-8a.5.5 0 0 0-.5-.5h-2a.5.5 0 0 1 0-1h2A1.5 1.5 0 0 1 14 6.5v8a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 14.5v-8A1.5 1.5 0 0 1 3.5 5h2a.5.5 0 0 1 0 1z"
+                  />
+                  <path
+                    fill-rule="evenodd"
+                    d="M7.646.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 1.707V10.5a.5.5 0 0 1-1 0V1.707L5.354 3.854a.5.5 0 1 1-.708-.708z"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="editor-wrapper">
+          <div id="editor"></div>
+        </div>
+        <div class="bar-bottom">
+          <div class="stats">
+            <span id="word-count">0 words</span>
+            <span><span id="char-count">0</span> characters</span>
+          </div>
+          <div class="spacer"></div>
+          <div class="zoom-controls">
+            <button id="btn-zoom-out" title="Zoom Out">-</button>
+            <span id="zoom-level">100%</span>
+            <button id="btn-zoom-in" title="Zoom In">+</button>
+          </div>
+        </div>
+      </main>
+    </div>
+    <div class="overlay"></div>
+    <div class="modal">
+      <div class="sidebar-modal">
+        <h2 class="modal-heading">Settings</h2>
+        <button
+          class="settings-nav-item active"
+          data-section="appearance-settings"
+        >
+          Appearance
+        </button>
+        <button class="settings-nav-item" data-section="editor-settings">
+          Editor
+        </button>
+        <button class="settings-nav-item" data-section="storage-settings">
+          Storage
+        </button>
+        <button class="settings-nav-item" data-section="tags-search-settings">
+          Tags & Search
+        </button>
+        <button class="settings-nav-item" data-section="advanced-settings">
+          Advanced
+        </button>
+        <button class="settings-nav-item" data-section="about-settings">
+          About
+        </button>
+      </div>
+      <div class="settings-content">
+        <div class="settings-panel active" id="appearance-settings">
+          <h2 class="modal-heading">Appearance</h2>
+          <div class="setting-item">Theme</div>
+          <div class="setting-item">Font Family</div>
+          <div class="setting-item">Layout</div>
+        </div>
+        <div class="settings-panel" id="editor-settings">
+          <h2 class="modal-heading">Editor</h2>
+          <div class="setting-item">Tab Size</div>
+          <div class="setting-item">Line Numbers</div>
+          <div class="setting-item">Auto-Save</div>
+        </div>
+        <div class="settings-panel" id="storage-settings">
+          <h2 class="modal-heading">Storage</h2>
+          <div class="setting-item">Notes Directory</div>
+          <div class="setting-item">Backup Options</div>
+          <div class="setting-item">Default Export Format</div>
+        </div>
+        <div class="settings-panel" id="tags-search-settings">
+          <h2 class="modal-heading">Tags & Search</h2>
+          <div class="setting-item">Default Sort Order</div>
+          <div class="setting-item">Search Settings</div>
+          <div class="setting-item">Filter Options</div>
+        </div>
+
+        <div class="settings-panel" id="advanced-settings">
+          <h2 class="modal-heading">Advanced</h2>
+          <div class="setting-item">Custom Keybindings</div>
+          <div class="setting-item">Experimental Features</div>
+          <div class="setting-item">Reset Settings</div>
+        </div>
+        <div class="settings-panel" id="about-settings">
+          <h2 class="modal-heading">About</h2>
+          <div class="setting-item">App Version</div>
+          <div class="setting-item">Check for Updates</div>
+          <div class="setting-item">Licenses</div>
+        </div>
+      </div>
+      <div class="button-collection-modal">
+        <button class="closeModal-btn" title="close modal">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            class="bi bi-x-lg"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="toast-container"></div>
+    <script type="module" src="src/main.ts"></script>
+  </body>
+</html>
