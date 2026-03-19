@@ -38,18 +38,14 @@ function debounce<T extends (...args: any[]) => void>(func: T, wait: number) {
 
 const updateStats = (text: string) => {
   const charCount = text.length;
-
-  // Optimierte Wortzählung: match() ist oft sicherer als split() bei leeren Strings
   const words = text.trim().match(/\S+/g);
   const wordCount = words ? words.length : 0;
 
-  // 1. Zeichenanzahl updaten (passiert jetzt nur noch 1x)
   const charCountEl = document.getElementById("char-count");
   if (charCountEl) {
     charCountEl.innerText = charCount.toString();
   }
 
-  // 2. Wortanzahl updaten (mit korrekter Grammatik)
   const wordCountEl = document.getElementById("word-count");
   if (wordCountEl) {
     if (wordCount === 1) {

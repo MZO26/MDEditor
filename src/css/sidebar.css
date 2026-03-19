@@ -1,0 +1,112 @@
+.sidebar-notes,
+.sidebar-categories {
+  height: 100%;
+  background-color: var(--bg-sidebar);
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header,
+.sidebar-footer {
+  flex-shrink: 0;
+}
+
+.sidebar-section {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 8px 12px;
+}
+
+.sidebar-header {
+  background: var(--bg-sidebar);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--border-color);
+  box-sizing: border-box;
+  display: flex;
+  height: 80px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px;
+}
+
+.sidebar-footer {
+  background: var(--bg-sidebar);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-top: 1px solid var(--border-color);
+  box-sizing: border-box;
+  display: flex;
+  height: 60px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  align-items: center;
+  padding: 0 15px;
+}
+
+.notes-container {
+  height: 100%;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.noteItem {
+  box-sizing: border-box;
+  padding: 10px 15px;
+  height: 70px;
+  width: 100%;
+  margin: 10px 0;
+  cursor: pointer;
+  color: var(--text-main);
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+
+.categoryItem {
+  box-sizing: border-box;
+  padding: 10px 15px;
+  height: 40px;
+  width: 100%;
+  margin: 10px 0;
+  cursor: pointer;
+  color: var(--text-main);
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.categoryItem.active,
+.noteItem.active {
+  background-color: var(--accent-hover);
+  border-color: var(--border-color);
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.noteItem:hover,
+.categoryItem:hover {
+  width: 100%;
+  background-color: var(--accent-hover);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.noteItem p,
+.categoryItem p {
+  color: var(--text-muted);
+}

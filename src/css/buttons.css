@@ -1,4 +1,4 @@
-button,
+/* button,
 select,
 input {
   cursor: pointer;
@@ -36,7 +36,7 @@ input:hover {
   background-color: var(--text-main);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   outline: none;
-}
+} */
 
 .button-collection-modal {
   display: flex;
@@ -89,10 +89,7 @@ input:hover {
 }
 
 .settings-btn {
-  display: flex;
   height: 35px;
   width: 35px;
   border-radius: 18px;
-  justify-content: center;
-  align-items: center;
 }

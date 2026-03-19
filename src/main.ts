@@ -2,27 +2,46 @@ import { initEditor } from "./editor";
 import { getElement } from "./helpers";
 
 document.addEventListener("DOMContentLoaded", async () => {
+  let aktuellerPfad: string | null = null;
+  const editor = document.getElementById("editor") as HTMLTextAreaElement;
+
+  // Datei speichern
+  document.getElementById("save-btn")?.addEventListener("click", async () => {
+    const inhalt = editor.value;
+    const ergebnis = await window.api.saveFile({ pfad: aktuellerPfad, inhalt });
+
+    if (typeof ergebnis === "string") {
+      aktuellerPfad = ergebnis;
+      alert("Gespeichert unter: " + ergebnis);
+    } else if (ergebnis === true) {
+      console.log("Änderungen gespeichert");
+    }
+  });
   const settingsBtn = getElement<HTMLButtonElement>(".settings-btn");
   settingsBtn.addEventListener("click", () => {
     openModal();
   });
   const darkModeBtn = getElement<HTMLButtonElement>(".dark-mode-btn");
+  const closeModalBtn = getElement<HTMLButtonElement>(".closeModal-btn");
+  closeModalBtn.addEventListener("click", () => {
+    const overlay = getElement<HTMLDivElement>(".overlay");
+    const modal = getElement<HTMLDivElement>(".modal");
+    overlay.classList.remove("show");
+    modal.classList.remove("show");
+  });
 
   darkModeBtn?.addEventListener("click", () => {
     const currentTheme = document.documentElement.getAttribute("data-theme");
 
     if (currentTheme === "dark") {
       document.documentElement.removeAttribute("data-theme");
+      window.electronAPI.setTheme("light");
     } else {
       document.documentElement.setAttribute("data-theme", "dark");
+      window.electronAPI.setTheme("dark");
     }
   });
-  try {
-    await initEditor();
-    console.log("Editor initialized successfully");
-  } catch (error) {
-    console.error("Error initializing editor:", error);
-  }
+  initEditor("#editor");
   function updateDateTime() {
     const displayElement = document.getElementById("datetime-display");
 
@@ -73,5 +92,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
   };
+  document.querySelectorAll(".categoryItem")?.forEach((item) => {
+    item.addEventListener("click", () => {
+      const sidebar = getElement<HTMLDivElement>(".sidebar-notes");
+      const appContainer = getElement<HTMLDivElement>(".app-container");
+      sidebar.classList.toggle("collapsed");
+      appContainer.classList.toggle("collapsed");
+    });
+  });
+
   setInterval(updateDateTime, 60000);
 });

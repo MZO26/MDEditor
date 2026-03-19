@@ -1,5 +1,4 @@
-@import "@milkdown/crepe/theme/common/style.css";
-@import "@milkdown/crepe/theme/frame.css";
+@import "highlight.js/styles/github-dark.css";
 
 :root {
   --bg-editor: #fcfcfc;
@@ -23,37 +22,13 @@
   --border-color: #313135;
 }
 
-.milkdown {
-  /* Backgrounds */
-  --crepe-color-background: var(--bg-editor);
-  --crepe-color-surface: var(--bg-sidebar);
-  --crepe-color-surface-low: var(--bg-button);
-
-  /* Text */
-  --crepe-color-on-background: var(--text-main);
-  --crepe-color-on-surface: var(--text-main);
-  --crepe-color-on-surface-variant: var(--text-main);
-
-  /* Accents */
-  --crepe-color-primary: var(--accent-primary);
-  --crepe-color-secondary: var(--bg-button);
-  --crepe-color-on-secondary: var(--text-main);
-
-  /* UI & Borders */
-  --crepe-color-outline: var(--accent-primary);
-  --crepe-color-inverse: var(--text-main);
-  --crepe-color-on-inverse: var(--bg-editor);
-
-  /* Interactive */
-  --crepe-color-hover: var(--border-color);
-  --crepe-color-selected: var(--border-color);
-  --crepe-color-inline-area: var(--bg-button);
-
-  /* Code & Error (Customized for balance) */
-  --crepe-color-inline-code: #ef4444;
-  --crepe-color-error: #ef4444;
-
-  --crepe-font-size: var(--editor-font-size, 18px);
+.drag-region {
+  -webkit-app-region: drag;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 140px;
+  height: 20px;
 }
 
 :root {
@@ -94,35 +69,6 @@
   font-weight: 500;
 }
 
-.milkdown svg {
-  fill: #71717a !important;
-  color: #71717a !important;
-  opacity: 0.7;
-}
-
-:root[data-theme="dark"] .milkdown svg {
-  fill: #e4e4e7 !important;
-  color: #e4e4e7 !important;
-  opacity: 0.7;
-}
-
-.milkdown {
-  /* Font Families */
-  --crepe-font-title: Georgia, Cambria, "Times New Roman", Times, serif;
-  --crepe-font-default: "Open Sans", Arial, Helvetica, sans-serif;
-  --crepe-font-code:
-    Fira Code, Menlo, Monaco, "Courier New", Courier, monospace;
-}
-
-.milkdown {
-  /* Small Shadow */
-  --crepe-shadow-1:
-    0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.3);
-  /* Large Shadow */
-  --crepe-shadow-2:
-    0px 2px 6px 2px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.3);
-}
-
 body,
 html {
   margin: 0;
@@ -146,80 +92,25 @@ p {
 
 .app-container {
   display: grid;
-
-  grid-template-columns: 250px 1fr;
+  grid-template-columns:
+    clamp(150px, 6vw, 220px)
+    clamp(220px, 12vw, 320px)
+    1fr; /* Editor */
   height: 100vh;
   transition: grid-template-columns 0.3s ease-in-out;
   overflow: hidden;
 }
 
 .app-container.collapsed {
-  grid-template-columns: 0px 1fr;
+  grid-template-columns:
+    clamp(150px, 6vw, 220px)
+    0px
+    1fr;
 }
-
-.sidebar {
-  height: 100%;
-  width: 250px;
-  background-color: var(--bg-sidebar);
-  box-sizing: border-box;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--border-color);
+.sidebar-notes.collapsed {
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  border: none;
 }
-
-.sidebar-header,
-.sidebar-footer {
-  flex-shrink: 0;
-}
-
-#editor .milkdown,
-#editor .ProseMirror,
-#editor .ProseMirror * {
-  font-size: inherit !important;
-}
-
-.sidebar-header {
-  background: var(--bg-sidebar);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border-bottom: 1px solid var(--border-color);
-  box-sizing: border-box;
-  display: flex;
-  height: 70px;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 30px;
-  z-index: 1000;
-}
-
-.sidebar-footer {
-  background: var(--bg-sidebar);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border-top: 1px solid var(--border-color);
-  box-sizing: border-box;
-  display: flex;
-  height: 50px;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 0 15px;
-  z-index: 1000;
-}
-
-.notes-container {
-  box-sizing: border-box;
-  height: 100%;
-  flex: 1;
-  padding: 15px;
-  overflow-y: auto;
-  min-height: 0;
-}
-
-.sidebar.collapsed {
-  border-right: none;
-}
-
 .editor-container {
   position: relative;
   min-width: 0;
@@ -234,84 +125,35 @@ p {
 .editor-wrapper {
   flex: 1;
   min-height: 0;
-  overflow-y: scroll;
 }
 
 .editor-header {
   box-sizing: border-box;
   position: sticky;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   z-index: 100;
-  height: 70px;
+  height: 80px;
   top: 0;
   background: var(--bg-sidebar);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border-bottom: 1px solid var(--border-color);
-  padding: 15px;
+  padding: 0 15px;
+  min-width: 200px;
+  margin: 0;
+  overflow: hidden;
 }
 
-.editor-header-btns {
-  display: flex;
-  gap: 10px;
+.editor-header-top-list {
+  display: grid;
+  gap: 20px;
   align-items: center;
-  margin-left: auto;
-}
-
-#editor {
-  min-height: 0;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  background-color: var(--bg-editor);
-  color: var(--text-main);
-}
-
-#editor .milkdown {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  max-width: 100% !important;
-}
-
-#editor .ProseMirror {
-  padding-top: 20px !important;
-  padding-bottom: 20px !important;
-  padding-left: 80px !important;
-  flex-grow: 1;
-  outline: none;
-}
-
-.milkdown .ProseMirror {
-  font-size: var(--editor-font-size, 16px) !important;
+  justify-content: space-between;
 }
 
 h3 {
   margin: 5px 0;
-}
-
-.noteItem {
-  box-sizing: border-box;
-  padding: 10px 15px;
-  height: 70px;
-  width: 100%;
-  margin: 10px 0;
-  cursor: pointer;
-  color: var(--text-main);
-  border-radius: 10px;
-  border: 1px solid transparent;
-  transition:
-    background-color 0.2s,
-    border-color 0.2s;
-}
-
-.noteItem:hover {
-  background-color: var(--accent-hover);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.noteItem p {
-  color: var(--text-muted);
 }
 
 .input-wrapper {
@@ -334,19 +176,6 @@ h3 {
 .input-wrapper .search-input::placeholder {
   color: var(--text-muted);
   opacity: 1;
-}
-
-.dropdown {
-  position: absolute;
-  background: var(--bg-editor);
-  color: var(--bg-dark);
-  width: 100px;
-  height: 50px;
-  overflow-y: auto;
-  display: none;
-  border-radius: 5px;
-  font: inherit;
-  font-size: 14px;
 }
 
 .bar-bottom {
@@ -387,6 +216,7 @@ h3 {
   font-size: 15px;
   color: var(--text-muted);
   font-weight: 500;
+  margin-right: auto;
 }
 
 .editor-header-top-list {
@@ -510,4 +340,17 @@ h3 {
   height: 20px;
   border-left: 1px solid var(--border-color);
   margin: 0 10px;
+}
+
+@media (max-width: 700px) {
+  .editor-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  #datetime-display {
+    white-space: nowrap;
+  }
+  .input-wrapper {
+    display: none;
+  }
 }
