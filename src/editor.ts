@@ -19,6 +19,8 @@ import html from "highlight.js/lib/languages/xml"; // HTML ist in highlight.js u
 import { createLowlight } from "lowlight";
 import { FileHandler } from "./../node_modules/@tiptap/extension-file-handler/src/fileHandler";
 import { setupZoomBar, updateStats } from "./helpers";
+import { updateNote } from "./renderNotes";
+import { getSavedItemId } from "./sharedStates";
 const lowlight = createLowlight();
 
 lowlight.register("css", css);
@@ -150,14 +152,19 @@ const setupToolbar = (editor: Editor) => {
     btnTable?.classList.toggle("is-active", editor.isActive("table"));
   });
 };
+let editor: Editor | null = null;
+
 const initEditor = (selector: string): Editor | null => {
   const element = document.querySelector(selector);
+  if (editor) {
+    return editor;
+  }
   if (!element) {
     console.error(`element with "${selector}" was not found.`);
     return null;
   }
 
-  const editor = new Editor({
+  editor = new Editor({
     element: element as HTMLElement,
     extensions: [
       Image,
@@ -234,7 +241,8 @@ const initEditor = (selector: string): Editor | null => {
     content: "",
     autofocus: true,
   });
-  editor.on("update", () => {
+  editor.on("update", async () => {
+    if (!editor) return;
     const text = editor.getText();
     updateStats(text);
   });
@@ -243,6 +251,20 @@ const initEditor = (selector: string): Editor | null => {
   return editor;
 };
 
+document.addEventListener("keydown", async (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+    e.preventDefault();
+    const id = getSavedItemId();
+    if (id) {
+      const notes = await window.notesAPI.getAll();
+      const note = notes.find((n) => n.id === id);
+      updateNote(note.id, note.title, note.content);
+      console.log(`Note with ID ${note.id} saved successfully.`);
+    } else {
+      console.warn("Keine Notiz zum Speichern gefunden.");
+    }
+  }
+});
 window.addEventListener("dragover", (e) => e.preventDefault());
 window.addEventListener("drop", (e) => e.preventDefault());
 

@@ -3,16 +3,10 @@
   height: 100%;
   background-color: var(--bg-sidebar);
   box-sizing: border-box;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-.sidebar-header,
-.sidebar-footer {
-  flex-shrink: 0;
 }
 
 .sidebar-section {
@@ -23,11 +17,11 @@
 
 .sidebar-header {
   background: var(--bg-sidebar);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow);
   border-bottom: 1px solid var(--border-color);
   box-sizing: border-box;
   display: flex;
-  height: 80px;
+  height: 60px;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
@@ -36,18 +30,17 @@
 
 .sidebar-footer {
   background: var(--bg-sidebar);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border-top: 1px solid var(--border-color);
   box-sizing: border-box;
   display: flex;
-  height: 60px;
+  height: 70px;
   justify-content: flex-end;
-  flex-shrink: 0;
-  align-items: center;
-  padding: 0 15px;
+  align-items: flex-start;
+  padding: 8px 8px 0 0;
 }
 
-.notes-container {
+.notes-container,
+.category-container {
   height: 100%;
   flex: 1;
   overflow-y: auto;
@@ -55,20 +48,67 @@
 }
 
 .noteItem {
-  box-sizing: border-box;
-  padding: 10px 15px;
-  height: 70px;
-  width: 100%;
-  margin: 10px 0;
-  cursor: pointer;
-  color: var(--text-main);
-  border-radius: 10px;
-  border: 1px solid transparent;
-  transition:
-    background-color 0.2s,
-    border-color 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
 }
 
+.note-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.note-title {
+  margin: 3px 0;
+}
+
+.note-date {
+  margin: 3px 0;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  order: 2;
+}
+
+.note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  order: 3;
+  max-width: 100%;
+}
+
+.tag {
+  background: var(--tag-bg);
+  color: var(--tag-color);
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 0.75em;
+}
+
+.delete-btn {
+  margin: 0;
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.delete-btn:hover {
+  background: var(--accent-hover);
+}
+
+.delete-btn:hover svg {
+  fill: #dc3545;
+}
+
+.delete-btn:active {
+  transform: scale(0.95);
+}
 .categoryItem {
   box-sizing: border-box;
   padding: 10px 15px;
@@ -101,9 +141,8 @@
 
 .noteItem:hover,
 .categoryItem:hover {
-  width: 100%;
   background-color: var(--accent-hover);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow);
 }
 
 .noteItem p,

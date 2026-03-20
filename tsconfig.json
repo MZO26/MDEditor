@@ -11,7 +11,7 @@
     "moduleResolution": "bundler",
 
     "lib": ["esnext", "DOM", "DOM.Iterable"],
-    "types": ["node"],
+    "types": ["node", "electron", "electron-vite/node"],
     "noEmit": true,
 
     // Stricter Typechecking Options
@@ -34,6 +34,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true
   },
-  // vite.config.ts hinzugefügt
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "electron/**/*", "vite.config.ts"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "electron/**/*"],
+  "exclude": ["node_modules", "dist", "dist-electron"]
 }

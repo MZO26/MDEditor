@@ -1,11 +1,11 @@
 import { initEditor } from "./editor";
 import { getElement } from "./helpers";
+import { createNote } from "./renderNotes";
 
 document.addEventListener("DOMContentLoaded", async () => {
   let aktuellerPfad: string | null = null;
   const editor = document.getElementById("editor") as HTMLTextAreaElement;
 
-  // Datei speichern
   document.getElementById("save-btn")?.addEventListener("click", async () => {
     const inhalt = editor.value;
     const ergebnis = await window.api.saveFile({ pfad: aktuellerPfad, inhalt });
@@ -63,6 +63,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
   updateDateTime();
+
+  document
+    .querySelector(".add-note-btn")
+    ?.addEventListener("click", async () => {
+      await createNote();
+    });
   const settingItems =
     document.querySelectorAll<HTMLButtonElement>(".settings-nav-item");
   const panels = document.querySelectorAll<HTMLDivElement>(".settings-panel");
