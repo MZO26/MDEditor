@@ -9,7 +9,12 @@ button {
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  transition: all 0.15s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
 }
 
 button svg {
@@ -39,4 +44,13 @@ button:active {
 .hidden {
   pointer-events: none;
   display: none;
+}
+
+.dark-mode-btn {
+  transition: opacity 0.2s ease;
+}
+
+.dark-mode-btn svg {
+  opacity: 1;
+  transition: opacity 0.2s ease;
 }

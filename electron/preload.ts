@@ -7,7 +7,8 @@ contextBridge.exposeInMainWorld("api", {
   saveFile: (daten: any) => ipcRenderer.invoke("file-save", daten),
 });
 contextBridge.exposeInMainWorld("electronAPI", {
-  setTheme: (theme: "light" | "dark") => ipcRenderer.send("set-theme", theme),
+  getTheme: () => ipcRenderer.invoke("get-theme"),
+  setTheme: (theme: "dark" | "light") => ipcRenderer.send("set-theme", theme),
 });
 contextBridge.exposeInMainWorld("notesAPI", {
   getAll: () => ipcRenderer.invoke("notes:getAll"),

@@ -1,6 +1,6 @@
 .sidebar-notes,
 .sidebar-categories {
-  height: 100%;
+  flex: 1;
   background-color: var(--bg-sidebar);
   box-sizing: border-box;
   box-shadow: var(--shadow);
@@ -21,7 +21,7 @@
   border-bottom: 1px solid var(--border-color);
   box-sizing: border-box;
   display: flex;
-  height: 60px;
+  height: 70px;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
@@ -33,7 +33,7 @@
   border-top: 1px solid var(--border-color);
   box-sizing: border-box;
   display: flex;
-  height: 70px;
+  height: 40px;
   justify-content: flex-end;
   align-items: flex-start;
   padding: 8px 8px 0 0;
@@ -44,7 +44,11 @@
   height: 100%;
   flex: 1;
   overflow-y: auto;
-  min-height: 0;
+  overflow-x: hidden;
+}
+
+.notes-container {
+  border-left: 1px solid var(--border-color);
 }
 
 .noteItem {

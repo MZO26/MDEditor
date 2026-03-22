@@ -30,7 +30,6 @@ class NoteDB {
     `);
   }
 
-  // CRUD-Methoden
   create(title: string, content: string): string {
     const id = crypto.randomUUID();
     this.db

@@ -4,14 +4,15 @@ declare module "*.css";
 declare global {
   interface Window {
     api: {
-      openFile: () => Promise<{ inhalt: string; pfad: string } | null>;
-      saveFile: (daten: {
-        pfad: string | null;
-        inhalt: string;
+      openFile: () => Promise<{ path: string; content: string } | null>;
+      saveFile: (data: {
+        path: string | null;
+        content: string;
       }) => Promise<string | boolean>;
     };
     electronAPI: {
-      setTheme: (theme: string) => void;
+      getTheme: () => Promise<"dark" | "light">;
+      setTheme: (theme: "dark" | "light" | "system") => void;
     };
     notesAPI: {
       getAll: () => Promise<Note[]>;
