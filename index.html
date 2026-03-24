@@ -21,10 +21,6 @@
       <div class="sidebar-container">
         <div class="sidebar-categories">
           <div class="sidebar-header">
-            <div class="note-info">
-              <p>Categories</p>
-              <span id="notes-count">3</span>
-            </div>
             <div class="sidebar-header-btns"></div>
           </div>
           <div class="category-container">
@@ -129,6 +125,7 @@
       </div>
       <div class="editor-container">
         <div class="editor-header">
+          <!-- <div class="editor-title">New Note</div> -->
           <div id="toolbar" class="toolbar">
             <button id="btn-undo" title="Rückgängig">↩</button>
             <button id="btn-redo" title="Wiederholen">↪</button>
@@ -209,6 +206,9 @@
     </div>
     <div class="overlay"></div>
     <div class="modal">
+      <button class="closeModal-btn" title="close modal">
+        <i data-lucide="x"></i>
+      </button>
       <div class="sidebar-modal">
         <h2 class="modal-heading">Settings</h2>
         <button
@@ -236,57 +236,74 @@
       <div class="settings-content">
         <div class="settings-panel active" id="appearance-settings">
           <h2 class="modal-heading">Appearance</h2>
-          <div class="setting-item">Theme</div>
-          <div class="setting-item">Font Family</div>
-          <div class="setting-item">Layout</div>
+          <div class="settings-item">
+            Theme:
+            <div class="theme-selector">
+              <select id="theme-dropdown" class="theme-select">
+                <option value="system">System Default</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="dark-glass">Dark-Glass</option>
+                <option value="light-glass">Light-Glass</option>
+                <option value="paper">Paper</option>
+                <option value="nord">Nord</option>
+                <option value="zinc">Zinc</option>
+                <option value="lavender">Lavender</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-item">
+            Font Family:
+            <div class="theme-selector">
+              <select id="font-dropdown" class="theme-select">
+                <option value="system">System Default</option>
+                <option value="arial">Arial</option>
+                <option value="verdana">Verdana</option>
+                <option value="trebuchet">Trebuchet</option>
+                <option value="georgia">Georgia</option>
+                <option value="courier">Courier</option>
+                <option value="times">Times New Roman</option>
+                <option value="palatino">Palatino</option>
+                <option value="garamond">Garamond</option>
+                <option value="tahoma">Tahoma</option>
+                <option value="century">Century Gothic</option>
+                <option value="consolas">Consolas (Code)</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-item">Layout</div>
         </div>
         <div class="settings-panel" id="editor-settings">
           <h2 class="modal-heading">Editor</h2>
-          <div class="setting-item">Tab Size</div>
-          <div class="setting-item">Line Numbers</div>
-          <div class="setting-item">Auto-Save</div>
+          <div class="settings-item">Tab Size</div>
+          <div class="settings-item">Line Numbers</div>
+          <div class="settings-item">Auto-Save</div>
         </div>
         <div class="settings-panel" id="storage-settings">
           <h2 class="modal-heading">Storage</h2>
-          <div class="setting-item">Notes Directory</div>
-          <div class="setting-item">Backup Options</div>
-          <div class="setting-item">Default Export Format</div>
+          <div class="settings-item">Notes Directory</div>
+          <div class="settings-item">Backup Options</div>
+          <div class="settings-item">Default Export Format</div>
         </div>
         <div class="settings-panel" id="tags-search-settings">
           <h2 class="modal-heading">Tags & Search</h2>
-          <div class="setting-item">Default Sort Order</div>
-          <div class="setting-item">Search Settings</div>
-          <div class="setting-item">Filter Options</div>
+          <div class="settings-item">Default Sort Order</div>
+          <div class="settings-item">Search Settings</div>
+          <div class="settings-item">Filter Options</div>
         </div>
 
         <div class="settings-panel" id="advanced-settings">
           <h2 class="modal-heading">Advanced</h2>
-          <div class="setting-item">Custom Keybindings</div>
-          <div class="setting-item">Experimental Features</div>
-          <div class="setting-item">Reset Settings</div>
+          <div class="settings-item">Custom Keybindings</div>
+          <div class="settings-item">Experimental Features</div>
+          <div class="settings-item">Reset Settings</div>
         </div>
         <div class="settings-panel" id="about-settings">
           <h2 class="modal-heading">About</h2>
-          <div class="setting-item">App Version</div>
-          <div class="setting-item">Check for Updates</div>
-          <div class="setting-item">Licenses</div>
+          <div class="settings-item">App Version</div>
+          <div class="settings-item">Check for Updates</div>
+          <div class="settings-item">Licenses</div>
         </div>
-      </div>
-      <div class="button-collection-modal">
-        <button class="closeModal-btn" title="close modal">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-x-lg"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"
-            />
-          </svg>
-        </button>
       </div>
     </div>
     <script type="module" src="src/app.ts" defer></script>

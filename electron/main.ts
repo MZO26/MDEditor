@@ -6,6 +6,7 @@ import {
   nativeTheme,
   shell,
 } from "electron";
+import * as fs from "fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -30,15 +31,77 @@ nativeTheme.themeSource = "system";
 function getTitleBarOverlay(): TitleBarOverlayOptions {
   let isDark = nativeTheme.shouldUseDarkColors;
   //boolean to check if the system theme is dark or light, used to set the title bar overlay colors accordingly
-  return isDark
-    ? { color: "#18181b", symbolColor: "#d4d4d8", height: 30 }
+  return isDark === true
+    ? { color: "#00000000", symbolColor: "#a1a1aa", height: 30 }
     : {
-        color: "#f3f3f3",
-        symbolColor: "#202020",
+        color: "#00000000",
+        symbolColor: "#71717a",
         height: 30,
       };
 }
+// 1. Define the exact path where the settings will be saved
+let configPath = "";
 
+// Helper function to read the theme from the hard drive
+function getSavedTheme(): string {
+  try {
+    // Check if the file exists before trying to read it
+    if (fs.existsSync(configPath)) {
+      const data = fs.readFileSync(configPath, "utf-8");
+      const parsedData = JSON.parse(data);
+      return parsedData.theme || "dark";
+    }
+  } catch (error) {
+    console.error("Could not read theme file, defaulting to dark:", error);
+  }
+  return "dark"; // The default fallback if no file exists
+}
+
+// Helper function to write the theme to the hard drive
+function saveTheme(theme: string) {
+  try {
+    const dataToSave = JSON.stringify({ theme: theme });
+    fs.writeFileSync(configPath, dataToSave, "utf-8");
+  } catch (error) {
+    console.error("Failed to save the theme:", error);
+  }
+}
+
+function setupThemeHandlers() {
+  ipcMain.handle("get-theme", () => {
+    return getSavedTheme();
+  });
+
+  ipcMain.handle("set-theme", (_, theme: string) => {
+    const validThemes = [
+      "light",
+      "dark",
+      "dark-glass",
+      "light-glass",
+      "paper",
+      "nord",
+      "sepia",
+      "lavender",
+      "system",
+    ];
+    if (validThemes.includes(theme)) {
+      saveTheme(theme);
+    }
+    if (theme === "system") {
+      nativeTheme.themeSource = "system";
+    } else if (
+      theme.includes("light") ||
+      theme === "paper" ||
+      theme === "sepia" ||
+      theme === "nord" ||
+      theme === "lavender"
+    ) {
+      nativeTheme.themeSource = "light";
+    } else if (theme.includes("dark")) {
+      nativeTheme.themeSource = "dark";
+    }
+  });
+}
 function createWindow() {
   const preloadPath = path.join(__dirname, "../preload/preload.js");
   console.log("__dirname:", __dirname);
@@ -51,7 +114,9 @@ function createWindow() {
     height: 600,
     titleBarStyle: "hidden",
     titleBarOverlay: getTitleBarOverlay(),
-
+    transparent: false,
+    backgroundMaterial: "acrylic",
+    backgroundColor: "#00000000",
     webPreferences: {
       preload: preloadPath,
       nodeIntegration: false,
@@ -77,6 +142,9 @@ function createWindow() {
 
 app.whenReady().then(async () => {
   Menu.setApplicationMenu(null);
+  configPath = path.join(app.getPath("userData"), "theme-settings.json");
+  setupThemeHandlers();
+  nativeTheme.themeSource = getSavedTheme() === "light" ? "light" : "dark";
   try {
     const db = await import("./database");
     console.log("Database loaded successfully:", db);
@@ -85,28 +153,6 @@ app.whenReady().then(async () => {
   }
   ipcMain.handle("get-system-info", () => {
     return `Node.js Version: ${process.versions.node}, Electron: ${process.versions.electron}`;
-  });
-
-  ipcMain.handle("get-theme", () => {
-    return nativeTheme.shouldUseDarkColors ? "dark" : "light";
-  });
-
-  ipcMain.handle("set-theme", async (_event, theme: Theme) => {
-    nativeTheme.themeSource = theme;
-    if (win) {
-      win.setTitleBarOverlay(getTitleBarOverlay());
-    }
-    return nativeTheme.shouldUseDarkColors ? "dark" : "light";
-  });
-
-  nativeTheme.on("updated", () => {
-    if (win) {
-      win.setTitleBarOverlay(getTitleBarOverlay());
-    }
-    win?.webContents.send(
-      "theme-changed",
-      nativeTheme.shouldUseDarkColors ? "dark" : "light",
-    );
   });
 
   ipcMain.handle("notes:getAll", () => {

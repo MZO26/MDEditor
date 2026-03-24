@@ -31,6 +31,7 @@ import {
   Trash2,
   Underline,
   Undo2,
+  X,
 } from "lucide";
 
 function renderIcons() {
@@ -67,6 +68,7 @@ function renderIcons() {
       Underline,
       Highlighter,
       Grid2x2,
+      X,
     },
   });
 }

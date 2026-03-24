@@ -13,7 +13,6 @@
   --zoom: 100;
   font-size: calc(16px * (var(--zoom) / 100));
   padding: 2em;
-  background-color: var(--bg-editor);
   color: var(--text-main);
   outline: none;
   transition: font-size 0.2s ease-out;
@@ -88,50 +87,21 @@
   margin-bottom: 0;
 }
 
-/* Target inline code inside the editor */
 .tiptap code {
-  /* Use your muted text color to keep it subtle but distinct */
   color: var(--text-main);
-
-  /* Use your button background for the 'pill' effect */
   background-color: var(--bg-button);
-
-  /* Subtle border using your existing border color */
-  border: 1px solid var(--border-color);
-
-  /* Styling to match your UI's clean aesthetic */
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
   font-size: 0.9em;
-
-  /* Ensures it doesn't break weirdly across lines */
   white-space: nowrap;
 }
 
-/* Optional: If you want it to pop slightly more in Dark Mode */
 :root[data-theme="dark"] .tiptap code {
-  background-color: var(--bg-button); /* Slightly lighter than editor bg */
-  color: var(
-    --tag-color
-  ); /* Or use your blue tag-color if you want it to stand out */
-}
-
-.tiptap pre {
-  background-color: var(--bg-sidebar);
-  color: var(--text-main);
-  padding: 1em 1.25em;
-  border-radius: 0.5em;
-  border: 1px solid var(--border-color);
-  margin: 1.5em 0;
-  overflow-x: auto;
-}
-
-.tiptap pre code {
-  font-family: "JetBrains Mono", "Fira Code", monospace;
-  font-size: 0.875em;
+  background-color: var(--bg-button);
+  color: var(--tag-color);
 }
 
 .tiptap img {
@@ -235,12 +205,11 @@
 .toolbar {
   flex-shrink: 0;
   display: flex;
-  gap: 2px;
+  gap: 5px;
   margin-bottom: 5px;
   align-items: flex-end;
-  background: var(--bg-sidebar);
-  flex-wrap: wrap;
-  overflow-x: auto;
+  flex-wrap: nowrap;
+  flex-direction: row;
 }
 
 .toolbar button:hover {
@@ -257,10 +226,11 @@ button.is-active {
 }
 
 .divider {
-  width: 1px;
+  width: 2px;
   height: 25px;
-  background-color: #d1d1d1;
+  background-color: var(--border-color);
   margin: 4px;
+  flex-shrink: 0;
 }
 
 .tiptap pre {
@@ -270,7 +240,8 @@ button.is-active {
   padding: 1rem;
   border-radius: 8px;
   margin: 1rem 0;
-  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
 
 .tiptap pre code {
@@ -278,6 +249,7 @@ button.is-active {
   color: inherit;
   padding: 0;
   font-size: 0.9em;
+  white-space: inherit;
 }
 
 .tiptap img {

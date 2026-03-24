@@ -8,6 +8,8 @@ button {
   cursor: pointer;
   width: 32px;
   height: 32px;
+  min-width: 32px;
+  min-height: 32px;
   border-radius: 6px;
   transition:
     color 0.2s ease,

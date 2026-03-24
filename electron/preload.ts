@@ -9,8 +9,19 @@ contextBridge.exposeInMainWorld("api", {
 contextBridge.exposeInMainWorld("electronAPI", {
   getTheme: () => ipcRenderer.invoke("get-theme"),
   setTheme: (theme: Theme) => ipcRenderer.invoke("set-theme", theme),
-  onThemeChanged: (callback: (theme: "dark" | "light") => void) =>
-    ipcRenderer.on("theme-changed", (_event, theme) => callback(theme)),
+  onThemeChanged: (
+    callback: (
+      theme:
+        | "dark"
+        | "light"
+        | "dark-glass"
+        | "light-glass"
+        | "paper"
+        | "nord"
+        | "sepia"
+        | "lavender",
+    ) => void,
+  ) => ipcRenderer.on("theme-changed", (_event, theme) => callback(theme)),
 });
 contextBridge.exposeInMainWorld("notesAPI", {
   getAll: () => ipcRenderer.invoke("notes:getAll"),

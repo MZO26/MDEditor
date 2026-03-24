@@ -2,34 +2,8 @@
 
 * {
   box-sizing: border-box;
-  --app-font:
-    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantall, "Open Sans", "Helvetica Neue", sans-serif;
 }
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-sidebar);
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: var(--text-muted);
-  border-radius: 8px;
-  border: 2px solid var(--bg-sidebar);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: var(--text-muted);
-}
-
-::-webkit-scrollbar-corner {
-  background: var(--bg-sidebar);
-}
-
+/* Light theme */
 :root {
   --bg-editor: #fcfcfc;
   --bg-sidebar: #f8f8f8;
@@ -42,10 +16,33 @@
   --tag-color: #1976d2;
   --tag-bg: #e3f2fd;
   --shadow: 0 0 0 1px rgba(212, 212, 216, 0.8), 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  /* Font families */
+  --font-system:
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantall, "Open Sans", "Helvetica Neue", sans-serif;
+  --font-arial: Arial, Helvetica, sans-serif;
+  --font-verdana: Verdana, Geneva, sans-serif;
+  --font-trebuchet: "Trebuchet MS", sans-serif;
+  --font-georgia: Georgia, serif;
+  --font-courier: "Courier New", Courier, monospace;
+  /* --- Klassische Serifen-Schriften (Elegant & Formell) --- */
+  --font-times: "Times New Roman", Times, serif;
+  --font-palatino: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  --font-garamond: Garamond, serif;
+
+  /* --- Saubere Serifenlose Schriften (Modern & Lesbar) --- */
+  --font-tahoma: Tahoma, Geneva, sans-serif;
+  --font-century: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
+
+  /* --- Moderne Monospace (Besser lesbar als Courier für Code) --- */
+  --font-consolas: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  --current-font: var(--font-system);
 }
 
+/* Default to system theme, but allow overrides */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root:not([data-theme]) {
     --bg-sidebar: #18181b;
     --bg-editor: #1e1e21;
     --bg-button: #2d2d30;
@@ -60,6 +57,7 @@
   }
 }
 
+/* Explicit override dark theme */
 :root[data-theme="dark"] {
   --bg-sidebar: #18181b;
   --bg-editor: #1e1e21;
@@ -74,18 +72,150 @@
   --shadow: 0 0 0 1px rgba(49, 49, 53, 0.8), 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-:root[data-theme="light"] {
-  --bg-editor: #fcfcfc;
-  --bg-sidebar: #f8f8f8;
-  --bg-button: #f1f1f2;
-  --text-main: #18181b;
+:root[data-theme="zinc"] {
+  --bg-editor: rgba(240, 240, 245, 0.85);
+  --bg-sidebar: rgba(230, 230, 235, 0.9);
+  --bg-button: rgba(215, 215, 225, 0.6);
+  --text-main: #27272a;
   --text-muted: #71717a;
   --accent-primary: #52525b;
-  --accent-hover: #e4e4e6;
-  --border-color: #d4d4d8;
-  --tag-color: #1976d2;
-  --tag-bg: #e3f2fd;
-  --shadow: 0 0 0 1px rgba(212, 212, 216, 0.8), 0 1px 3px rgba(0, 0, 0, 0.1);
+  --accent-hover: rgba(200, 200, 210, 0.5);
+  --border-color: rgba(160, 160, 170, 0.3);
+  --tag-color: #1565c0;
+  --tag-bg: rgba(200, 225, 245, 0.6);
+  --shadow: 0 0 0 1px rgba(160, 160, 170, 0.2), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Dark Glass theme with transparency*/
+[data-theme="dark-glass"] {
+  --bg-editor: rgba(24, 24, 27, 0.25);
+  --bg-sidebar: rgba(18, 18, 20, 0.45);
+  --bg-button: rgba(255, 255, 255, 0.08);
+  --accent-hover: rgba(255, 255, 255, 0.15);
+  --text-main: #e4e4e7;
+  --text-muted: #a1a1aa;
+  --accent-primary: #d4d4d8;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --tag-color: #7dd3fc;
+  --tag-bg: rgba(125, 211, 252, 0.1);
+  --shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 8px 16px rgba(0, 0, 0, 0.4);
+  /* filter: contrast(95%) brightness(98%); */
+}
+
+/* Light Glass theme with transparency */
+[data-theme="light-glass"] {
+  --bg-editor: rgba(225, 225, 230, 0.25);
+  --bg-sidebar: rgba(215, 215, 220, 0.45);
+  --text-main: #1e1e21;
+  --text-muted: #52525b;
+  --accent-primary: #3f3f46;
+  --bg-button: rgba(0, 0, 0, 0.05);
+  --accent-hover: rgba(0, 0, 0, 0.1);
+  --border-color: rgba(0, 0, 0, 0.08);
+  --tag-color: #0369a1;
+  --tag-bg: rgba(3, 105, 161, 0.1);
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+/* Paper theme mimicking kindle paperwhite warm mode*/
+[data-theme="paper"] {
+  --bg-editor: rgba(242, 232, 207, 0.98);
+  --bg-sidebar: rgba(230, 220, 195, 1);
+  --text-main: #2d2926;
+  --text-muted: #6b635a;
+  --accent-primary: #606c38;
+  --bg-button: rgba(0, 0, 0, 0.04);
+  --accent-hover: rgba(0, 0, 0, 0.08);
+  --border-color: rgba(0, 0, 0, 0.06);
+  --tag-color: #5b7065;
+  --tag-bg: rgba(91, 112, 101, 0.1);
+  --shadow: 0 2px 10px rgba(45, 41, 38, 0.08);
+}
+
+/* filter: sepia(10%) contrast(96%) brightness(98%); */
+/* Nord theme */
+[data-theme="nord"] {
+  --bg-editor: #2e3440;
+  --bg-sidebar: #242933;
+  --bg-button: #3b4252;
+  --text-main: #d8dee9;
+  --text-muted: #606c81;
+  --accent-primary: #88c0d0;
+  --accent-hover: #434c5e;
+  --border-color: #3b4252;
+  --tag-color: #8fbcbb;
+  --tag-bg: #3b4252;
+  --shadow: 0 0 0 1px rgba(59, 66, 82, 0.8), 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+/* Lavender theme */
+[data-theme="lavender"] {
+  --bg-editor: #1e1e2e;
+  --bg-sidebar: #181825;
+  --bg-button: #313244;
+  --text-main: #cdd6f4;
+  --text-muted: #a6adc8;
+  --accent-primary: #b4befe;
+  --accent-hover: #45475a;
+  --border-color: #45475a;
+  --tag-color: #cba6f7;
+  --tag-bg: #313244;
+  --shadow: 0 0 0 1px rgba(69, 71, 90, 0.8), 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+[data-font="system"] {
+  --current-font: var(--font-system);
+}
+[data-font="arial"] {
+  --current-font: var(--font-arial);
+}
+[data-font="verdana"] {
+  --current-font: var(--font-verdana);
+}
+[data-font="trebuchet"] {
+  --current-font: var(--font-trebuchet);
+}
+[data-font="georgia"] {
+  --current-font: var(--font-georgia);
+}
+[data-font="courier"] {
+  --current-font: var(--font-courier);
+}
+[data-font="times"] {
+  --current-font: var(--font-times);
+}
+[data-font="palatino"] {
+  --current-font: var(--font-palatino);
+}
+[data-font="garamond"] {
+  --current-font: var(--font-garamond);
+}
+[data-font="tahoma"] {
+  --current-font: var(--font-tahoma);
+}
+[data-font="century"] {
+  --current-font: var(--font-century);
+}
+[data-font="consolas"] {
+  --current-font: var(--font-consolas);
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  font-family: var(--current-font);
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    font-family 0.2s;
+}
+
+body {
+  color: var(--text-main);
+  background-color: var(--bg-editor);
+  font-family: var(--current-font);
 }
 
 .lucide {
@@ -97,4 +227,23 @@
     stroke 0.2s ease,
     opacity 0.2s ease,
     transform 0.2s ease;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--text-muted);
+  border-radius: 8px;
+  border: 2px solid var(--bg-sidebar);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-muted);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--bg-sidebar);
 }

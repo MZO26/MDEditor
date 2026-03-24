@@ -2,7 +2,16 @@ export {};
 
 declare module "*.css";
 declare global {
-  type Theme = "light" | "dark";
+  type Theme =
+    | "light"
+    | "dark"
+    | "dark-glass"
+    | "light-glass"
+    | "paper"
+    | "nord"
+    | "sepia"
+    | "lavender"
+    | "system";
   interface Window {
     api: {
       openFile: () => Promise<{ path: string; content: string } | null>;
