@@ -7,6 +7,10 @@ import {
 } from "../shared/types";
 
 declare module "*.css";
+declare module "*?raw" {
+  const content: string;
+  export default content;
+}
 
 declare global {
   interface Window {
@@ -30,7 +34,10 @@ declare global {
       create: (payload: CreateNotePayload) => Promise<IpcResponse<Note>>;
       update: (payload: UpdateNotePayload) => Promise<IpcResponse<Note>>;
       delete: (id: string) => Promise<IpcResponse<boolean>>;
-      searchNotes: (searchTerm: string) => Promise<IpcResponse<[]>>;
+      searchNotes: (
+        searchTerm: string,
+        limit?: number,
+      ) => Promise<IpcResponse<Note[]>>;
     };
     storeApi: {
       getSettings: <T = any>(key: string) => Promise<IpcResponse<T>>;

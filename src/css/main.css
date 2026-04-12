@@ -34,18 +34,36 @@
   overflow: hidden;
 }
 
-.editor-title {
-  appearance: none;
-  background: transparent;
-  border: none;
-  outline: none;
-  width: 100%;
-  font-size: 1.5rem;
-  font-weight: 700;
-  padding: 5px 0;
-  color: var(--text-main);
-  cursor: text;
-  transition: opacity 0.2s ease;
+.editor-view {
+  display: contents;
+}
+
+.editor-empty-state {
+  grid-row: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-height: 100%;
+  margin-top: 20px;
+  animation: fadeSlideIn 0.4s ease-out forwards;
+  opacity: 0;
+}
+
+.editor-empty-state svg {
+  width: 300px;
+  margin-bottom: 1em;
+}
+
+@keyframes fadeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .editor-header {
@@ -76,6 +94,19 @@
 
 .bar-bottom button {
   height: 20px;
+}
+
+.search-highlight {
+  font-weight: bold;
+  padding: 0 2px; /* Adds a tiny, invisible space on the left and right */
+  display: inline-block; /* Forces the browser to respect the padding */
+}
+
+.editor-search-highlight {
+  background-color: #ffe066; /* The classic TipTap/HTML <mark> yellow */
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 2px;
 }
 
 .zoom-controls {

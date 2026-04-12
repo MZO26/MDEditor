@@ -12,9 +12,9 @@ function getElementOrNull<T extends HTMLElement>(selector: string): T | null {
   return document.querySelector<T>(selector);
 }
 
-function setActiveItem(element: HTMLElement) {
-  if (!element || !element.parentElement) return;
-  const currentlyActive = element.parentElement.querySelector(".active");
+function setActiveItem(element: HTMLElement, parent: HTMLElement) {
+  if (!element) return;
+  const currentlyActive = parent.querySelector(".active");
   if (currentlyActive) {
     currentlyActive.classList.remove("active");
   }
@@ -46,15 +46,6 @@ function debounce<T extends (...args: any[]) => void>(func: T, wait: number) {
       lastArgs = null;
     }
   };
-
-  debounced.cancel = () => {
-    if (timeout) {
-      clearTimeout(timeout);
-      timeout = null;
-      lastArgs = null;
-    }
-  };
-
   return debounced;
 }
 

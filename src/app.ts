@@ -1,23 +1,21 @@
 import { initEditor } from "./components/editor";
 import { updateDateTime } from "./components/editorFooter";
-import { initializeContainer } from "./components/sidebarNotes";
-import {
-  addNoteBtnHandler,
-  handleSearchInput,
-} from "./handlers/buttonHandlers";
-import { setupEditorHandlers } from "./handlers/editorHandlers";
-import { reloadNoteList } from "./handlers/noteHandlers";
+import { initNotesSidebar, reloadNoteList } from "./components/sidebarNotes";
+import { handleSearchInput } from "./features/search/searchInputHandler";
+import { addNoteBtnHandler } from "./handlers/buttonHandlers";
+import { initEditorHandlers } from "./handlers/editorHandlers";
 import { getSelectedFont, setSelectedFont } from "./settings/appearance/font";
 import { applyAppTheme, setAppTheme } from "./settings/appearance/theme";
 import { openModal } from "./settings/settings";
+import { setValue, StorageKeys } from "./utils/cache";
 import { debounce, getElement, getElementOrNull } from "./utils/helpers";
 import { renderIcons } from "./utils/icons";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const editor = initEditor("#editor");
-  setupEditorHandlers(editor);
+  initEditorHandlers(editor);
   renderIcons();
-  await initializeContainer();
+  await initNotesSidebar();
   await reloadNoteList();
   const addNoteBtn = getElement(".add-note-btn");
   addNoteBtn.addEventListener("click", addNoteBtnHandler);
@@ -63,6 +61,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       sidebar.classList.toggle("collapsed");
       appContainer.classList.toggle("collapsed");
       editor.classList.toggle("collapsed");
+      if (sidebar.classList.contains("collapsed")) {
+        setValue(StorageKeys.SIDEBAR_COLLAPSED, true);
+      } else {
+        setValue(StorageKeys.SIDEBAR_COLLAPSED, false);
+      }
     });
   });
 

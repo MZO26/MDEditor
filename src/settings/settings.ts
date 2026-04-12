@@ -1,6 +1,6 @@
 import { getElement } from "../utils/helpers";
 
-const openModal = (): void => {
+function openModal(): void {
   const overlay = getElement<HTMLDivElement>(".overlay");
   const modal = getElement<HTMLDivElement>(".modal");
   const items: HTMLCollection | undefined =
@@ -13,7 +13,7 @@ const openModal = (): void => {
         element.classList.remove("active");
     });
   }
-};
+}
 
 const settingItems =
   document.querySelectorAll<HTMLButtonElement>(".settings-nav-item");

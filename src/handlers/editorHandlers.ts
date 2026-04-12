@@ -1,19 +1,31 @@
 import type { Editor } from "@tiptap/core";
 import { setupZoomBar } from "../components/editorFooter";
 import { setupToolbar } from "../components/editorHeader";
-import { setupAutoSave, startNewSaveCycle } from "../utils/autoSave";
 import { getValue, setValue, StorageKeys } from "../utils/cache";
+import { getElement } from "../utils/helpers";
+import { generateSnippet, showEditorEmptyState } from "../utils/templates";
 
-function setupEditorHandlers(editor: Editor) {
-  const currentController = startNewSaveCycle();
-  const signal = currentController.signal;
+function initEditorHandlers(editor: Editor) {
   setupToolbar(editor);
   setupZoomBar();
-  setupAutoSave({ editor, signal });
+  handleEditorEmptyState();
+}
 
-  return function destroyHandlers() {
-    currentController.abort();
-  };
+function extractNoteDataFromEditor(editor: Editor | null) {
+  const plainText = editor?.getText() ?? "";
+  const jsonObj = editor?.getJSON() ?? '{"type": "doc", "content": []}';
+  const content = JSON.stringify(jsonObj);
+  const snippet = generateSnippet(plainText);
+  const lines = plainText
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  const title: string = lines[0] ?? "New note";
+  const tagMatches = plainText.match(/#[\p{L}\p{N}_]+/gu);
+  const tags = tagMatches
+    ? Array.from(new Set(tagMatches.map((tag) => tag.slice(1))))
+    : [];
+  return { title, content, plainText, snippet, tags };
 }
 
 class PositionManager {
@@ -40,4 +52,28 @@ class PositionManager {
     setValue(StorageKeys.NOTE_ID, this.activeNoteId);
   }
 }
-export { PositionManager, setupEditorHandlers };
+
+function handleEditorEmptyState(ID?: string | undefined | null) {
+  const editorContainer = getElement(".editor-container");
+  const editorView = getElement(".editor-view");
+  const existingEmptyState = editorContainer?.querySelector(
+    ".editor-empty-state",
+  );
+  if (existingEmptyState) {
+    existingEmptyState.remove();
+  }
+  if (!ID) {
+    editorView.classList.add("hidden");
+    const newEmptyState = showEditorEmptyState();
+    editorContainer.appendChild(newEmptyState);
+  } else {
+    editorView.classList.remove("hidden");
+  }
+}
+
+export {
+  extractNoteDataFromEditor,
+  handleEditorEmptyState,
+  initEditorHandlers,
+  PositionManager,
+};

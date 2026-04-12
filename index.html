@@ -93,9 +93,7 @@
               </button>
             </div>
           </div>
-
           <div class="notes-container"></div>
-
           <div class="sidebar-footer">
             <button class="bookmark-btn">
               <i data-lucide="bookmark"></i>
@@ -109,86 +107,89 @@
           </div>
         </div>
       </div>
+
       <div class="editor-container">
-        <div class="editor-header">
-          <div id="toolbar" class="toolbar">
-            <button id="btn-undo" title="Rückgängig">
-              <i data-lucide="undo2"></i>
-            </button>
-            <button id="btn-redo" title="Wiederholen">
-              <i data-lucide="redo2"></i>
-            </button>
-            <div class="divider"></div>
+        <div class="editor-view hidden">
+          <div class="editor-header">
+            <div id="toolbar" class="toolbar">
+              <button id="btn-undo" title="Rückgängig">
+                <i data-lucide="undo2"></i>
+              </button>
+              <button id="btn-redo" title="Wiederholen">
+                <i data-lucide="redo2"></i>
+              </button>
+              <div class="divider"></div>
 
-            <button id="btn-bold">
-              <i data-lucide="bold"></i>
-            </button>
-            <button id="btn-italic">
-              <i data-lucide="italic"></i>
-            </button>
-            <button id="btn-strike">
-              <i data-lucide="strikethrough"></i>
-            </button>
-            <button id="btn-underline" title="Unterstreichen">
-              <i data-lucide="underline"></i>
-            </button>
-            <div class="divider"></div>
+              <button id="btn-bold">
+                <i data-lucide="bold"></i>
+              </button>
+              <button id="btn-italic">
+                <i data-lucide="italic"></i>
+              </button>
+              <button id="btn-strike">
+                <i data-lucide="strikethrough"></i>
+              </button>
+              <button id="btn-underline" title="Unterstreichen">
+                <i data-lucide="underline"></i>
+              </button>
+              <div class="divider"></div>
 
-            <button id="btn-h1">
-              <i data-lucide="heading-1"></i>
-            </button>
-            <button id="btn-h2">
-              <i data-lucide="heading-2"></i>
-            </button>
-            <button id="btn-h3">
-              <i data-lucide="heading-3"></i>
-            </button>
+              <button id="btn-h1">
+                <i data-lucide="heading-1"></i>
+              </button>
+              <button id="btn-h2">
+                <i data-lucide="heading-2"></i>
+              </button>
+              <button id="btn-h3">
+                <i data-lucide="heading-3"></i>
+              </button>
 
-            <div class="divider"></div>
+              <div class="divider"></div>
 
-            <button id="btn-bullet">
-              <i data-lucide="list"></i>
-            </button>
-            <button id="btn-ordered">
-              <i data-lucide="list-ordered"></i>
-            </button>
-            <button id="btn-task">
-              <i data-lucide="list-todo"></i>
-            </button>
-            <button id="btn-quote">
-              <i data-lucide="text-quote"></i>
-            </button>
-            <div class="divider"></div>
-            <button id="btn-code" title="Inline code">
-              <i data-lucide="code"></i>
-            </button>
-            <button id="btn-codeblock">
-              <i data-lucide="code-xml"></i>
-            </button>
-            <button id="btn-hr">
-              <i data-lucide="separator-horizontal"></i>
-            </button>
-            <div class="divider"></div>
-            <button id="btn-highlight" title="Highlight">
-              <i data-lucide="highlighter"></i>
-            </button>
-            <button id="btn-table">
-              <i data-lucide="grid-2x2"></i>
-            </button>
+              <button id="btn-bullet">
+                <i data-lucide="list"></i>
+              </button>
+              <button id="btn-ordered">
+                <i data-lucide="list-ordered"></i>
+              </button>
+              <button id="btn-task">
+                <i data-lucide="list-todo"></i>
+              </button>
+              <button id="btn-quote">
+                <i data-lucide="text-quote"></i>
+              </button>
+              <div class="divider"></div>
+              <button id="btn-code" title="Inline code">
+                <i data-lucide="code"></i>
+              </button>
+              <button id="btn-codeblock">
+                <i data-lucide="code-xml"></i>
+              </button>
+              <button id="btn-hr">
+                <i data-lucide="separator-horizontal"></i>
+              </button>
+              <div class="divider"></div>
+              <button id="btn-highlight" title="Highlight">
+                <i data-lucide="highlighter"></i>
+              </button>
+              <button id="btn-table">
+                <i data-lucide="grid-2x2"></i>
+              </button>
+            </div>
           </div>
-        </div>
-        <div id="editor"></div>
-        <div class="bar-bottom">
-          <time id="datetime-display"></time>
-          <div class="stats">
-            <span id="word-count">0 words</span>
-            <span><span id="char-count">0</span> characters</span>
-          </div>
-          <div class="spacer"></div>
-          <div class="zoom-controls">
-            <button id="btn-zoom-out" title="Zoom Out">-</button>
-            <span id="zoom-level">100%</span>
-            <button id="btn-zoom-in" title="Zoom In">+</button>
+          <div id="editor"></div>
+          <div class="bar-bottom">
+            <time id="datetime-display"></time>
+            <div class="stats">
+              <span id="word-count">0 words</span>
+              <span><span id="char-count">0</span> characters</span>
+            </div>
+            <div class="spacer"></div>
+            <div class="zoom-controls">
+              <button id="btn-zoom-out" title="Zoom Out">-</button>
+              <span id="zoom-level">100%</span>
+              <button id="btn-zoom-in" title="Zoom In">+</button>
+            </div>
           </div>
         </div>
       </div>

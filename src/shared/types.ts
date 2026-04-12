@@ -5,6 +5,7 @@ interface Note {
   title: string;
   content: string;
   snippet: string;
+  plainText: string;
   created_at: string;
   updated_at: string;
   tags: string[];
@@ -19,13 +20,22 @@ interface IpcResponse<T = void> {
 interface AutoSaveConfig {
   editor: Editor;
   signal: AbortSignal;
+  noteID?: string;
 }
 
 type CreateNotePayload = Omit<Note, "id" | "created_at" | "updated_at">;
 type UpdateNotePayload = Omit<Note, "created_at" | "updated_at">;
-type NoteData = Omit<Note, "id" | "created_at" | "updated_at">;
-
+type FTSRows = Omit<Note, "tags"> & { tags: string };
 type SavedPosition = number | { from: number; to: number };
+type NoteItemElements = {
+  containers: {
+    tagContainer: HTMLDivElement | null;
+    snippetContainer: HTMLDivElement | null;
+    dateContainer: HTMLDivElement | null;
+    titleContainer: HTMLDivElement | null;
+  };
+  tags: string[];
+};
 
 type Theme =
   | "light"
@@ -56,9 +66,10 @@ export type {
   AutoSaveConfig,
   CreateNotePayload,
   Font,
+  FTSRows,
   IpcResponse,
   Note,
-  NoteData,
+  NoteItemElements,
   SavedPosition,
   Theme,
   UpdateNotePayload,

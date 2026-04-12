@@ -2,7 +2,7 @@ import type { SavedPosition } from "../shared/types";
 
 const StorageKeys = {
   NOTE_ID: "noteID",
-  SIDEBAR_STATE: "sidebarState",
+  SIDEBAR_COLLAPSED: "sidebarCollapsed",
   ZOOM_LEVEL: "zoomLevel",
   EDITOR_POS: "editorPos",
   SORT_ORDER: "sortOrder",
@@ -10,7 +10,7 @@ const StorageKeys = {
 
 interface StorageData {
   [StorageKeys.NOTE_ID]: string | null;
-  [StorageKeys.SIDEBAR_STATE]: boolean;
+  [StorageKeys.SIDEBAR_COLLAPSED]: boolean;
   [StorageKeys.ZOOM_LEVEL]: number;
   [StorageKeys.EDITOR_POS]: Record<string, SavedPosition>;
   [StorageKeys.SORT_ORDER]: string;
@@ -18,7 +18,7 @@ interface StorageData {
 
 const defaultValues: StorageData = {
   [StorageKeys.NOTE_ID]: null,
-  [StorageKeys.SIDEBAR_STATE]: true,
+  [StorageKeys.SIDEBAR_COLLAPSED]: true,
   [StorageKeys.ZOOM_LEVEL]: 100,
   [StorageKeys.EDITOR_POS]: {},
   [StorageKeys.SORT_ORDER]: "",

@@ -70,15 +70,18 @@ function registerIpcHandlers() {
     }
   });
 
-  ipcMain.handle("note:search", async (_event, searchTerm: string) => {
-    try {
-      const result = db.searchNotes(searchTerm);
-      return result;
-    } catch (error) {
-      console.error("Failed to search note", error);
-      return [];
-    }
-  });
+  ipcMain.handle(
+    "note:search",
+    async (_event, searchTerm: string, limit?: number) => {
+      try {
+        const data = db.search.searchNotes(searchTerm, limit);
+        return { success: true, data };
+      } catch (error) {
+        console.error("Failed to search note", error);
+        return { success: false, data: [] };
+      }
+    },
+  );
 
   ipcMain.handle("set:theme", (_event, theme: Theme) => {
     if (theme in THEME_MAP) {
