@@ -69,7 +69,7 @@ function updateNoteInList(note: Note): void {
     noteElement.querySelector<HTMLDivElement>(".note-content");
   const tagContainer = noteElement.querySelector<HTMLDivElement>(".note-tags");
   const dateContainer = noteElement.querySelector<HTMLDivElement>(".note-date");
-  const tags = note.tags && note.tags.slice(0, 3);
+  const tags = note.tags.slice(0, 3);
   updateTransition(
     {
       containers: {
@@ -91,6 +91,7 @@ function updateTransition(data: NoteItemElements, note: Note) {
     console.warn("Missing elements, skipping transition.");
     return;
   }
+  console.log(`Transition elements: ${note.snippet}`);
   document.startViewTransition(() => {
     tagContainer.innerHTML = "";
     data.tags.forEach((tagItem) => {

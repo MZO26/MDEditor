@@ -1,6 +1,9 @@
 import BetterSqlite from "better-sqlite3";
 import { app } from "electron";
 import path from "path";
+import { generateSnippet } from "../src/shared/generationHelpers.ts/snippet";
+import { generateTags } from "../src/shared/generationHelpers.ts/tags";
+import { generateTitle } from "../src/shared/generationHelpers.ts/title";
 import { NoteFromDbSchema } from "../src/shared/schemas/noteSchema";
 import type {
   CreateNotePayload,
@@ -50,11 +53,11 @@ class NoteDB {
   create(payload: CreateNotePayload): Note {
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
-    let { title, content, plainText, snippet, tags } = payload;
+    let { content, plainText } = payload;
+    const title = generateTitle(plainText);
+    const snippet = generateSnippet(plainText);
+    const tags = generateTags(plainText);
     const stringifiedContent = JSON.stringify(content);
-    if (tags.length > 0) {
-      tags = tags.slice(0, 3);
-    }
     const createTransaction = this.db.transaction((): Note => {
       const result = this.db
         .prepare(
@@ -90,10 +93,10 @@ class NoteDB {
 
   update(payload: UpdateNotePayload): Note {
     const now = new Date().toISOString();
-    let { id, title, content, plainText, snippet, tags = [] } = payload;
-    if (tags.length > 0) {
-      tags = tags.slice(0, 3); // Limit to 3 tags per note
-    }
+    let { id, content, plainText } = payload;
+    const title = generateTitle(plainText);
+    const snippet = generateSnippet(plainText);
+    const tags = generateTags(plainText);
     const stringifiedContent = JSON.stringify(content);
     const updateTransaction = this.db.transaction((): Note => {
       // Update the note's title and content

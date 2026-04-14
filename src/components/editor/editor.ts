@@ -1,6 +1,7 @@
 import { Editor } from "@tiptap/core";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { FileHandler } from "@tiptap/extension-file-handler";
+import Focus from "@tiptap/extension-focus";
 import Highlight from "@tiptap/extension-highlight";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
@@ -10,15 +11,18 @@ import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import TableRow from "@tiptap/extension-table-row";
 import StarterKit from "@tiptap/starter-kit";
+import BubbleMenuManager from "../../extensions/bubbleMenu";
 import { compressImage } from "../../extensions/image";
 import { lowlight } from "../../extensions/lowlight";
 import { Placeholder } from "../../extensions/placeholder";
 import { NoteTag } from "../../extensions/tag";
+import { Typography } from "../../extensions/typography";
 import { updateStats } from "./editorFooter";
 import { PositionManager } from "./editorHandlers";
 
 let editor: Editor | null = null;
 const positionManager = new PositionManager();
+const bubbleMenuManager = new BubbleMenuManager();
 
 function initEditor(selector: string): Editor {
   const element = document.querySelector(selector);
@@ -26,8 +30,8 @@ function initEditor(selector: string): Editor {
     return editor;
   }
   if (!element) {
-    console.error(`element with "${selector}" was not found.`);
-    throw new Error(`element with "${selector}" was not found.`);
+    console.error(`(editor): element with "${selector}" was not found.`);
+    throw new Error(`(editor): element with "${selector}" was not found.`);
   }
 
   editor = new Editor({
@@ -60,11 +64,18 @@ function initEditor(selector: string): Editor {
     const text = editor.getText();
     updateStats(text);
   });
+  bubbleMenuManager.attach(editor);
   return editor;
 }
 
 function getNoteEditorExtensions() {
   return [
+    Typography,
+    bubbleMenuManager.getExtension(),
+    Focus.configure({
+      className: "has-focus",
+      mode: "shallowest",
+    }),
     Placeholder,
     TaskList,
     TaskItem.configure({

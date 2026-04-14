@@ -16,11 +16,11 @@
   --tag-color: #1976d2;
   --tag-bg: #e3f2fd;
   --shadow: 0 0 0 1px rgba(212, 212, 216, 0.8), 0 1px 3px rgba(0, 0, 0, 0.1);
-  --code-block: 
 
   /* Font families */
-    --font-system: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantall, "Open Sans", "Helvetica Neue", sans-serif;
+  --font-system:
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantall, "Open Sans", "Helvetica Neue", sans-serif;
   --font-arial: Arial, Helvetica, sans-serif;
   --font-verdana: Verdana, Geneva, sans-serif;
   --font-trebuchet: "Trebuchet MS", sans-serif;

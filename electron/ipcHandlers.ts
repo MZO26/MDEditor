@@ -21,8 +21,8 @@ function registerIpcHandlers() {
       const data = db.getAll();
       return { success: true, data };
     } catch (error) {
-      console.error("Failed to get all notes:", error);
-      return { success: false, message: "Failed to get all notes" };
+      console.error("[IPC] Failed to get all notes: ", error);
+      return { success: false, message: "[IPC] Failed to get all notes" };
     }
   });
 
@@ -35,8 +35,8 @@ function registerIpcHandlers() {
       const data = db.create(result.data);
       return { success: true, data };
     } catch (error) {
-      console.error("Failed to create note:", error);
-      return { success: false, message: "Failed to create note" };
+      console.error("[IPC] Failed to create note: ", error);
+      return { success: false, message: "[IPC] Failed to create note" };
     }
   });
 
@@ -49,8 +49,8 @@ function registerIpcHandlers() {
       const data = db.update(result.data);
       return { success: true, data };
     } catch (error) {
-      console.error("Failed to update note:", error);
-      return { success: false, message: "Note not found" };
+      console.error("[IPC] Failed to update note: ", error);
+      return { success: false, message: "[IPC] Failed to update note" };
     }
   });
 
@@ -62,12 +62,12 @@ function registerIpcHandlers() {
     try {
       const success = db.delete(result.data);
       if (!success) {
-        return { success: false, message: "Note not found" };
+        return { success: false, message: "[IPC] Note not found" };
       }
       return { success: success };
     } catch (error) {
-      console.error("Failed to delete note", error);
-      return { success: false, message: "Failed to delete note" };
+      console.error("[IPC] Failed to delete note: ", error);
+      return { success: false, message: "[IPC] Failed to delete note" };
     }
   });
 
@@ -79,18 +79,18 @@ function registerIpcHandlers() {
     try {
       const data = db.getById(result.data);
       if (!data) {
-        return { success: false, message: "Note not found" };
+        return { success: false, message: "[IPC] Note not found" };
       }
       return { success: true, data };
     } catch (error) {
-      console.error("Failed to get note by ID", error);
-      return { success: false, message: "Failed to get note by ID" };
+      console.error("[IPC] Failed to get note by ID: ", error);
+      return { success: false, message: "[IPC] Failed to get note by ID" };
     }
   });
 
   ipcMain.handle(
     "note:search",
-    async (_event, searchTerm: string, limit: number) => {
+    async (_event, searchTerm: unknown, limit: unknown) => {
       const result = validateSearch(searchTerm, limit);
 
       if (!result.success) {
@@ -101,8 +101,8 @@ function registerIpcHandlers() {
         const data = db.search.searchNotes(validSearchTerm, validLimit);
         return { success: true, data };
       } catch (error) {
-        console.error("Failed to search note", error);
-        return { success: false, data: [] };
+        console.error("[IPC] Failed to search note: ", error);
+        return { success: false, message: "[IPC] Failed to search note" };
       }
     },
   );
@@ -113,7 +113,7 @@ function registerIpcHandlers() {
       nativeTheme.themeSource = THEME_MAP[validTheme];
       return { success: true };
     }
-    return { success: false, message: "Invalid theme" };
+    return { success: false, message: "[IPC] Invalid theme" };
   });
 
   ipcMain.handle("file-open", async () => {
@@ -150,8 +150,11 @@ function registerIpcHandlers() {
       const value = store.get(key);
       return { success: true, data: value };
     } catch (error) {
-      console.error(`[IPC] Error while loading key "${key}":`, error);
-      return { success: false, message: "Error while loading" };
+      console.error(`[IPC] Error while getting key ${key}: `, error);
+      return {
+        success: false,
+        message: `[IPC] Error while getting key: ${key}`,
+      };
     }
   });
 
@@ -162,10 +165,10 @@ function registerIpcHandlers() {
         store.set(key, val);
         return { success: true };
       } catch (error) {
-        console.error(`[IPC] Error saving key "${key}:`, error);
+        console.error(`[IPC] Error while saving key ${key}: `, error);
         return {
           success: false,
-          message: error instanceof Error ? error.message : "Unknown error",
+          message: `[IPC] Error while saving key ${key}`,
         };
       }
     },

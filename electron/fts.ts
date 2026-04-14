@@ -1,4 +1,6 @@
 import type { Database as DatabaseType } from "better-sqlite3";
+import { generateFtsQuery } from "../src/shared/generationHelpers.ts/ftsQuery";
+import { NoteFromDbSchema } from "../src/shared/schemas/noteSchema";
 import type { FTSRows } from "../src/shared/types";
 
 class FTS5 {
@@ -67,20 +69,15 @@ class FTS5 {
   }
 
   searchNotes(searchTerm: string, limit: number) {
-    const cleanSearch = searchTerm.replace(/[^\p{L}\p{N}\s]/gu, " ");
-    const ftsQuery = cleanSearch
-      .split(/\s+/)
-      .filter((word: string) => word.length > 0)
-      .map((word: string) => `"${word}"*`)
-      .join(" AND ");
-    if (!ftsQuery) return [];
+    const ftsQuery = generateFtsQuery(searchTerm);
     const stmt = this.db.prepare<unknown[], FTSRows>(`
     SELECT 
       n.id, 
       highlight(notes_fts, 1, '<b>', '</b>') AS title, 
       --index 1 -> second column
       n.content,
-      snippet(notes_fts, 2, '<b class="search-highlight">', '</b>', '...', 64) AS plainText,
+      snippet(notes_fts, 2, '<b class="search-highlight">', '</b>', '...', 50) as snippet,
+      plainText,
       (
         SELECT json_group_array(tag_name)
         FROM note_tags
@@ -95,10 +92,13 @@ class FTS5 {
     LIMIT ?
   `);
     const rows = stmt.all(ftsQuery, limit);
-    const parsedRows = rows.map((row) => ({
-      ...row,
-      tags: JSON.parse(row.tags),
-    }));
+    const parsedRows = rows.map((row) => {
+      const noteData = {
+        ...row,
+        tags: JSON.parse(row.tags),
+      };
+      return NoteFromDbSchema.parse(noteData);
+    });
     return parsedRows;
   }
 }

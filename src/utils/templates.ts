@@ -4,16 +4,8 @@ import type { Note } from "../shared/types";
 import { formatNoteDate } from "./helpers";
 import { renderIcons } from "./icons";
 
-function generateSnippet(plainText: string) {
-  return plainText
-    .replace(/#[\p{L}\p{N}_]+/gu, "")
-    .replace(/\s{2,}/g, " ")
-    .trim();
-}
-
 function noteItemTemplate(note: Omit<Note, "id" | "created_at">) {
-  const { title, snippet, plainText, updated_at, tags } = note;
-  const preview = snippet ? snippet : generateSnippet(plainText);
+  const { title, snippet, updated_at, tags } = note;
   const formattedDate = formatNoteDate(updated_at);
   const htmlString = `<div class="note-header">
                 <span class="note-title">${title}</span>
@@ -27,7 +19,7 @@ function noteItemTemplate(note: Omit<Note, "id" | "created_at">) {
                   ${tags?.map((tag) => `<span class="tag">#${tag}</span>`).join("")}
                 </div>
               </div>
-                <div class="note-content">${preview}</div>
+                <div class="note-content">${snippet}</div>
               `;
   return DOMPurify.sanitize(htmlString);
 }
@@ -41,4 +33,4 @@ function getNoteItemUI(note: Note) {
   return noteElement;
 }
 
-export { generateSnippet, getNoteItemUI, noteItemTemplate };
+export { getNoteItemUI, noteItemTemplate };

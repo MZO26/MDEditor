@@ -42,8 +42,3 @@ button:active {
   top: 8px;
   right: 3px;
 }
-
-.hidden {
-  pointer-events: none;
-  display: none;
-}

@@ -22,16 +22,68 @@
   position: relative;
 }
 
+.tiptap > * {
+  padding: 3px;
+  border-radius: 6px;
+  background-color: transparent;
+  box-shadow: 0 0 0 0 transparent;
+  outline: 1px solid transparent;
+  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tiptap .has-focus {
+  background-color: var(--bg-button);
+  box-shadow: var(--shadow);
+  outline-color: var(--border-color);
+}
+
 .tiptap.is-editor-empty::before {
   content: attr(data-placeholder);
-  position: absolute; /* Absolut statt float */
-  top: 0.2em;
+  position: absolute;
+  top: 0.45em;
   left: 0;
   color: #adb5bd;
   pointer-events: none;
   font-style: italic;
   line-height: inherit;
   user-select: none;
+}
+
+.bubble-menu {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background-color: var(--bg-sidebar);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  z-index: 50;
+}
+
+.bubble-menu .menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  background-color: transparent;
+  color: var(--text-main);
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bubble-menu .menu-btn:hover {
+  background-color: var(--bg-button);
+  color: var(--text-main);
+}
+
+.bubble-menu .menu-btn.is-active {
+  background-color: var(--tag-bg);
+  color: var(--tag-color);
 }
 
 .tiptap h1 {
@@ -219,6 +271,17 @@
   flex-direction: row;
 }
 
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid var(--accent-primary);
+  border-radius: 0;
+  margin: 1.5rem 0;
+}
+
+.ProseMirror hr.ProseMirror-selectednode {
+  border-top-color: var(--tag-color);
+}
+
 .toolbar button:hover {
   background: var(--bg-button);
   border-color: var(--border-color);
@@ -241,7 +304,7 @@ button.is-active {
 }
 
 .tiptap pre {
-  background-color: rgba(24, 24, 27, 0.85);
+  background-color: transparent;
   border-radius: 0.5em;
   box-shadow: var(--shadow);
   color: #e4e4e7;

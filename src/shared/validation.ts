@@ -49,7 +49,7 @@ function validateId(id: unknown) {
   return validation(IdSchema, id);
 }
 
-function validateSearch(searchTerm: string, limit: number) {
+function validateSearch(searchTerm: unknown, limit: unknown) {
   return validation(SearchSchema, { searchTerm, limit });
 }
 

@@ -1,17 +1,11 @@
-import type { Note } from "../../shared/types";
+import type { Note, Result } from "../../shared/types";
+import { safeIpcCall } from "../../utils/helpers";
 
-async function searchNotes(searchInput: string): Promise<Note[] | undefined> {
-  try {
-    const result = await window.noteAPI.searchNotes(searchInput);
-    if (!result.success) {
-      console.warn("Failed to create note: ", result.message);
-      return undefined;
-    }
-    return result.data;
-  } catch (error) {
-    console.error(`Error searching notes: `, error);
-    return undefined;
-  }
+async function searchNotes(
+  searchInput: string,
+  limit: number,
+): Promise<Result<Note[]>> {
+  return safeIpcCall(window.noteAPI.searchNotes(searchInput, limit));
 }
 
 export { searchNotes };

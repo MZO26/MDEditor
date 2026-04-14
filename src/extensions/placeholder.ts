@@ -6,7 +6,7 @@ const Placeholder = Extension.create({
 
   addOptions() {
     return {
-      placeholder: "Write something...",
+      placeholder: " Write something...",
     };
   },
 

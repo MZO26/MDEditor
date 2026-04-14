@@ -3,18 +3,13 @@ import { DbContentSchema, EditorDocSchema } from "./editorSchema";
 
 const IdSchema = z.uuid();
 
-const TitleSchema = z
-  .string()
-  .trim()
-  .max(200)
-  .transform((value) => (value === "" ? "New Note" : value))
-  .default("New Note");
+const TitleSchema = z.string().min(1).max(100).default("New Note");
 
-const TagSchema = z.string().trim().min(1).max(40);
+const TagSchema = z.string().trim().min(1).max(40).toLowerCase();
 
 const TagsSchema = z.array(TagSchema).max(3).default([]);
 
-const SnippetSchema = z.string().trim().max(200).default("");
+const SnippetSchema = z.string().max(50).default("");
 
 const PlainTextSchema = z.string().default("");
 
@@ -37,8 +32,8 @@ const NoteFromDbSchema = z.object({
   id: IdSchema,
   title: TitleSchema,
   content: DbContentSchema,
-  plainText: PlainTextSchema,
   snippet: SnippetSchema,
+  plainText: PlainTextSchema,
   created_at: DateSchema,
   updated_at: DateSchema,
   tags: TagsSchema,
@@ -69,22 +64,34 @@ const SearchSchema = z.object({
 
 const CreateNotePayloadSchema = NoteSchema.omit({
   id: true,
+  title: true,
+  snippet: true,
+  tags: true,
   created_at: true,
   updated_at: true,
 });
 
 const UpdateNotePayloadSchema = NoteSchema.omit({
+  title: true,
+  snippet: true,
+  tags: true,
   created_at: true,
   updated_at: true,
 });
 
 export {
   CreateNotePayloadSchema,
+  EditorDocSchema,
   FTSRowsSchema,
   IdSchema,
   NoteFromDbSchema,
   NoteSchema,
   NotesSchema,
+  PlainTextSchema,
   SearchSchema,
+  SnippetSchema,
+  TagSchema,
+  TagsSchema,
+  TitleSchema,
   UpdateNotePayloadSchema,
 };

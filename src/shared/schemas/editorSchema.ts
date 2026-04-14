@@ -6,11 +6,11 @@ const MAX_CHARS = 250_000;
 const jsonNode: z.ZodType<JSONContent> = z.lazy(() =>
   z
     .object({
-      type: z.string().optional(),
-      attrs: z.record(z.string(), z.unknown()).optional(),
+      type: z.string().nullable().optional(),
+      attrs: z.record(z.string(), z.unknown()).nullable().optional(),
       content: z.array(jsonNode).optional(),
-      marks: z.array(z.record(z.string(), z.unknown())).optional(),
-      text: z.string().optional(),
+      marks: z.array(z.record(z.string(), z.unknown())).nullable().optional(),
+      text: z.string().nullable().optional(),
     })
     .catchall(z.any()),
 ) as any;
@@ -32,13 +32,20 @@ const EditorDocSchema = z
 
 const DbContentSchema = z
   .string()
-  .transform((val) => {
+  .transform((val, ctx) => {
     try {
-      return JSON.parse(val);
+      const parsed = JSON.parse(val);
+      return parsed;
     } catch (e) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Content is corrupted (invalid JSON)",
+      });
       return z.NEVER;
     }
   })
   .pipe(EditorDocSchema);
+
+//input gets validated -> processed into parsed object -> piped to validate output against EditorDocSchema
 
 export { DbContentSchema, EditorDocSchema };

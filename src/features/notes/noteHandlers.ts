@@ -1,16 +1,20 @@
-import type { Editor, JSONContent } from "@tiptap/core";
+import type { Editor } from "@tiptap/core";
 import { EditorState } from "@tiptap/pm/state";
-import { positionManager } from "../../components/editor/editor";
+import { editor, positionManager } from "../../components/editor/editor";
 import { updateStats } from "../../components/editor/editorFooter";
-import { handleEditorEmptyState } from "../../components/editor/editorHandlers";
+import {
+  extractNoteDataFromEditor,
+  handleEditorEmptyState,
+} from "../../components/editor/editorHandlers";
 import { updateNoteInList } from "../../components/sidebar2/sidebarNotes";
-import type { Note, UpdateNotePayload } from "../../shared/types";
+import type { Note } from "../../shared/types";
 import {
   abortCurrentSave,
   setupAutoSave,
   startNewSaveCycle,
 } from "../../utils/autoSave";
-import { getValue, setValue, StorageKeys } from "../../utils/cache";
+import { setValue, StorageKeys } from "../../utils/cache";
+import { updateNotePayload } from "../../utils/factory";
 import { setActiveItem } from "../../utils/helpers";
 import { showToast } from "../../utils/toast";
 import { getNoteById, updateNote } from "./noteAPI";
@@ -39,21 +43,20 @@ async function noteItemHandler(
   }
 }
 
-async function saveNote(note: UpdateNotePayload): Promise<void> {
-  const currentId =
-    note.id !== undefined ? note.id : getValue(StorageKeys.NOTE_ID);
-  if (currentId === null) return;
+async function saveNote(id: string): Promise<void> {
+  const editorData = extractNoteDataFromEditor(editor);
+  const payload = updateNotePayload({ id, ...editorData });
   try {
-    const result = await updateNote(note);
+    const result = await updateNote(payload);
     if (!result.success) {
       showToast(result.message);
       return;
     }
+    console.log(result.data);
     updateNoteInList(result.data);
-    setValue(StorageKeys.NOTE_ID, note.id);
-    console.log("saved!");
+    setValue(StorageKeys.NOTE_ID, id);
   } catch (error) {
-    console.error(`Error saving note: `, error);
+    console.error("(noteHandler): Failed saving note: ", error);
   }
 }
 
@@ -62,7 +65,7 @@ function viewNote(note: Note, editor: Editor): void {
   abortCurrentSave();
   positionManager.save(editor); // save position from old note
   handleEditorEmptyState(note.id);
-  editor.commands.setContent(note.content as JSONContent, {
+  editor.commands.setContent(note.content, {
     emitUpdate: false,
   });
   const newState = EditorState.create({

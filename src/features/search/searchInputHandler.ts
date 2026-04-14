@@ -1,9 +1,11 @@
+import { handleEditorEmptyState } from "../../components/editor/editorHandlers";
 import {
   addManyNotesToList,
   handleSidebarEmptyState,
   reloadNoteList,
 } from "../../components/sidebar2/sidebarNotes";
 import { renderIcons } from "../../utils/icons";
+import { showToast } from "../../utils/toast";
 import { searchNotes } from "./searchAPI";
 
 async function handleSearchInput(
@@ -19,16 +21,17 @@ async function handleSearchInput(
       return;
     }
 
-    const response = await searchNotes(searchInput);
-
-    if (!response || response.length === 0) {
+    const result = await searchNotes(searchInput, 20);
+    if (!result.success) {
+      showToast(result.message);
+      handleEditorEmptyState();
       handleSidebarEmptyState(notesContainer, searchInput);
       return;
     }
-    addManyNotesToList(response);
+    addManyNotesToList(result.data);
   } catch (error) {
     const action = searchInput === "" ? "reload note list" : "search notes";
-    console.error(`Failed to ${action}:`, error);
+    console.error(`(searchInputHandler): Failed to ${action}:`, error);
     return;
   }
   const newNoteElements =

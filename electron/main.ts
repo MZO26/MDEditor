@@ -1,9 +1,10 @@
-import { app, BrowserWindow, Menu, shell } from "electron";
+import { app, BrowserWindow, Menu } from "electron";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { registerIpcHandlers } from "./ipcHandlers";
 import { getTitleBarOverlay } from "./titlebar";
+import { navigationInterceptor } from "./windowPolicies";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env["DIST"] = path.join(__dirname, "../dist");
@@ -36,14 +37,7 @@ function createWindow() {
       webSecurity: true,
     },
   });
-
-  win.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith("https:") || url.startsWith("http:")) {
-      shell.openExternal(url);
-    }
-    return { action: "deny" };
-  });
-
+  navigationInterceptor(win);
   win.webContents.openDevTools();
   if (process.env["ELECTRON_RENDERER_URL"]) {
     win.loadURL(process.env["ELECTRON_RENDERER_URL"]);

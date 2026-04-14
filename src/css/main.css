@@ -34,19 +34,26 @@
   overflow: hidden;
 }
 
+.editor-view,
+.editor-empty-state {
+  grid-row: 1 / -1;
+  grid-column: 1 / -1;
+}
+
 .editor-view {
   display: contents;
+  transition: display 0.2s ease-in-out;
 }
 
 .editor-empty-state {
-  grid-row: 1 / -1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   max-height: 100%;
-  margin-top: 20px;
+  padding-top: 20px;
   animation: fadeSlideIn 0.4s ease-out forwards;
+  background-color: var(--bg-editor);
   opacity: 0;
 }
 
@@ -312,6 +319,11 @@ select {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.hidden {
+  pointer-events: none;
+  display: none;
 }
 
 @media (max-width: 800px) {
