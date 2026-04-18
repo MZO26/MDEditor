@@ -5,7 +5,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'"
+      content="
+    default-src 'none';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data: blob: appimg:;
+    connect-src 'self';
+    font-src 'self';
+    object-src 'none';
+    base-uri 'self';
+    form-action 'none';
+    frame-src 'none';
+  "
     />
     <meta name="description" content="notetaking app" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -189,32 +200,101 @@
                 <i data-lucide="image"></i>
               </button>
             </div>
-            <div class="bubble-menu" style="visibility: hidden">
-              <div id="format-tools" style="display: none">
-                <button id="copy" data-action="copy">
+            <div
+              class="bubble-menu"
+              data-active-menu="text"
+              style="visibility: hidden"
+            >
+              <div class="tool-group text-tools">
+                <button data-action="copy">
                   <i data-lucide="copy"></i>
                 </button>
-                <button id="align-start" data-action="alignStart">
+                <button data-action="copyBlock">
+                  <i data-lucide="copy-plus"></i>
+                </button>
+                <div class="select-wrapper">
+                  <select id="font-size" data-action="selectFontSize">
+                    <option value="0.571em">8</option>
+                    <option value="0.857em">12</option>
+                    <option value="unset">14 -</option>
+                    <option value="1.143em">16</option>
+                    <option value="1.286em">18</option>
+                    <option value="1.714em">24</option>
+                  </select>
+
+                  <i class="select-icon" data-lucide="a-large-small"></i>
+                </div>
+                <div class="select-wrapper">
+                  <select id="line-height" data-action="selectLineHeight">
+                    <option value="1">1.0</option>
+                    <option value="1.2">1.2</option>
+                    <option value="1.4">1.4</option>
+                    <option value="unset">1.5 -</option>
+                    <option value="1.6">1.6</option>
+                    <option value="1.8">1.8</option>
+                    <option value="2">2.0</option>
+                  </select>
+                  <i class="select-icon" data-lucide="unfold-vertical"></i>
+                </div>
+                <button data-action="alignStart">
                   <i data-lucide="text-align-start"></i>
                 </button>
-                <button id="align-center" data-action="alignCenter">
+                <button data-action="alignCenter">
                   <i data-lucide="text-align-center"></i>
                 </button>
-                <button id="align-end" data-action="alignEnd">
+                <button data-action="alignEnd">
                   <i data-lucide="text-align-end"></i>
                 </button>
-                <button id="align-justify" data-action="alignJustify">
+                <button data-action="alignJustify">
                   <i data-lucide="text-align-justify"></i>
                 </button>
               </div>
-              <div id="table-tools" style="display: none">
-                <button id="add-row-after" data-action="addRowAfter">
+
+              <div class="tool-group table-tools">
+                <button data-action="addRowBefore">
+                  <i data-lucide="between-vertical-start"></i>
+                </button>
+                <button data-action="addRowAfter">
                   <i data-lucide="between-vertical-end"></i>
                 </button>
-                <button id="add-column-after" data-action="addColumnAfter">
+                <button data-action="addColumnBefore">
+                  <i data-lucide="between-horizontal-start"></i>
+                </button>
+                <button data-action="addColumnAfter">
                   <i data-lucide="between-horizontal-end"></i>
                 </button>
-                <button id="delete-table" data-action="deleteTable">
+                <button data-action="deleteTable">
+                  <i data-lucide="trash-2"></i>
+                </button>
+              </div>
+              <div class="tool-group code-block-tools">
+                <button data-action="copy">
+                  <i data-lucide="copy"></i>
+                </button>
+                <button data-action="copyBlock">
+                  <i data-lucide="copy-plus"></i>
+                </button>
+                <button data-action="duplicate">
+                  <i data-lucide="repeat"></i>
+                </button>
+                <button data-action="toggleLanguage">
+                  <i data-lucide="hash"></i>
+                </button>
+                <button data-action="delete">
+                  <i data-lucide="trash-2"></i>
+                </button>
+              </div>
+              <div class="tool-group inline-code-tools">
+                <button data-action="copy">
+                  <i data-lucide="copy"></i>
+                </button>
+                <button data-action="promote">
+                  <i data-lucide="code-xml"></i>
+                </button>
+                <button data-action="removeFormat">
+                  <i data-lucide="code"></i>
+                </button>
+                <button data-action="delete">
                   <i data-lucide="trash-2"></i>
                 </button>
               </div>

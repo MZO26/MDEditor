@@ -1,5 +1,5 @@
 import { THEME_MAP } from "../../constants/themes";
-import type { Code, Theme } from "../../shared/types";
+import type { Theme } from "../../shared/types";
 import { resolveTheme } from "./theme";
 
 const isTheme = (value: string): value is Theme =>
@@ -30,14 +30,14 @@ async function getSelectedCodeTheme(
         theme && isTheme(theme) ? resolveTheme(theme) : resolveTheme("system");
       const codeTheme =
         resolvedTheme === "dark" ? "github-dark" : "github-light";
-      document.documentElement.dataset["codeTheme"] = codeTheme;
+      document.documentElement.dataset["code-theme"] = codeTheme;
       if (selectElement) selectElement.value = codeTheme;
       return codeTheme;
     }
     const codeTheme = response.data;
-    document.documentElement.setAttribute("data-code-theme", codeTheme as Code);
+    document.documentElement.setAttribute("data-code-theme", codeTheme);
     if (selectElement) {
-      selectElement.value = codeTheme as Code;
+      selectElement.value = codeTheme;
     }
     return codeTheme;
   } catch (error) {

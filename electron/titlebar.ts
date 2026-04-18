@@ -1,23 +1,23 @@
 import { nativeTheme } from "electron";
+import { THEME_DATA } from "../src/constants/themes";
+import type { Theme, TitleBarOverlayOptions } from "../src/shared/types";
 
-type TitleBarOverlayOptions = {
-  color: string;
-  symbolColor: string;
-  height: number;
-};
-
-nativeTheme.themeSource = "system";
-
-function getTitleBarOverlay(): TitleBarOverlayOptions {
-  let isDark = nativeTheme.shouldUseDarkColors;
-  //boolean to check if the system theme is dark or light, used to set the title bar overlay colors accordingly
-  return isDark === true
-    ? { color: "#00000000", symbolColor: "#a1a1aa", height: 30 }
-    : {
-        color: "#00000000",
-        symbolColor: "#71717a",
-        height: 30,
-      };
+function getTitleBarOverlay(
+  themeName: keyof typeof THEME_DATA,
+): TitleBarOverlayOptions {
+  const theme = THEME_DATA[themeName];
+  return {
+    color: theme.color,
+    symbolColor: theme.symbolColor,
+    height: 30,
+  };
 }
 
-export { getTitleBarOverlay };
+function resolveThemeForOverlay(theme: Theme): keyof typeof THEME_DATA {
+  if (theme === "system") {
+    return nativeTheme.shouldUseDarkColors ? "dark" : "light";
+  }
+  return theme as keyof typeof THEME_DATA;
+}
+
+export { getTitleBarOverlay, resolveThemeForOverlay };

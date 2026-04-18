@@ -30,11 +30,11 @@ const applyAppTheme = async (
       } else theme = result.data;
     }
     const resolvedTheme = resolveTheme(theme);
-    document.documentElement.dataset["theme"] = theme;
+    document.documentElement.dataset["theme"] = resolvedTheme;
     if (selectElement) {
       selectElement.value = theme;
     }
-    await window.storeApi.setSettings("theme", theme);
+    await window.electronAPI.setTheme(theme);
     const defaultCodeTheme =
       resolvedTheme === "dark" ? "github-dark" : "github-light";
     document.documentElement.setAttribute("data-code-theme", defaultCodeTheme);

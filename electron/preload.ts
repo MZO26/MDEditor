@@ -17,6 +17,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("theme:changed", (_event: IpcRendererEvent, response: any) =>
       callback(response),
     ),
+  saveImage: (imageData: string | ArrayBuffer, extension: string) =>
+    ipcRenderer.invoke("saveImage", imageData, extension),
 });
 contextBridge.exposeInMainWorld("noteAPI", {
   getAll: () => ipcRenderer.invoke("note:getAll"),

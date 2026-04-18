@@ -1,32 +1,45 @@
 import type { Editor } from "@tiptap/core";
 import { showToast } from "../utils/toast";
 
-function compressImage(
+async function compressImage(
   file: File,
   maxWidth = 800,
   quality = 0.8,
-): Promise<string> {
+): Promise<Uint8Array> {
+  const img = new Image();
+  const objectUrl = URL.createObjectURL(file); // creates tiny reference-url
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl); // frees ram space
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-      img.onload = () => {
-        if (img.width > maxWidth) {
-          canvas.width = maxWidth;
-          canvas.height = (img.height * maxWidth) / img.width;
-        } else {
-          canvas.width = img.width;
-          canvas.height = img.height;
-        }
-        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", quality));
-      };
-      img.src = e.target?.result as string;
+      let width = img.width;
+      let height = img.height;
+      if (width > maxWidth) {
+        height = (height * maxWidth) / width;
+        width = maxWidth;
+      }
+      canvas.width = width;
+      canvas.height = height;
+      ctx?.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        async (blob) => {
+          if (blob) {
+            const buffer = await blob.arrayBuffer();
+            resolve(new Uint8Array(buffer));
+          } else {
+            reject(new Error("Compression failed"));
+          }
+        },
+        "image/jpeg",
+        quality,
+      );
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Image load failed"));
+    };
+    img.src = objectUrl;
   });
 }
 
@@ -53,13 +66,22 @@ function promptImageUpload(editor: Editor) {
       }
       try {
         const compressedImage = await compressImage(file);
-        editor.chain().focus().setImage({ src: compressedImage }).run();
+        const extension = file.type.split("/")[1];
+        if (!extension) return;
+        const result = await window.electronAPI.saveImage(
+          compressedImage,
+          extension,
+        );
+        if (!result.success) {
+          showToast("Error: Could not save image to disk.");
+          return;
+        }
+        editor.chain().focus().setImage({ src: result.imageSrc }).run();
       } catch (error) {
         console.error("Failed to process and insert image:", error);
       }
     }
   };
-
   input.click();
 }
 

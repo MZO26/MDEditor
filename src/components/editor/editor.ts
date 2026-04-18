@@ -1,29 +1,35 @@
 import { Editor } from "@tiptap/core";
 import BubbleMenu from "@tiptap/extension-bubble-menu";
-import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import {
   Details,
   DetailsContent,
   DetailsSummary,
 } from "@tiptap/extension-details";
-import Focus from "@tiptap/extension-focus";
 import Highlight from "@tiptap/extension-highlight";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
-import { Table } from "@tiptap/extension-table";
-import TableCell from "@tiptap/extension-table-cell";
-import TableHeader from "@tiptap/extension-table-header";
-import TableRow from "@tiptap/extension-table-row";
+import { TableKit } from "@tiptap/extension-table";
 import TextAlign from "@tiptap/extension-text-align";
+import { TextStyleKit } from "@tiptap/extension-text-style";
+import {
+  CharacterCount,
+  Focus,
+  Placeholder,
+  Selection,
+} from "@tiptap/extensions";
 import StarterKit from "@tiptap/starter-kit";
 import { DragAutoScroll } from "../../extensions/autoScroll";
 import BubbleMenuManager from "../../extensions/bubbleMenu";
+import {
+  CustomCodeBlockLowlight,
+  updateDetectCodeLanguage,
+} from "../../extensions/languages";
 import { lowlight } from "../../extensions/lowlight";
-import { Placeholder } from "../../extensions/placeholder";
 import { NoteTag } from "../../extensions/tag";
 import { Typography } from "../../extensions/typography";
 import { getElement } from "../../utils/helpers";
+import { renderIcons } from "../../utils/icons";
 import { updateStats } from "./editorFooter";
 import { PositionManager } from "./editorHandlers";
 
@@ -46,33 +52,8 @@ function initEditor(selector: string): Editor {
     element: element as HTMLElement,
     extensions: getNoteEditorExtensions(),
     editorProps: {
-      handleDOMEvents: {
-        dragover: (view, event) => {
-          if (event.dataTransfer?.types?.includes("Files")) {
-            event.dataTransfer.dropEffect = "none";
-            event.preventDefault();
-
-            return true;
-          }
-          const editorBounds = view.dom.getBoundingClientRect();
-          const mouseNextToTop = event.clientY - editorBounds.top;
-          if (mouseNextToTop < 40) {
-            const scrollContainer = view.dom.parentElement;
-            scrollContainer?.scrollBy({
-              top: -10,
-              behavior: "auto",
-            });
-          }
-          return false;
-        },
-        dragenter: (_view, event) => {
-          if (event.dataTransfer?.types?.includes("Files")) {
-            event.dataTransfer.dropEffect = "none";
-            event.preventDefault();
-            return true;
-          }
-          return false;
-        },
+      attributes: {
+        spellcheck: "false",
       },
     },
     content: {
@@ -81,12 +62,15 @@ function initEditor(selector: string): Editor {
     },
     autofocus: true,
   });
-  editor.on("update", async () => {
+  editor.on("update", () => {
     if (!editor) return;
-    const text = editor.getText();
-    updateStats(text);
+    updateDetectCodeLanguage(editor);
+    updateStats(editor);
   });
+  renderIcons(bubbleMenuElement);
   bubbleMenuManager.attach(editor);
+  editor.view.dom.style.setProperty("--editor-font-size", "18px");
+  editor.view.dom.style.setProperty("--editor-line-height", "1.8");
   return editor;
 }
 
@@ -102,12 +86,19 @@ function getNoteEditorExtensions() {
       maxSpeed: 10,
     }),
     TextAlign.configure({
-      types: ["heading", "paragraph", "blockquote", "listItem", "codeBlock"],
+      types: [
+        "heading",
+        "paragraph",
+        "blockquote",
+        "listItem",
+        "codeBlock",
+        "details",
+      ],
       alignments: ["start", "center", "end", "justify"],
       defaultAlignment: "start",
     }),
     BubbleMenu.configure({
-      element: document.querySelector(".bubble-menu") as HTMLElement,
+      element: getElement(".bubble-menu") as HTMLElement,
       options: {
         placement: "top",
         offset: 15,
@@ -118,9 +109,29 @@ function getNoteEditorExtensions() {
     }),
     Focus.configure({
       className: "has-focus",
-      mode: "shallowest",
+      mode: "deepest",
     }),
-    Placeholder,
+    Placeholder.configure({
+      placeholder: "Start writing...",
+      emptyEditorClass: "is-editor-empty",
+      emptyNodeClass: "is-empty",
+      showOnlyWhenEditable: true,
+      showOnlyCurrent: false,
+      includeChildren: false,
+    }),
+    CharacterCount.configure({
+      textCounter: (text) => {
+        const chars = text.match(/[\p{L}\p{N}]/gu);
+        return chars ? chars.length : 0;
+      },
+      wordCounter: (text) => {
+        const words = text.match(/[\p{L}\d]+(?:['’]\p{L}+)*/gu);
+        return words ? words.length : 0;
+      },
+    }),
+    Selection.configure({
+      className: "editor-selection-blur",
+    }),
     TaskList,
     TaskItem.configure({
       nested: true,
@@ -129,27 +140,45 @@ function getNoteEditorExtensions() {
       allowBase64: true,
       resize: {
         enabled: true,
-        directions: ["right"],
-        minWidth: 100,
+        directions: ["top", "bottom", "left", "right"],
+        minWidth: 50,
+        minHeight: 50,
         alwaysPreserveAspectRatio: true,
       },
     }),
     NoteTag,
-    Table.configure({
-      resizable: true,
-      allowTableNodeSelection: true,
-      lastColumnResizable: true,
-      handleWidth: 5,
+    TextStyleKit.configure({
+      fontSize: {
+        types: ["textStyle", "paragraph", "heading", "code", "codeBlock"],
+      },
+      backgroundColor: false,
     }),
-    TableRow,
-    TableHeader,
-    TableCell,
+    TableKit.configure({
+      table: {
+        resizable: true,
+        allowTableNodeSelection: true,
+        lastColumnResizable: true,
+        handleWidth: 5,
+        HTMLAttributes: { class: "table" },
+      },
+      tableHeader: {
+        HTMLAttributes: { class: "th" },
+      },
+      tableCell: {
+        HTMLAttributes: { class: "td" },
+      },
+    }),
     Highlight.configure({ multicolor: true }),
     StarterKit.configure({
       codeBlock: false,
       link: false,
+      dropcursor: {
+        color: "var(--accent-primary)",
+        width: 2,
+        class: "editor-dropcursor",
+      },
     }),
-    CodeBlockLowlight.configure({
+    CustomCodeBlockLowlight.configure({
       lowlight,
       enableTabIndentation: true,
       HTMLAttributes: {
@@ -167,8 +196,5 @@ function getNoteEditorExtensions() {
     }),
   ];
 }
-
-window.addEventListener("dragover", (e) => e.preventDefault());
-window.addEventListener("drop", (e) => e.preventDefault());
 
 export { editor, getNoteEditorExtensions, initEditor, positionManager };

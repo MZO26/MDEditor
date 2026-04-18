@@ -57,8 +57,11 @@ type AutoScrollOptions = {
   edge?: number;
   maxSpeed?: number;
 };
+type BubbleMenuCommands = (
+  value?: string | undefined,
+) => boolean | void | Promise<void>;
 
-type Theme = "system" | keyof typeof THEME_MAP;
+type Theme = keyof typeof THEME_MAP;
 
 type Code =
   | "github-light"
@@ -88,10 +91,23 @@ type Font =
   | "century"
   | "consolas";
 
+type TitleBarOverlayOptions = {
+  color: string;
+  symbolColor: string;
+  height: number;
+};
+
+type ThemeConfig = {
+  color: string; // background
+  symbolColor: string; // button color
+  isDark: boolean;
+};
+
 export type {
   Actions,
   AutoSaveConfig,
   AutoScrollOptions,
+  BubbleMenuCommands,
   Code,
   CreateNotePayload,
   EditorDoc,
@@ -106,5 +122,7 @@ export type {
   SaveState,
   Settings,
   Theme,
+  ThemeConfig,
+  TitleBarOverlayOptions,
   UpdateNotePayload,
 };

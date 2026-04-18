@@ -1,5 +1,5 @@
 :root[data-code-theme="github-dark"] {
-  --hljs-bg: #0d1117;
+  --hljs-bg: transparent;
   --hljs-fg: #c9d1d9;
   --hljs-keyword: #ff7b72;
   --hljs-entity: #d2a8ff;
@@ -17,7 +17,7 @@
 }
 
 :root[data-code-theme="github-light"] {
-  --hljs-bg: #ffffff;
+  --hljs-bg: transparent;
   --hljs-fg: #24292e;
 
   --hljs-keyword: #d73a49;

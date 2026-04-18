@@ -1,7 +1,8 @@
-import { dialog, ipcMain, nativeTheme } from "electron";
+import { app, BrowserWindow, ipcMain, nativeTheme } from "electron";
 import fs from "node:fs";
-import { THEME_MAP } from "../src/constants/themes";
-import type { Theme } from "../src/shared/types";
+import path from "node:path";
+import { THEME_DATA } from "../src/constants/themes";
+import type { Theme, ThemeConfig } from "../src/shared/types";
 import {
   validateCreate,
   validateId,
@@ -10,6 +11,7 @@ import {
 } from "../src/shared/validation";
 import db from "./database";
 import { store } from "./store";
+import { getTitleBarOverlay } from "./titlebar";
 
 function registerIpcHandlers() {
   ipcMain.handle("get:system-info", () => {
@@ -108,41 +110,49 @@ function registerIpcHandlers() {
   );
 
   ipcMain.handle("set:theme", (_event, theme: Theme) => {
-    if (theme in THEME_MAP) {
-      const validTheme = theme as Theme;
-      nativeTheme.themeSource = THEME_MAP[validTheme];
+    if (theme !== "system" && !(theme in THEME_DATA)) {
+      return { success: false, message: "Invalid theme" };
+    }
+    if (theme === "system") {
+      nativeTheme.themeSource = "system";
+      const activeTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
+      BrowserWindow.getAllWindows().forEach((win) => {
+        win.setTitleBarOverlay(getTitleBarOverlay(activeTheme));
+      });
+      return { success: true };
+    }
+    if (theme in THEME_DATA) {
+      const validTheme = theme as keyof typeof THEME_DATA;
+      const selectedTheme = THEME_DATA[validTheme] as ThemeConfig;
+      nativeTheme.themeSource = selectedTheme.isDark ? "dark" : "light";
+      const overlayOptions = getTitleBarOverlay(validTheme);
+      BrowserWindow.getAllWindows().forEach((win) => {
+        win.setTitleBarOverlay(overlayOptions);
+      });
       return { success: true };
     }
     return { success: false, message: "[IPC] Invalid theme" };
   });
 
-  ipcMain.handle("file-open", async () => {
-    const { canceled, filePaths } = await dialog.showOpenDialog({
-      properties: ["openFile"],
-      filters: [{ name: "Markdown", extensions: ["md", "txt"] }],
-    });
-
-    if (!canceled && filePaths.length > 0) {
-      const inhalt = fs.readFileSync(filePaths[0]!, "utf-8");
-      return { inhalt, pfad: filePaths[0]! };
-    }
-    return null;
-  });
-
-  ipcMain.handle("file-save", async (_event, { pfad, inhalt, win }) => {
-    if (pfad) {
-      fs.writeFileSync(pfad, inhalt, "utf-8");
-      return true;
-    } else {
-      const { canceled, filePath } = await dialog.showSaveDialog(win, {
-        filters: [{ name: "Markdown", extensions: ["md"] }],
-      });
-      if (!canceled && filePath) {
-        fs.writeFileSync(filePath, inhalt, "utf-8");
-        return filePath;
+  ipcMain.handle("saveImage", async (_event, imageData, extension) => {
+    try {
+      const userDataPath = app.getPath("userData");
+      const imagesFolder = path.join(userDataPath, "editor-images");
+      // Create the folder if it doesn't exist yet
+      if (!fs.existsSync(imagesFolder)) {
+        fs.mkdirSync(imagesFolder, { recursive: true }); // to guarantee folder exists
       }
+      const fileName = `${crypto.randomUUID()}.${extension}`;
+      const filePath = path.join(imagesFolder, fileName);
+      const buffer = Buffer.from(imageData); // converts frontend ArrayBuffer to NodeJS Buffer Format so file system can understand it
+      // 4. Save the file to the hard drive
+      fs.writeFileSync(filePath, buffer);
+      // 5. Return the local file path to Tiptap
+      return { success: true, imageSrc: `appimg:///${fileName}` };
+    } catch (error) {
+      console.error("Failed to save image:", error);
+      return { success: false, error };
     }
-    return false;
   });
 
   ipcMain.handle("electron-store:get", async (_event, key: string) => {

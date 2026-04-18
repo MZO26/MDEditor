@@ -32,11 +32,14 @@ declare global {
       }) => Promise<string | boolean>;
     };
     electronAPI: {
-      getTheme: () => Promise<IpcResponse<Theme>>;
       setTheme: (theme: Theme) => Promise<IpcResponse<Theme>>;
       onThemeChanged: (
         callback: (response: IpcResponse<Theme>) => void,
       ) => void;
+      saveImage: (
+        imageData: Uint8Array,
+        extension: string,
+      ) => Promise<{ success: boolean; imageSrc: string }>;
     };
     noteAPI: {
       getAll: () => Promise<NotesReponse>;

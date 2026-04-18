@@ -1,9 +1,12 @@
 .ProseMirror {
-  --zoom: 100;
-  font-size: calc(16px * (var(--zoom) / 100));
+  --editor-font-size: 0.875em;
+  font-size: var(--editor-font-size);
+  line-height: 1.5;
   color: var(--text-main);
   outline: none;
-  transition: font-size 0.2s ease-out;
+  transition:
+    font-size 0.2s ease-out,
+    line-height 0.2s ease-out;
   position: relative;
 }
 
@@ -38,13 +41,34 @@
   position: absolute;
   top: 0;
   left: 0;
-  gap: 4px;
   padding: 4px;
   background-color: var(--bg-sidebar);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: var(--shadow);
   z-index: 50;
+}
+
+.tool-group {
+  display: none;
+  gap: 4px;
+  align-items: center;
+}
+
+.bubble-menu[data-active-menu="text"] .text-tools {
+  display: flex;
+}
+
+.bubble-menu[data-active-menu="codeBlock"] .code-block-tools {
+  display: flex;
+}
+
+.bubble-menu[data-active-menu="table"] .table-tools {
+  display: flex;
+}
+
+.bubble-menu[data-active-menu="inlineCode"] .inline-code-tools {
+  display: flex;
 }
 
 .bubble-menu .menu-btn {
@@ -73,12 +97,72 @@
   color: var(--tag-color);
 }
 
+.select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.select-wrapper::after {
+  content: "";
+  position: absolute;
+  right: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 25px;
+  width: 1px;
+  background-color: var(--text-main);
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.select-icon {
+  position: absolute;
+  right: 8px;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  color: var(--text-main);
+}
+
+.bubble-menu select {
+  appearance: none;
+  height: 28px;
+  width: 85px;
+  padding: 0 10px;
+  margin: 0 5px;
+  background-color: transparent;
+  color: var(--text-main);
+  border: none;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.875em;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.bubble-menu select:hover,
+.bubble-menu select:focus {
+  background: var(--bg-button);
+  border-color: var(--border-color);
+  color: var(--text-main);
+  box-shadow: var(--shadow);
+}
+
+.bubble-menu select option {
+  background-color: var(--bg-sidebar);
+  color: var(--text-main);
+  padding: 4px;
+}
+
 .ProseMirror h1 {
-  font-size: 2.25em;
-  line-height: 1.2;
+  font-size: 2.2em;
+  line-height: 1;
   font-weight: 800;
   margin-top: 0;
-  margin-bottom: 0.67em;
 }
 
 .ProseMirror h2 {
@@ -86,7 +170,6 @@
   line-height: 1.25;
   font-weight: 700;
   margin-top: 0;
-  margin-bottom: 0.6em;
   letter-spacing: -0.01em;
 }
 
@@ -95,7 +178,16 @@
   line-height: 1.4;
   font-weight: 600;
   margin-top: 0;
-  margin-bottom: 0.5em;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
+  padding: 12px 2px;
+  border-radius: 6px;
+  outline: 1px solid transparent;
+  box-shadow: 0 0 0 0 transparent;
+  background-color: transparent;
 }
 
 .ProseMirror p {
@@ -384,21 +476,27 @@
   color: var(--text-main);
 }
 
-.ProseMirror-gapcursor {
+.ProseMirror .ProseMirror-gapcursor {
   display: none;
   pointer-events: none;
   position: absolute;
 }
 
-.ProseMirror-gapcursor:after {
+.ProseMirror .ProseMirror-gapcursor::after {
   content: "";
   display: block;
   position: absolute;
   top: -2px;
   width: 1px;
   height: 1.5em;
-  background: var(--accent-primary, #000);
+  background: var(--accent-primary);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
   animation: gap-cursor-blink 1.1s steps(2, start) infinite;
+}
+
+.ProseMirror.ProseMirror-focused .ProseMirror-gapcursor {
+  display: block;
 }
 
 @keyframes gap-cursor-blink {
@@ -423,16 +521,96 @@
 }
 
 .ProseMirror pre {
+  position: relative;
   background: var(--bg-sidebar);
   border: 1px solid var(--code-shell-border);
   border-radius: 0.5em;
   color: var(--hljs-fg);
   box-shadow: var(--shadow);
-  padding: 1em;
+  padding: 1rem;
   margin: 1em 0;
   font-family: monospace;
   white-space: pre-wrap;
   overflow-wrap: break-word;
+  transition: padding-top 0.2s ease-in-out;
+}
+
+pre[data-language="true"] {
+  padding-top: 2.5rem;
+}
+
+pre[data-language="true"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2rem;
+  background-color: var(--bg-sidebar);
+  box-shadow: var(--shadow);
+  z-index: 1;
+}
+
+pre[data-language="true"] code::before {
+  position: absolute;
+  top: 0;
+  right: 1rem;
+  height: 2rem;
+  line-height: 2rem;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  user-select: none;
+  z-index: 2;
+}
+
+pre[data-language="true"] code[class~="language-html"]::before {
+  content: "HTML";
+}
+pre[data-language="true"] code[class~="language-css"]::before {
+  content: "CSS";
+}
+
+pre[data-language="true"] code[class~="language-javascript"]::before,
+pre[data-language="true"] code[class~="language-js"]::before {
+  content: "JavaScript";
+}
+
+pre[data-language="true"] code[class~="language-typescript"]::before,
+pre[data-language="true"] code[class~="language-ts"]::before {
+  content: "TypeScript";
+}
+
+pre[data-language="true"] code[class~="language-python"]::before {
+  content: "Python";
+}
+pre[data-language="true"] code[class~="language-csharp"]::before {
+  content: "C#";
+}
+pre[data-language="true"] code[class~="language-java"]::before {
+  content: "Java";
+}
+pre[data-language="true"] code[class~="language-cpp"]::before {
+  content: "C++";
+}
+pre[data-language="true"] code[class~="language-rust"]::before {
+  content: "Rust";
+}
+
+pre[data-language="true"] code[class~="language-shell"]::before {
+  content: "Shell";
+}
+pre[data-language="true"] code[class~="language-powershell"]::before {
+  content: "PowerShell";
+}
+pre[data-language="true"] code[class~="language-sql"]::before {
+  content: "SQL";
+}
+pre[data-language="true"] code[class~="language-json"]::before {
+  content: "JSON";
 }
 
 .ProseMirror pre code {
@@ -451,6 +629,34 @@
   margin: 1em 0;
 }
 
+.ProseMirror [data-resize-handle] {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: var(--bg-sidebar);
+  border: 2px solid var(--border-color);
+  z-index: 20;
+  transition:
+    background-color 0.2s ease,
+    opacity 0.2s ease-in-out;
+}
+
+.ProseMirror *:has(> [data-resize-handle]):hover > [data-resize-handle] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ProseMirror [data-resize-handle]:hover {
+  background-color: var(--accent-hover);
+}
+
+.ProseMirror .is-resizing [data-resize-handle] {
+  opacity: 1;
+  pointer-events: auto;
+}
 .ProseMirror li {
   list-style-position: inside;
 }
@@ -504,4 +710,52 @@ ul[data-type="taskList"]
   > label
   input[type="checkbox"] {
   accent-color: var(--tag-color);
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+  opacity: 0.72;
+  float: left;
+  height: 0;
+  pointer-events: none;
+  font-style: italic;
+}
+
+.ProseMirror h1.is-empty::before {
+  opacity: 0.38;
+  font-style: normal;
+}
+
+.ProseMirror .editor-selection-blur {
+  background: var(--accent-hover);
+  color: inherit;
+  border-radius: 3px;
+  box-shadow: var(--shadow);
+}
+
+.ProseMirror mark.editor-selection-blur,
+.ProseMirror code.editor-selection-blur,
+.ProseMirror .editor-selection-blur strong,
+.ProseMirror .editor-selection-blur em {
+  background: var(--accent-hover);
+}
+
+.ProseMirror .editor-dropcursor {
+  position: relative;
+  background: var(--accent-primary);
+  width: 2px;
+  border-radius: 999px;
+}
+
+.ProseMirror .editor-dropcursor::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: 50%;
+  width: 8px;
+  transform: translateX(-50%);
+  background: rgba(82, 82, 91, 0.12);
+  border-radius: 999px;
 }

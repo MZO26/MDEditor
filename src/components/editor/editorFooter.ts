@@ -1,3 +1,4 @@
+import type { Editor } from "@tiptap/core";
 import { debounce, getElement, getElementOrNull } from "../../utils/helpers";
 
 function updateDateTime() {
@@ -21,18 +22,16 @@ function updateDateTime() {
   }
 }
 
-const updateStats = debounce((text: string) => {
-  const chars = text.match(/[\p{L}\p{N}]/gu);
-  const charCount = chars ? chars.length : 0;
-  const words = text.match(/[\p{L}\d]+(?:['’]\p{L}+)*/gu);
-  const wordCount = words ? words.length : 0;
+const updateStats = debounce((editor: Editor) => {
+  const charCount = editor.storage.characterCount.characters();
+  const wordCount = editor.storage.characterCount.words();
 
-  const charCountEl = getElementOrNull<HTMLDivElement>("#char-count");
+  const charCountEl = getElement<HTMLDivElement>("#char-count");
   if (charCountEl) {
     charCountEl.innerText = charCount.toString();
   }
 
-  const wordCountEl = getElementOrNull<HTMLDivElement>("#word-count");
+  const wordCountEl = getElement<HTMLDivElement>("#word-count");
   if (wordCountEl) {
     if (wordCount === 1) {
       wordCountEl.innerText = "1 word";
@@ -53,16 +52,18 @@ function setupZoomBar() {
   const MAX_ZOOM = 150;
   const ZOOM_STEP = 12.5;
 
+  const BASE_FONT_SIZE = 14; // px
+
   const applyZoom = (newZoom: number) => {
     currentZoom = Math.max(MIN_ZOOM, Math.min(newZoom, MAX_ZOOM));
 
     const editorEl = getElementOrNull<HTMLElement>("#editor .ProseMirror");
     if (editorEl) {
-      editorEl.style.setProperty("--zoom", currentZoom.toString());
+      const scaledSize = (BASE_FONT_SIZE * currentZoom) / 100;
+      editorEl.style.setProperty("--editor-font-size", `${scaledSize}px`);
     }
 
-    const percentage = Math.round(currentZoom);
-    label.innerText = `${percentage}%`;
+    label.innerText = `${Math.round(currentZoom)}%`;
   };
   btnIn.addEventListener("mousedown", (e) => {
     e.preventDefault();

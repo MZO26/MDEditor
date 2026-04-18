@@ -35,7 +35,7 @@ async function noteItemHandler(
     }
     setValue(StorageKeys.NOTE_ID, noteID);
     viewNote(result.data, editor);
-    updateStats(result.data.plainText);
+    updateStats(editor);
     console.log("Viewing note with content: ", result.data.snippet);
     setActiveItem(noteItem, container);
   } catch (error) {
