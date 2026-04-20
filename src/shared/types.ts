@@ -1,7 +1,8 @@
 import type { Editor } from "@tiptap/core";
+import type { Settings } from "http2";
 import type z from "zod";
-import type { THEME_MAP } from "../constants/themes";
 import type { EditorDocSchema } from "./schemas/editorSchema";
+import type { ImagePayloadSchema } from "./schemas/imageSchema";
 import type {
   NoteResponseSchema,
   NotesResponseSchema,
@@ -12,7 +13,6 @@ import type {
   NoteSchema,
   UpdateNotePayloadSchema,
 } from "./schemas/noteSchema";
-import type { SettingsSchema } from "./schemas/settingsSchema";
 
 interface AutoSaveConfig {
   editor: Editor;
@@ -48,7 +48,7 @@ type Note = z.infer<typeof NoteSchema>;
 type UpdateNotePayload = z.infer<typeof UpdateNotePayloadSchema>;
 type CreateNotePayload = z.infer<typeof CreateNotePayloadSchema>;
 type EditorDoc = z.infer<typeof EditorDocSchema>;
-type Settings = z.infer<typeof SettingsSchema>;
+type ImagePayload = z.infer<typeof ImagePayloadSchema>;
 type Result<T> =
   | { success: true; data: T }
   | { success: false; message: string };
@@ -61,21 +61,13 @@ type BubbleMenuCommands = (
   value?: string | undefined,
 ) => boolean | void | Promise<void>;
 
-type Theme = keyof typeof THEME_MAP;
-
 type Code =
   | "github-light"
   | "github-dark"
   | "atom-one-light"
   | "atom-one-dark"
-  | "dracula"
-  | "monokai"
-  | "vs2015"
-  | "zenburn"
-  | "a11y-dark"
-  | "a11y-light"
-  | "xcode"
-  | "docco";
+  | "everforest-dark"
+  | "everforest-light";
 
 type Font =
   | "system"
@@ -103,6 +95,8 @@ type ThemeConfig = {
   isDark: boolean;
 };
 
+type ResolvedTheme = "light" | "dark";
+
 export type {
   Actions,
   AutoSaveConfig,
@@ -113,15 +107,16 @@ export type {
   EditorDoc,
   Font,
   FTSRows,
+  ImagePayload,
   Note,
   NoteItemElements,
   NoteResponse,
   NotesReponse,
+  ResolvedTheme,
   Result,
   SavedPosition,
   SaveState,
   Settings,
-  Theme,
   ThemeConfig,
   TitleBarOverlayOptions,
   UpdateNotePayload,

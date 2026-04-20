@@ -1,40 +1,21 @@
 import z from "zod";
+import { ImagePayloadSchema } from "./schemas/imageSchema";
 import {
   CreateNotePayloadSchema,
   IdSchema,
   SearchSchema,
   UpdateNotePayloadSchema,
 } from "./schemas/noteSchema";
+import { StoreSchema } from "./schemas/storeSchema";
 
-type ValidationResult<T> =
-  | {
-      success: true;
-      data: T;
-    }
-  | {
-      success: false;
-      message: string;
-      errors: Record<string, string[] | undefined>;
-    };
-
-function validation<T extends z.ZodType>(
-  schema: T,
-  payload: unknown,
-): ValidationResult<z.output<T>> {
+function validation<T>(schema: z.ZodType<T>, payload: unknown): T {
   const validation = schema.safeParse(payload);
   if (!validation.success) {
     console.error("Validation failed:", z.treeifyError(validation.error));
 
-    return {
-      success: false,
-      message: "Invalid data provided",
-      errors: z.flattenError(validation.error).fieldErrors,
-    };
+    throw validation.error;
   }
-  return {
-    success: true as const,
-    data: validation.data,
-  };
+  return validation.data;
 }
 
 function validateUpdate(payload: unknown) {
@@ -53,4 +34,31 @@ function validateSearch(searchTerm: unknown, limit: unknown) {
   return validation(SearchSchema, { searchTerm, limit });
 }
 
-export { validateCreate, validateId, validateSearch, validateUpdate };
+function validateStore(key: unknown, val: unknown) {
+  const keyValidation = StoreSchema.keyof().safeParse(key);
+  if (!keyValidation.success) {
+    console.error("Validation failed:", z.treeifyError(keyValidation.error));
+    throw keyValidation.error;
+  }
+  const safeKey = keyValidation.data;
+  const validObject = validation(StoreSchema.partial(), { [safeKey]: val });
+  return validObject[safeKey];
+}
+
+function validateTheme(theme: unknown) {
+  return validation(StoreSchema.shape.theme, theme);
+}
+
+function validateImage(payload: unknown) {
+  return validation(ImagePayloadSchema, payload);
+}
+
+export {
+  validateCreate,
+  validateId,
+  validateImage,
+  validateSearch,
+  validateStore,
+  validateTheme,
+  validateUpdate,
+};

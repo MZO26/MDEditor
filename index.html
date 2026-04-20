@@ -44,81 +44,44 @@
           <div class="category-container">
             <div class="categoryItem">
               <i data-lucide="notebook-pen"></i>
-              <span>All Notes</span>
             </div>
             <div class="categoryItem">
-              <i data-lucide="star"></i>
-              <span>Favorites</span>
+              <i data-lucide="notebook-pen"></i>
             </div>
             <div class="categoryItem">
-              <i data-lucide="history"></i>
-              <span>Last viewed</span>
-            </div>
-            <div class="categoryItem">
-              <i data-lucide="folder"></i>
-              <span>Open Tasks</span>
-            </div>
-            <hr class="sidebar-section" />
-            <div class="categoryItem">
-              <i data-lucide="folder"></i>
-              <span>Code</span>
-            </div>
-            <div class="categoryItem">
-              <i data-lucide="folder"></i>
-              <span>Media</span>
-            </div>
-            <div class="categoryItem">
-              <i data-lucide="folder"></i>
-              <span>Untagged</span>
-            </div>
-            <div class="categoryItem">
-              <i data-lucide="folder"></i>
-              <span>Drafts</span>
-            </div>
-            <hr class="sidebar-section" />
-            <div class="categoryItem">
-              <i data-lucide="hash"></i>
-              <span>#tag1</span>
-            </div>
-            <div class="categoryItem">
-              <i data-lucide="hash"></i>
-              <span>#tag2</span>
-            </div>
-            <div class="categoryItem">
-              <i data-lucide="hash"></i>
-              <span>#tag3</span>
+              <i data-lucide="notebook-pen"></i>
             </div>
           </div>
           <div class="sidebar-footer">
             <button class="settings-btn">
               <i data-lucide="sliders-horizontal"></i>
             </button>
+            <button class="collapse-btn">
+              <i data-lucide="arrow-left-from-line" class="collapse-icon"></i>
+            </button>
           </div>
         </div>
 
         <div class="sidebar-notes">
           <div class="sidebar-header">
-            <div class="note-info">
+            <div class="input-wrapper">
+              <i data-lucide="search" class="search-icon"></i>
               <input
                 type="search"
                 id="searchInput"
+                class="search-input"
                 placeholder="search notes or tags"
               />
             </div>
-            <div class="sidebar-header-btns">
-              <button class="add-note-btn" title="add new note">
-                <i data-lucide="plus"></i>
-              </button>
-            </div>
-          </div>
-          <div class="notes-container"></div>
-          <div class="sidebar-footer">
             <button class="bookmark-btn">
               <i data-lucide="bookmark"></i>
             </button>
-            <button class="search-btn">
-              <i data-lucide="search"></i>
+            <button class="add-note-btn" title="add new note">
+              <i data-lucide="plus"></i>
             </button>
+          </div>
+          <div class="notes-container"></div>
+          <div class="sidebar-footer">
             <button class="export-btn">
               <i data-lucide="download"></i>
             </button>
@@ -355,13 +318,12 @@
             Theme:
             <div class="theme-selector">
               <select id="theme-dropdown" class="theme-select">
-                <option value="system">System Default</option>
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
                 <option value="dark-glass">Dark-Glass</option>
                 <option value="light-glass">Light-Glass</option>
                 <option value="paper">Paper</option>
-                <option value="cappucino">Cappucino</option>
+                <option value="cappuccino">Cappucino</option>
                 <option value="rainy-slate">Rainy-Slate</option>
                 <option value="night-pine">Night-Pine</option>
                 <option value="ashfall">Ashfall</option>
@@ -373,7 +335,6 @@
             Font Family:
             <div class="theme-selector">
               <select id="font-dropdown" class="theme-select">
-                <option value="system">System Default</option>
                 <option value="arial">Arial</option>
                 <option value="verdana">Verdana</option>
                 <option value="trebuchet">Trebuchet</option>
@@ -392,50 +353,14 @@
             Code-Block Theme:
             <div class="theme-selector">
               <select id="code-theme-dropdown" class="theme-select">
-                <option value="system">System Default</option>
-                <option value="atom-one-dark">Atom One Dark</option>
-                <option value="atom-one-light">Atom One Light</option>
-                <option value="dracula">Dracula</option>
-                <option value="monokai">Monokai</option>
-                <option value="vs2015">vs2015</option>
-                <option value="zenburn">Zenburn</option>
-                <option value="a11y-dark">a11y dark</option>
-                <option value="a11y-light">a11y light</option>
-                <option value="docco">Docco</option>
-                <option value="xcode">Xcode</option>
+                <option value="focus">Focus</option>
+                <option value="balanced">Balanced</option>
+                <option value="eye-comfort">Eye Comfort</option>
               </select>
             </div>
           </div>
-          <div class="settings-item">Highlighter Color</div>
-          <div class="settings-item">Line Height</div>
         </div>
-        <div class="settings-panel" id="storage-settings">
-          <h2 class="modal-heading">Storage</h2>
-          <div class="settings-item">Database location</div>
-          <div class="settings-item">Backup Options</div>
-          <div class="settings-item">Default Export Format</div>
-          <div class="settings-item">Autosave</div>
-          <div class="settings-item">Trash Retention</div>
-        </div>
-        <div class="settings-panel" id="tags-search-settings">
-          <h2 class="modal-heading">Tags & Search</h2>
-          <div class="settings-item">Default Sort Order</div>
-          <div class="settings-item">Search Settings</div>
-          <div class="settings-item">Filter Options</div>
-        </div>
-        <div class="settings-panel" id="advanced-settings">
-          <h2 class="modal-heading">Advanced</h2>
-          <div class="settings-item">Custom Keybindings</div>
-          <div class="settings-item">Start options</div>
-          <div class="settings-item">Reset Settings</div>
-          <div class="settings-item">Markdown Auto Formatting</div>
-        </div>
-        <div class="settings-panel" id="about-settings">
-          <h2 class="modal-heading">About</h2>
-          <div class="settings-item">App Version</div>
-          <div class="settings-item">Check for Updates</div>
-          <div class="settings-item">Licenses</div>
-        </div>
+        <div class="settings-panel" id="storage-settings"></div>
       </div>
     </div>
     <script type="module" src="src/app.ts" defer></script>

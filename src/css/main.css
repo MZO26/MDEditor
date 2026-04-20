@@ -111,13 +111,13 @@
   width: 100%;
   height: 100%;
   grid-template-rows: minmax(29px, 29px) minmax(120px, 1fr);
-  grid-template-columns: minmax(180px, 450px) minmax(0, 1fr);
+  grid-template-columns: minmax(70px, 340px) minmax(0, 1fr);
   transition: grid-template-columns 0.3s ease-in-out;
   overflow: hidden;
 }
 
 .app-container.collapsed {
-  grid-template-columns: minmax(180px, 180px) minmax(0, 1fr);
+  grid-template-columns: minmax(75px, 75px) minmax(0, 1fr);
 }
 
 .editor-container {

@@ -90,7 +90,7 @@
     0 0 0 1px rgba(168, 157, 142, 0.85), 0 1px 3px rgba(43, 39, 35, 0.08);
 }
 
-[data-theme="cappucino"] {
+[data-theme="cappuccino"] {
   --bg-editor: #f2ebe2;
   --bg-sidebar: #e5dbcf;
   --bg-button: #d8ccbe;

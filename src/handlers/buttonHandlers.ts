@@ -48,6 +48,7 @@ async function deleteBtnHandler(
       showToast(result.message);
       return;
     }
+    deleteBtn.disabled = true;
     noteElement.remove();
     const noteID = getValue(StorageKeys.NOTE_ID);
     if (noteID === id) {
@@ -58,7 +59,6 @@ async function deleteBtnHandler(
     handleEditorEmptyState();
   } catch (error) {
     console.error("(btnHandler): Failed to delete note: ", error);
-    return;
   }
 }
 

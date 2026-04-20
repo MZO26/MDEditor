@@ -7,12 +7,12 @@ import {
 } from "./components/sidebar2/sidebarNotes";
 import { handleSearchInput } from "./features/search/searchInputHandler";
 import { addNoteBtnHandler, closeModal } from "./handlers/buttonHandlers";
-import {
-  getSelectedCodeTheme,
-  setSelectedCodeTheme,
-} from "./settings/appearance/code";
 import { getSelectedFont, setSelectedFont } from "./settings/appearance/font";
-import { applyAppTheme, setAppTheme } from "./settings/appearance/theme";
+import {
+  applyAppTheme,
+  setAppTheme,
+  updateCodeTheme,
+} from "./settings/appearance/theme";
 import { openModal } from "./settings/settings";
 import { setValue, StorageKeys } from "./utils/cache";
 import { debounce, getElement } from "./utils/helpers";
@@ -48,8 +48,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     getSelectedFont(fontSelect);
   }
   if (codeThemeSelect) {
-    codeThemeSelect.addEventListener("change", setSelectedCodeTheme);
-    getSelectedCodeTheme(codeThemeSelect);
+    codeThemeSelect.addEventListener("change", async (_event: Event) => {
+      await updateCodeTheme(codeThemeSelect);
+    });
   }
   const settingsBtn = getElement<HTMLButtonElement>(".settings-btn");
   settingsBtn.addEventListener("click", () => {
@@ -59,20 +60,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   const closeModalBtn = getElement<HTMLButtonElement>(".closeModal-btn");
   closeModalBtn.addEventListener("click", closeModal);
 
-  document.querySelectorAll(".categoryItem").forEach((item) => {
-    item.addEventListener("click", () => {
-      const sidebar = getElement<HTMLDivElement>(".sidebar-notes");
-      const appContainer = getElement<HTMLDivElement>(".app-container");
-      const editor = getElement<HTMLDivElement>("#editor");
-      sidebar.classList.toggle("collapsed");
-      appContainer.classList.toggle("collapsed");
-      editor.classList.toggle("collapsed");
-      if (sidebar.classList.contains("collapsed")) {
-        setValue(StorageKeys.SIDEBAR_COLLAPSED, true);
-      } else {
-        setValue(StorageKeys.SIDEBAR_COLLAPSED, false);
-      }
-    });
+  const collapseBtn = getElement<HTMLButtonElement>(".collapse-btn");
+  collapseBtn.addEventListener("click", () => {
+    const sidebar = getElement<HTMLDivElement>(".sidebar-notes");
+    const appContainer = getElement<HTMLDivElement>(".app-container");
+    const editor = getElement<HTMLDivElement>("#editor");
+    sidebar.classList.toggle("collapsed");
+    appContainer.classList.toggle("collapsed");
+    editor.classList.toggle("collapsed");
+    collapseBtn.classList.toggle("collapsed");
+    if (sidebar.classList.contains("collapsed")) {
+      setValue(StorageKeys.SIDEBAR_COLLAPSED, true);
+    } else {
+      setValue(StorageKeys.SIDEBAR_COLLAPSED, false);
+    }
   });
-  setInterval(updateDateTime, 60000);
 });
+setInterval(updateDateTime, 60000);

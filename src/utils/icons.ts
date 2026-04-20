@@ -1,5 +1,6 @@
 import {
   ALargeSmall,
+  ArrowLeftFromLine,
   BetweenHorizontalEnd,
   BetweenHorizontalStart,
   BetweenVerticalEnd,
@@ -101,6 +102,7 @@ function renderIcons(scope: Document | HTMLElement = document): void {
       BetweenVerticalStart,
       CopyPlus,
       Repeat,
+      ArrowLeftFromLine,
     },
     root: scope,
   });

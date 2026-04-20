@@ -1,4 +1,5 @@
 import type { Editor } from "@tiptap/core";
+import type { ImagePayload } from "../shared/types";
 import { showToast } from "../utils/toast";
 
 async function compressImage(
@@ -68,15 +69,15 @@ function promptImageUpload(editor: Editor) {
         const compressedImage = await compressImage(file);
         const extension = file.type.split("/")[1];
         if (!extension) return;
-        const result = await window.electronAPI.saveImage(
-          compressedImage,
-          extension,
-        );
+        const result = await window.electronAPI.saveImage({
+          imageData: compressedImage,
+          extension: extension as ImagePayload["extension"],
+        });
         if (!result.success) {
           showToast("Error: Could not save image to disk.");
           return;
         }
-        editor.chain().focus().setImage({ src: result.imageSrc }).run();
+        editor.chain().focus().setImage({ src: result.data.imageSrc }).run();
       } catch (error) {
         console.error("Failed to process and insert image:", error);
       }

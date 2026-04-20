@@ -1,9 +1,6 @@
 import BetterSqlite from "better-sqlite3";
 import { app } from "electron";
 import path from "path";
-import { generateSnippet } from "../src/shared/generationHelpers.ts/snippet";
-import { generateTags } from "../src/shared/generationHelpers.ts/tags";
-import { generateTitle } from "../src/shared/generationHelpers.ts/title";
 import { NoteFromDbSchema } from "../src/shared/schemas/noteSchema";
 import type {
   CreateNotePayload,
@@ -11,10 +8,17 @@ import type {
   UpdateNotePayload,
 } from "../src/shared/types";
 import { FTS5 } from "./fts";
+import { getNoteData } from "./generators";
+import { createNoteTransactions, type NoteTransactions } from "./transactions";
 
 class NoteDB {
   private db: BetterSqlite.Database;
+  private transactions: NoteTransactions;
   public search: FTS5;
+  private getAllNotesStmt: BetterSqlite.Statement;
+  private getNoteByIdStmt: BetterSqlite.Statement;
+  private getAllTagsStmt: BetterSqlite.Statement;
+  private getTagsById: BetterSqlite.Statement;
   constructor() {
     const dbPath = path.join(app.getPath("userData"), "notes.db");
     this.db = new BetterSqlite(dbPath);
@@ -23,8 +27,20 @@ class NoteDB {
     this.db.pragma("journal_mode = WAL");
     this.db.pragma("foreign_keys = ON");
     this.createTables();
+    this.transactions = createNoteTransactions(this.db);
     this.search.setupFullTextSearch();
     this.search.populateInitialFTSIndex();
+    // predefined statements to prevent parsing them for every transaction
+    this.getAllNotesStmt = this.db.prepare(
+      "SELECT * FROM notes ORDER BY created_at DESC",
+    );
+    this.getNoteByIdStmt = this.db.prepare("SELECT * FROM notes WHERE id = ?");
+    this.getAllTagsStmt = this.db.prepare(
+      "SELECT note_id, tag_name FROM note_tags",
+    );
+    this.getTagsById = this.db.prepare(
+      "SELECT tag_name FROM note_tags WHERE note_id = ?",
+    );
   }
 
   private createTables() {
@@ -54,112 +70,77 @@ class NoteDB {
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
     let { content, plainText } = payload;
-    const title = generateTitle(plainText);
-    const snippet = generateSnippet(plainText);
-    const tags = generateTags(plainText);
-    const stringifiedContent = JSON.stringify(content);
-    const createTransaction = this.db.transaction((): Note => {
-      const result = this.db
-        .prepare(
-          "INSERT INTO notes (id, title, content, plainText, snippet, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        )
-        .run(id, title, stringifiedContent, plainText, snippet, now, now);
-
-      if (result.changes !== 1) {
-        throw new Error("Failed to create note");
-      }
-      // Save the tags for the note
-      const insertTag = this.db.prepare(
-        "INSERT INTO note_tags (note_id, tag_name) VALUES (?, ?)",
-      );
-      tags.forEach((tag) => {
-        insertTag.run(id, tag);
-      });
-
-      return NoteFromDbSchema.parse({
-        id,
-        title,
-        content: stringifiedContent,
-        plainText,
-        snippet,
-        tags,
-        created_at: now,
-        updated_at: now,
-      });
+    const noteData = getNoteData(content, plainText);
+    const result = this.transactions.safeCreate({
+      id,
+      title: noteData.title,
+      stringifiedContent: noteData.stringifiedContent,
+      snippet: noteData.snippet,
+      tags: noteData.tags,
+      plainText,
+      created_at: now,
+      updated_at: now,
     });
-    // Execute the transaction to insert the note and its tags into the database
-    return createTransaction();
+    return NoteFromDbSchema.parse({
+      ...result,
+      content: noteData.stringifiedContent,
+      tags: noteData.tags,
+    });
   }
 
   update(payload: UpdateNotePayload): Note {
-    const now = new Date().toISOString();
     let { id, content, plainText } = payload;
-    const title = generateTitle(plainText);
-    const snippet = generateSnippet(plainText);
-    const tags = generateTags(plainText);
-    const stringifiedContent = JSON.stringify(content);
-    const updateTransaction = this.db.transaction((): Note => {
-      // Update the note's title and content
-      const result = this.db
-        .prepare(
-          "UPDATE notes SET title = ?, content = ?, plainText = ?, snippet = ?, updated_at = ? WHERE id = ? RETURNING *",
-        )
-        .get(title, stringifiedContent, plainText, snippet, now, id) as Note;
-      if (!result) {
-        throw new Error(`Note not found: ${id}`);
-      }
-      this.db.prepare("DELETE FROM note_tags WHERE note_id = ? ").run(id);
-      const insertTag = this.db.prepare(
-        "INSERT INTO note_tags (note_id, tag_name) VALUES (?, ?)",
-      );
-      tags.forEach((tag) => {
-        insertTag.run(id, tag);
-      });
-      return NoteFromDbSchema.parse({
-        ...result,
-        content: stringifiedContent,
-        tags,
-      });
+    const noteData = getNoteData(content, plainText);
+    const now = new Date().toISOString();
+    const result = this.transactions.safeUpdate({
+      id,
+      title: noteData.title,
+      stringifiedContent: noteData.stringifiedContent,
+      snippet: noteData.snippet,
+      tags: noteData.tags,
+      plainText,
+      updated_at: now,
     });
-    return updateTransaction();
+    return NoteFromDbSchema.parse({
+      ...result,
+      content: noteData.stringifiedContent,
+      tags: noteData.tags,
+    });
   }
 
-  delete(id: string): boolean {
-    const result = this.db.prepare("DELETE FROM notes WHERE id = ?").run(id);
-    return result.changes > 0;
+  delete(id: string): void {
+    const result = this.transactions.safeDelete(id);
+    if (!result) throw new Error("NOT_FOUND");
   }
 
   getAll(): Note[] {
-    const allNotes = this.db
-      .prepare("SELECT * FROM notes ORDER BY created_at DESC")
-      .all() as Note[];
-    if (allNotes.length === 0) return [];
-    const allTags = this.db
-      .prepare("SELECT note_id, tag_name FROM note_tags")
-      .all() as { note_id: string; tag_name: string }[];
+    const result = this.getAllNotesStmt.all() as Note[];
+    if (result.length === 0) return [];
+    const allTags = this.getAllTagsStmt.all() as {
+      note_id: string;
+      tag_name: string;
+    }[];
     const tagMap = new Map<string, string[]>();
     for (const tag of allTags) {
-      if (!tagMap.has(tag.note_id)) {
-        tagMap.set(tag.note_id, []);
-      }
-      tagMap.get(tag.note_id)!.push(tag.tag_name);
+      const existingTags = tagMap.get(tag.note_id) || [];
+      existingTags.push(tag.tag_name);
+      tagMap.set(tag.note_id, existingTags);
     }
-    const result = allNotes.map((note) => {
+    return result.map((note) => {
+      const noteTags = tagMap.get(note.id) || [];
       return NoteFromDbSchema.parse({
         ...note,
-        tags: tagMap.get(note.id) || [],
+        tags: noteTags,
       });
     });
-    return result;
   }
 
   getById(id: string): Note {
-    const note = this.db
-      .prepare("SELECT * FROM notes WHERE id = ?")
-      .get(id) as Note;
-    const tags = this.db
-      .prepare("SELECT tag_name FROM note_tags WHERE note_id = ?")
-      .all(id) as { tag_name: string }[];
+    const note = this.getNoteByIdStmt.get(id) as Note;
+    const tags = this.getTagsById.all(id) as { tag_name: string }[];
+    if (!note) {
+      throw new Error("NOT_FOUND");
+    }
     return NoteFromDbSchema.parse({
       ...note,
       tags: tags.map((t) => t.tag_name),

@@ -2,6 +2,7 @@ export {};
 import {
   IpcResponse,
   type CreateNotePayload,
+  type ImagePayload,
   type NoteResponse,
   type NotesReponse,
   type Theme,
@@ -24,26 +25,18 @@ type IpcResponse<T> =
 
 declare global {
   interface Window {
-    api: {
-      openFile: () => Promise<{ path: string; content: string } | null>;
-      saveFile: (data: {
-        path: string | null;
-        content: string;
-      }) => Promise<string | boolean>;
-    };
     electronAPI: {
       setTheme: (theme: Theme) => Promise<IpcResponse<Theme>>;
       saveImage: (
-        imageData: Uint8Array,
-        extension: string,
-      ) => Promise<{ success: boolean; imageSrc: string }>;
+        payload: ImagePayload,
+      ) => Promise<IpcResponse<{ imageSrc: string }>>;
     };
     noteAPI: {
       getAll: () => Promise<NotesReponse>;
       getById: (id: string) => Promise<NoteResponse>;
       create: (payload: CreateNotePayload) => Promise<NoteResponse>;
       update: (payload: UpdateNotePayload) => Promise<NoteResponse>;
-      delete: (id: string) => Promise<IpcResponse<boolean>>;
+      delete: (id: string) => Promise<IpcResponse<void>>;
       searchNotes: (searchTerm: string, limit: number) => Promise<NotesReponse>;
     };
     storeApi: {
@@ -53,7 +46,7 @@ declare global {
       setSettings: <K extends keyof Settings>(
         key: K,
         value: Settings[K],
-      ) => Promise<IpcResponse<boolean>>;
+      ) => Promise<IpcResponse<Settings[K]>>;
     };
   }
 }

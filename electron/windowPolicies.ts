@@ -1,6 +1,6 @@
 import { shell, type BrowserWindow } from "electron";
 
-function navigationInterceptor(win: BrowserWindow) {
+function navigationHandler(win: BrowserWindow) {
   win.webContents.setWindowOpenHandler(({ url }) => {
     try {
       const parsedUrl = new URL(url);
@@ -14,10 +14,10 @@ function navigationInterceptor(win: BrowserWindow) {
         );
       }
     } catch (error) {
-      console.error(`Blocked malformed URL: ${url}`);
+      console.error(`Blocked URL: ${url}`);
     }
     return { action: "deny" };
   });
 }
 
-export { navigationInterceptor };
+export { navigationHandler };

@@ -1,10 +1,11 @@
 import { nativeTheme } from "electron";
 import { THEME_DATA } from "../src/constants/themes";
-import type { Theme, TitleBarOverlayOptions } from "../src/shared/types";
+import type { AppTheme } from "../src/shared/schemas/storeSchema";
+import type { TitleBarOverlayOptions } from "../src/shared/types";
 
 // updates the title bar overlay accordingly
 function getTitleBarOverlay(
-  themeName: Exclude<Theme, "system">, // exclude for union types (|) and Omit for object types ({})
+  themeName: Exclude<AppTheme, "system">, // exclude for union types (|) and Omit for object types ({})
 ): TitleBarOverlayOptions {
   const theme = THEME_DATA[themeName];
   return {
@@ -15,8 +16,8 @@ function getTitleBarOverlay(
 }
 
 // tells electron if theme is dark or light
-function initTheme(savedTheme: unknown): Exclude<Theme, "system"> {
-  const theme = (savedTheme as Theme) ?? "system";
+function initTheme(savedTheme: unknown): Exclude<AppTheme, "system"> {
+  const theme = (savedTheme as AppTheme) ?? "system";
   if (theme === "system") {
     nativeTheme.themeSource = "system";
     return nativeTheme.shouldUseDarkColors ? "dark" : "light";

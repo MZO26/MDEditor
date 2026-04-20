@@ -1,7 +1,7 @@
 import type { Database as DatabaseType } from "better-sqlite3";
 import { generateFtsQuery } from "../src/shared/generationHelpers.ts/ftsQuery";
 import { NoteFromDbSchema } from "../src/shared/schemas/noteSchema";
-import type { FTSRows } from "../src/shared/types";
+import type { FTSRows, Note } from "../src/shared/types";
 
 class FTS5 {
   private db: DatabaseType;
@@ -68,7 +68,7 @@ class FTS5 {
 `);
   }
 
-  searchNotes(searchTerm: string, limit: number) {
+  searchNotes(searchTerm: string, limit: number): Note[] {
     const ftsQuery = generateFtsQuery(searchTerm);
     const stmt = this.db.prepare<unknown[], FTSRows>(`
     SELECT 
@@ -90,15 +90,14 @@ class FTS5 {
     ORDER BY bm25(notes_fts, 0.0, 10.0, 1.0)
     LIMIT ?
   `);
-    const rows = stmt.all(ftsQuery, limit);
-    const parsedRows = rows.map((row) => {
+    const result = stmt.all(ftsQuery, limit);
+    return result.map((note) => {
       const noteData = {
-        ...row,
-        tags: JSON.parse(row.tags),
+        ...note,
+        tags: JSON.parse(note.tags),
       };
       return NoteFromDbSchema.parse(noteData);
     });
-    return parsedRows;
   }
 }
 

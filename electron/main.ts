@@ -3,13 +3,10 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { registerIpcHandlers } from "./ipcHandlers";
-import {
-  registerProtocolPrivileges,
-  setupLocalImageProtocol,
-} from "./protocol";
+import { registerCustomProtocol, setupLocalImageProtocol } from "./protocol";
 import { store } from "./store";
 import { getTitleBarOverlay, initTheme } from "./titlebar";
-import { navigationInterceptor } from "./windowPolicies";
+import { navigationHandler } from "./windowPolicies";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env["DIST"] = path.join(__dirname, "../dist");
@@ -17,7 +14,7 @@ process.env["VITE_PUBLIC"] = app.isPackaged
   ? process.env["DIST"]
   : path.join(process.env["DIST"], "../public");
 
-registerProtocolPrivileges();
+registerCustomProtocol();
 
 let win: BrowserWindow | null = null;
 
@@ -28,8 +25,6 @@ function createWindow() {
   const activeTheme = initTheme(store.get("theme"));
 
   win = new BrowserWindow({
-    minHeight: 600,
-    minWidth: 1100,
     width: 1100,
     height: 600,
     titleBarStyle: "hidden",
@@ -45,7 +40,7 @@ function createWindow() {
       webSecurity: true,
     },
   });
-  navigationInterceptor(win);
+  navigationHandler(win);
   win.webContents.openDevTools();
   if (process.env["ELECTRON_RENDERER_URL"]) {
     win.loadURL(process.env["ELECTRON_RENDERER_URL"]);

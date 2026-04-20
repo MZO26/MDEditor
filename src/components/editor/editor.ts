@@ -193,6 +193,7 @@ function getNoteEditorExtensions() {
         target: "_blank",
         rel: "noopener noreferrer",
       },
+      validate: (href) => !href.startsWith("appimg://"),
     }),
   ];
 }
