@@ -1,14 +1,14 @@
 import { contextBridge, ipcRenderer } from "electron";
+import type { AppTheme } from "../src/shared/schemas/storeSchema";
 import type {
   CreateNotePayload,
   ImagePayload,
-  Theme,
   UpdateNotePayload,
 } from "../src/shared/types";
 console.log("--- PRELOAD ACTIVE ---");
 
 contextBridge.exposeInMainWorld("electronAPI", {
-  setTheme: (theme: Theme) => ipcRenderer.invoke("set:theme", theme),
+  setTheme: (theme: AppTheme) => ipcRenderer.invoke("set:theme", theme),
   saveImage: (payload: ImagePayload) =>
     ipcRenderer.invoke("saveImage", payload),
 });

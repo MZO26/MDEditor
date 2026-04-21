@@ -20,33 +20,26 @@ const applyAppTheme = async (
   selectElement: HTMLSelectElement,
   themeOverride?: AppTheme,
 ) => {
-  try {
-    const codeThemeSelect = getElement<HTMLSelectElement>(
-      "#code-theme-dropdown",
-    );
-    let theme: AppTheme;
-    if (themeOverride) {
-      theme = themeOverride; // theme override
-    } else {
-      // fallback reading from store
-      const result = await window.storeApi.getSettings("theme");
-      theme = result.success ? result.data : "system";
-    }
-    const resolvedTheme = resolveTheme(theme);
-    document.documentElement.setAttribute(
-      "data-theme",
-      theme === "system" ? resolvedTheme : theme,
-    ); // set selected theme as background and fallback for system
-    if (selectElement) {
-      selectElement.value = theme; // update select value to selected theme
-    }
-    await window.electronAPI.setTheme(theme); // api call for theme to resolve electrons internal theme
-    updateCodeTheme(codeThemeSelect);
-    await window.storeApi.setSettings("theme", theme);
-    showToast(`Set theme: ${theme}`);
-  } catch (error) {
-    console.error("Failed to apply theme: ", error);
+  const codeThemeSelect = getElement<HTMLSelectElement>("#code-theme-dropdown");
+  let theme: AppTheme;
+  if (themeOverride) {
+    theme = themeOverride; // theme override
+  } else {
+    // fallback reading from store
+    const response = await window.storeApi.getSettings("theme");
+    theme = response.success ? response.data : "system";
   }
+  theme === "system" ? resolveTheme(theme) : theme;
+  document.documentElement.setAttribute("data-theme", theme); // set selected theme as background and fallback for system
+  if (selectElement) {
+    selectElement.value = theme; // update select value to selected theme
+  }
+  const preference = setCodeTheme(codeThemeSelect);
+  await Promise.all([
+    window.electronAPI.setTheme(theme), // api call for theme to resolve electrons internal theme
+    window.storeApi.setSettings("theme", theme),
+    window.storeApi.setSettings("code-theme", preference),
+  ]);
 };
 
 function getDefaultCodeTheme(
@@ -59,31 +52,31 @@ function getDefaultCodeTheme(
     preference,
     codeTheme:
       CODE_THEME_MAP[preference]?.[resolvedTheme] ??
-      CODE_THEME_MAP["Balanced"]?.[resolvedTheme],
+      CODE_THEME_MAP["balanced"]?.[resolvedTheme],
   };
 }
 
-async function updateCodeTheme(selectElement: HTMLSelectElement) {
+function setCodeTheme(selectElement: HTMLSelectElement): CodeThemePreference {
   const theme = document.documentElement.getAttribute("data-theme") as AppTheme;
   const resolvedTheme = resolveTheme(theme);
   const { preference, codeTheme } = getDefaultCodeTheme(
     selectElement,
     resolvedTheme,
   );
-  document.documentElement.setAttribute("code-theme", codeTheme);
-  await window.storeApi.setSettings("code-theme", preference);
+  document.documentElement.setAttribute("data-code-theme", codeTheme);
+  return preference;
 }
 
 const setAppTheme = async (event: Event) => {
+  const selectElement = event.currentTarget as HTMLSelectElement;
+  const newTheme = selectElement.value as AppTheme;
+  // sets the theme in the main process, which will trigger the theme-changed event
   try {
-    const selectElement = event.currentTarget as HTMLSelectElement;
-    const newTheme = selectElement.value as AppTheme;
-    // sets the theme in the main process, which will trigger the theme-changed event
     await applyAppTheme(selectElement, newTheme);
+    showToast(`Set app theme to: ${newTheme}`);
   } catch (error) {
-    console.error("Failed to get current theme:", error);
-    return;
+    showToast("Unable to set app theme");
   }
 };
 
-export { applyAppTheme, resolveTheme, setAppTheme, updateCodeTheme };
+export { applyAppTheme, resolveTheme, setAppTheme, setCodeTheme };

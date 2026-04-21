@@ -15,23 +15,18 @@ async function addNoteBtnHandler() {
   const container = getElement(".notes-container");
   const activeID = getValue(StorageKeys.NOTE_ID);
   if (activeID) removeValue(StorageKeys.NOTE_ID);
-  try {
-    const payload = createNotePayload();
-    const result = await createNote(payload);
-    console.log("new note created: ", result);
-    showToast("New note created!");
-    if (!result.success) {
-      showToast(result.message);
-      return;
-    }
-    if (editor) {
-      const noteElement = addOneNoteToList(result.data);
-      handleEditorEmptyState(result.data.id);
-      if (noteElement) setActiveItem(noteElement, container);
-      viewNote(result.data, editor);
-    }
-  } catch (error) {
-    console.error("(btnHandler): Failed to add a new note: ", error);
+  const payload = createNotePayload();
+  const response = await createNote(payload);
+  showToast("New note created!");
+  if (!response.success) {
+    showToast("Failed to create new note");
+    return;
+  }
+  if (editor) {
+    const noteElement = addOneNoteToList(response.data);
+    handleEditorEmptyState(response.data.id);
+    if (noteElement) setActiveItem(noteElement, container);
+    viewNote(response.data, editor);
   }
 }
 
@@ -42,24 +37,20 @@ async function deleteBtnHandler(
   const noteElement = deleteBtn.closest<HTMLDivElement>(".noteItem");
   const id = noteElement?.dataset["id"];
   if (!id) return;
-  try {
-    const result = await deleteNote(id);
-    if (!result.success) {
-      showToast(result.message);
-      return;
-    }
-    deleteBtn.disabled = true;
-    noteElement.remove();
-    const noteID = getValue(StorageKeys.NOTE_ID);
-    if (noteID === id) {
-      removeValue(StorageKeys.NOTE_ID);
-      editor?.commands.clearContent();
-    }
-    handleSidebarEmptyState(container);
-    handleEditorEmptyState();
-  } catch (error) {
-    console.error("(btnHandler): Failed to delete note: ", error);
+  const response = await deleteNote(id);
+  if (!response.success) {
+    showToast("Failed to delete note");
+    return;
   }
+  deleteBtn.disabled = true;
+  noteElement.remove();
+  const noteID = getValue(StorageKeys.NOTE_ID);
+  if (noteID === id) {
+    removeValue(StorageKeys.NOTE_ID);
+    editor?.commands.clearContent();
+  }
+  handleSidebarEmptyState(container);
+  handleEditorEmptyState();
 }
 
 function closeModal() {

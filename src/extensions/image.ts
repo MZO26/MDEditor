@@ -57,7 +57,7 @@ function promptImageUpload(editor: Editor) {
     if (file) {
       if (!allowedTypes.includes(file.type)) {
         console.error("Invalid file type.");
-        showToast("Security Error: Only JPG, PNG, GIF, and WebP are allowed.");
+        showToast("Error: Only JPG, PNG, GIF, and WebP are allowed.");
         return;
       }
       if (file.size > 5 * 1024 * 1024) {

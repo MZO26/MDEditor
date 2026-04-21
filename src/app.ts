@@ -11,7 +11,7 @@ import { getSelectedFont, setSelectedFont } from "./settings/appearance/font";
 import {
   applyAppTheme,
   setAppTheme,
-  updateCodeTheme,
+  setCodeTheme,
 } from "./settings/appearance/theme";
 import { openModal } from "./settings/settings";
 import { setValue, StorageKeys } from "./utils/cache";
@@ -48,8 +48,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     getSelectedFont(fontSelect);
   }
   if (codeThemeSelect) {
-    codeThemeSelect.addEventListener("change", async (_event: Event) => {
-      await updateCodeTheme(codeThemeSelect);
+    codeThemeSelect.addEventListener("change", async () => {
+      setCodeTheme(codeThemeSelect);
     });
   }
   const settingsBtn = getElement<HTMLButtonElement>(".settings-btn");

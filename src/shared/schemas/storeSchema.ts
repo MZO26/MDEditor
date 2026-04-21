@@ -33,11 +33,11 @@ const StoreSchema = z.object({
     ])
     .default("system"),
   "code-theme": z
-    .enum(["Focus", "Balanced", "Eye-Comfort"])
-    .default("Balanced"),
+    .enum(["focus", "balanced", "eye-comfort"])
+    .default("balanced"),
 });
-export type Store = z.infer<typeof StoreSchema>;
-export type AppTheme = Store["theme"];
-export type AppFont = Store["font"];
-export type CodeThemePreference = Store["code-theme"];
+export type StoreType = z.infer<typeof StoreSchema>;
+export type AppTheme = StoreType["theme"];
+export type AppFont = StoreType["font"];
+export type CodeThemePreference = StoreType["code-theme"];
 export { StoreSchema };

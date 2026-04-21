@@ -16,7 +16,6 @@ import {
 import { setValue, StorageKeys } from "../../utils/cache";
 import { updateNotePayload } from "../../utils/factory";
 import { setActiveItem } from "../../utils/helpers";
-import { showSaveIndicator } from "../../utils/savingStatus";
 import { showToast } from "../../utils/toast";
 import { getNoteById, updateNote } from "./noteAPI";
 
@@ -27,41 +26,27 @@ async function noteItemHandler(
 ) {
   const noteID = noteItem.dataset["id"];
   if (!noteID) return;
-  try {
-    const result = await getNoteById(noteID);
-    if (!result.success) {
-      showToast(result.message);
-      return;
-    }
-    setValue(StorageKeys.NOTE_ID, noteID);
-    viewNote(result.data, editor);
-    updateStats(editor);
-    console.log("Viewing note with content: ", result.data.snippet);
-    setActiveItem(noteItem, container);
-  } catch (error) {
-    console.error("(noteHandler): Failed to open note: ", error);
+  const result = await getNoteById(noteID);
+  if (!result.success) {
+    showToast("Failed to find note");
     return;
   }
+  setValue(StorageKeys.NOTE_ID, noteID);
+  viewNote(result.data, editor);
+  updateStats(editor);
+  setActiveItem(noteItem, container);
 }
 
 async function saveNote(id: string): Promise<void> {
   const editorData = extractNoteDataFromEditor(editor);
   const payload = updateNotePayload({ id, ...editorData });
-  try {
-    const result = await updateNote(payload);
-    if (!result.success) {
-      showSaveIndicator("error");
-      return;
-    }
-    updateNoteInList(result.data);
-    setValue(StorageKeys.NOTE_ID, id);
-    document.startViewTransition(() => {
-      showSaveIndicator("success");
-    });
-  } catch (error) {
-    showSaveIndicator("error");
-    console.error("(noteHandler): Failed saving note: ", error);
+  const result = await updateNote(payload);
+  if (!result.success) {
+    showToast("Save failed");
+    return;
   }
+  updateNoteInList(result.data);
+  setValue(StorageKeys.NOTE_ID, id);
 }
 
 function viewNote(note: Note, editor: Editor): void {

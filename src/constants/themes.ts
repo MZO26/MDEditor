@@ -23,9 +23,9 @@ const CODE_THEME_MAP: Record<
   CodeThemePreference,
   Record<ResolvedTheme, Code>
 > = {
-  Focus: { dark: "github-dark", light: "github-light" },
-  Balanced: { dark: "atom-one-dark", light: "atom-one-light" },
-  "Eye-Comfort": { dark: "everforest-dark", light: "everforest-light" },
+  focus: { dark: "github-dark", light: "github-light" },
+  balanced: { dark: "atom-one-dark", light: "atom-one-light" },
+  "eye-comfort": { dark: "everforest-dark", light: "everforest-light" },
 } as const;
 
 const THEME_DATA: Record<

@@ -20,20 +20,17 @@ async function handleSearchInput(
       await reloadNoteList();
       return;
     }
-
-    const result = await searchNotes(searchInput, 20);
-    if (!result.success) {
-      showToast(result.message);
-      handleEditorEmptyState();
-      handleSidebarEmptyState(notesContainer, searchInput);
-      return;
-    }
-    addManyNotesToList(result.data);
   } catch (error) {
-    const action = searchInput === "" ? "reload note list" : "search notes";
-    console.error(`(searchInputHandler): Failed to ${action}:`, error);
+    console.error(`(searchInputHandler): Failed to reload note list`);
+  }
+  const response = await searchNotes(searchInput, 20);
+  if (!response.success) {
+    showToast("Search failed");
+    handleEditorEmptyState();
+    handleSidebarEmptyState(notesContainer, searchInput);
     return;
   }
+  addManyNotesToList(response.data);
   const newNoteElements =
     notesContainer.querySelectorAll<HTMLDivElement>(".noteItem");
   newNoteElements.forEach((noteElement) => {

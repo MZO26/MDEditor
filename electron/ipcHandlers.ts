@@ -14,8 +14,10 @@ import {
 } from "../src/shared/validation";
 import db from "./database";
 import { handleIpc } from "./ipcValidation";
-import { store } from "./store";
+import { store, taskQueue } from "./store";
 import { getTitleBarOverlay, initTheme } from "./titlebar";
+
+const storeQueue = taskQueue();
 
 function registerIpcHandlers() {
   ipcMain.handle("note:getAll", (event) => {
@@ -126,12 +128,17 @@ function registerIpcHandlers() {
     });
   });
 
-  ipcMain.handle("electron-store:set", (event, key: string, val: unknown) => {
-    return handleIpc(event, async () => {
-      const validValue = validateStore(key, val);
-      store.set(key, validValue);
-    });
-  });
+  ipcMain.handle(
+    "electron-store:set",
+    async (event, key: string, val: unknown) => {
+      return handleIpc(event, async () => {
+        return await storeQueue(async () => {
+          const validValue = validateStore(key, val);
+          store.set(key, validValue);
+        });
+      });
+    },
+  );
 }
 
 export { registerIpcHandlers };

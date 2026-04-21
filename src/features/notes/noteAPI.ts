@@ -14,7 +14,7 @@ async function updateNote(note: UpdateNotePayload): Promise<Result<Note>> {
   return safeIpcCall(window.noteAPI.update(note));
 }
 
-async function deleteNote(id: string): Promise<Result<boolean>> {
+async function deleteNote(id: string): Promise<Result<void>> {
   return safeIpcCall(window.noteAPI.delete(id));
 }
 
