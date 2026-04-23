@@ -1,12 +1,6 @@
 import { app, type IpcMainInvokeEvent } from "electron";
 import z, { ZodError } from "zod";
-
-type IpcResponse<T> =
-  | { success: true; data: T }
-  | {
-      success: false;
-      message: string;
-    };
+import type { IpcResponse } from "../shared/types";
 
 enum AppError {
   DBError = "NOT_FOUND",

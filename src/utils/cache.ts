@@ -1,27 +1,20 @@
-import type { SavedPosition } from "../../shared/types";
-
 const StorageKeys = {
   NOTE_ID: "noteID",
   SIDEBAR_COLLAPSED: "sidebarCollapsed",
   ZOOM_LEVEL: "zoomLevel",
-  EDITOR_POS: "editorPos",
   SORT_ORDER: "sortOrder",
 } as const;
 
 interface StorageData {
   [StorageKeys.NOTE_ID]: string | null;
   [StorageKeys.SIDEBAR_COLLAPSED]: boolean;
-  [StorageKeys.ZOOM_LEVEL]: number;
-  [StorageKeys.EDITOR_POS]: Record<string, SavedPosition>;
-  [StorageKeys.SORT_ORDER]: string;
+  [StorageKeys.ZOOM_LEVEL]: string;
 }
 
 const defaultValues: StorageData = {
   [StorageKeys.NOTE_ID]: null,
   [StorageKeys.SIDEBAR_COLLAPSED]: true,
-  [StorageKeys.ZOOM_LEVEL]: 100,
-  [StorageKeys.EDITOR_POS]: {},
-  [StorageKeys.SORT_ORDER]: "",
+  [StorageKeys.ZOOM_LEVEL]: "100",
 };
 
 type StorageKey = keyof StorageData;

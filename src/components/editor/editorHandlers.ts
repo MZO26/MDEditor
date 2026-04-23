@@ -1,7 +1,6 @@
 import type { Editor } from "@tiptap/core";
 import { EditorDocSchema } from "../../../shared/schemas/editorSchema";
 import { PlainTextSchema } from "../../../shared/schemas/noteSchema";
-import { getValue, setValue, StorageKeys } from "../../utils/cache";
 import { getElement } from "../../utils/helpers";
 import { showEditorEmptyState } from "./editorEmptyState";
 import { setupZoomBar } from "./editorFooter";
@@ -16,31 +15,6 @@ function extractNoteDataFromEditor(editor: Editor | null) {
   const plainText = PlainTextSchema.parse(editor?.getText());
   const content = EditorDocSchema.parse(editor?.getJSON());
   return { content, plainText };
-}
-
-class PositionManager {
-  private savedPositions = getValue(StorageKeys.EDITOR_POS);
-  private activeNoteId = getValue(StorageKeys.NOTE_ID);
-
-  save(editor: Editor) {
-    if (!this.activeNoteId || !editor) return;
-    const { from, to } = editor.state.selection;
-    this.savedPositions[this.activeNoteId] = from === to ? from : { from, to };
-    setValue(StorageKeys.EDITOR_POS, this.savedPositions);
-  }
-
-  restore(editor: Editor, noteId: string) {
-    const position = this.savedPositions[noteId];
-
-    if (position !== undefined) {
-      editor.chain().focus().setTextSelection(position).scrollIntoView().run();
-    } else {
-      editor.chain().focus("end").run();
-    }
-
-    this.activeNoteId = noteId;
-    setValue(StorageKeys.NOTE_ID, this.activeNoteId);
-  }
 }
 
 function handleEditorEmptyState(ID?: string | undefined | null) {
@@ -72,5 +46,4 @@ export {
   extractNoteDataFromEditor,
   handleEditorEmptyState,
   initEditorHandlers,
-  PositionManager,
 };

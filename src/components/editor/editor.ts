@@ -31,11 +31,9 @@ import { Typography } from "../../extensions/typography";
 import { getElement } from "../../utils/helpers";
 import { renderIcons } from "../../utils/icons";
 import { updateStats } from "./editorFooter";
-import { PositionManager } from "./editorHandlers";
 
 let editor: Editor | null = null;
 const bubbleMenuElement = getElement(".bubble-menu");
-const positionManager = new PositionManager();
 const bubbleMenuManager = new BubbleMenuManager(bubbleMenuElement);
 
 function initEditor(selector: string): Editor {
@@ -69,8 +67,8 @@ function initEditor(selector: string): Editor {
   });
   renderIcons(bubbleMenuElement);
   bubbleMenuManager.attach(editor);
-  editor.view.dom.style.setProperty("--editor-font-size", "18px");
-  editor.view.dom.style.setProperty("--editor-line-height", "1.8");
+  editor.view.dom.style.setProperty("--editor-font-size", "0.875em");
+  editor.view.dom.style.setProperty("--editor-line-height", "1.5");
   return editor;
 }
 
@@ -198,4 +196,4 @@ function getNoteEditorExtensions() {
   ];
 }
 
-export { editor, getNoteEditorExtensions, initEditor, positionManager };
+export { editor, getNoteEditorExtensions, initEditor };

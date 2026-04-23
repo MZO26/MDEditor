@@ -1,4 +1,5 @@
 import type { Editor } from "@tiptap/core";
+import { getValue, setValue, StorageKeys } from "../../utils/cache";
 import { debounce, getElement } from "../../utils/helpers";
 
 function updateDateTime() {
@@ -47,7 +48,7 @@ function setupZoomBar() {
   const label = getElement<HTMLDivElement>("#zoom-level");
 
   const DEFAULT_ZOOM = 100;
-  let currentZoom = DEFAULT_ZOOM;
+  let currentZoom = Number(getValue(StorageKeys.ZOOM_LEVEL)) || DEFAULT_ZOOM;
   const MIN_ZOOM = 75;
   const MAX_ZOOM = 150;
   const ZOOM_STEP = 12.5;
@@ -64,6 +65,7 @@ function setupZoomBar() {
     }
 
     label.innerText = `${Math.round(currentZoom)}%`;
+    setValue(StorageKeys.ZOOM_LEVEL, String(currentZoom));
   };
   btnIn.addEventListener("mousedown", (e) => {
     e.preventDefault();
@@ -80,6 +82,7 @@ function setupZoomBar() {
     applyZoom(DEFAULT_ZOOM);
   });
   label.style.cursor = "pointer";
+  applyZoom(currentZoom);
 }
 
 export { setupZoomBar, updateDateTime, updateStats };

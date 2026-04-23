@@ -29,7 +29,6 @@ type Actions = Record<
   }
 >;
 
-type SavedPosition = number | { from: number; to: number };
 type NoteItemElements = {
   containers: {
     tagContainer: HTMLDivElement | null;
@@ -49,9 +48,13 @@ type UpdateNotePayload = z.infer<typeof UpdateNotePayloadSchema>;
 type CreateNotePayload = z.infer<typeof CreateNotePayloadSchema>;
 type EditorDoc = z.infer<typeof EditorDocSchema>;
 type ImagePayload = z.infer<typeof ImagePayloadSchema>;
-type Result<T> =
+type IpcResponse<T> =
   | { success: true; data: T }
-  | { success: false; message: string };
+  | {
+      success: false;
+      message: string;
+    };
+
 type AutoScrollOptions = {
   getScrollContainer: (editorRoot: HTMLElement) => HTMLElement;
   edge?: number;
@@ -111,13 +114,12 @@ export type {
   Font,
   FTSRows,
   ImagePayload,
+  IpcResponse,
   Note,
   NoteItemElements,
   NoteResponse,
   NotesReponse,
   ResolvedTheme,
-  Result,
-  SavedPosition,
   SaveState,
   Settings,
   ThemeConfig,

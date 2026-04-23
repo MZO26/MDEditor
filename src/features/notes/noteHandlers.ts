@@ -1,7 +1,7 @@
 import type { Editor } from "@tiptap/core";
 import { EditorState } from "@tiptap/pm/state";
 import type { Note } from "../../../shared/types";
-import { editor, positionManager } from "../../components/editor/editor";
+import { editor } from "../../components/editor/editor";
 import { updateStats } from "../../components/editor/editorFooter";
 import {
   extractNoteDataFromEditor,
@@ -26,13 +26,13 @@ async function noteItemHandler(
 ) {
   const noteID = noteItem.dataset["id"];
   if (!noteID) return;
-  const result = await getNoteById(noteID);
-  if (!result.success) {
-    showToast("Failed to find note");
+  const response = await getNoteById(noteID);
+  if (!response.success) {
+    showToast(response.message);
     return;
   }
   setValue(StorageKeys.NOTE_ID, noteID);
-  viewNote(result.data, editor);
+  viewNote(response.data, editor);
   updateStats(editor);
   setActiveItem(noteItem, container);
 }
@@ -40,19 +40,18 @@ async function noteItemHandler(
 async function saveNote(id: string, flush: boolean = false): Promise<void> {
   const editorData = extractNoteDataFromEditor(editor);
   const payload = updateNotePayload({ id, ...editorData });
-  const result = await updateNote(payload, flush);
-  if (!result.success) {
-    showToast("Save failed");
+  const response = await updateNote(payload, flush);
+  if (!response.success) {
+    showToast(response.message);
     return;
   }
-  updateNoteInList(result.data);
+  updateNoteInList(response.data);
   setValue(StorageKeys.NOTE_ID, id);
 }
 
 function viewNote(note: Note, editor: Editor): void {
   if (!editor) return;
   abortCurrentSave();
-  positionManager.save(editor); // save position from old note
   handleEditorEmptyState(note.id);
   editor.commands.setContent(note.content, {
     emitUpdate: false,
@@ -65,7 +64,6 @@ function viewNote(note: Note, editor: Editor): void {
   editor.view.updateState(newState);
   editor.commands.focus();
   editor.commands.unsetAllMarks();
-  positionManager.restore(editor, note.id); // moves cursor and updates id
   const newController = startNewSaveCycle();
   setupAutoSave({
     editor,

@@ -16,14 +16,6 @@ declare module "*?raw" {
   export default content;
 }
 
-type IpcResponse<T> =
-  | { success: true; data: T }
-  | {
-      success: false;
-      message: string;
-      errors?: Record<string, string[] | undefined>;
-    };
-
 declare global {
   interface Window {
     electronAPI: {

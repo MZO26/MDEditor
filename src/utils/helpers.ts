@@ -1,4 +1,4 @@
-import type { Result } from "../../shared/types";
+import type { IpcResponse } from "../../shared/types";
 
 function getElement<T extends HTMLElement>(selector: string): T {
   const element = document.querySelector<T>(selector);
@@ -54,8 +54,8 @@ function formatNoteDate(isoString: string) {
 }
 
 async function safeIpcCall<T>(
-  ipcPromise: Promise<Result<T>>,
-): Promise<Result<T>> {
+  ipcPromise: Promise<IpcResponse<T>>,
+): Promise<IpcResponse<T>> {
   try {
     return await ipcPromise;
   } catch (error) {

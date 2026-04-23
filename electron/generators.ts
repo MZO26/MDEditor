@@ -1,7 +1,9 @@
 import type { JSONContent } from "@tiptap/core";
-import { generateSnippet } from "../shared/generationHelpers.ts/snippet";
-import { generateTags } from "../shared/generationHelpers.ts/tags";
-import { generateTitle } from "../shared/generationHelpers.ts/title";
+import {
+  snippetGenerator,
+  tagsGenerator,
+  titleGenerator,
+} from "../shared/generators/generators";
 
 interface NoteData {
   title: string;
@@ -17,12 +19,12 @@ function getNoteData(
     content: JSONContent[];
     attrs?: Record<string, unknown> | undefined;
   },
-  plainText: string,
+  plainText: unknown,
 ): NoteData {
   return {
-    title: generateTitle(plainText),
-    snippet: generateSnippet(plainText),
-    tags: generateTags(plainText),
+    title: titleGenerator(plainText),
+    snippet: snippetGenerator(plainText),
+    tags: tagsGenerator(plainText),
     stringifiedContent: JSON.stringify(content),
     now: new Date().toISOString(),
   };
