@@ -5,7 +5,7 @@ import { noteItemHandler } from "../../features/notes/noteHandlers";
 import { deleteBtnHandler } from "../../handlers/buttonHandlers";
 import { getValue, setValue, StorageKeys } from "../../utils/cache";
 import { formatNoteDate, getElement } from "../../utils/helpers";
-import { getNoteItemUI } from "../../utils/templates";
+import { createNoteItem } from "../../utils/templates";
 import { showToast } from "../../utils/toast";
 import { editor } from "../editor/editor";
 import { handleEditorEmptyState } from "../editor/editorHandlers";
@@ -43,23 +43,19 @@ function collapseSidebar(): void {
   setValue(StorageKeys.SIDEBAR_COLLAPSED, newState);
 }
 
-function addOneNoteToList(note: Note): HTMLDivElement | undefined {
+function addOneNoteToList(note: Note) {
   const container = getElement<HTMLDivElement>(".notes-container");
-  const noteElement = getNoteItemUI(note);
-  if (noteElement) {
-    container.prepend(noteElement);
-    handleSidebarEmptyState(container);
-    setValue(StorageKeys.NOTE_ID, note.id);
-    return noteElement;
-  }
-  return undefined;
+  const noteElement = createNoteItem(note);
+  container.prepend(noteElement);
+  handleSidebarEmptyState(container);
+  setValue(StorageKeys.NOTE_ID, note.id);
 }
 
-function addManyNotesToList(notes: Note[]): void {
+function addManyNotesToList(notes: Note[]) {
   const fragment = document.createDocumentFragment();
   const container = getElement<HTMLDivElement>(".notes-container");
   notes.forEach((note: Note) => {
-    const noteElement = getNoteItemUI(note);
+    const noteElement = createNoteItem(note);
     if (noteElement) {
       fragment.appendChild(noteElement);
     }
@@ -81,39 +77,18 @@ function updateNoteInList(note: Note): void {
     noteElement.querySelector<HTMLDivElement>(".note-title");
   const snippetContainer =
     noteElement.querySelector<HTMLDivElement>(".note-content");
-  const tagContainer = noteElement.querySelector<HTMLDivElement>(".note-tags");
   const dateContainer = noteElement.querySelector<HTMLDivElement>(".note-date");
-  const tags = note.tags.slice(0, 3);
-  updateTransition(
-    {
-      containers: {
-        tagContainer,
-        snippetContainer,
-        titleContainer,
-        dateContainer,
-      },
-      tags: tags,
-    },
-    note,
-  );
+  updateTransition({ snippetContainer, titleContainer, dateContainer }, note);
 }
 
-function updateTransition(data: NoteItemElements, note: Note) {
-  const { tagContainer, snippetContainer, dateContainer, titleContainer } =
-    data.containers;
+function updateTransition(containers: NoteItemElements, note: Note) {
+  const { snippetContainer, dateContainer, titleContainer } = containers;
 
-  if (!tagContainer || !snippetContainer || !dateContainer || !titleContainer) {
+  if (!snippetContainer || !dateContainer || !titleContainer) {
     console.warn("Missing elements, skipping transition.");
     return;
   }
   document.startViewTransition(() => {
-    tagContainer.innerHTML = "";
-    data.tags.forEach((tagItem) => {
-      const tagElement = document.createElement("span");
-      tagElement.classList.add("tag");
-      tagElement.textContent = `#${tagItem}`;
-      tagContainer.appendChild(tagElement);
-    });
     snippetContainer.textContent = note.snippet;
     dateContainer.textContent = formatNoteDate(note.updated_at);
     titleContainer.textContent = note.title;

@@ -48,25 +48,25 @@ function setupZoomBar() {
   const label = getElement<HTMLDivElement>("#zoom-level");
 
   const DEFAULT_ZOOM = 100;
-  let currentZoom = Number(getValue(StorageKeys.ZOOM_LEVEL)) || DEFAULT_ZOOM;
+  let currentZoom = getValue(StorageKeys.ZOOM_LEVEL) || DEFAULT_ZOOM;
   const MIN_ZOOM = 75;
   const MAX_ZOOM = 150;
   const ZOOM_STEP = 12.5;
 
-  const BASE_FONT_SIZE = 14; // px
+  const BASE_FONT_SIZE = 16; // px
 
   const applyZoom = (newZoom: number) => {
     currentZoom = Math.max(MIN_ZOOM, Math.min(newZoom, MAX_ZOOM));
 
-    const editorEl = getElement<HTMLElement>("#editor .ProseMirror");
-    if (editorEl) {
-      const scaledSize = (BASE_FONT_SIZE * currentZoom) / 100;
-      editorEl.style.setProperty("--editor-font-size", `${scaledSize}px`);
-    }
-
+    const editorEl = getElement<HTMLElement>(".ProseMirror");
+    const scaledSize = (BASE_FONT_SIZE * currentZoom) / 100;
+    editorEl.style.setProperty("--editor-font-size", `${scaledSize}px`);
     label.innerText = `${Math.round(currentZoom)}%`;
-    setValue(StorageKeys.ZOOM_LEVEL, String(currentZoom));
+    setValue(StorageKeys.ZOOM_LEVEL, currentZoom);
   };
+
+  applyZoom(currentZoom);
+
   btnIn.addEventListener("mousedown", (e) => {
     e.preventDefault();
     applyZoom(currentZoom + ZOOM_STEP);
@@ -82,7 +82,6 @@ function setupZoomBar() {
     applyZoom(DEFAULT_ZOOM);
   });
   label.style.cursor = "pointer";
-  applyZoom(currentZoom);
 }
 
 export { setupZoomBar, updateDateTime, updateStats };

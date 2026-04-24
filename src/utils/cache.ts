@@ -8,13 +8,13 @@ const StorageKeys = {
 interface StorageData {
   [StorageKeys.NOTE_ID]: string | null;
   [StorageKeys.SIDEBAR_COLLAPSED]: boolean;
-  [StorageKeys.ZOOM_LEVEL]: string;
+  [StorageKeys.ZOOM_LEVEL]: number;
 }
 
 const defaultValues: StorageData = {
   [StorageKeys.NOTE_ID]: null,
   [StorageKeys.SIDEBAR_COLLAPSED]: true,
-  [StorageKeys.ZOOM_LEVEL]: "100",
+  [StorageKeys.ZOOM_LEVEL]: 100,
 };
 
 type StorageKey = keyof StorageData;
@@ -41,7 +41,7 @@ function getValue<K extends StorageKey>(key: K): StorageData[K] {
 function setValue<K extends StorageKey>(
   key: K,
   value: StorageData[K],
-  delay = 100,
+  delay = 300,
 ) {
   if (cache[key] === value) return;
   cache[key] = value;

@@ -63,7 +63,7 @@ function createNoteTransactions(db: DatabaseType): NoteTransactions {
         updated_at,
       );
       if (!result) {
-        throw new Error("Error creating note");
+        throw new Error("NOT_FOUND");
       }
       for (const tag of tags) {
         insertTagsStmt.run(id, tag);
@@ -97,7 +97,7 @@ function createNoteTransactions(db: DatabaseType): NoteTransactions {
         id,
       );
       if (!result) {
-        throw new Error(`Note not found: ${id}`);
+        throw new Error("NOT_FOUND");
       }
       deleteTagsStmt.run(id);
       for (const tag of tags) {

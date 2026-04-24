@@ -76,10 +76,9 @@ class FTS5 {
     const stmt = this.db.prepare<unknown[], FTSRows>(`
     SELECT 
       n.id, 
-      highlight(notes_fts, 1, '<b>', '</b>') AS title, 
-      --index 1 -> second column
+      n.title,
       n.content,
-      snippet(notes_fts, 2, '<b class="search-highlight">', '</b>', '...', 50) as plainText,
+      n.snippet,
       (
         SELECT json_group_array(tag_name)
         FROM note_tags
@@ -90,7 +89,7 @@ class FTS5 {
     FROM notes_fts
     JOIN notes n ON notes_fts.id = n.id
     WHERE notes_fts MATCH ? -- id(0), title(10), plainText(1))
-    ORDER BY bm25(notes_fts, 0.0, 10.0, 1.0)
+    ORDER BY bm25(notes_fts, 0.0, 10.0, 1.0), n.updated_at DESC
     LIMIT ?
   `);
     const result = stmt.all(ftsQuery, limit);

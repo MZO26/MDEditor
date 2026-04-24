@@ -1,4 +1,3 @@
-import DOMPurify from "dompurify";
 import emptySidebar from "../../assets/emptySidebar.svg?raw";
 import searchNotFound from "../../assets/searchNotFound.svg?raw";
 
@@ -22,19 +21,20 @@ function handleSidebarEmptyState(
   }
 }
 
-function showSidebarEmptyState(searchInput?: string | undefined) {
+function showSidebarEmptyState(searchInput?: string) {
   const emptyStateContainer = document.createElement("div");
-  const p = document.createElement("p");
   emptyStateContainer.className = "sidebar-empty-state";
   if (searchInput) {
     emptyStateContainer.innerHTML = searchNotFound;
-    const safeInput = DOMPurify.sanitize(searchInput);
-    p.innerHTML = `No results found for <strong>${safeInput}</strong>`;
+    const p = document.createElement("p");
+    p.append(`No results found for ${searchInput}`);
+    emptyStateContainer.append(p);
   } else {
     emptyStateContainer.innerHTML = emptySidebar;
-    p.innerHTML = "No notes here";
+    const p = document.createElement("p");
+    p.textContent = "No notes here";
+    emptyStateContainer.append(p);
   }
-  emptyStateContainer.appendChild(p);
   return emptyStateContainer;
 }
 

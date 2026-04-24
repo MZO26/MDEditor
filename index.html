@@ -31,31 +31,6 @@
     <div class="app-container">
       <div class="drag-region"></div>
       <div class="sidebar-container">
-        <div class="sidebar-categories">
-          <div class="sidebar-header">
-            <div class="sidebar-header-btns"></div>
-          </div>
-          <div class="category-container">
-            <div class="categoryItem">
-              <i data-lucide="notebook-pen"></i>
-            </div>
-            <div class="categoryItem">
-              <i data-lucide="notebook-pen"></i>
-            </div>
-            <div class="categoryItem">
-              <i data-lucide="notebook-pen"></i>
-            </div>
-          </div>
-          <div class="sidebar-footer">
-            <button class="settings-btn">
-              <i data-lucide="sliders-horizontal"></i>
-            </button>
-            <button class="collapse-btn">
-              <i data-lucide="arrow-left-from-line" class="collapse-icon"></i>
-            </button>
-          </div>
-        </div>
-
         <div class="sidebar-notes">
           <div class="sidebar-header">
             <div class="input-wrapper">
@@ -76,6 +51,10 @@
           </div>
           <div class="notes-container"></div>
           <div class="sidebar-footer">
+            <button class="settings-btn">
+              <i data-lucide="sliders-horizontal"></i>
+            </button>
+
             <button class="export-btn">
               <i data-lucide="download"></i>
             </button>
@@ -87,6 +66,9 @@
         <div class="editor-view hidden">
           <div class="editor-header">
             <div id="toolbar" class="toolbar">
+              <button class="collapse-btn">
+                <i data-lucide="arrow-left-from-line" class="collapse-icon"></i>
+              </button>
               <button id="btn-undo" data-action="undo">
                 <i data-lucide="undo2"></i>
               </button>
@@ -157,6 +139,7 @@
                 <i data-lucide="image"></i>
               </button>
             </div>
+
             <div
               class="bubble-menu"
               data-active-menu="text"
@@ -171,12 +154,12 @@
                 </button>
                 <div class="select-wrapper">
                   <select id="font-size" data-action="selectFontSize">
-                    <option value="0.571em">8</option>
-                    <option value="0.857em">12</option>
-                    <option value="unset">14 -</option>
-                    <option value="1.143em">16</option>
-                    <option value="1.286em">18</option>
-                    <option value="1.714em">24</option>
+                    <option value="8px">8</option>
+                    <option value="12px">12</option>
+                    <option value="14px">14</option>
+                    <option value="unset">16 -</option>
+                    <option value="18px">18</option>
+                    <option value="20px">20</option>
                   </select>
 
                   <i class="select-icon" data-lucide="a-large-small"></i>
@@ -257,7 +240,35 @@
               </div>
             </div>
           </div>
+          <button class="info-sidebar-toggle">
+            <span class="dots"></span>
+          </button>
           <div id="editor"></div>
+          <div class="info-sidebar">
+            <div class="info-sidebar-header">
+              <h4>Note-Info</h4>
+            </div>
+            <div class="info-sidebar-content">
+              <h3 class="info-sidebar-title">Table of Contents</h3>
+              <nav id="toc-list"></nav>
+            </div>
+            <div class="sidebar-section"></div>
+            <div class="info-sidebar-metadata">
+              <span class="info-span">Task status: </span>
+              <div class="todo-progress-container" style="display: none">
+                <div class="todo-stats">
+                  <span>Tasks</span>
+                  <span id="todo-count">0/0</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div id="todo-progress" class="progress-bar-fill"></div>
+                </div>
+              </div>
+              <div class="sidebar-section"></div>
+              <span class="info-span">Tags: </span>
+              <div class="tag-container"></div>
+            </div>
+          </div>
           <div class="bar-bottom">
             <time id="datetime-display"></time>
             <div class="stats">

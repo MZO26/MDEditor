@@ -8,16 +8,13 @@
   width: 100%;
   grid-column: 1 / -1;
   grid-row: 1;
-  border-bottom: 1px solid var(--border-color);
 }
 
 .toolbar {
-  flex-shrink: 0;
   display: flex;
   gap: 5px;
-  margin-bottom: 5px;
-  align-items: flex-end;
   flex-wrap: nowrap;
+  padding-top: 10px;
   flex-direction: row;
 }
 
@@ -27,13 +24,6 @@
   background-color: var(--border-color);
   margin: 4px;
   flex-shrink: 0;
-}
-
-.toolbar button:hover {
-  background: var(--bg-button);
-  border-color: var(--border-color);
-  color: var(--text-main);
-  box-shadow: var(--shadow);
 }
 
 #editor {
@@ -54,13 +44,13 @@
   width: 100%;
   height: 100%;
   grid-template-rows: minmax(29px, 29px) minmax(120px, 1fr);
-  grid-template-columns: minmax(70px, 340px) minmax(0, 1fr);
+  grid-template-columns: 280px minmax(0, 1fr);
   transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
 
 .app-container.sidebar-collapsed {
-  grid-template-columns: minmax(75px, 75px) minmax(0, 1fr);
+  grid-template-columns: 0 minmax(0, 1fr);
 }
 
 .app-container.sidebar-collapsed .collapse-icon {
@@ -76,6 +66,7 @@
 }
 
 .editor-container {
+  position: relative;
   display: grid;
   grid-column: 2;
   grid-row: 2;
@@ -129,11 +120,11 @@
   padding: 0 10px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
   background: var(--bg-sidebar);
   box-shadow: var(--shadow);
   border-bottom: 1px solid var(--border-color);
-  overflow-x: auto;
+  overflow-x: scroll;
 }
 
 .bar-bottom {

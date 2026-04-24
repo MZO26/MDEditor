@@ -1,22 +1,16 @@
 .sidebar-notes,
 .sidebar-categories {
   background-color: var(--bg-sidebar);
-  box-sizing: border-box;
-  box-shadow: var(--shadow);
+  border-right: 1px solid var(--border-color);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-.sidebar-notes {
-  border-right: 1px solid var(--border-color);
 }
 
 .sidebar-container {
   display: grid;
   grid-column: 1;
   grid-row: 2;
-  grid-template-columns: 75px 265px;
   min-height: 0;
   overflow: hidden;
 }
@@ -71,22 +65,190 @@
   margin: 8px 12px;
 }
 
-.sidebar-header {
-  box-shadow: var(--shadow);
-  border-bottom: 1px solid var(--border-color);
+.sidebar-header,
+.info-sidebar-header {
   display: flex;
   height: 70px;
-  padding: 10px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
 }
 
+.sidebar-header {
+  padding: 10px;
+  margin: 0;
+  justify-content: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.info-sidebar-toggle {
+  position: absolute;
+  top: 87px;
+  right: 15px;
+  z-index: 9999;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-main);
+}
+
+.delete-btn {
+  position: absolute;
+  top: 5px;
+  right: 2px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-muted);
+}
+
+.dots {
+  width: 4px;
+  height: 4px;
+  background-color: currentColor;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+  box-shadow:
+    0 -7px 0 0 currentColor,
+    0 7px 0 0 currentColor;
+}
+
+.info-span {
+  font-size: 14px;
+  color: var(--text-muted);
+  padding: 20px;
+}
+
+.info-sidebar {
+  position: absolute;
+  top: 70px;
+  right: 0;
+  bottom: 20px;
+  width: 300px;
+  background: transparent;
+  backdrop-filter: blur(6px);
+  box-shadow: var(--shadow);
+  border-left: 1px solid var(--border-color);
+  z-index: 9998;
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0.3s;
+  transform: translateX(0);
+  visibility: visible;
+}
+
+.info-sidebar.off {
+  transform: translateX(100%);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.info-sidebar-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0 22px;
+}
+
+#toc-list {
+  width: 100%;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toc-item {
+  padding: 0 5px;
+  justify-content: left;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: fit-content;
+}
+
+.toc-item:hover {
+  background-color: var(--tag-bg);
+  color: var(--text-main);
+}
+
+.toc-level-1 {
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.toc-level-2 {
+  padding-left: 16px;
+}
+.toc-level-3 {
+  padding-left: 32px;
+  font-size: 13px;
+}
+.toc-level-4 {
+  padding-left: 48px;
+  font-size: 13px;
+}
+.toc-level-5 {
+  padding-left: 64px;
+  font-size: 12px;
+}
+.toc-level-6 {
+  padding-left: 80px;
+  font-size: 12px;
+}
+
+.info-sidebar-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+}
+
+.todo-progress-container,
+.tag-container {
+  padding: 20px;
+}
+
+.todo-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 10px 0;
+  font-weight: 500;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 6px;
+  background-color: var(--accent-hover);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: var(--tag-bg);
+  width: 0%;
+  transition:
+    width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.4s ease;
+}
+
 .input-wrapper {
   max-width: 180px;
-  margin: 5px;
   display: flex;
-  align-items: center;
   border-radius: 10px;
   border: 1px solid var(--border-color);
   transition: all 0.2s ease;
@@ -174,21 +336,16 @@
   border-top: 1px solid var(--border-color);
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   height: 40px;
   padding: 2px;
 }
 
-.notes-container,
-.category-container {
+.notes-container {
   height: 100%;
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-}
-
-.notes-container {
-  border-left: 1px solid var(--border-color);
 }
 
 .noteItem {
@@ -200,37 +357,19 @@
   overflow: hidden;
   background-color: transparent;
   border: 1px solid var(--shadow);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 100px;
+  contain: layout style;
 }
 
-.categoryItem {
-  cursor: pointer;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background-color: var(--tag-bg);
-  color: var(--text-muted);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  transition:
-    border-radius 0.2s ease,
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-
-.noteItem:active,
-.categoryItem:active {
+.noteItem:active {
   background: var(--accent-hover);
 }
 
-.noteItem.active,
-.categoryItem.active {
+.noteItem.active {
   background: var(--accent-hover);
   transition: background-color 0.15s ease-in-out;
 }
-
-/* noteItem configs */
 
 .note-header {
   display: grid;
@@ -260,17 +399,10 @@
 .note-date {
   font-size: 0.85em;
   color: var(--text-muted);
+  padding: 5px 0;
   align-items: center;
   flex-shrink: 0;
   white-space: nowrap;
-}
-
-.note-tags {
-  display: flex;
-  gap: 4px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  flex-wrap: nowrap;
 }
 
 .note-content {
@@ -315,7 +447,6 @@
   transform: scale(0.95);
 }
 
-.categoryItem.active,
 .noteItem.active {
   background-color: var(--accent-hover);
   border-color: var(--border-color);
@@ -323,13 +454,11 @@
   font-weight: 500;
 }
 
-.noteItem:hover,
-.categoryItem:hover {
+.noteItem:hover {
   background-color: var(--accent-hover);
   box-shadow: var(--shadow);
 }
 
-.noteItem p,
-.categoryItem p {
+.noteItem p {
   color: var(--text-muted);
 }

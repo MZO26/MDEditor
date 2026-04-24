@@ -10,6 +10,7 @@ import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
 import { TableKit } from "@tiptap/extension-table";
+import TableOfContents from "@tiptap/extension-table-of-contents";
 import TextAlign from "@tiptap/extension-text-align";
 import { TextStyleKit } from "@tiptap/extension-text-style";
 import {
@@ -27,6 +28,7 @@ import {
 } from "../../extensions/languages";
 import { lowlight } from "../../extensions/lowlight";
 import { NoteTag } from "../../extensions/tag";
+import { debouncedToDoUpdate } from "../../extensions/toDoBar";
 import { Typography } from "../../extensions/typography";
 import { getElement } from "../../utils/helpers";
 import { renderIcons } from "../../utils/icons";
@@ -34,6 +36,7 @@ import { setupZoomBar, updateStats } from "./editorFooter";
 import { setupToolbar } from "./editorHeader";
 
 let editor: Editor | null = null;
+let seenSlugs = new Map<string, number>();
 const bubbleMenuElement = getElement(".bubble-menu");
 const bubbleMenuManager = new BubbleMenuManager(bubbleMenuElement);
 
@@ -63,6 +66,7 @@ function initEditor(selector: string): Editor {
   });
   editor.on("update", () => {
     if (!editor) return;
+    debouncedToDoUpdate(editor);
     updateDetectCodeLanguage(editor);
     updateStats(editor);
   });
@@ -70,8 +74,6 @@ function initEditor(selector: string): Editor {
   bubbleMenuManager.attach(editor);
   setupToolbar(editor);
   setupZoomBar();
-  editor.view.dom.style.setProperty("--editor-font-size", "0.875em");
-  editor.view.dom.style.setProperty("--editor-line-height", "1.5");
   return editor;
 }
 
@@ -106,7 +108,22 @@ function getNoteEditorExtensions() {
         flip: true,
         shift: true,
       },
-      shouldShow: ({ from, to }) => from !== to,
+      shouldShow: ({ editor, from, to }) => {
+        if (from === to) return false;
+        if (editor.isActive("image")) return false;
+        const isDetails = editor.isActive("details");
+        const isParagraph = editor.isActive("paragraph");
+        const isCodeBlock = editor.isActive("codeBlock");
+        const isInlineCode = editor.isActive("code");
+        const isHeading = editor.isActive("heading");
+        if (isDetails) {
+          if (isParagraph || isCodeBlock || isHeading || isInlineCode) {
+            return true;
+          }
+          return false;
+        }
+        return true;
+      },
     }),
     Focus.configure({
       className: "has-focus",
@@ -195,6 +212,40 @@ function getNoteEditorExtensions() {
         rel: "noopener noreferrer",
       },
       validate: (href) => !href.startsWith("appimg://"),
+    }),
+    TableOfContents.configure({
+      getId: (textContent) => {
+        const slug = textContent
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+          .replace(/[^\w-]/g, "");
+        const count = seenSlugs.get(slug) || 0;
+        seenSlugs.set(slug, count + 1);
+        return count === 0 ? slug : `${slug}-${count}`;
+      },
+      onUpdate: (data) => {
+        const container = getElement("#toc-list");
+        container.innerHTML = "";
+
+        data.forEach((heading) => {
+          const item = document.createElement("button");
+          item.className = `toc-item toc-level-${heading.level}`;
+          item.innerText = heading.textContent;
+
+          item.onclick = () => {
+            if (!editor) return;
+            heading.dom?.scrollIntoView({ behavior: "smooth", block: "start" });
+            editor.commands.setTextSelection(heading.pos + 1);
+
+            editor.commands.focus();
+          };
+
+          container.appendChild(item);
+        });
+        seenSlugs.clear();
+      },
+      anchorTypes: ["heading"],
+      scrollParent: () => editor?.view.dom ?? window,
     }),
   ];
 }

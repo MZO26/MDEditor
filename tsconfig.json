@@ -39,8 +39,7 @@
     "src/**/*.ts",
     "types/**/*.d.ts",
     "electron/**/*.ts",
-    "shared/**/*.ts",
-    "shared/generators"
+    "shared/**/*.ts"
   ],
   "exclude": ["node_modules", "dist", "dist-electron"]
 }

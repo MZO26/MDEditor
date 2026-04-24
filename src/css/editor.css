@@ -1,6 +1,5 @@
 .ProseMirror {
-  --editor-font-size: 0.875em;
-  font-size: var(--editor-font-size);
+  font-size: var(--editor-font-size, 16px);
   line-height: 1.5;
   color: var(--text-main);
   outline: none;
@@ -303,7 +302,7 @@
   transition: color 0.2s ease;
   display: block;
   width: 100%;
-  padding: 0.5rem 3rem;
+  padding: 0.3rem 3rem;
 }
 
 .ProseMirror div[data-type="details"] summary::marker,
@@ -572,17 +571,14 @@ pre[data-language="true"] code[class~="language-html"]::before {
 pre[data-language="true"] code[class~="language-css"]::before {
   content: "CSS";
 }
-
 pre[data-language="true"] code[class~="language-javascript"]::before,
 pre[data-language="true"] code[class~="language-js"]::before {
   content: "JavaScript";
 }
-
 pre[data-language="true"] code[class~="language-typescript"]::before,
 pre[data-language="true"] code[class~="language-ts"]::before {
   content: "TypeScript";
 }
-
 pre[data-language="true"] code[class~="language-python"]::before {
   content: "Python";
 }
@@ -598,7 +594,6 @@ pre[data-language="true"] code[class~="language-cpp"]::before {
 pre[data-language="true"] code[class~="language-rust"]::before {
   content: "Rust";
 }
-
 pre[data-language="true"] code[class~="language-shell"]::before {
   content: "Shell";
 }
@@ -608,8 +603,26 @@ pre[data-language="true"] code[class~="language-powershell"]::before {
 pre[data-language="true"] code[class~="language-sql"]::before {
   content: "SQL";
 }
-pre[data-language="true"] code[class~="language-json"]::before {
-  content: "JSON";
+pre[data-language="true"] code[class~="language-go"]::before {
+  content: "Go";
+}
+pre[data-language="true"] code[class~="language-bash"]::before {
+  content: "bash";
+}
+pre[data-language="true"] code[class~="language-markdown"]::before {
+  content: "markdown";
+}
+pre[data-language="true"] code[class~="language-yaml"]::before {
+  content: "yaml";
+}
+pre[data-language="true"] code[class~="language-dockerfile"]::before {
+  content: "dockerfile";
+}
+pre[data-language="true"] code[class~="language-php"]::before {
+  content: "php";
+}
+pre[data-language="true"] code[class~="language-c"]::before {
+  content: "c";
 }
 
 .ProseMirror pre code {

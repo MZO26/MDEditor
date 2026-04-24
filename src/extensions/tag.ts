@@ -1,4 +1,6 @@
 import { InputRule, Mark, markPasteRule, mergeAttributes } from "@tiptap/core";
+import type { Note } from "../../shared/schemas/noteSchema";
+import { debounce, getElement } from "../utils/helpers";
 
 const NoteTag = Mark.create({
   name: "noteTag",
@@ -49,4 +51,18 @@ const NoteTag = Mark.create({
   },
 });
 
-export { NoteTag };
+function updateNoteTags(tags: Note["tags"]) {
+  const container = getElement(".tag-container");
+  container.innerHTML = "";
+  if (!tags || tags.length === 0) return;
+  tags.forEach((tag) => {
+    const span = document.createElement("span");
+    span.classList.add("tag");
+    span.textContent = `#${tag}`;
+    container.append(span);
+  });
+}
+
+const debouncedTagUpdate = debounce(updateNoteTags, 500);
+
+export { debouncedTagUpdate, NoteTag };

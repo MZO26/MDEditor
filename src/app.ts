@@ -25,16 +25,31 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateDateTime();
   const addNoteBtn = getElement(".add-note-btn");
   addNoteBtn.addEventListener("click", addNoteBtnHandler);
+  const infoSidebar = getElement<HTMLElement>(".info-sidebar");
+  const infoSidebarToggle = getElement<HTMLButtonElement>(
+    ".info-sidebar-toggle",
+  );
 
+  infoSidebarToggle.addEventListener("click", () => {
+    infoSidebar.classList.toggle("off");
+  });
+
+  const editorEl = getElement<HTMLElement>("#editor");
+  editorEl.addEventListener("mousedown", () => {
+    if (!infoSidebar.classList.contains("off")) {
+      infoSidebar.classList.add("off");
+    }
+  });
   const themeDropdown = getElement<HTMLSelectElement>("#theme-dropdown");
   const fontSelect = getElement<HTMLSelectElement>("#font-dropdown");
   const codeThemeSelect = getElement<HTMLSelectElement>("#code-theme-dropdown");
   const searchInput = getElement<HTMLInputElement>("#searchInput");
   const notesContainer = getElement<HTMLDivElement>(".notes-container");
   if (searchInput && notesContainer) {
-    const debouncedSearch = debounce(async () => {
-      await handleSearchInput(searchInput, notesContainer);
-    }, 300);
+    const debouncedSearch = debounce(() => {
+      const value = searchInput.value.trim();
+      void handleSearchInput(value, notesContainer);
+    }, 500);
     searchInput.addEventListener("input", debouncedSearch);
   }
   if (themeDropdown) {

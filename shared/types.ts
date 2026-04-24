@@ -55,13 +55,9 @@ interface AutoSaveConfig {
 }
 
 type NoteItemElements = {
-  containers: {
-    tagContainer: HTMLDivElement | null;
-    snippetContainer: HTMLDivElement | null;
-    dateContainer: HTMLDivElement | null;
-    titleContainer: HTMLDivElement | null;
-  };
-  tags: string[];
+  snippetContainer: HTMLDivElement | null;
+  dateContainer: HTMLDivElement | null;
+  titleContainer: HTMLDivElement | null;
 };
 
 type AutoScrollOptions = {

@@ -9,12 +9,10 @@ import { showToast } from "../../utils/toast";
 import { searchNotes } from "./searchAPI";
 
 async function handleSearchInput(
-  inputElement: HTMLInputElement,
+  searchInput: string,
   notesContainer: HTMLDivElement,
 ) {
   notesContainer.innerHTML = "";
-  const searchInput = inputElement.value.trim();
-
   try {
     if (searchInput === "") {
       await reloadNoteList();
@@ -22,6 +20,7 @@ async function handleSearchInput(
     }
   } catch (error) {
     console.error(`(searchInputHandler): Failed to reload note list`);
+    return;
   }
   const response = await searchNotes(searchInput, 20);
   if (!response.success) {
