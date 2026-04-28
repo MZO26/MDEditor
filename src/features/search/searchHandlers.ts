@@ -1,9 +1,11 @@
+import { debounce } from "@tiptap/extension-table-of-contents";
 import { handleEditorEmptyState } from "../../components/editor/editorHandlers";
 import {
   addManyNotesToList,
   handleSidebarEmptyState,
   reloadNoteList,
 } from "../../components/sidebar/sidebarNotes";
+import { getElement } from "../../utils/helpers";
 import { showToast } from "../../utils/toast";
 import { getViews, searchNotes } from "./searchAPI";
 
@@ -40,4 +42,27 @@ async function handleViews(view: string) {
   reloadNoteList(response.data);
 }
 
-export { handleSearchInput, handleViews };
+function initSearchHandlers() {
+  const searchInput = getElement<HTMLInputElement>("#searchInput");
+  const notesContainer = getElement<HTMLDivElement>(".notes-container");
+  if (searchInput && notesContainer) {
+    const debouncedSearch = debounce(() => {
+      const value = searchInput.value.trim();
+      void handleSearchInput(value, notesContainer);
+    }, 500);
+    searchInput.addEventListener("input", debouncedSearch);
+  }
+
+  const smartViewContainer = getElement(".smart-view-list");
+
+  smartViewContainer.addEventListener("click", async (event) => {
+    const target = (event.target as HTMLButtonElement).closest(
+      "button[data-view]",
+    ) as HTMLButtonElement | null;
+    const view = target?.dataset["view"];
+    if (!view) return;
+    await handleViews(view);
+  });
+}
+
+export { initSearchHandlers };

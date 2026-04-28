@@ -1,7 +1,4 @@
-import type {
-  AppTheme,
-  CodeThemePreference,
-} from "../../shared/schemas/storeSchema";
+import type { CodeTheme, Theme } from "../../shared/schemas/storeSchema";
 import type { Code, ResolvedTheme } from "../../shared/types";
 
 // This file defines a mapping between the themes available in the application and the corresponding system theme that should be applied. This is used to determine which system theme (light or dark) should be applied based on the user's selected theme in the application.
@@ -13,17 +10,14 @@ const THEME_MAP = {
   "dark-warm": "dark",
 } as const;
 
-const CODE_THEME_MAP: Record<
-  CodeThemePreference,
-  Record<ResolvedTheme, Code>
-> = {
+const CODE_THEME_MAP: Record<CodeTheme, Record<ResolvedTheme, Code>> = {
   focus: { dark: "github-dark", light: "github-light" },
   balanced: { dark: "atom-one-dark", light: "atom-one-light" },
   "eye-comfort": { dark: "solarized-dark", light: "solarized-light" },
 } as const;
 
 const THEME_DATA: Record<
-  Exclude<AppTheme, "system">,
+  Exclude<Theme, "system">,
   {
     color: string;
     symbolColor: string;

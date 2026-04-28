@@ -1,36 +1,63 @@
-import type { AppTheme } from "../shared/schemas/storeSchema";
-import { editor, initEditor } from "./components/editor/editor";
-import { updateDateTime } from "./components/editor/editorFooter";
+import { initEditor } from "./components/editor/editor";
+import {
+  setUpEditorSettings,
+  updateDateTime,
+} from "./components/editor/editorFooter";
+import { initHoverbar } from "./components/editor/hoverbar";
+import { buildToolbar } from "./components/editor/toolbar/toolbar";
 import {
   collapseSidebar,
   initNotesSidebar,
   reloadNoteList,
 } from "./components/sidebar/sidebarNotes";
-import {
-  handleSearchInput,
-  handleViews,
-} from "./features/search/searchHandlers";
+import { initSearchHandlers } from "./features/search/searchHandlers";
 import { addNoteBtnHandler, closeModal } from "./handlers/buttonHandlers";
 import {
   applyAppTheme,
-  getSelectedFont,
   setAppTheme,
   setCodeTheme,
-  setSelectedFont,
 } from "./settings/settings-service";
-import { debounce, getElement } from "./utils/helpers";
+import { getElement } from "./utils/helpers";
 import { renderIcons } from "./utils/icons";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  initEditor("#editor");
+  const editor = initEditor("#editor");
   renderIcons();
   initNotesSidebar();
   await reloadNoteList();
   updateDateTime();
+  const toolbarContainer = getElement(".toolbar");
+  buildToolbar(toolbarContainer, editor);
+  initHoverbar();
+  initSearchHandlers();
+  setUpEditorSettings({
+    selectId: "#font-family",
+    storageKey: "font-family",
+    cssVar: "--editor-font-family",
+    defaultValue: "system",
+  });
 
-  const themeDropdown = getElement<HTMLSelectElement>("#theme-dropdown");
+  setUpEditorSettings({
+    selectId: "#line-height",
+    storageKey: "line-height",
+    cssVar: "--editor-line-height",
+    defaultValue: 1.5,
+    min: 1.2,
+    max: 1.7,
+  });
+
+  setUpEditorSettings({
+    selectId: "#font-size",
+    storageKey: "font-size",
+    cssVar: "--editor-font-size",
+    defaultValue: 16,
+    min: 12,
+    max: 24,
+    formatValue: (v) => `${v}px`,
+  });
+
+  const themeDropdown = getElement<HTMLSelectElement>("#theme");
   window.electronAPI.onThemeChanged(async (newTheme) => {
-    console.log("FRONTEND RECEIVED THEME:", newTheme);
     await applyAppTheme(themeDropdown, newTheme, true);
   });
   const addNoteBtn = getElement(".add-note-btn");
@@ -48,36 +75,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       infoSidebar.classList.add("off");
     }
   });
-
-  const searchInput = getElement<HTMLInputElement>("#searchInput");
-  const notesContainer = getElement<HTMLDivElement>(".notes-container");
-  if (searchInput && notesContainer) {
-    const debouncedSearch = debounce(() => {
-      const value = searchInput.value.trim();
-      void handleSearchInput(value, notesContainer);
-    }, 500);
-    searchInput.addEventListener("input", debouncedSearch);
-  }
-
-  const smartViewContainer = document.querySelector(".smart-view-list");
-
-  smartViewContainer?.addEventListener("click", async (event) => {
-    const target = (event.target as HTMLButtonElement).closest(
-      "button[data-view]",
-    ) as HTMLButtonElement | null;
-    const view = target?.dataset["view"];
-    if (!view) return;
-    await handleViews(view);
+  const closeModalBtn = getElement<HTMLButtonElement>(".closeModal-btn");
+  closeModalBtn.addEventListener("click", closeModal);
+  const focusEditorBtn = getElement(".focus-editor-btn");
+  focusEditorBtn.addEventListener("click", () => {
+    const editorElement = document.querySelector(".ProseMirror");
+    if (editorElement) {
+      editorElement.classList.toggle("focus-mode-active");
+    }
   });
 
-  const fontSelect = getElement<HTMLSelectElement>("#font-dropdown");
-
-  if (fontSelect) {
-    fontSelect.addEventListener("change", setSelectedFont);
-    getSelectedFont(fontSelect);
-  }
-
-  const codeThemeSelect = getElement<HTMLSelectElement>("#code-theme-dropdown");
+  const codeThemeSelect = getElement<HTMLSelectElement>("#code-theme");
 
   if (themeDropdown) {
     themeDropdown.addEventListener("change", setAppTheme);
@@ -90,49 +98,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  const focusBtn = getElement(".focus-btn");
-  focusBtn.addEventListener("click", async () => {
-    const theme = document.body.dataset["theme"] as AppTheme;
-    const appContainer = getElement<HTMLDivElement>(".app-container");
-    const editorHeader = getElement(".editor-header");
-    const currentState = appContainer.classList.contains("focus");
-    const dragRegion = getElement(".drag-region");
-    const frameLeft = getElement(".frame-left");
-    const frameRight = getElement(".frame-right");
-    const editorContainer = getElement(".editor-container");
-    editorHeader.classList.toggle("focus");
-    infoSidebarToggle.classList.toggle("focus");
-    dragRegion.classList.toggle("focus");
-    editorContainer.classList.toggle("focus");
-    infoSidebar.classList.toggle("focus");
-    frameLeft.classList.toggle("focus");
-    frameRight.classList.toggle("focus");
-    const newState = !currentState;
-    appContainer.classList.toggle("focus", newState);
-    await window.electronAPI.setTheme(theme, newState);
-  });
-
-  const readOnlyBtn = getElement(".read-only-btn");
-  readOnlyBtn.addEventListener("click", () => {
-    editor?.setEditable(!editor.isEditable);
-  });
-  const widths = ["comfortable", "normal", "wide"] as const;
-  const editorWidthBtn = getElement(".editor-width-btn");
-  editorWidthBtn.addEventListener("click", () => {
-    const current = editorEl.dataset["width"] || "normal";
-    const index = widths.indexOf(current as (typeof widths)[number]);
-    const next = widths[(index + 1) % widths.length];
-    editorEl.dataset["width"] = next;
-  });
-  const closeModalBtn = getElement<HTMLButtonElement>(".closeModal-btn");
-  closeModalBtn.addEventListener("click", closeModal);
-  const focusEditorBtn = getElement(".focus-editor-btn");
-  focusEditorBtn.addEventListener("click", () => {
-    const editorElement = document.querySelector(".ProseMirror");
-    if (editorElement) {
-      editorElement.classList.toggle("focus-mode-active");
-    }
-  });
   const collapseBtn = getElement<HTMLButtonElement>(".collapse-btn");
   collapseBtn.addEventListener("click", collapseSidebar);
   document.addEventListener("keydown", (event) => {

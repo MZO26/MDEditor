@@ -1,5 +1,6 @@
 import type { Editor } from "@tiptap/core";
-import { getValue, setValue, StorageKeys } from "../../utils/cache";
+import type { AppSettings } from "../../../shared/schemas/storeSchema";
+import { getSettings, setSettings } from "../../settings/settingsAPI";
 import { debounce, getElement } from "../../utils/helpers";
 
 function updateDateTime() {
@@ -42,46 +43,58 @@ const updateStats = debounce((editor: Editor) => {
   }
 }, 500);
 
-function setupZoomBar() {
-  const btnIn = getElement<HTMLButtonElement>("#btn-zoom-in");
-  const btnOut = getElement<HTMLButtonElement>("#btn-zoom-out");
-  const label = getElement<HTMLDivElement>("#zoom-level");
-
-  const DEFAULT_ZOOM = 100;
-  let currentZoom = getValue(StorageKeys.ZOOM_LEVEL) || DEFAULT_ZOOM;
-  const MIN_ZOOM = 75;
-  const MAX_ZOOM = 150;
-  const ZOOM_STEP = 12.5;
-
-  const BASE_FONT_SIZE = 16; // px
-
-  const applyZoom = (newZoom: number) => {
-    currentZoom = Math.max(MIN_ZOOM, Math.min(newZoom, MAX_ZOOM));
-
-    const editorEl = getElement<HTMLElement>(".ProseMirror");
-    const scaledSize = (BASE_FONT_SIZE * currentZoom) / 100;
-    editorEl.style.setProperty("--editor-font-size", `${scaledSize}px`);
-    label.innerText = `${Math.round(currentZoom)}%`;
-    setValue(StorageKeys.ZOOM_LEVEL, currentZoom);
-  };
-
-  applyZoom(currentZoom);
-
-  btnIn.addEventListener("mousedown", (e) => {
-    e.preventDefault();
-    applyZoom(currentZoom + ZOOM_STEP);
-  });
-
-  btnOut.addEventListener("mousedown", (e) => {
-    e.preventDefault();
-    applyZoom(currentZoom - ZOOM_STEP);
-  });
-
-  label.addEventListener("mousedown", (e) => {
-    e.preventDefault();
-    applyZoom(DEFAULT_ZOOM);
-  });
-  label.style.cursor = "pointer";
+// sets select value and body value
+function syncUI<K extends string>(
+  select: HTMLSelectElement,
+  key: K,
+  value: string,
+) {
+  if (select.querySelector(`option[value="${value}"]`)) {
+    select.value = value;
+    document.documentElement.setAttribute(`data-${key}`, value);
+  }
 }
 
-export { setupZoomBar, updateDateTime, updateStats };
+interface EditorStyleConfig<T extends number | string> {
+  selectId: string; // uses the select for the settings
+  storageKey: keyof AppSettings; // single cache key
+  cssVar: string; // css variable that responds on select
+  defaultValue: T; // line-height and font are numbers / font-family string
+  min?: number; // min and max optional so they don't appear on font-family setting / otherwise they set the min and max value possible
+  max?: number;
+  formatValue?: (value: T) => string; // formatValue is a little helper to set the correct css variable for editor
+}
+
+async function setUpEditorSettings<T extends number | string>(
+  config: EditorStyleConfig<T>,
+) {
+  const {
+    selectId,
+    storageKey,
+    cssVar,
+    defaultValue,
+    min,
+    max,
+    formatValue = String,
+  } = config;
+  const editorEl = getElement("#editor .ProseMirror");
+  const select = getElement<HTMLSelectElement>(selectId);
+  const response = await getSettings(storageKey);
+  let currentValue = response.success ? response.data : defaultValue;
+  const apply = (newValue: T | string) => {
+    if (typeof defaultValue === "number") {
+      let num = Number(newValue);
+      if (Number.isNaN(num)) num = defaultValue;
+      if (min !== undefined) num = Math.max(min, num);
+      if (max !== undefined) num = Math.min(num, max);
+      currentValue = num as T;
+    } else currentValue = newValue as T;
+    editorEl.style.setProperty(cssVar, formatValue(currentValue));
+    setSettings({ [storageKey]: String(currentValue) });
+    syncUI(select, String(storageKey), String(currentValue));
+  };
+  apply(currentValue); // call function to represent current state
+  select.addEventListener("change", () => apply(select.value));
+}
+
+export { setUpEditorSettings, updateDateTime, updateStats };

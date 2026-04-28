@@ -1,20 +1,16 @@
 const StorageKeys = {
   NOTE_ID: "noteID",
   SIDEBAR_COLLAPSED: "sidebarCollapsed",
-  ZOOM_LEVEL: "zoomLevel",
-  SORT_ORDER: "sortOrder",
 } as const;
 
 interface StorageData {
   [StorageKeys.NOTE_ID]: string | null;
   [StorageKeys.SIDEBAR_COLLAPSED]: boolean;
-  [StorageKeys.ZOOM_LEVEL]: number;
 }
 
 const defaultValues: StorageData = {
   [StorageKeys.NOTE_ID]: null,
   [StorageKeys.SIDEBAR_COLLAPSED]: true,
-  [StorageKeys.ZOOM_LEVEL]: 100,
 };
 
 type StorageKey = keyof StorageData;
@@ -71,4 +67,4 @@ function removeValue<K extends StorageKey>(key: K): void {
   }
 }
 
-export { getValue, removeValue, setValue, StorageKeys };
+export { getValue, removeValue, setValue, StorageKeys, type StorageKey };

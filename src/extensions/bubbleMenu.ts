@@ -12,80 +12,14 @@ class BubbleMenuManager {
   attach(editor: Editor) {
     const actions: Record<string, BubbleMenuCommands> = {
       // text actions
-      copy: () => this.copySelectedText(editor),
-      delete: () => this.smartDelete(editor),
-      selectFontSize: (value: string | undefined) => {
-        if (!value) return;
-        if (editor.isActive("codeBlock")) {
-          if (value === "unset") {
-            editor
-              .chain()
-              .focus()
-              .updateAttributes("codeBlock", { fontSize: null })
-              .run();
-          } else {
-            editor
-              .chain()
-              .focus()
-              .updateAttributes("codeBlock", { fontSize: value })
-              .run();
-          }
-          return;
-        }
-        if (editor.isActive("code")) {
-          if (value === "unset") {
-            editor
-              .chain()
-              .focus()
-              .updateAttributes("code", { fontSize: null })
-              .run();
-          } else {
-            editor
-              .chain()
-              .focus()
-              .updateAttributes("code", { fontSize: value })
-              .run();
-          }
-          return;
-        }
-        if (value === "unset") {
-          editor.chain().focus().unsetFontSize().run();
-          return;
-        }
-        editor.chain().focus().setFontSize(value).run();
-      },
-      selectLineHeight: (value: string | undefined) => {
-        if (!value) return;
-        if (editor.isActive("codeBlock")) {
-          editor
-            .chain()
-            .focus()
-            .updateAttributes("codeBlock", {
-              lineHeight: value === "unset" ? null : value,
-            })
-            .run();
-          return;
-        }
-        if (editor.isActive("code")) {
-          editor
-            .chain()
-            .focus()
-            .updateAttributes("code", {
-              lineHeight: value === "unset" ? null : value,
-            })
-            .run();
-          return;
-        }
-        if (value === "unset") {
-          editor.chain().focus().unsetLineHeight().run();
-          return;
-        }
-        editor.chain().focus().setLineHeight(value).run();
-      },
-      alignStart: () => editor.chain().focus().setTextAlign("start").run(),
-      alignCenter: () => editor.chain().focus().setTextAlign("center").run(),
-      alignEnd: () => editor.chain().focus().setTextAlign("end").run(),
-      alignJustify: () => editor.chain().focus().setTextAlign("justify").run(),
+      bold: () => editor.chain().focus().toggleBold().run(),
+      italic: () => editor.chain().focus().toggleItalic().run(),
+      strike: () => editor.chain().focus().toggleStrike().run(),
+      inlineCode: () => editor.chain().focus().toggleCode().run(),
+      link: () => editor.chain().focus().toggleLink().run(),
+      h1: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
+      h2: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
+      h3: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
       // table actions
       addRowAfter: () => editor.chain().focus().addRowAfter().run(),
       addColumnAfter: () => editor.chain().focus().addColumnAfter().run(),
@@ -106,45 +40,10 @@ class BubbleMenuManager {
       );
       if (!elements) return;
       elements.forEach((el) => {
-        if (el.tagName === "SELECT") {
-          const selectEl = el as HTMLSelectElement;
-          const isFontSize = selectEl.id === "font-size";
-          const isLineHeight = selectEl.id === "line-height";
-          selectEl.addEventListener("change", () => {
-            const value = selectEl.value;
-            if (isFontSize) {
-              if (value === "unset")
-                editor.chain().focus().unsetFontSize().run();
-              else command(value);
-            }
-            if (isLineHeight) {
-              if (value === "unset")
-                editor.chain().focus().unsetLineHeight().run();
-              else command(value);
-            }
-          });
-          editor.on("selectionUpdate", ({ editor }) => {
-            if (isFontSize) {
-              const attributes = editor.getAttributes("textStyle");
-              selectEl.value = attributes["fontSize"] || "unset";
-            }
-            if (isLineHeight) {
-              const pAttrs = editor.getAttributes("paragraph");
-              const hAttrs = editor.getAttributes("heading");
-              const cAttrs = editor.getAttributes("codeBlock");
-              selectEl.value =
-                pAttrs["lineHeight"] ||
-                hAttrs["lineHeight"] ||
-                cAttrs["lineHeight"] ||
-                "unset";
-            }
-          });
-        } else {
-          el.addEventListener("click", (e) => {
-            e.preventDefault();
-            command();
-          });
-        }
+        el.addEventListener("click", (e) => {
+          e.preventDefault();
+          command();
+        });
       });
     });
     editor.on("selectionUpdate", () => {

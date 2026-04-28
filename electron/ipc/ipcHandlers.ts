@@ -4,8 +4,8 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   StoreSchema,
-  type AppTheme,
-  type Settings,
+  type AppSettings,
+  type Theme,
 } from "../../shared/schemas/storeSchema";
 import {
   validateCreate,
@@ -123,7 +123,7 @@ function registerIpcHandlers() {
     });
   });
 
-  ipcMain.handle("set:theme", (event, theme: AppTheme, focus?: boolean) => {
+  ipcMain.handle("set:theme", (event, theme: Theme, focus?: boolean) => {
     return tryExec(event, async () => {
       if (!checkRateLimit("set:theme", LIMITS.WRITE_LIGHT))
         throw new Error("RATE_LIMIT");
@@ -185,7 +185,7 @@ function registerIpcHandlers() {
     });
   });
 
-  ipcMain.handle("electron-store:set", async (event, settings: Settings) => {
+  ipcMain.handle("electron-store:set", async (event, settings: AppSettings) => {
     return tryExec(event, async () => {
       if (!checkRateLimit("electron-store:set", LIMITS.WRITE_STANDARD))
         throw new Error("RATE_LIMIT");

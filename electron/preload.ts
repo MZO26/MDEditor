@@ -1,17 +1,17 @@
-import { contextBridge, ipcRenderer, type Settings } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 import type { ImagePayload } from "../shared/schemas/imageSchema";
 import type {
   CreateNotePayload,
   UpdateNotePayload,
 } from "../shared/schemas/noteSchema";
-import type { AppTheme } from "../shared/schemas/storeSchema";
+import type { AppSettings, Theme } from "../shared/schemas/storeSchema";
 
 console.log("--- PRELOAD ACTIVE ---");
 
 contextBridge.exposeInMainWorld("electronAPI", {
-  setTheme: (theme: AppTheme, focus?: boolean) =>
+  setTheme: (theme: Theme, focus?: boolean) =>
     ipcRenderer.invoke("set:theme", theme, focus),
-  onThemeChanged: (callback: (theme: AppTheme) => void) => {
+  onThemeChanged: (callback: (theme: Theme) => void) => {
     ipcRenderer.on("theme-changed", (_event, theme) => callback(theme));
   },
   saveImage: (payload: ImagePayload) =>
@@ -31,6 +31,6 @@ contextBridge.exposeInMainWorld("noteAPI", {
 });
 contextBridge.exposeInMainWorld("storeApi", {
   getSettings: (key: string) => ipcRenderer.invoke("electron-store:get", key),
-  setSettings: (settings: Settings) =>
+  setSettings: (settings: AppSettings) =>
     ipcRenderer.invoke("electron-store:set", settings),
 });

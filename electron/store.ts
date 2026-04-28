@@ -1,8 +1,8 @@
 import Store from "electron-store";
 import z from "zod";
-import { StoreSchema, type Settings } from "../shared/schemas/storeSchema";
+import { StoreSchema, type AppSettings } from "../shared/schemas/storeSchema";
 
-export const store = new Store<Settings>();
+export const store = new Store<AppSettings>();
 
 function validateStore() {
   const data = store.store;

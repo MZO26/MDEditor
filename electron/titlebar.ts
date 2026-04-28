@@ -1,12 +1,12 @@
 import { BrowserWindow, nativeTheme } from "electron";
-import type { Settings } from "../shared/schemas/storeSchema";
-import { StoreSchema, type AppTheme } from "../shared/schemas/storeSchema";
+import type { AppSettings, Theme } from "../shared/schemas/storeSchema";
+import { StoreSchema } from "../shared/schemas/storeSchema";
 import type { NativeWindowColors } from "../shared/types";
 import { THEME_DATA } from "../src/constants/themes";
 
 // updates the title bar overlay accordingly
 function getTitleBarOverlay(
-  themeName: Exclude<AppTheme, "system">, // exclude for union types (|) and Omit for object types ({})
+  themeName: Exclude<Theme, "system">, // exclude for union types (|) and Omit for object types ({})
   focus?: boolean,
 ): NativeWindowColors {
   const theme = THEME_DATA[themeName];
@@ -21,7 +21,7 @@ function getTitleBarOverlay(
 }
 
 // tells electron if theme is dark or light
-function initTheme(savedTheme: unknown): Exclude<AppTheme, "system"> {
+function initTheme(savedTheme: unknown): Exclude<Theme, "system"> {
   const validTheme = StoreSchema.shape.theme.safeParse(savedTheme);
   if (!validTheme.success) {
     console.warn(
@@ -38,7 +38,7 @@ function initTheme(savedTheme: unknown): Exclude<AppTheme, "system"> {
   return theme;
 }
 
-function onOSThemeChange(win: BrowserWindow, store: Settings["theme"]) {
+function onOSThemeChange(win: BrowserWindow, store: AppSettings["theme"]) {
   const savedTheme = store;
   if (savedTheme === "system") {
     const newActiveTheme = initTheme("system");

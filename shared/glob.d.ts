@@ -6,7 +6,7 @@ import {
   type UpdateNotePayload,
 } from "../shared/types";
 import type { Note } from "./schemas/noteSchema";
-import type { AppTheme, Settings } from "./schemas/storeSchema";
+import type { AppSettings, Theme } from "./schemas/storeSchema";
 
 declare module "*.css";
 declare module "*?raw" {
@@ -17,14 +17,11 @@ declare module "*?raw" {
 declare global {
   interface Window {
     electronAPI: {
-      setTheme: (
-        theme: AppTheme,
-        focus?: boolean,
-      ) => Promise<IpcResponse<AppTheme>>;
+      setTheme: (theme: Theme, focus?: boolean) => Promise<IpcResponse<Theme>>;
       saveImage: (
         payload: ImagePayload,
       ) => Promise<IpcResponse<{ imageSrc: string }>>;
-      onThemeChanged: (callback: (theme: AppTheme) => void) => () => void;
+      onThemeChanged: (callback: (theme: Theme) => void) => () => void;
     };
     noteAPI: {
       getAll: () => Promise<IpcResponse<Note[]>>;
@@ -42,12 +39,12 @@ declare global {
       getViews: (view) => Promise<IpcResponse<Note[]>>;
     };
     storeApi: {
-      getSettings: <K extends keyof Settings>(
+      getSettings: <K extends keyof AppSettings>(
         key: K,
-      ) => Promise<IpcResponse<Settings[K]>>;
+      ) => Promise<IpcResponse<AppSettings[K]>>;
       setSettings: (
-        settings: Partial<Settings>,
-      ) => Promise<IpcResponse<Settings>>;
+        settings: Partial<AppSettings>,
+      ) => Promise<IpcResponse<AppSettings>>;
     };
   }
 }

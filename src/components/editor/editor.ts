@@ -32,8 +32,7 @@ import { debouncedToDoUpdate } from "../../extensions/toDoBar";
 import { Typography } from "../../extensions/typography";
 import { getElement } from "../../utils/helpers";
 import { renderIcons } from "../../utils/icons";
-import { setupZoomBar, updateStats } from "./editorFooter";
-import { setupToolbar } from "./editorHeader";
+import { updateStats } from "./editorFooter";
 
 let editor: Editor | null = null;
 let seenSlugs = new Map<string, number>();
@@ -73,8 +72,6 @@ function initEditor(selector: string): Editor {
   });
   renderIcons(bubbleMenuElement);
   bubbleMenuManager.attach(editor);
-  setupToolbar(editor);
-  setupZoomBar();
   return editor;
 }
 

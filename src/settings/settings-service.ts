@@ -1,34 +1,11 @@
-import {
-  type AppFont,
-  type AppTheme,
-  type CodeThemePreference,
-} from "../../shared/schemas/storeSchema";
+import type { CodeTheme, Theme } from "../../shared/schemas/storeSchema";
 import type { Code, ResolvedTheme } from "../../shared/types";
 import { CODE_THEME_MAP, THEME_MAP } from "../constants/themes";
 import { getElement } from "../utils/helpers";
 import { showToast } from "../utils/toast";
+import { getSettings, setSettings } from "./settingsAPI";
 
-async function setSelectedFont(event: Event) {
-  const selectedFont = event.target as HTMLSelectElement;
-  const font = selectedFont.value as AppFont;
-  document.documentElement.setAttribute("data-font", font);
-  const response = await window.storeApi.setSettings({ font: font });
-  response.success
-    ? showToast(`Selected font: ${font}`)
-    : showToast("Failed to set font");
-}
-
-async function getSelectedFont(selectElement: HTMLSelectElement | undefined) {
-  const response = await window.storeApi.getSettings("font");
-  if (!response.success) return;
-  const font: AppFont = response.data || "system";
-  document.documentElement.setAttribute("data-font", font);
-  if (selectElement) {
-    selectElement.value = font;
-  }
-}
-
-function resolveTheme(theme: AppTheme): ResolvedTheme {
+function resolveTheme(theme: Theme): ResolvedTheme {
   if (theme === "system") {
     return window.matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
@@ -39,16 +16,16 @@ function resolveTheme(theme: AppTheme): ResolvedTheme {
 
 const applyAppTheme = async (
   selectElement: HTMLSelectElement,
-  themeOverride?: AppTheme,
+  themeOverride?: Theme,
   onOSchange?: boolean,
 ) => {
-  const codeThemeSelect = getElement<HTMLSelectElement>("#code-theme-dropdown");
-  let theme: AppTheme;
+  const codeThemeSelect = getElement<HTMLSelectElement>("#code-theme");
+  let theme: Theme;
   if (themeOverride) {
     theme = themeOverride; // theme override
   } else {
     // fallback reading from store
-    const response = await window.storeApi.getSettings("theme");
+    const response = await getSettings("theme");
     theme = response.success ? response.data : "system";
   }
   const resolved = theme === "system" ? resolveTheme(theme) : theme;
@@ -57,7 +34,7 @@ const applyAppTheme = async (
     selectElement.value = theme; // update select value to selected theme
     // api call for theme to resolve electrons internal theme
     const preference = setCodeTheme(codeThemeSelect);
-    await window.storeApi.setSettings({
+    await setSettings({
       theme: theme,
       "code-theme": preference,
     });
@@ -68,8 +45,8 @@ const applyAppTheme = async (
 function getDefaultCodeTheme(
   selectElement: HTMLSelectElement,
   resolvedTheme: ResolvedTheme,
-): { preference: CodeThemePreference; codeTheme: Code } {
-  const preference = selectElement.value as CodeThemePreference;
+): { preference: CodeTheme; codeTheme: Code } {
+  const preference = selectElement.value as CodeTheme;
   selectElement.value = preference;
   return {
     preference,
@@ -79,8 +56,8 @@ function getDefaultCodeTheme(
   };
 }
 
-function setCodeTheme(selectElement: HTMLSelectElement): CodeThemePreference {
-  const theme = document.documentElement.getAttribute("data-theme") as AppTheme;
+function setCodeTheme(selectElement: HTMLSelectElement): CodeTheme {
+  const theme = document.documentElement.getAttribute("data-theme") as Theme;
   const resolvedTheme = resolveTheme(theme);
   const { preference, codeTheme } = getDefaultCodeTheme(
     selectElement,
@@ -93,17 +70,10 @@ function setCodeTheme(selectElement: HTMLSelectElement): CodeThemePreference {
 const setAppTheme = async (event: Event) => {
   const selectElement = event.currentTarget as HTMLSelectElement;
   const theme = selectElement.value;
-  const validTheme = theme in THEME_MAP ? (theme as AppTheme) : "system";
+  const validTheme = theme in THEME_MAP ? (theme as Theme) : "system";
   // sets the theme in the main process, which will trigger the theme-changed event
   await applyAppTheme(selectElement, validTheme, false);
   showToast(`Set app theme to: ${validTheme}`);
 };
 
-export {
-  applyAppTheme,
-  getSelectedFont,
-  resolveTheme,
-  setAppTheme,
-  setCodeTheme,
-  setSelectedFont,
-};
+export { applyAppTheme, resolveTheme, setAppTheme, setCodeTheme };
