@@ -143,6 +143,50 @@ body {
   font-family: var(--current-font);
 }
 
+button {
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  margin: 0 2px;
+  padding: 0;
+  font: inherit;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  border-radius: 6px;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
+}
+
+button:hover {
+  background-color: var(--bg-button);
+  border-color: var(--border-color);
+  color: var(--text-main);
+  box-shadow: var(--shadow);
+}
+
+button:active {
+  transform: scale(0.95);
+  background: var(--bg-button);
+}
+
+button.is-active {
+  background-color: var(--bg-button);
+  color: var(--text-muted);
+  border-color: var(--accent-primary);
+  font-weight: bold;
+}
+
 .lucide {
   width: 18px;
   height: 18px;

@@ -14,7 +14,6 @@ import {
 } from "@tiptap/extensions";
 import StarterKit from "@tiptap/starter-kit";
 import { DragAutoScroll } from "../../extensions/autoScroll";
-import BubbleMenuManager from "../../extensions/bubbleMenu";
 import { CustomCodeBlockLowlight } from "../../extensions/languages";
 import { lowlight } from "../../extensions/lowlight";
 import { NoteTag } from "../../extensions/tag";
@@ -22,10 +21,10 @@ import { Typography } from "../../extensions/typography";
 import { getElement } from "../../utils/helpers";
 import { renderIcons } from "../../utils/icons";
 import { updateStats } from "./editorFooter";
+import { buildMenu } from "./toolbar/toolbarBuilder";
 
 let editor: Editor | null = null;
 const bubbleMenuElement = getElement(".bubble-menu");
-const bubbleMenuManager = new BubbleMenuManager(bubbleMenuElement);
 
 function initEditor(selector: string): Editor {
   const element = document.querySelector(selector);
@@ -57,7 +56,7 @@ function initEditor(selector: string): Editor {
     updateStats(editor, content);
   });
   renderIcons(bubbleMenuElement);
-  bubbleMenuManager.attach(editor);
+  buildMenu(bubbleMenuElement, editor, "bubble-menu");
   return editor;
 }
 
@@ -70,28 +69,12 @@ function getNoteEditorExtensions() {
       maxSpeed: 10,
     }),
     BubbleMenu.configure({
-      element: getElement(".bubble-menu") as HTMLElement,
+      element: bubbleMenuElement,
       options: {
         placement: "top",
         offset: 15,
         flip: true,
         shift: true,
-      },
-      shouldShow: ({ editor, from, to }) => {
-        if (from === to) return false;
-        if (editor.isActive("image")) return false;
-        const isDetails = editor.isActive("details");
-        const isParagraph = editor.isActive("paragraph");
-        const isCodeBlock = editor.isActive("codeBlock");
-        const isInlineCode = editor.isActive("code");
-        const isHeading = editor.isActive("heading");
-        if (isDetails) {
-          if (isParagraph || isCodeBlock || isHeading || isInlineCode) {
-            return true;
-          }
-          return false;
-        }
-        return true;
       },
     }),
     Focus.configure({

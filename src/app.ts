@@ -4,7 +4,7 @@ import {
   updateDateTime,
 } from "./components/editor/editorFooter";
 import { initHoverbar } from "./components/editor/hoverbar";
-import { buildToolbar } from "./components/editor/toolbar/toolbar";
+import { buildMenu } from "./components/editor/toolbar/toolbarBuilder";
 import {
   collapseSidebar,
   initNotesSidebar,
@@ -13,11 +13,7 @@ import {
 import { getByTag } from "./features/notes/noteAPI";
 import { initSearchHandlers } from "./features/search/searchHandlers";
 import { addNoteBtnHandler, closeModal } from "./handlers/buttonHandlers";
-import {
-  applyAppTheme,
-  setAppTheme,
-  setCodeTheme,
-} from "./settings/settings-service";
+import { applyAppTheme, setAppTheme, setCodeTheme } from "./settings/theme";
 import { getElement } from "./utils/helpers";
 import { renderIcons } from "./utils/icons";
 import { showToast } from "./utils/toast";
@@ -29,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await reloadNoteList();
   updateDateTime();
   const toolbarContainer = getElement("#toolbar");
-  buildToolbar(toolbarContainer, editor);
+  buildMenu(toolbarContainer, editor, "toolbar");
   initHoverbar();
   initSearchHandlers();
   getElement(".notes-container")?.addEventListener("contextmenu", (e) => {

@@ -386,6 +386,12 @@
   white-space: nowrap;
 }
 
+.tag-node {
+  background: var(--tag-bg);
+  color: var(--tag-color);
+  white-space: nowrap;
+}
+
 .searchTag {
   cursor: pointer;
 }

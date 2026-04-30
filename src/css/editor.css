@@ -55,19 +55,14 @@
   align-items: center;
 }
 
-.bubble-menu[data-active-menu="text"] .text-tools {
-  display: flex;
+.bubble-menu .tool-group {
+  display: none;
 }
 
-.bubble-menu[data-active-menu="codeBlock"] .code-block-tools {
-  display: flex;
-}
-
-.bubble-menu[data-active-menu="table"] .table-tools {
-  display: flex;
-}
-
-.bubble-menu[data-active-menu="inlineCode"] .inline-code-tools {
+.bubble-menu[data-active-menu="text"] .text-tools,
+.bubble-menu[data-active-menu="codeBlock"] .codeBlock-tools,
+.bubble-menu[data-active-menu="table"] .table-tools,
+.bubble-menu[data-active-menu="inlineCode"] .inlineCode-tools {
   display: flex;
 }
 

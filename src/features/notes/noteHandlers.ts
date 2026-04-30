@@ -42,7 +42,6 @@ async function saveNote(id: string, flush: boolean = false): Promise<void> {
   if (!editor) return;
   const editorData = extractNoteDataFromEditor(editor);
   const payload = { ...editorData, id };
-  console.log(payload);
   const response = await updateNote(payload, flush);
   if (!response.success) {
     showToast(response.message);

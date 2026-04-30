@@ -1,53 +1,61 @@
-import { InputRule, Mark, markPasteRule, mergeAttributes } from "@tiptap/core";
+import { mergeAttributes } from "@tiptap/core";
+import Mention from "@tiptap/extension-mention";
+import { PluginKey } from "@tiptap/pm/state";
 import type { Note } from "../../shared/schemas/noteSchema";
 import { debounce, getElement } from "../utils/helpers";
 
-const NoteTag = Mark.create({
-  name: "noteTag",
-  inclusive: true,
-  parseHTML() {
-    return [{ tag: "span.tag" }];
-  },
-  renderHTML({ HTMLAttributes }) {
-    return ["span", mergeAttributes(HTMLAttributes, { class: "tag" }), 0];
-  },
-  addInputRules() {
-    return [
-      new InputRule({
-        find: /(?:^|\s)(#[\p{L}\p{N}_]+)\s$/gu,
-        handler: ({ state, range, match }) => {
-          const { tr } = state;
-          const fullMatch = match[0];
-          const tagText = match[1];
-          if (!tagText) return;
-          const startIndex = fullMatch.indexOf(tagText);
-          const start = range.from + startIndex;
-          const end = start + tagText.length;
+const NoteTag = Mention.extend({
+  name: "noteTag", // unique name to register extension in the editor schema
+}).configure({
+  HTMLAttributes: { class: "tag-node" }, // gives a specific class to handle styling
 
-          tr.addMark(start, end, this.type.create());
-          tr.removeStoredMark(this.type);
-        },
-      }),
-    ];
-  },
-  addPasteRules() {
+  renderHTML({ options, node }) {
     return [
-      markPasteRule({
-        find: /#[\p{L}\p{N}_]+/gu,
-        type: this.type,
-      }),
+      "span",
+      mergeAttributes(options.HTMLAttributes),
+      `#${node.attrs["id"]}`, // json format to describe the html structure of the tag
     ];
   },
-  addKeyboardShortcuts() {
-    return {
-      Space: ({ editor }) => {
-        if (editor.isActive(this.name)) {
-          editor.chain().unsetMark(this.name).insertContent(" ").run();
-          return true;
-        }
-        return false;
-      },
-    };
+
+  renderText({ node }) {
+    return `#${node.attrs["id"]}`; // without this, the mention extension would default back to @
+  },
+
+  suggestion: {
+    char: "#",
+    pluginKey: new PluginKey("noteTagSuggestion"), // unique key to keep it extensible
+    items: ({ query }: { query: string }) => (query ? [query] : []),
+    render: () => {
+      let savedCommand: ((props: any) => void) | null = null;
+      let savedQuery = "";
+      // always gets called once # is being typed
+      return {
+        onStart: (props) => {
+          savedCommand = props.command;
+          savedQuery = props.query;
+        },
+        onUpdate: (props) => {
+          savedCommand = props.command;
+          savedQuery = props.query;
+        },
+        onExit: () => {
+          savedCommand = null;
+          savedQuery = "";
+        },
+        onKeyDown: ({ event }) => {
+          // when user hits space or enter
+          if (
+            (event.key === " " || event.key === "Enter") &&
+            savedQuery.length > 0
+          ) {
+            event.preventDefault();
+            savedCommand?.({ id: savedQuery }); // replaces the #query text in the document with a noteTag inline node
+            return true;
+          }
+          return false;
+        },
+      };
+    },
   },
 });
 
