@@ -1,23 +1,24 @@
 import type { Editor } from "@tiptap/core";
 import { EditorState } from "@tiptap/pm/state";
-import type { Note } from "../../../shared/schemas/noteSchema";
-import { editor } from "../../components/editor/editor";
-import { updateStats } from "../../components/editor/editorFooter";
+
+import { getNoteById, updateNote } from "@/api/noteAPI";
+import { editor } from "@/components/editor/editor";
+import { handleEditorEmptyState } from "@/components/editor/editorEmptyState";
 import {
+  debouncedStatUpdate,
   extractNoteDataFromEditor,
-  handleEditorEmptyState,
-} from "../../components/editor/editorHandlers";
-import { updateNoteInList } from "../../components/sidebar/sidebarNotes";
-import { debouncedTagUpdate } from "../../extensions/tag";
+} from "@/components/editor/editorHandlers";
+import { updateNoteInList } from "@/components/sidebar/sidebarNotes";
+import { debouncedTagUpdate } from "@/extensions/tag";
 import {
   abortCurrentSave,
   setupAutoSave,
   startNewSaveCycle,
-} from "../../utils/autoSave";
-import { setValue, StorageKeys } from "../../utils/cache";
-import { setActiveItem } from "../../utils/helpers";
-import { showToast } from "../../utils/toast";
-import { getNoteById, updateNote } from "./noteAPI";
+} from "@/services/autoSave";
+import { setValue, StorageKeys } from "@/services/cache";
+import { setActiveItem } from "@/utils/helpers";
+import { showToast } from "@/utils/toast";
+import type { Note } from "@shared/schemas/noteSchema";
 
 async function noteItemHandler(
   noteItem: HTMLDivElement,
@@ -34,7 +35,7 @@ async function noteItemHandler(
   setValue(StorageKeys.NOTE_ID, noteID);
   viewNote(response.data, editor);
   debouncedTagUpdate(response.data.tags);
-  updateStats(editor, response.data.content);
+  debouncedStatUpdate(editor, response.data.content);
   setActiveItem(noteItem, container);
 }
 

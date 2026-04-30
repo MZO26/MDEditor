@@ -1,0 +1,26 @@
+import { safeIpcCall } from "@/utils/helpers";
+import type { ImagePayload } from "@shared/schemas/imageSchema";
+import type { Theme } from "@shared/schemas/storeSchema";
+import type { IpcResponse } from "@shared/types";
+
+async function setTheme(theme: Theme): Promise<IpcResponse<Theme>> {
+  return safeIpcCall(window.electronAPI.setTheme(theme));
+}
+
+async function saveImage(
+  payload: ImagePayload,
+): Promise<IpcResponse<{ imageSrc: string }>> {
+  return safeIpcCall(window.electronAPI.saveImage(payload));
+}
+
+async function showContextMenu(
+  id: string,
+  pinned: boolean,
+  bookmarked: boolean,
+): Promise<IpcResponse<void>> {
+  return safeIpcCall(
+    window.electronAPI.showContextMenu(id, pinned, bookmarked),
+  );
+}
+
+export { saveImage, setTheme, showContextMenu };

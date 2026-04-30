@@ -1,4 +1,4 @@
-import { getElement } from "./helpers";
+import { getElement } from "@/utils/helpers";
 
 function showToast(value: string, duration = 2000): void {
   const container = getElement<HTMLDivElement>(".toast-container");

@@ -1,7 +1,7 @@
-import type { AutoSaveConfig } from "../../shared/types";
-import { saveNote } from "../features/notes/noteHandlers";
-import { getValue, StorageKeys } from "./cache";
-import { debounce } from "./helpers";
+import { saveNote } from "@/handlers/noteHandlers";
+import { getValue, StorageKeys } from "@/services/cache";
+import { debounce } from "@/utils/helpers";
+import type { AutoSaveConfig } from "@shared/types";
 
 let currentController: AbortController | null = null;
 

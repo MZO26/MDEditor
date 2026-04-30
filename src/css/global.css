@@ -221,6 +221,30 @@ button.is-active {
   box-shadow: inset 0 0 0 1px var(--accent-hover);
 }
 
+.tippy-box[data-theme~="app-theme"] {
+  background-color: var(--bg-sidebar-section);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.tippy-box[data-theme~="app-theme"][data-placement^="top"]
+  > .tippy-arrow::before {
+  border-top-color: var(--bg-sidebar-section);
+}
+.tippy-box[data-theme~="app-theme"][data-placement^="bottom"]
+  > .tippy-arrow::before {
+  border-bottom-color: var(--bg-sidebar-section);
+}
+.tippy-box[data-theme~="app-theme"][data-placement^="left"]
+  > .tippy-arrow::before {
+  border-left-color: var(--bg-sidebar-section);
+}
+.tippy-box[data-theme~="app-theme"][data-placement^="right"]
+  > .tippy-arrow::before {
+  border-right-color: var(--bg-sidebar-section);
+}
+
 /* Focus */
 :root[data-code-theme="github-dark"] {
   --hljs-bg: transparent;

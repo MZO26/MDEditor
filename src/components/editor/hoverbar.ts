@@ -1,6 +1,6 @@
-import type { Theme } from "../../../shared/schemas/storeSchema";
-import { getElement } from "../../utils/helpers";
-import { editor } from "./editor";
+import { editor } from "@/components/editor/editor";
+import { getElement } from "@/utils/helpers";
+import type { Theme } from "@shared/schemas/storeSchema";
 
 function initFocusMode(appContainer: HTMLDivElement) {
   const newState = !appContainer.classList.contains("focus");

@@ -1,6 +1,6 @@
-import type { AppSettings } from "../../shared/schemas/storeSchema";
-import type { IpcResponse } from "../../shared/types";
-import { safeIpcCall } from "../utils/helpers";
+import { safeIpcCall } from "@/utils/helpers";
+import type { AppSettings } from "@shared/schemas/storeSchema";
+import type { IpcResponse } from "@shared/types";
 
 async function getSettings<K extends keyof AppSettings>(
   key: K,

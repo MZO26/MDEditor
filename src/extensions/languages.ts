@@ -1,7 +1,7 @@
+import { lowlight } from "@/extensions/lowlight";
+import { debounce } from "@/utils/helpers";
 import { Editor } from "@tiptap/core";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
-import { debounce } from "../utils/helpers";
-import { lowlight } from "./lowlight";
 
 const CustomCodeBlockLowlight = CodeBlockLowlight.extend({
   addAttributes() {

@@ -4,7 +4,11 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/*": ["./shared/*"],
+      "@electron/*": ["./electron/*"]
+    },
     "rootDir": ".",
 
     "module": "esnext",

@@ -1,10 +1,14 @@
-import type { Editor } from "@tiptap/core";
-import { renderIcons } from "../../../utils/icons";
-import { BubbleMenuActions, ToolbarActions, type ActionMap } from "./actions";
+import {
+  BubbleMenuActions,
+  ToolbarActions,
+  type ActionMap,
+} from "@/components/toolbar/actions";
 import {
   createBubbleMenuFragment,
   createToolbarFragment,
-} from "./creationHelpers";
+} from "@/components/toolbar/creationHelpers";
+import { renderIcons } from "@/utils/icons";
+import type { Editor } from "@tiptap/core";
 
 function getActiveMenu(editor: Editor): string {
   if (editor.isActive("table")) return "table";

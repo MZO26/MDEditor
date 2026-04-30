@@ -3,6 +3,13 @@ import { resolve } from "node:path";
 
 export default defineConfig({
   main: {
+    resolve: {
+      alias: {
+        "@": resolve(__dirname, "src"),
+        "@shared": resolve(__dirname, "shared"),
+        "@electron": resolve(__dirname, "electron"),
+      },
+    },
     build: {
       outDir: "dist-electron/main",
       rollupOptions: {
@@ -17,6 +24,13 @@ export default defineConfig({
     },
   },
   preload: {
+    resolve: {
+      alias: {
+        "@": resolve(__dirname, "src"),
+        "@shared": resolve(__dirname, "shared"),
+        "@electron": resolve(__dirname, "electron"),
+      },
+    },
     build: {
       outDir: "dist-electron/preload",
       rollupOptions: {
@@ -32,6 +46,13 @@ export default defineConfig({
     },
   },
   renderer: {
+    resolve: {
+      alias: {
+        "@": resolve(__dirname, "src"),
+        "@shared": resolve(__dirname, "shared"),
+        "@electron": resolve(__dirname, "electron"),
+      },
+    },
     root: resolve(__dirname, "."),
     build: {
       outDir: "dist",

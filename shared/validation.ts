@@ -1,13 +1,13 @@
-import z from "zod";
-import { ImagePayloadSchema } from "./schemas/imageSchema";
+import { ImagePayloadSchema } from "@shared/schemas/imageSchema";
 import {
   CreateNotePayloadSchema,
   IdSchema,
   SearchSchema,
   TagSchema,
   UpdateNotePayloadSchema,
-} from "./schemas/noteSchema";
-import { StoreSchema } from "./schemas/storeSchema";
+} from "@shared/schemas/noteSchema";
+import { StoreSchema } from "@shared/schemas/storeSchema";
+import z from "zod";
 
 function validation<T>(schema: z.ZodType<T>, payload: unknown): T {
   const validation = schema.safeParse(payload);

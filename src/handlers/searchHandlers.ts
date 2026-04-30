@@ -1,12 +1,12 @@
-import { handleEditorEmptyState } from "../../components/editor/editorHandlers";
+import { getByTag, getViews, searchNotes } from "@/api/noteAPI";
+import { handleEditorEmptyState } from "@/components/editor/editorEmptyState";
+import { handleSidebarEmptyState } from "@/components/sidebar/sidebarEmptyState";
 import {
   addManyNotesToList,
-  handleSidebarEmptyState,
   reloadNoteList,
-} from "../../components/sidebar/sidebarNotes";
-import { debounce, getElement } from "../../utils/helpers";
-import { showToast } from "../../utils/toast";
-import { getViews, searchNotes } from "./searchAPI";
+} from "@/components/sidebar/sidebarNotes";
+import { debounce, getElement } from "@/utils/helpers";
+import { showToast } from "@/utils/toast";
 
 async function handleSearchInput(
   searchInput: string,
@@ -41,6 +41,15 @@ async function handleViews(view: string) {
   reloadNoteList(response.data);
 }
 
+async function searchByTag(tag: string) {
+  const response = await getByTag(tag);
+  if (!response.success) {
+    showToast(response.message);
+    return;
+  }
+  await reloadNoteList(response.data);
+}
+
 function initSearchHandlers() {
   const searchInput = getElement<HTMLInputElement>("#searchInput");
   const notesContainer = getElement<HTMLDivElement>(".notes-container");
@@ -53,14 +62,26 @@ function initSearchHandlers() {
   }
 
   const smartViewContainer = getElement(".smart-view-list");
+  const infoSidebarTagContainer = getElement<HTMLDivElement>(".tag-container");
 
   smartViewContainer.addEventListener("click", async (event) => {
     const target = (event.target as HTMLButtonElement).closest(
       "button[data-view]",
     ) as HTMLButtonElement | null;
-    const view = target?.dataset["view"];
+    if (!target) return;
+    const view = target.dataset["view"];
     if (!view) return;
-    await handleViews(view);
+    handleViews(view);
+  });
+
+  infoSidebarTagContainer.addEventListener("click", async (e: Event) => {
+    const target = (e.target as HTMLElement).closest(
+      ".tag",
+    ) as HTMLSpanElement | null;
+    if (!target) return;
+    const tag = target.dataset["tag"];
+    if (!tag) return;
+    searchByTag(tag);
   });
 }
 

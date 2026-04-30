@@ -1,16 +1,19 @@
-import BetterSqlite from "better-sqlite3";
-import { app } from "electron";
-import path from "path";
+import { FTS5 } from "@electron/db/fts";
+import {
+  createNoteTransactions,
+  type NoteTransactions,
+} from "@electron/db/transactions";
+import { Views } from "@electron/db/views";
+import { getNoteData } from "@shared/generators/generators";
 import {
   NoteFromDbSchema,
   type CreateNotePayload,
   type Note,
   type UpdateNotePayload,
-} from "../../shared/schemas/noteSchema";
-import { getNoteData } from "../../src/utils/helpers";
-import { FTS5 } from "./fts";
-import { createNoteTransactions, type NoteTransactions } from "./transactions";
-import { Views } from "./views";
+} from "@shared/schemas/noteSchema";
+import BetterSqlite from "better-sqlite3";
+import { app } from "electron";
+import path from "path";
 
 class NoteDB {
   private db: BetterSqlite.Database;

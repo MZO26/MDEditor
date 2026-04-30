@@ -1,4 +1,8 @@
-import type { Action, ActionMap, BubbleMenuGroup } from "./actions";
+import type {
+  Action,
+  ActionMap,
+  BubbleMenuGroup,
+} from "@/components/toolbar/actions";
 
 const BUBBLE_MENU_GROUPS: BubbleMenuGroup[] = [
   "text",

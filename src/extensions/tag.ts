@@ -1,8 +1,8 @@
+import { debounce, getElement } from "@/utils/helpers";
+import type { Note } from "@shared/schemas/noteSchema";
 import { mergeAttributes } from "@tiptap/core";
 import Mention from "@tiptap/extension-mention";
 import { PluginKey } from "@tiptap/pm/state";
-import type { Note } from "../../shared/schemas/noteSchema";
-import { debounce, getElement } from "../utils/helpers";
 
 const NoteTag = Mention.extend({
   name: "noteTag", // unique name to register extension in the editor schema

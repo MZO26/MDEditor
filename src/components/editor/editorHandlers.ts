@@ -1,6 +1,6 @@
-import type { Editor } from "@tiptap/core";
-import { getElement } from "../../utils/helpers";
-import { showEditorEmptyState } from "./editorEmptyState";
+import { calculateToDos } from "@/extensions/toDoBar";
+import { debounce, getElement } from "@/utils/helpers";
+import type { Editor, JSONContent } from "@tiptap/core";
 
 function extractNoteDataFromEditor(editor: Editor) {
   const plainText = editor.getText();
@@ -8,29 +8,30 @@ function extractNoteDataFromEditor(editor: Editor) {
   return { content, plainText };
 }
 
-function handleEditorEmptyState(ID?: string | undefined | null) {
-  const editorContainer = getElement(".editor-container");
-  const editorView = getElement(".editor-view");
-  if (!editorContainer || !editorView) {
-    console.warn("(editorHandler): Editor UI elements not found.");
-    return;
-  }
-  const emptyState = editorContainer.querySelector(".editor-empty-state");
-  // if no note id: show empty state of editor view
-  if (!ID) {
-    editorView.classList.add("hidden");
-    // only append new empty state if it doesn't already exist
-    if (!emptyState) {
-      const newEmptyState = showEditorEmptyState();
-      editorContainer.appendChild(newEmptyState);
-    }
-    // if note id: show editor view and remove empty state if it exists
-  } else {
-    editorView.classList.remove("hidden");
-    if (emptyState) {
-      emptyState.remove();
-    }
-  }
+function estimateReadingTime(wordCount: number, wpm = 238): string {
+  const s = Math.round((wordCount / wpm) * 60);
+  const m = Math.floor(s / 60);
+  return s < 30 ? "< 1 min read" : s < 60 ? "1 min read" : `${m} min read`;
 }
 
-export { extractNoteDataFromEditor, handleEditorEmptyState };
+function updateStats(editor: Editor, content: JSONContent) {
+  const charCount = editor.storage.characterCount.characters();
+  const wordCount = editor.storage.characterCount.words();
+
+  const charCountEl = getElement("#char-count");
+  charCountEl.innerText = charCount.toString();
+
+  const wordCountEl = getElement("#word-count");
+  if (wordCount === 1) {
+    wordCountEl.innerText = "1 word";
+  } else {
+    wordCountEl.innerText = `${wordCount} words`;
+  }
+  const readingTimeEl = getElement("#reading-time");
+  readingTimeEl.innerText = estimateReadingTime(wordCount);
+  calculateToDos(content);
+}
+
+const debouncedStatUpdate = debounce(updateStats, 1000);
+
+export { debouncedStatUpdate, extractNoteDataFromEditor };

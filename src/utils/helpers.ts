@@ -1,11 +1,4 @@
-import type { JSONContent } from "@tiptap/core";
-import {
-  snippetGenerator,
-  tagsGenerator,
-  titleGenerator,
-} from "../../shared/generators/generators";
-import type { IpcResponse, NoteData } from "../../shared/types";
-import { getTodoStats } from "../extensions/toDoBar";
+import type { IpcResponse } from "@shared/types";
 
 function getElement<T extends HTMLElement>(selector: string): T {
   const element = document.querySelector<T>(selector);
@@ -52,33 +45,6 @@ function debounce<T extends (...args: any[]) => void>(func: T, wait: number) {
   return debounced;
 }
 
-function formatNoteDate(isoString: string) {
-  const date = new Date(isoString);
-  return new Intl.DateTimeFormat("de-DE", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-}
-
-function getNoteData(
-  content: {
-    type: "doc";
-    content: JSONContent[];
-    attrs?: Record<string, unknown> | undefined;
-  },
-  plainText: unknown,
-): NoteData {
-  const { left } = getTodoStats(content);
-  return {
-    title: titleGenerator(plainText),
-    snippet: snippetGenerator(plainText),
-    todos_left: left,
-    tags: tagsGenerator(plainText),
-    stringifiedContent: JSON.stringify(content),
-    now: new Date().toISOString(),
-  };
-}
-
 async function safeIpcCall<T>(
   ipcPromise: Promise<IpcResponse<T>>,
 ): Promise<IpcResponse<T>> {
@@ -96,11 +62,4 @@ async function safeIpcCall<T>(
   }
 }
 
-export {
-  debounce,
-  formatNoteDate,
-  getElement,
-  getNoteData,
-  safeIpcCall,
-  setActiveItem,
-};
+export { debounce, getElement, safeIpcCall, setActiveItem };

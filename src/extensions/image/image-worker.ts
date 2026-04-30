@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-import { compressImage } from "./image-utils";
+import { compressImage } from "@/extensions/image/image-utils";
 
 self.onmessage = async (event: MessageEvent) => {
   const { id, file, maxWidth, quality } = event.data;

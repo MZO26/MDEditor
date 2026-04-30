@@ -1,3 +1,12 @@
+import { debouncedStatUpdate } from "@/components/editor/editorHandlers";
+import { buildMenu } from "@/components/toolbar/toolbarBuilder";
+import { DragAutoScroll } from "@/extensions/autoScroll";
+import { CustomCodeBlockLowlight } from "@/extensions/languages";
+import { lowlight } from "@/extensions/lowlight";
+import { NoteTag } from "@/extensions/tag";
+import { Typography } from "@/extensions/typography";
+import { getElement } from "@/utils/helpers";
+import { renderIcons } from "@/utils/icons";
 import { Editor } from "@tiptap/core";
 import BubbleMenu from "@tiptap/extension-bubble-menu";
 import Highlight from "@tiptap/extension-highlight";
@@ -13,15 +22,6 @@ import {
   Selection,
 } from "@tiptap/extensions";
 import StarterKit from "@tiptap/starter-kit";
-import { DragAutoScroll } from "../../extensions/autoScroll";
-import { CustomCodeBlockLowlight } from "../../extensions/languages";
-import { lowlight } from "../../extensions/lowlight";
-import { NoteTag } from "../../extensions/tag";
-import { Typography } from "../../extensions/typography";
-import { getElement } from "../../utils/helpers";
-import { renderIcons } from "../../utils/icons";
-import { updateStats } from "./editorFooter";
-import { buildMenu } from "./toolbar/toolbarBuilder";
 
 let editor: Editor | null = null;
 const bubbleMenuElement = getElement(".bubble-menu");
@@ -53,7 +53,7 @@ function initEditor(selector: string): Editor {
   editor.on("update", () => {
     if (!editor) return;
     const content = editor.getJSON();
-    updateStats(editor, content);
+    debouncedStatUpdate(editor, content);
   });
   renderIcons(bubbleMenuElement);
   buildMenu(bubbleMenuElement, editor, "bubble-menu");

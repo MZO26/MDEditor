@@ -1,5 +1,5 @@
+import { getElement } from "@/utils/helpers";
 import type { JSONContent } from "@tiptap/core";
-import { getElement } from "../utils/helpers";
 
 function getTodoStats(content: JSONContent) {
   let total = 0;

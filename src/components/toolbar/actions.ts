@@ -1,12 +1,12 @@
-import type { Editor } from "@tiptap/core";
-import { promptImageUpload } from "../../../extensions/image/image";
 import {
   copyBlock,
   duplicateCodeBlock,
   handleTableDelete,
   promoteToCodeBlock,
   toggleLanguage,
-} from "./customActions";
+} from "@/components/toolbar/customActions";
+import { promptImageUpload } from "@/extensions/image/image";
+import type { Editor } from "@tiptap/core";
 
 export type BubbleMenuGroup = "text" | "inlineCode" | "codeBlock" | "table";
 

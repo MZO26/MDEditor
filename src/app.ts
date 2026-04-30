@@ -1,25 +1,22 @@
-import { initEditor } from "./components/editor/editor";
-import {
-  setUpEditorSettings,
-  updateDateTime,
-} from "./components/editor/editorFooter";
-import { initHoverbar } from "./components/editor/hoverbar";
-import { buildMenu } from "./components/editor/toolbar/toolbarBuilder";
+import { initEditor } from "@/components/editor/editor";
+import { initHoverbar } from "@/components/editor/hoverbar";
 import {
   collapseSidebar,
   initNotesSidebar,
   reloadNoteList,
-} from "./components/sidebar/sidebarNotes";
-import { getByTag } from "./features/notes/noteAPI";
-import { initSearchHandlers } from "./features/search/searchHandlers";
-import { addNoteBtnHandler, closeModal } from "./handlers/buttonHandlers";
-import { applyAppTheme, setAppTheme, setCodeTheme } from "./settings/theme";
-import { getElement } from "./utils/helpers";
-import { renderIcons } from "./utils/icons";
-import { showToast } from "./utils/toast";
+} from "@/components/sidebar/sidebarNotes";
+import { buildMenu } from "@/components/toolbar/toolbarBuilder";
+import { addNoteBtnHandler, closeModal } from "@/handlers/buttonHandlers";
+import { initSearchHandlers } from "@/handlers/searchHandlers";
+import { initAppSettings } from "@/settings/settings";
+import { updateDateTime } from "@/utils/date";
+import { getElement } from "@/utils/helpers";
+import { renderIcons } from "@/utils/icons";
+import { createContextMenu } from "@/utils/templates";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const editor = initEditor("#editor");
+  initAppSettings();
   renderIcons();
   initNotesSidebar();
   await reloadNoteList();
@@ -28,65 +25,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   buildMenu(toolbarContainer, editor, "toolbar");
   initHoverbar();
   initSearchHandlers();
-  getElement(".notes-container")?.addEventListener("contextmenu", (e) => {
-    const item = (e.target as Element).closest<HTMLElement>(".noteItem");
-    if (!item) return;
-    e.preventDefault();
-    const id = item.dataset["id"];
-    const pinned = item.dataset["pinned"] === "true";
-    const bookmarked = item.dataset["bookmarked"] === "true";
-    if (!id) return;
-    window.electronAPI.showContextMenu(id, pinned, bookmarked);
-  });
-  setUpEditorSettings({
-    selectId: "#font-family",
-    storageKey: "font-family",
-    cssVar: "--editor-font-family",
-    defaultValue: "system",
-  });
-
-  setUpEditorSettings({
-    selectId: "#line-height",
-    storageKey: "line-height",
-    cssVar: "--editor-line-height",
-    defaultValue: 1.5,
-    min: 1.2,
-    max: 1.7,
-  });
-
-  setUpEditorSettings({
-    selectId: "#font-size",
-    storageKey: "font-size",
-    cssVar: "--editor-font-size",
-    defaultValue: 16,
-    min: 12,
-    max: 24,
-    formatValue: (v) => `${v}px`,
-  });
-
-  const themeDropdown = getElement<HTMLSelectElement>("#theme");
-  window.electronAPI.onThemeChanged(async (newTheme) => {
-    await applyAppTheme(themeDropdown, newTheme, true);
-  });
+  const notesContainer = getElement(".notes-container");
+  notesContainer.addEventListener("contextmenu", createContextMenu);
   const addNoteBtn = getElement(".add-note-btn");
   addNoteBtn.addEventListener("click", addNoteBtnHandler);
   const infoSidebar = getElement<HTMLElement>(".info-sidebar");
-  const infoSidebarTagContainer = getElement<HTMLDivElement>(".tag-container");
-  infoSidebarTagContainer.addEventListener("click", async (e: Event) => {
-    const clickedTag = (e.target as HTMLElement).closest(
-      ".tag",
-    ) as HTMLSpanElement;
-    if (!clickedTag) return;
-    const tagName = clickedTag.dataset["tag"];
-    if (!tagName) return;
-    console.log(`Searching for: ${tagName}`);
-    const response = await getByTag(tagName);
-    if (!response.success) {
-      showToast(response.message);
-      return;
-    }
-    await reloadNoteList(response.data);
-  });
   const infoSidebarToggle = getElement<HTMLButtonElement>(
     ".info-sidebar-toggle",
   );
@@ -103,24 +46,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   closeModalBtn.addEventListener("click", closeModal);
   const focusEditorBtn = getElement(".focus-editor-btn");
   focusEditorBtn.addEventListener("click", () => {
-    const editorElement = document.querySelector(".ProseMirror");
+    const editorElement = getElement(".ProseMirror");
     if (editorElement) {
       editorElement.classList.toggle("focus-mode-active");
     }
   });
-
-  const codeThemeSelect = getElement<HTMLSelectElement>("#code-theme");
-
-  if (themeDropdown) {
-    themeDropdown.addEventListener("change", setAppTheme);
-    applyAppTheme(themeDropdown);
-  }
-
-  if (codeThemeSelect) {
-    codeThemeSelect.addEventListener("change", async () => {
-      setCodeTheme(codeThemeSelect);
-    });
-  }
 
   const collapseBtn = getElement<HTMLButtonElement>(".collapse-btn");
   collapseBtn.addEventListener("click", collapseSidebar);
@@ -132,20 +62,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       collapseSidebar();
     }
   });
-  // function openModal(): void {
-  //   const overlay = getElement<HTMLDivElement>(".overlay");
-  //   const modal = getElement<HTMLDivElement>(".modal");
-  //   const items: HTMLCollection | undefined =
-  //     getElement<HTMLDivElement>(".notes-container").children;
-  //   overlay.classList.add("show");
-  //   modal.classList.add("show");
-  //   if (items) {
-  //     Array.from(items).forEach((element) => {
-  //       if (element.classList.contains("active"))
-  //         element.classList.remove("active");
-  //     });
-  //   }
-  // }
 });
 
 setInterval(updateDateTime, 60000);

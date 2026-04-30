@@ -1,18 +1,22 @@
-import { app, BrowserWindow, ipcMain, Menu, nativeTheme } from "electron";
-import path from "node:path";
-import process from "node:process";
-import { fileURLToPath } from "node:url";
-import { setUpContextMenu } from "./contextMenu";
-import { registerIpcHandlers } from "./ipc/ipcHandlers";
-import { tryExec } from "./ipc/ipcValidation";
+import { setUpContextMenu } from "@electron/contextMenu";
+import { registerIpcHandlers } from "@electron/ipc/ipcHandlers";
+import { tryExec } from "@electron/ipc/ipcValidation";
 import {
   navigationHandler,
   registerCustomProtocol,
   setupLocalImageProtocol,
-} from "./navigationHandler";
-import { setPermissions } from "./permissions";
-import { store } from "./store";
-import { getTitleBarOverlay, initTheme, onOSThemeChange } from "./titlebar";
+} from "@electron/navigationHandler";
+import { setPermissions } from "@electron/permissions";
+import { store } from "@electron/store";
+import {
+  getTitleBarOverlay,
+  initTheme,
+  onOSThemeChange,
+} from "@electron/titlebar";
+import { app, BrowserWindow, ipcMain, Menu, nativeTheme } from "electron";
+import path from "node:path";
+import process from "node:process";
+import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env["DIST"] = path.join(__dirname, "../dist");

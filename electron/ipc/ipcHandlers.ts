@@ -1,12 +1,12 @@
-import { app, BrowserWindow, ipcMain } from "electron";
-import { createHash } from "node:crypto";
-import fs from "node:fs";
-import path from "node:path";
+import db from "@electron/db/database";
+import { checkRateLimit, tryExec } from "@electron/ipc/ipcValidation";
+import { store } from "@electron/store";
+import { getTitleBarOverlay, initTheme } from "@electron/titlebar";
 import {
   StoreSchema,
   type AppSettings,
   type Theme,
-} from "../../shared/schemas/storeSchema";
+} from "@shared/schemas/storeSchema";
 import {
   validateCreate,
   validateId,
@@ -16,11 +16,11 @@ import {
   validateTag,
   validateTheme,
   validateUpdate,
-} from "../../shared/validation";
-import db from "../db/database";
-import { store } from "../store";
-import { getTitleBarOverlay, initTheme } from "../titlebar";
-import { checkRateLimit, tryExec } from "./ipcValidation";
+} from "@shared/validation";
+import { app, BrowserWindow, ipcMain } from "electron";
+import { createHash } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 
 export const LIMITS = {
   WRITE_HEAVY: 2000, // saveImage

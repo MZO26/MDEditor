@@ -1,12 +1,11 @@
-export {};
+import type { Note } from "@shared/schemas/noteSchema";
+import type { AppSettings, Theme } from "@shared/schemas/storeSchema";
 import {
   IpcResponse,
   type CreateNotePayload,
   type ImagePayload,
   type UpdateNotePayload,
-} from "../shared/types";
-import type { Note } from "./schemas/noteSchema";
-import type { AppSettings, Theme } from "./schemas/storeSchema";
+} from "@shared/shared/types";
 
 declare module "*.css";
 declare module "*?raw" {
@@ -26,7 +25,7 @@ declare global {
         id: string,
         pinned: boolean,
         bookmarked: boolean,
-      ) => void;
+      ) => Promise<IpcResponse<void>>;
     };
     noteAPI: {
       getAll: () => Promise<IpcResponse<Note[]>>;

@@ -1,6 +1,6 @@
+import { NoteFromDbSchema, type Note } from "@shared/schemas/noteSchema";
 import type { Database as DatabaseType } from "better-sqlite3";
 import BetterSqlite from "better-sqlite3";
-import { NoteFromDbSchema, type Note } from "../../shared/schemas/noteSchema";
 
 class Views {
   private db: DatabaseType;

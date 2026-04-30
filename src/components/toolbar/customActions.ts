@@ -1,7 +1,7 @@
+import { detectCodeBlockLanguage } from "@/extensions/languages";
+import { showToast } from "@/utils/toast";
 import { Editor, getMarkRange } from "@tiptap/core";
 import { CellSelection } from "@tiptap/pm/tables";
-import { detectCodeBlockLanguage } from "../../../extensions/languages";
-import { showToast } from "../../../utils/toast";
 
 async function copySelectedText(editor: Editor) {
   const { empty, from, to } = editor.state.selection;

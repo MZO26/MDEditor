@@ -1,5 +1,6 @@
-import type { Note } from "../../shared/schemas/noteSchema";
-import { formatNoteDate } from "./helpers";
+import { showContextMenu } from "@/api/electronAPI";
+import { formatNoteDate } from "@/utils/date";
+import type { Note } from "@shared/schemas/noteSchema";
 
 // builds skeleton once
 
@@ -39,4 +40,15 @@ function createNoteItem(note: Note): HTMLDivElement {
   return item;
 }
 
-export { createNoteItem };
+async function createContextMenu(e: Event) {
+  const item = (e.target as Element).closest<HTMLElement>(".noteItem");
+  if (!item) return;
+  e.preventDefault();
+  const id = item.dataset["id"];
+  const pinned = item.dataset["pinned"] === "true";
+  const bookmarked = item.dataset["bookmarked"] === "true";
+  if (!id) return;
+  await showContextMenu(id, pinned, bookmarked);
+}
+
+export { createContextMenu, createNoteItem };

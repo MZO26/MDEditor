@@ -1,8 +1,8 @@
+import type { AppSettings, Theme } from "@shared/schemas/storeSchema";
+import { StoreSchema } from "@shared/schemas/storeSchema";
+import { THEME_DATA } from "@shared/themes.constants";
+import type { NativeWindowColors } from "@shared/types";
 import { BrowserWindow, nativeTheme } from "electron";
-import type { AppSettings, Theme } from "../shared/schemas/storeSchema";
-import { StoreSchema } from "../shared/schemas/storeSchema";
-import type { NativeWindowColors } from "../shared/types";
-import { THEME_DATA } from "../src/constants/themes";
 
 // updates the title bar overlay accordingly
 function getTitleBarOverlay(

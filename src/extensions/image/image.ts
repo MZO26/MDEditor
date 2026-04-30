@@ -1,7 +1,8 @@
+import { saveImage } from "@/api/electronAPI";
+import { compressImage } from "@/extensions/image/image-utils";
+import { showToast } from "@/utils/toast";
+import type { WorkerResult } from "@shared/types";
 import type { Editor } from "@tiptap/core";
-import type { WorkerResult } from "../../../shared/types";
-import { showToast } from "../../utils/toast";
-import { compressImage } from "./image-utils";
 
 const worker = new Worker(new URL("./image-worker.ts", import.meta.url), {
   type: "module",
@@ -63,7 +64,7 @@ function promptImageUpload(editor: Editor) {
         return;
       }
       const extension = "jpeg";
-      const imageCompression = await window.electronAPI.saveImage({
+      const imageCompression = await saveImage({
         imageData: response.data,
         extension: extension,
       });

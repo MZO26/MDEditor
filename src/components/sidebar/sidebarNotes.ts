@@ -1,15 +1,16 @@
-import type { Note } from "../../../shared/schemas/noteSchema";
-import type { NoteItemElements } from "../../../shared/types";
-import { getAll } from "../../features/notes/noteAPI";
-import { noteItemHandler } from "../../features/notes/noteHandlers";
-import { deleteBtnHandler } from "../../handlers/buttonHandlers";
-import { getValue, setValue, StorageKeys } from "../../utils/cache";
-import { formatNoteDate, getElement } from "../../utils/helpers";
-import { createNoteItem } from "../../utils/templates";
-import { showToast } from "../../utils/toast";
-import { editor } from "../editor/editor";
-import { handleEditorEmptyState } from "../editor/editorHandlers";
-import { handleSidebarEmptyState } from "./sidebarEmptyState";
+import { getAll } from "@/api/noteAPI";
+import { editor } from "@/components/editor/editor";
+import { handleEditorEmptyState } from "@/components/editor/editorEmptyState";
+import { handleSidebarEmptyState } from "@/components/sidebar/sidebarEmptyState";
+import { deleteBtnHandler } from "@/handlers/buttonHandlers";
+import { noteItemHandler } from "@/handlers/noteHandlers";
+import { getValue, setValue, StorageKeys } from "@/services/cache";
+import { formatNoteDate } from "@/utils/date";
+import { getElement } from "@/utils/helpers";
+import { createNoteItem } from "@/utils/templates";
+import { showToast } from "@/utils/toast";
+import type { Note } from "@shared/schemas/noteSchema";
+import type { NoteItemElements } from "@shared/types";
 
 function initNotesSidebar() {
   const appContainer = getElement(".app-container");

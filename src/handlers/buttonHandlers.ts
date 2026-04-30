@@ -1,21 +1,16 @@
-import { editor } from "../components/editor/editor";
-import { handleEditorEmptyState } from "../components/editor/editorHandlers";
+import { bookmark, createNote, deleteNote, pin } from "@/api/noteAPI";
+import { editor } from "@/components/editor/editor";
+import { handleEditorEmptyState } from "@/components/editor/editorEmptyState";
 import {
   addOneNoteToList,
   handleSidebarEmptyState,
   reloadNoteList,
-} from "../components/sidebar/sidebarNotes";
-import {
-  bookmark,
-  createNote,
-  deleteNote,
-  pin,
-} from "../features/notes/noteAPI";
-import { viewNote } from "../features/notes/noteHandlers";
-import { getValue, removeValue, StorageKeys } from "../utils/cache";
-import { createNotePayload } from "../utils/factory";
-import { getElement, setActiveItem } from "../utils/helpers";
-import { showToast } from "../utils/toast";
+} from "@/components/sidebar/sidebarNotes";
+import { viewNote } from "@/handlers/noteHandlers";
+import { getValue, removeValue, StorageKeys } from "@/services/cache";
+import { createNotePayload } from "@/utils/factory";
+import { getElement, setActiveItem } from "@/utils/helpers";
+import { showToast } from "@/utils/toast";
 
 async function addNoteBtnHandler() {
   const container = getElement<HTMLDivElement>(".notes-container");
@@ -65,7 +60,9 @@ const unsubscribePin = window.noteAPI.onTriggerPin(async (id: string) => {
     showToast(response.message);
     return;
   }
-  showToast("Pinned note");
+  response.data === true
+    ? showToast("Pinned note")
+    : showToast("Unpinned note");
   await reloadNoteList();
 });
 
@@ -76,7 +73,9 @@ const unsubscribeBookmark = window.noteAPI.onTriggerBookmark(
       showToast(response.message);
       return;
     }
-    showToast("Bookmarked note");
+    response.data === true
+      ? showToast("Bookmarked note")
+      : showToast("Removed bookmark");
     await reloadNoteList();
   },
 );
@@ -105,5 +104,20 @@ function closeModal() {
   overlay.classList.remove("show");
   modal.classList.remove("show");
 }
+
+// function openModal(): void {
+//   const overlay = getElement<HTMLDivElement>(".overlay");
+//   const modal = getElement<HTMLDivElement>(".modal");
+//   const items: HTMLCollection | undefined =
+//     getElement<HTMLDivElement>(".notes-container").children;
+//   overlay.classList.add("show");
+//   modal.classList.add("show");
+//   if (items) {
+//     Array.from(items).forEach((element) => {
+//       if (element.classList.contains("active"))
+//         element.classList.remove("active");
+//     });
+//   }
+// }
 
 export { addNoteBtnHandler, closeModal, deleteBtnHandler };

@@ -1,10 +1,10 @@
+import { safeIpcCall } from "@/utils/helpers";
 import type {
   CreateNotePayload,
   Note,
   UpdateNotePayload,
-} from "../../../shared/schemas/noteSchema";
-import type { IpcResponse } from "../../../shared/types";
-import { safeIpcCall } from "../../utils/helpers";
+} from "@shared/schemas/noteSchema";
+import type { IpcResponse } from "@shared/types";
 
 async function createNote(
   payload: CreateNotePayload,
@@ -43,6 +43,17 @@ async function bookmark(id: string): Promise<IpcResponse<boolean>> {
   return safeIpcCall(window.noteAPI.bookmark(id));
 }
 
+async function searchNotes(
+  searchInput: string,
+  limit: number,
+): Promise<IpcResponse<Note[]>> {
+  return safeIpcCall(window.noteAPI.searchNotes(searchInput, limit));
+}
+
+async function getViews(view: string): Promise<IpcResponse<Note[]>> {
+  return safeIpcCall(window.noteAPI.getViews(view));
+}
+
 export {
   bookmark,
   createNote,
@@ -50,6 +61,8 @@ export {
   getAll,
   getByTag,
   getNoteById,
+  getViews,
   pin,
+  searchNotes,
   updateNote,
 };

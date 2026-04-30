@@ -1,5 +1,5 @@
-import emptySidebar from "../../assets/emptySidebar.svg?raw";
-import searchNotFound from "../../assets/searchNotFound.svg?raw";
+import emptySidebar from "@/assets/emptySidebar.svg?raw";
+import searchNotFound from "@/assets/searchNotFound.svg?raw";
 
 function handleSidebarEmptyState(
   container: HTMLDivElement,

@@ -1,4 +1,4 @@
-import type { CreateNotePayload } from "../../shared/schemas/noteSchema";
+import type { CreateNotePayload } from "@shared/schemas/noteSchema";
 
 function createNotePayload(data?: CreateNotePayload): CreateNotePayload {
   return {

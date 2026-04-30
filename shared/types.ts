@@ -1,6 +1,5 @@
+import type { Views } from "@electron/db/views";
 import type { Editor } from "@tiptap/core";
-import type { Settings } from "http2";
-import type { Views } from "../electron/db/views";
 
 type NativeWindowColors = {
   backgroundColor: string;
@@ -76,7 +75,6 @@ export type {
   NoteData,
   NoteItemElements,
   ResolvedTheme,
-  Settings,
   TitleBarOverlayOptions,
   Views,
   WorkerResult,

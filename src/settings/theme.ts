@@ -1,9 +1,10 @@
-import type { CodeTheme, Theme } from "../../shared/schemas/storeSchema";
-import type { Code, ResolvedTheme } from "../../shared/types";
-import { CODE_THEME_MAP, THEME_MAP } from "../constants/themes";
-import { getElement } from "../utils/helpers";
-import { showToast } from "../utils/toast";
-import { getSettings, setSettings } from "./settingsAPI";
+import { setTheme } from "@/api/electronAPI";
+import { getSettings, setSettings } from "@/api/settingsAPI";
+import { getElement } from "@/utils/helpers";
+import { showToast } from "@/utils/toast";
+import type { CodeTheme, Theme } from "@shared/schemas/storeSchema";
+import { CODE_THEME_MAP, THEME_MAP } from "@shared/themes.constants";
+import type { Code, ResolvedTheme } from "@shared/types";
 
 function resolveTheme(theme: Theme): ResolvedTheme {
   if (theme === "system") {
@@ -39,7 +40,7 @@ const applyAppTheme = async (
       "code-theme": preference,
     });
   } else selectElement.value = "system"; // does not set theme because it was triggered by theme-changed callback and should not be overwritten
-  await window.electronAPI.setTheme(theme);
+  await setTheme(theme);
 };
 
 function getDefaultCodeTheme(

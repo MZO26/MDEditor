@@ -1,10 +1,10 @@
-import type { Database as DatabaseType } from "better-sqlite3";
-import { generateFtsQuery } from "../../shared/generators/ftsQuery";
+import { ftsQueryGenerator } from "@shared/generators/generators";
 import {
   NoteFromDbSchema,
   type FTSRows,
   type Note,
-} from "../../shared/schemas/noteSchema";
+} from "@shared/schemas/noteSchema";
+import type { Database as DatabaseType } from "better-sqlite3";
 
 class FTS5 {
   private db: DatabaseType;
@@ -72,7 +72,7 @@ class FTS5 {
   }
 
   searchNotes(searchTerm: string, limit: number): Note[] {
-    const ftsQuery = generateFtsQuery(searchTerm);
+    const ftsQuery = ftsQueryGenerator(searchTerm);
     const stmt = this.db.prepare<unknown[], FTSRows>(`
     SELECT 
       n.id, 

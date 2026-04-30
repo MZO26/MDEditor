@@ -1,6 +1,6 @@
+import type { IpcResponse } from "@shared/types";
 import { app, type IpcMainInvokeEvent } from "electron";
 import z, { ZodError } from "zod";
-import type { IpcResponse } from "../../shared/types";
 
 enum AppError {
   DBError = "NOT_FOUND",

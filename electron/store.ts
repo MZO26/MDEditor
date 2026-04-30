@@ -1,6 +1,6 @@
+import { StoreSchema, type AppSettings } from "@shared/schemas/storeSchema";
 import Store from "electron-store";
 import z from "zod";
-import { StoreSchema, type AppSettings } from "../shared/schemas/storeSchema";
 
 export const store = new Store<AppSettings>();
 

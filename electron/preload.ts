@@ -1,10 +1,10 @@
-import { contextBridge, ipcRenderer, type IpcRendererEvent } from "electron";
-import type { ImagePayload } from "../shared/schemas/imageSchema";
+import type { ImagePayload } from "@shared/schemas/imageSchema";
 import type {
   CreateNotePayload,
   UpdateNotePayload,
-} from "../shared/schemas/noteSchema";
-import type { AppSettings, Theme } from "../shared/schemas/storeSchema";
+} from "@shared/schemas/noteSchema";
+import type { AppSettings, Theme } from "@shared/schemas/storeSchema";
+import { contextBridge, ipcRenderer, type IpcRendererEvent } from "electron";
 
 console.log("--- PRELOAD ACTIVE ---");
 
