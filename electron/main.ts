@@ -38,6 +38,8 @@ function createWindow() {
     show: false,
     width: 1100,
     height: 600,
+    minWidth: 1000,
+    minHeight: 500,
     titleBarStyle: "hidden",
     titleBarOverlay: windowTheme.overlayOptions,
     autoHideMenuBar: true,

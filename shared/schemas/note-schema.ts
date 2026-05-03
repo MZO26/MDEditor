@@ -73,8 +73,7 @@ const FTSRowsSchema = NoteSchema.omit({
 
 const SearchSchema = z.object({
   searchTerm: z.string().trim().min(1).max(100),
-
-  limit: z.number().int().min(1).max(50).default(20),
+  limit: z.number().int().min(20).max(50).default(50),
 });
 
 const CreateNotePayloadSchema = NoteSchema.omit({

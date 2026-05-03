@@ -22,7 +22,7 @@ import {
   Selection,
 } from "@tiptap/extensions";
 import StarterKit from "@tiptap/starter-kit";
-import { debouncedStatUpdate } from "../sidebar/meta-sidebar-actions";
+import { debouncedStatUpdate } from "../sidebar/info-sidebar-actions";
 
 let editor: Editor | null = null;
 const bubbleMenuElement = getElement(".bubble-menu");
@@ -77,10 +77,15 @@ function getNoteEditorExtensions() {
         flip: true,
         shift: true,
       },
+      shouldShow: ({ editor, from, to }) => {
+        if (from === to) return false;
+        if (editor.isActive("code")) return false;
+        return true;
+      },
     }),
     Focus.configure({
       className: "has-focus",
-      mode: "deepest",
+      mode: "all",
     }),
     Placeholder.configure({
       placeholder: "Start writing...",

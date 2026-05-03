@@ -109,8 +109,27 @@ function formatShortcut(shortcut?: string): string {
   return formatted.toUpperCase();
 }
 
+function createTooltipContent(
+  baseText: string,
+  shortcut?: string,
+): HTMLSpanElement {
+  const tooltipContent = document.createElement("span");
+  tooltipContent.textContent = baseText;
+
+  if (shortcut) {
+    const formatted = formatShortcut(shortcut);
+    const kbdElement = document.createElement("kbd");
+    kbdElement.className = "tippy-shortcut";
+    kbdElement.textContent = formatted;
+    tooltipContent.appendChild(kbdElement);
+  }
+
+  return tooltipContent;
+}
+
 export {
   createAsyncHandler,
+  createTooltipContent,
   debounce,
   formatShortcut,
   getElement,

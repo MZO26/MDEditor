@@ -1,3 +1,4 @@
+import { duplicateCodeBlock } from "@/components/toolbar/custom-actions";
 import { promptImageUpload } from "@/extensions/image/image";
 import { Extension } from "@tiptap/core";
 
@@ -33,6 +34,12 @@ export const MasterShortcuts = Extension.create({
         promptImageUpload(this.editor);
         return true;
       },
+      "Mod-Alt-ArrowDown": () => this.editor.commands.addRowAfter(),
+      "Mod-Alt-ArrowUp": () => this.editor.commands.addRowBefore(),
+      "Mod-Alt-ArrowRight": () => this.editor.commands.addColumnAfter(),
+      "Mod-Alt-ArrowLeft": () => this.editor.commands.addColumnBefore(),
+      "Mod-Alt-Backspace": () => this.editor.commands.deleteTable(),
+      "Shift-Alt-ArrowDown": () => duplicateCodeBlock(this.editor),
     };
   },
 });

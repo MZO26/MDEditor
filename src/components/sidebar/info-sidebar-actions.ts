@@ -10,6 +10,7 @@ function updateNoteTags(tags: Note["tags"]) {
   tags.forEach((tag) => {
     const span = document.createElement("span");
     span.classList.add("tag", "searchTag");
+    span.setAttribute("tippy-content", `filter notes with: ${tag}`);
     span.dataset["tag"] = String(tag);
     span.textContent = `#${tag}`;
     container.append(span);

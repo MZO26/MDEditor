@@ -14,21 +14,22 @@
 
 :root {
   --bg-editor: #fcfcfc;
-  --bg-sidebar: #f8f8f8;
-  --bg-sidebar-section: #f1f1f2;
-  --bg-button: #f1f1f2;
+  --bg-sidebar: #f2f2f4;
+  --bg-sidebar-section: #e2e2e5;
+  --bg-button: #d8d8dc;
   --text-main: #18181b;
-  --text-muted: #71717a;
+  --text-muted: #636370;
   --accent-primary: #52525b;
   --accent-hover: #e4e4e6;
-  --border-color: #d4d4d8;
-  --tag-color: #1976d2;
-  --tag-bg: #e3f2fd;
+  --border-color: #c8c8cc;
   --shadow: 0 0 0 1px rgba(200, 200, 205, 0.8), 0 1px 3px rgba(0, 0, 0, 0.08);
-  --pin-accent: #d97706;
-  --pin-bg: rgba(217, 119, 6, 0.07);
-  --bookmark-accent: #6d28d9;
-  --bookmark-bg: rgba(109, 40, 217, 0.05);
+  --tag-color: #1565c0;
+  --tag-bg: #e3f2fd;
+  --selection-bg: rgba(82, 82, 91, 0.12);
+  --focus-ring: #52525b;
+  --scrollbar-thumb: #c4c4c8;
+  --tooltip-bg: #2c2c2f;
+  --tooltip-text: #f4f4f5;
 
   /* Font families */
   --font-system:
@@ -61,29 +62,31 @@
   --tag-color: #4fc3f7;
   --tag-bg: #1e293b;
   --shadow: 0 0 0 1px rgba(49, 49, 53, 0.8), 0 1px 3px rgba(0, 0, 0, 0.3);
-  --pin-accent: #fbbf24;
-  --pin-bg: rgba(251, 191, 36, 0.08);
-  --bookmark-accent: #a78bfa;
-  --bookmark-bg: rgba(167, 139, 250, 0.08);
+  --selection-bg: rgba(161, 161, 170, 0.18);
+  --focus-ring: #a1a1aa;
+  --scrollbar-thumb: #6a6a6e;
+  --tooltip-bg: #e8e8eb;
+  --tooltip-text: #18181b;
 }
 
 [data-theme="light-warm"] {
   --bg-editor: #f8f7f3;
   --bg-sidebar: #eceae3;
-  --bg-sidebar-section: #e0ded6;
-  --bg-button: #e0ded6;
+  --bg-sidebar-section: #d8d6ce;
+  --bg-button: #d0cec6;
   --text-main: #1c1917;
-  --text-muted: #6b6560;
+  --text-muted: #5e5b56;
   --accent-primary: #44403c;
   --accent-hover: #e2e0d8;
-  --border-color: #cbc8c0;
+  --border-color: #c4c2ba;
+  --shadow: 0 0 0 1px rgba(196, 194, 186, 0.8), 0 1px 3px rgba(0, 0, 0, 0.07);
   --tag-color: #1456a8;
   --tag-bg: #dbeafe;
-  --shadow: 0 0 0 1px rgba(203, 200, 192, 0.8), 0 1px 3px rgba(0, 0, 0, 0.07);
-  --pin-accent: #b45309;
-  --pin-bg: rgba(180, 83, 9, 0.07);
-  --bookmark-accent: #5b21b6;
-  --bookmark-bg: rgba(91, 33, 182, 0.05);
+  --selection-bg: rgba(68, 64, 60, 0.12);
+  --focus-ring: #44403c;
+  --scrollbar-thumb: #c0beb6;
+  --tooltip-bg: #2c2925;
+  --tooltip-text: #f5f3ef;
 }
 
 [data-theme="dark-warm"] {
@@ -99,10 +102,11 @@
   --tag-color: #5bc3f5;
   --tag-bg: #1c2030;
   --shadow: 0 0 0 1px rgba(80, 72, 67, 0.85), 0 1px 3px rgba(0, 0, 0, 0.32);
-  --pin-accent: #f59e0b;
-  --pin-bg: rgba(245, 158, 11, 0.08);
-  --bookmark-accent: #c4b5fd;
-  --bookmark-bg: rgba(196, 181, 253, 0.08);
+  --selection-bg: rgba(158, 152, 144, 0.18);
+  --focus-ring: #9e9890;
+  --scrollbar-thumb: #6a645b;
+  --tooltip-bg: #e4e2da;
+  --tooltip-text: #1c1917;
 }
 
 [data-font="system"] {
@@ -137,10 +141,8 @@ html {
 }
 
 body {
-  background: var(--window-bg);
   color: var(--text-main);
   background-color: var(--bg-editor);
-  font-family: var(--current-font);
 }
 
 button {
@@ -169,7 +171,7 @@ button {
 }
 
 button:hover {
-  background-color: var(--bg-button);
+  background-color: var(--accent-hover);
   border-color: var(--border-color);
   color: var(--text-main);
   box-shadow: var(--shadow);
@@ -181,7 +183,7 @@ button:active {
 }
 
 button.is-active {
-  background-color: var(--bg-button);
+  background-color: var(--bg-sidebar-section);
   color: var(--text-muted);
   border-color: var(--accent-primary);
   font-weight: bold;
@@ -213,7 +215,7 @@ button:disabled {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--bg-button);
+  background-color: var(--scrollbar-thumb);
   backdrop-filter: blur(10px);
   border: 3px solid transparent;
   background-clip: content-box;
@@ -229,33 +231,31 @@ button:disabled {
 
 .tippy-box[data-theme~="app-theme"] {
   font-size: 14px;
-  background-color: var(--bg-sidebar-section);
-  color: var(--text-main);
+  background-color: var(--tooltip-bg);
+  color: var(--tooltip-text);
   border: 1px solid var(--border-color);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .tippy-box[data-theme~="app-theme"][data-placement^="top"]
   > .tippy-arrow::before {
-  border-top-color: var(--bg-sidebar-section);
+  border-top-color: var(--tooltip-bg);
 }
 .tippy-box[data-theme~="app-theme"][data-placement^="bottom"]
   > .tippy-arrow::before {
-  border-bottom-color: var(--bg-sidebar-section);
+  border-bottom-color: var(--tooltip-bg);
 }
 .tippy-box[data-theme~="app-theme"][data-placement^="left"]
   > .tippy-arrow::before {
-  border-left-color: var(--bg-sidebar-section);
+  border-left-color: var(--tooltip-bg);
 }
 .tippy-box[data-theme~="app-theme"][data-placement^="right"]
   > .tippy-arrow::before {
-  border-right-color: var(--bg-sidebar-section);
+  border-right-color: var(--tooltip-bg);
 }
 
 .tippy-shortcut {
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: row;
   opacity: 0.6;
   padding: 3px 0;

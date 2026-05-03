@@ -8,6 +8,10 @@
   position: relative;
 }
 
+.ProseMirror ::selection {
+  background: var(--selection-bg);
+}
+
 .ProseMirror > * {
   padding: 3px;
   border-radius: 6px;
@@ -75,7 +79,7 @@
   height: 28px;
   padding: 0 8px;
   background-color: transparent;
-  color: var(--text-main);
+  color: var(--text-muted);
   border: none;
   border-radius: 4px;
   font-weight: 600;
@@ -83,15 +87,16 @@
   transition: all 0.15s ease;
 }
 
-.bubble-menu .menu-btn:hover {
+/* .bubble-menu .menu-btn:hover {
   background-color: var(--bg-button);
   color: var(--text-main);
 }
 
 .bubble-menu .menu-btn.is-active {
-  background-color: var(--tag-bg);
-  color: var(--tag-color);
-}
+  background-color: var(--bg-sidebar-section);
+  color: var(--text-muted);
+  border-color: var(--accent-primary);
+} */
 
 .select-wrapper {
   position: relative;

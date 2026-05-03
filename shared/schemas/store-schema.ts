@@ -14,7 +14,8 @@ const StoreSchema = z.object({
   "code-theme": z
     .enum(["focus", "balanced", "eye-comfort"])
     .default("balanced"),
-  "collapsed-state": z.boolean().default(false),
+  "note-sidebar-state": z.boolean().default(false),
+  "info-sidebar-state": z.boolean().default(false),
 });
 type AppSettings = z.infer<typeof StoreSchema>;
 type Theme = AppSettings["theme"];
@@ -26,7 +27,10 @@ type StyleKeys = Extract<
   keyof AppSettings,
   "theme" | "font-family" | "font-size" | "line-height" | "code-theme"
 >;
-type StateKeys = Extract<keyof AppSettings, "collapsed-state">;
+type StateKeys = Extract<
+  keyof AppSettings,
+  "note-sidebar-state" | "info-sidebar-state"
+>;
 export {
   StoreSchema,
   type AppSettings,

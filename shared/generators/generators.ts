@@ -61,7 +61,8 @@ function tagsGenerator(input: unknown): string[] {
   const arr: string[] = [];
   const seen = new Set<string>();
   for (const tag of input.match(/#[\p{L}\p{N}_]+/gu) ?? []) {
-    const t = tag.slice(1);
+    const t = tag.slice(1).trim().toLowerCase();
+    if (t.length === 0 || t.length > 40) continue;
     if (seen.has(t)) continue;
     seen.add(t);
     arr.push(t);

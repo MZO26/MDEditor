@@ -1,8 +1,6 @@
 import {
-  copyBlock,
   duplicateCodeBlock,
   handleTableDelete,
-  promoteToCodeBlock,
 } from "@/components/toolbar/custom-actions";
 import type { ActionMap } from "@shared/types";
 
@@ -13,24 +11,28 @@ const BubbleMenuActions: ActionMap = {
     isActive: (editor) => editor.isActive("bold"),
     icon: "bold",
     group: "text",
+    shortcut: "Mod+B",
   },
   italic: {
     run: (editor) => editor.chain().focus().toggleItalic().run(),
     isActive: (editor) => editor.isActive("italic"),
     icon: "italic",
     group: "text",
+    shortcut: "MOD+I",
   },
   strike: {
     run: (editor) => editor.chain().focus().toggleStrike().run(),
     isActive: (editor) => editor.isActive("strike"),
     icon: "strikethrough",
     group: "text",
+    shortcut: "MOD+Shift+X",
   },
   highlight: {
     run: (editor) => editor.chain().focus().toggleHighlight().run(),
     isActive: (editor) => editor.isActive("highlight"),
     icon: "highlighter",
     group: "text",
+    shortcut: "MOD+Shift+H",
   },
   divider1: { type: "divider" },
   h1: {
@@ -38,79 +40,66 @@ const BubbleMenuActions: ActionMap = {
     isActive: (editor) => editor.isActive("heading", { level: 1 }),
     icon: "heading-1",
     group: "text",
+    shortcut: "MOD+Alt+1",
   },
   h2: {
     run: (editor) => editor.chain().focus().toggleHeading({ level: 2 }).run(),
     isActive: (editor) => editor.isActive("heading", { level: 2 }),
     icon: "heading-2",
     group: "text",
+    shortcut: "MOD+Alt+2",
   },
   h3: {
     run: (editor) => editor.chain().focus().toggleHeading({ level: 3 }).run(),
     isActive: (editor) => editor.isActive("heading", { level: 3 }),
     icon: "heading-3",
     group: "text",
+    shortcut: "MOD+Alt+3",
   },
   divider2: { type: "divider" },
   link: {
     run: (editor) => editor.chain().focus().toggleLink().run(),
     icon: "link",
     group: "text",
+    shortcut: "MOD+K",
   },
   // table actions
   addRowAfter: {
     run: (editor) => editor.chain().focus().addRowAfter().run(),
     icon: "between-vertical-end",
     group: "table",
+    shortcut: "Mod-Alt-ArrowDown",
   },
   addColumnAfter: {
     run: (editor) => editor.chain().focus().addColumnAfter().run(),
     icon: "between-horizontal-end",
     group: "table",
+    shortcut: "Mod-Alt-ArrowRight",
   },
   addRowBefore: {
     run: (editor) => editor.chain().focus().addRowBefore().run(),
     icon: "between-vertical-start",
     group: "table",
+    shortcut: "Mod-Alt-ArrowUp",
   },
   addColumnBefore: {
     run: (editor) => editor.chain().focus().addColumnBefore().run(),
     icon: "between-horizontal-start",
     group: "table",
+    shortcut: "Mod-Alt-ArrowLeft",
   },
   divider3: { type: "divider" },
   deleteTable: {
     run: (editor) => handleTableDelete(editor),
     icon: "trash-2",
     group: "table",
-  },
-  // code block actions
-  copyBlock: {
-    run: (editor) => copyBlock(editor),
-    icon: "copy",
-    group: "codeBlock",
+    shortcut: "Mod-Alt-Backspace",
   },
   duplicate: {
     run: (editor) => duplicateCodeBlock(editor),
     icon: "repeat",
     group: "codeBlock",
-  },
-  // inline code actions
-  inlineCode: {
-    run: (editor) => editor.chain().focus().toggleCode().run(),
-    isActive: (editor) => editor.isActive("code"),
-    icon: "code",
-    group: "inlineCode",
-  },
-  removeFormat: {
-    run: (editor) => editor.chain().focus().toggleMark("code").run(),
-    icon: "code",
-    group: "inlineCode",
-  },
-  promote: {
-    run: (editor) => promoteToCodeBlock(editor),
-    icon: "code-xml",
-    group: "inlineCode",
+    shortcut: "Shift+Alt+ArrowDown",
   },
 };
 

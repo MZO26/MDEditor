@@ -32,11 +32,16 @@
         <div class="frame-right">
           <div class="toolbar-hover-zone">
             <div class="top-toolbar">
-              <button class="read-only-btn">
+              <button class="read-only-btn" data-tippy-content="read only mode">
                 <i data-lucide="glasses"></i>
               </button>
-              <button class="focus-btn"><i data-lucide="focus"></i></button>
-              <button class="editor-width-btn">
+              <button class="focus-btn" data-tippy-content="focus mode">
+                <i data-lucide="focus"></i>
+              </button>
+              <button
+                class="editor-width-btn"
+                data-tippy-content="editor width"
+              >
                 <i data-lucide="ruler-dimension-line"></i>
               </button>
             </div>
@@ -53,21 +58,27 @@
                 id="searchInput"
                 class="search-input"
                 placeholder="search notes"
+                data-tippy-content="search note content"
               />
             </div>
-            <button class="add-note-btn" title="add new note">
+            <button class="add-note-btn" data-tippy-content="add new note">
               <i data-lucide="plus"></i>
             </button>
           </div>
           <div class="notes-container"></div>
           <div class="sidebar-footer">
-            <button class="settings-btn" popovertarget="settings-panel">
+            <button
+              class="settings-btn"
+              popovertarget="settings-panel"
+              data-tippy-content="settings"
+            >
               <i data-lucide="sliders-horizontal"></i>
             </button>
 
             <button
               class="sidebar-trigger-btn"
               popovertarget="smart-views-popover"
+              data-tippy-content="smart views"
             >
               <i data-lucide="list-filter"></i>
             </button>
@@ -139,19 +150,31 @@
     </div>
     <div class="overlay"></div>
     <div class="modal">
-      <button class="closeModal-btn" title="close modal">
+      <button class="closeModal-btn" data-tippy-content="close">
         <i data-lucide="x"></i>
       </button>
       <div class="settings-selection">
         <div class="settings-title">Settings</div>
         <div class="settings-buttons">
-          <button class="selection-btn" data-category="appearance">
+          <button
+            class="selection-btn"
+            data-category="appearance"
+            data-tippy-content="appearance"
+          >
             <i data-lucide="palette"></i>
           </button>
-          <button class="selection-btn" data-category="editor">
+          <button
+            class="selection-btn"
+            data-category="editor"
+            data-tippy-content="editor"
+          >
             <i data-lucide="pen-line"></i>
           </button>
-          <button class="selection-btn" data-category="app">
+          <button
+            class="selection-btn"
+            data-category="app"
+            data-tippy-content="app"
+          >
             <i data-lucide="app-window"></i>
           </button>
         </div>

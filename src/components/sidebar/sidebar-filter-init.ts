@@ -4,6 +4,7 @@ import {
   searchByTag,
 } from "@/components/sidebar/sidebar-filter";
 import { createAsyncHandler, debounce, getElement } from "@/utils/helpers";
+import { delegate } from "tippy.js";
 
 function initSearchHandlers() {
   const searchInput = getElement<HTMLInputElement>("#searchInput");
@@ -33,7 +34,13 @@ function initSearchHandlers() {
       handleViews(view);
     }),
   );
-
+  const tippyInstance = delegate(infoSidebarTagContainer, {
+    target: "[tippy-content]",
+    placement: "top",
+    theme: "app-theme",
+    content: (reference) =>
+      reference.getAttribute("tippy-content") || "filter notes by tag",
+  });
   infoSidebarTagContainer.addEventListener(
     "click",
     createAsyncHandler(async (e: Event) => {
@@ -43,6 +50,7 @@ function initSearchHandlers() {
       if (!spanEl) return;
       const tag = spanEl.dataset["tag"];
       if (!tag) return;
+      tippyInstance.show();
       searchByTag(tag);
     }),
   );

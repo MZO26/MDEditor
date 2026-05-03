@@ -1,27 +1,27 @@
 import { setSettings } from "@/api/settingsAPI";
 import emptySidebar from "@/assets/emptySidebar.svg?raw";
 import searchNotFound from "@/assets/searchNotFound.svg?raw";
-import { getElement } from "@/utils/helpers";
+import { createTooltipContent, getElement } from "@/utils/helpers";
+import type { Instance } from "tippy.js";
 
-let defaultSidebarContainer: HTMLDivElement | null = null;
-
-function getSidebarContainer(): HTMLDivElement {
-  if (!defaultSidebarContainer) {
-    defaultSidebarContainer = getElement<HTMLDivElement>(".notes-container");
-  }
-  return defaultSidebarContainer;
-}
-
-async function collapseSidebar(): Promise<void> {
-  const appContainer = getElement<HTMLDivElement>(".app-container");
-  const currentState = appContainer.classList.contains("sidebar-collapsed");
-  const newState = !currentState;
-  appContainer.classList.toggle("sidebar-collapsed", newState);
-  await setSettings({ "collapsed-state": newState });
+async function setSidebarState(
+  element: HTMLElement,
+  key: string,
+  collapsed: boolean,
+  tippyInstance: Instance,
+  shortcut?: string,
+): Promise<void> {
+  const isCollapsed = element.classList.contains("collapsed");
+  if (isCollapsed === collapsed) return;
+  element.classList.toggle("collapsed", collapsed);
+  const baseText = collapsed ? "Open sidebar" : "Close sidebar";
+  const tooltipContent = createTooltipContent(baseText, shortcut);
+  tippyInstance.setContent(tooltipContent);
+  await setSettings({ [key]: collapsed });
 }
 
 function handleSidebarEmptyState(
-  container: HTMLDivElement = getSidebarContainer(),
+  container: HTMLDivElement = getElement<HTMLDivElement>(".notes-container"),
   searchInput?: string | undefined,
 ) {
   if (!container) return;
@@ -58,4 +58,4 @@ function showSidebarEmptyState(searchInput?: string) {
   return emptyStateContainer;
 }
 
-export { collapseSidebar, handleSidebarEmptyState };
+export { handleSidebarEmptyState, setSidebarState };

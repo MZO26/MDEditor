@@ -1,4 +1,4 @@
-import { formatShortcut } from "@/utils/helpers";
+import { createTooltipContent } from "@/utils/helpers";
 import type { Action, ActionMap, BubbleMenuGroup } from "@shared/types";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
@@ -16,20 +16,11 @@ function createButton(key: string, item: Action): HTMLButtonElement {
   const i = document.createElement("i");
   i.dataset["lucide"] = item.icon;
   btn.appendChild(i);
-  const tooltipContainer = document.createElement("span");
-  tooltipContainer.textContent = key;
-  const shortcutText = formatShortcut(item.shortcut);
-  if (shortcutText) {
-    const kbd = document.createElement("kbd");
-    kbd.className = "tippy-shortcut";
-    kbd.textContent = shortcutText;
-    tooltipContainer.appendChild(kbd);
-  }
+  const tooltipContent = createTooltipContent(key, item.shortcut);
   tippy(btn, {
-    content: tooltipContainer,
-    placement: "auto",
+    content: tooltipContent,
+    placement: "top",
     arrow: true,
-    animation: "fade",
     theme: "app-theme",
   });
   return btn;

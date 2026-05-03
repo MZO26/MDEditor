@@ -1,6 +1,8 @@
 import { showContextMenu } from "@/api/electronAPI";
 import { formatNoteDate } from "@/utils/date";
 import type { Note } from "@shared/schemas/note-schema";
+import "tippy.js/dist/tippy.css";
+import { renderIcons } from "./icons";
 
 // builds skeleton once
 
@@ -10,15 +12,29 @@ baseNoteItem.className = "noteItem";
 const baseHeader = document.createElement("div");
 baseHeader.className = "note-header";
 
+const iconDiv = document.createElement("div");
+iconDiv.className = "icon-div";
+const pinIcon = document.createElement("i");
+pinIcon.setAttribute("data-lucide", "pin");
+pinIcon.setAttribute("tippy-content", "pinned");
+pinIcon.classList.add("pin");
+const bookmarkIcon = document.createElement("i");
+bookmarkIcon.setAttribute("data-lucide", "bookmark");
+bookmarkIcon.setAttribute("tippy-content", "bookmarked");
+bookmarkIcon.classList.add("bookmark");
+iconDiv.append(pinIcon, bookmarkIcon);
+
 const baseTitle = document.createElement("span");
 baseTitle.className = "note-title";
 
 const baseButton = document.createElement("button");
+baseButton.classList.add("menu-btn");
+baseButton.setAttribute("tippy-content", "options");
 const dots = document.createElement("span");
 dots.className = "dots";
 baseButton.appendChild(dots);
 
-baseHeader.append(baseTitle, baseButton);
+baseHeader.append(iconDiv, baseTitle, baseButton);
 
 const baseMetadata = document.createElement("div");
 baseMetadata.className = "note-metadata";
@@ -34,9 +50,20 @@ baseNoteItem.append(baseHeader, baseMetadata, baseContent);
 function createNoteItem(note: Note): HTMLDivElement {
   // true to clone everything inside it too
   const item = baseNoteItem.cloneNode(true) as HTMLDivElement;
+  const pinned = note.pinned === true;
+  const bookmarked = note.bookmarked === true;
   item.dataset["id"] = note.id;
-  item.dataset["pinned"] = String(note.pinned);
-  item.dataset["bookmarked"] = String(note.bookmarked);
+  item.dataset["pinned"] = String(pinned);
+  item.dataset["bookmarked"] = String(bookmarked);
+  if (!pinned) {
+    item.querySelector(".pin")?.remove();
+  }
+  if (!bookmarked) {
+    item.querySelector(".bookmark")?.remove();
+  }
+  if (pinned || bookmarked) {
+    renderIcons(item);
+  }
   item.querySelector(".note-title")!.textContent = note.title;
   item.querySelector(".note-date")!.textContent = formatNoteDate(
     note.updated_at,

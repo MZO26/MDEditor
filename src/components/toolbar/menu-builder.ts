@@ -11,7 +11,6 @@ import type { Editor } from "@tiptap/core";
 function getActiveMenu(editor: Editor): string {
   if (editor.isActive("table")) return "table";
   if (editor.isActive("codeBlock")) return "codeBlock";
-  if (editor.isActive("code")) return "inlineCode";
   return "text";
 }
 

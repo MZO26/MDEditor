@@ -6,12 +6,13 @@
   grid-column: 1 / -1;
   grid-row: 1;
   transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 5;
 }
 
 .frame-left {
   padding: 0 15px;
-  background: var(--bg-sidebar-section);
-  border: 1px solid var(--border-color);
+  background-color: var(--bg-sidebar-section);
+  border-right: 1px solid var(--border-color);
   transition:
     border 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -19,8 +20,7 @@
 
 .frame-right {
   width: 100%;
-  background: var(--bg-sidebar);
-  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-sidebar);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -40,7 +40,7 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
-  z-index: 9998;
+  z-index: 3;
 }
 
 .overlay.show {
@@ -64,7 +64,7 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   opacity: 0;
   pointer-events: none;
-  z-index: 9999;
+  z-index: 4;
   transition:
     opacity 0.3s ease,
     transform 0.3s ease;
@@ -250,7 +250,7 @@ select:focus {
 }
 
 .toolbar-hover-zone {
-  margin-right: 260px;
+  margin-right: 300px;
   -webkit-app-region: no-drag;
 }
 
@@ -352,6 +352,11 @@ select:focus {
   border-color: transparent;
 }
 
+.app-container.collapsed.focus .frame-left {
+  background-color: transparent;
+  border-color: transparent;
+}
+
 .app-container.focus .editor-header {
   opacity: 0;
   transform: translateY(-20px);
@@ -376,15 +381,15 @@ select:focus {
     visibility 0s linear 0.3s;
 }
 
-.app-container.sidebar-collapsed {
+.app-container.collapsed {
   grid-template-columns: 0 minmax(0, 1fr);
 }
 
-.app-container.sidebar-collapsed .collapse-icon {
+.app-container.collapsed .collapse-icon {
   transform: rotate(180deg);
 }
 
-.app-container.sidebar-collapsed .frame-left {
+.app-container.collapsed .frame-left {
   background-color: var(--bg-sidebar);
   border: transparent;
 }
@@ -454,7 +459,6 @@ select:focus {
   flex-direction: column;
   justify-content: center;
   background-color: var(--bg-sidebar);
-  box-shadow: var(--shadow);
   overflow-x: scroll;
   overflow-y: hidden;
   border-bottom: 1px solid var(--border-color);
@@ -536,7 +540,7 @@ select {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 1000;
+  z-index: 5;
   padding: 12px 20px;
   border-radius: 12px;
   min-width: 200px;

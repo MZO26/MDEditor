@@ -1,4 +1,5 @@
 import { setSettings } from "@/api/settingsAPI";
+import { setModalState } from "@/services/state";
 import { setUpEditorSettings } from "@/settings/setting-actions";
 import { buildSelects } from "@/settings/setting-items";
 import {
@@ -13,6 +14,10 @@ import type { Theme } from "@shared/schemas/store-schema";
 async function initAppSettings() {
   const buttonsContainer = getElement<HTMLDivElement>(".settings-buttons");
   const settingsContainer = getElement<HTMLDivElement>(".settings-content");
+  const closeModalBtn = getElement<HTMLButtonElement>(".closeModal-btn");
+  closeModalBtn.addEventListener("click", () => setModalState(false));
+  const openModalBtn = getElement<HTMLButtonElement>(".settings-btn");
+  openModalBtn.addEventListener("click", () => setModalState(true));
   const firstActiveBtn =
     buttonsContainer.querySelector<HTMLButtonElement>("button:first-child");
   if (firstActiveBtn) setActiveItem(firstActiveBtn, buttonsContainer);

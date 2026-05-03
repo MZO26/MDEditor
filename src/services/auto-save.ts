@@ -11,7 +11,7 @@ function setupAutoSave(editor: Editor, id: string) {
     if (editor.state.doc.eq(lastSavedDoc)) return;
     lastSavedDoc = editor.state.doc;
     await handleSaveNote(id, false);
-  }, 2000);
+  }, 1000);
   const updateHandler = () => debouncedSave();
   editor.on("update", updateHandler);
   return {

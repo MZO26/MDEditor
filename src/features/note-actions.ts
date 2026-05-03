@@ -4,7 +4,7 @@ import { handleEditorEmptyState } from "@/components/editor/editor-state";
 import {
   debouncedStatUpdate,
   debouncedTagUpdate,
-} from "@/components/sidebar/meta-sidebar-actions";
+} from "@/components/sidebar/info-sidebar-actions";
 import { updateNoteInList } from "@/components/sidebar/sidebar-actions";
 import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
 import { viewNote } from "@/features/note-ui";

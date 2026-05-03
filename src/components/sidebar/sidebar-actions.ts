@@ -7,7 +7,6 @@ import { getElement, setActiveItem } from "@/utils/helpers";
 import { createNoteItem } from "@/utils/templates";
 import { showToast } from "@/utils/toast";
 import type { Note } from "@shared/schemas/note-schema";
-import type { NoteItemElements } from "@shared/types";
 
 function getNotePriority(note: Note): number {
   if (note.pinned && note.bookmarked) return 0;
@@ -66,7 +65,6 @@ function addManyNotesToList(notes: Note[], container: HTMLDivElement) {
 
 async function reloadNoteList(notes?: Note[]): Promise<void> {
   const container = getElement<HTMLDivElement>(".notes-container");
-  if (!container) return;
   container.innerHTML = "";
   if (notes) {
     addManyNotesToList(notes.sort(compareNotes), container);
@@ -82,29 +80,15 @@ function updateNoteInList(note: Note): void {
   const noteElement = getElement<HTMLDivElement>(
     `.noteItem[data-id="${note.id}"]`,
   );
-  if (!noteElement) {
-    console.warn(`Note element with ID ${note.id} not found for update.`);
-    return;
-  }
   const titleContainer =
     noteElement.querySelector<HTMLDivElement>(".note-title");
   const snippetContainer =
     noteElement.querySelector<HTMLDivElement>(".note-content");
   const dateContainer = noteElement.querySelector<HTMLDivElement>(".note-date");
-  updateTransition({ snippetContainer, titleContainer, dateContainer }, note);
-}
-
-function updateTransition(containers: NoteItemElements, note: Note) {
-  const { snippetContainer, dateContainer, titleContainer } = containers;
-
-  if (!snippetContainer || !dateContainer || !titleContainer) {
-    console.warn("Missing elements, skipping transition.");
-    return;
-  }
   document.startViewTransition(() => {
-    snippetContainer.textContent = note.snippet;
-    dateContainer.textContent = formatNoteDate(note.updated_at);
-    titleContainer.textContent = note.title;
+    snippetContainer!.textContent = note.snippet;
+    dateContainer!.textContent = formatNoteDate(note.updated_at);
+    titleContainer!.textContent = note.title;
   });
 }
 
