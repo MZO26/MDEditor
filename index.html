@@ -31,20 +31,7 @@
         <div class="frame-left"><time id="datetime-display"></time></div>
         <div class="frame-right">
           <div class="toolbar-hover-zone">
-            <div class="top-toolbar">
-              <button class="read-only-btn" data-tippy-content="read only mode">
-                <i data-lucide="glasses"></i>
-              </button>
-              <button class="focus-btn" data-tippy-content="focus mode">
-                <i data-lucide="focus"></i>
-              </button>
-              <button
-                class="editor-width-btn"
-                data-tippy-content="editor width"
-              >
-                <i data-lucide="ruler-dimension-line"></i>
-              </button>
-            </div>
+            <div class="top-toolbar"></div>
           </div>
         </div>
       </div>
@@ -74,7 +61,6 @@
             >
               <i data-lucide="sliders-horizontal"></i>
             </button>
-
             <button
               class="sidebar-trigger-btn"
               popovertarget="smart-views-popover"
@@ -89,11 +75,7 @@
       <div class="editor-container">
         <div class="editor-view hidden">
           <div class="editor-header">
-            <div id="toolbar">
-              <button class="collapse-btn">
-                <i data-lucide="arrow-left-from-line" class="collapse-icon"></i>
-              </button>
-            </div>
+            <div id="toolbar"></div>
             <div
               class="bubble-menu"
               data-active-menu="text"
@@ -136,9 +118,6 @@
       </div>
       <div class="toast-container"></div>
     </div>
-    <!-- <div class="settings-field">
-          <button class="focus-editor-btn">Focus</button>
-        </div> -->
     <div id="smart-views-popover" popover>
       <ul class="smart-view-list">
         <li><button data-view="all">All Notes</button></li>

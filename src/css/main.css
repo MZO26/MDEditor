@@ -394,8 +394,15 @@ select:focus {
   border: transparent;
 }
 
-.collapse-icon {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.toggleSidebar-btn i,
+.toggleSidebar-btn svg {
+  display: inline-block;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-container.collapsed .toggleSidebar-btn i,
+.app-container.collapsed .toggleSidebar-btn svg {
+  transform: rotate(180deg);
 }
 
 .no-transition * {

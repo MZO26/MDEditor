@@ -35,7 +35,7 @@ function resetEditorHistory(editor: Editor) {
 
 export const cleanup = new WeakMap<
   Editor,
-  { flush: () => void; cancel: () => void }
+  { flush: () => Promise<void>; cancel: () => void }
 >();
 
 function viewNote(note: Note): void {

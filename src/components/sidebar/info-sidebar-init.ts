@@ -10,24 +10,22 @@ async function initInfoSidebar() {
   const infoSidebarToggle = getElement<HTMLButtonElement>(
     ".info-sidebar-toggle",
   );
-  const tippyInstance = tippy(infoSidebarToggle, {
+  tippy(infoSidebarToggle, {
     placement: "top",
     theme: "app-theme",
+    content: "toggleInfobar",
   });
-  setSidebarState(infoSidebar, "info-sidebar-state", collapsed, tippyInstance);
-  infoSidebarToggle.addEventListener("click", () => {
+  setSidebarState(infoSidebar, "info-sidebar-state", collapsed);
+  const collapseInfoSidebar = () => {
     const collapsed = infoSidebar.classList.contains("collapsed");
-    setSidebarState(
-      infoSidebar,
-      "info-sidebar-state",
-      !collapsed,
-      tippyInstance,
-    );
-  });
+    setSidebarState(infoSidebar, "info-sidebar-state", !collapsed);
+  };
+  infoSidebarToggle.addEventListener("click", collapseInfoSidebar);
+  document.addEventListener("app:toggle-info-sidebar", collapseInfoSidebar);
   const editorEl = getElement<HTMLElement>("#editor");
   editorEl.addEventListener("mousedown", () => {
     if (!infoSidebar.classList.contains("collapsed")) {
-      setSidebarState(infoSidebar, "info-sidebar-state", true, tippyInstance);
+      setSidebarState(infoSidebar, "info-sidebar-state", true);
     }
   });
 }

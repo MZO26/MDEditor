@@ -12,6 +12,10 @@
     box-shadow 0.2s ease-in-out;
 }
 
+*:focus {
+  outline: none;
+}
+
 :root {
   --bg-editor: #fcfcfc;
   --bg-sidebar: #f2f2f4;

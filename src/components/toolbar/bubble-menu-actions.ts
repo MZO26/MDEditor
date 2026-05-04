@@ -3,8 +3,9 @@ import {
   handleTableDelete,
 } from "@/components/toolbar/custom-actions";
 import type { ActionMap } from "@shared/types";
+import type { Editor } from "@tiptap/core";
 
-const BubbleMenuActions: ActionMap = {
+const BubbleMenuActions: ActionMap<Editor> = {
   // text actions
   bold: {
     run: (editor) => editor.chain().focus().toggleBold().run(),
@@ -89,7 +90,7 @@ const BubbleMenuActions: ActionMap = {
     shortcut: "Mod-Alt-ArrowLeft",
   },
   divider3: { type: "divider" },
-  deleteTable: {
+  deleteSelection: {
     run: (editor) => handleTableDelete(editor),
     icon: "trash-2",
     group: "table",

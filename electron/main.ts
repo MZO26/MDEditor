@@ -1,4 +1,4 @@
-import { setUpContextMenu } from "@electron/context-menu";
+import { setUpEditorMenu, setUpNoteMenu } from "@electron/context-menu";
 import { registerIpcHandlers } from "@electron/ipc/ipc-handlers";
 import { wrapResult } from "@electron/ipc/ipc-validation";
 import {
@@ -18,6 +18,7 @@ import console from "node:console";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { setupGlobalErrorHandling } from "./error-handler";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env["DIST"] = path.join(__dirname, "../dist");
@@ -25,9 +26,12 @@ process.env["VITE_PUBLIC"] = app.isPackaged
   ? process.env["DIST"]
   : path.join(process.env["DIST"], "../public");
 
-registerCustomProtocol();
-
 let win: BrowserWindow | null = null;
+
+registerCustomProtocol();
+setupGlobalErrorHandling({
+  ignore: ["DownloadItem", "net::ERR_ABORTED", "net::ERR_CONNECTION_REFUSED"],
+});
 
 function createWindow() {
   const preloadPath = path.join(__dirname, "../preload/preload.js");
@@ -75,24 +79,33 @@ function createWindow() {
 
 app.whenReady().then(async () => {
   Menu.setApplicationMenu(null);
-  const { default: contextMenu } = await import("electron-context-menu");
-  contextMenu();
   createWindow();
   setupLocalImageProtocol();
   setPermissions();
   registerIpcHandlers();
+  setUpEditorMenu();
   ipcMain.on(
     "show-note-menu",
     (event, id: string, pinned: boolean, bookmarked: boolean) => {
       return wrapResult(event, async () => {
         console.log("show menu for", id);
         if (win) {
-          const contextMenu = setUpContextMenu(win, id, pinned, bookmarked);
+          const contextMenu = setUpNoteMenu(win, id, pinned, bookmarked);
           contextMenu.popup({ window: win });
         }
       });
     },
   );
+  let isReadyToClose = false;
+  win?.on("close", (e) => {
+    if (isReadyToClose) return;
+    e.preventDefault();
+    win?.webContents.send("request-flush");
+  });
+  ipcMain.on("flush-confirmed", () => {
+    isReadyToClose = true;
+    win?.close();
+  });
   nativeTheme.on("updated", () => {
     if (win) onOSThemeChange(win, store.get("theme"));
   });

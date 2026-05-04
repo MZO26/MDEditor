@@ -1,23 +1,24 @@
 import { Editor } from "@tiptap/core";
 import { CellSelection } from "@tiptap/pm/tables";
 
-function handleTableDelete(editor: Editor) {
+function handleTableDelete(editor: Editor): boolean {
   const { selection } = editor.state;
-  if (selection instanceof CellSelection) {
-    const isWholeTableSelected =
-      selection.isRowSelection?.() && selection.isColSelection?.();
-    if (!isWholeTableSelected) {
-      if (selection.isRowSelection?.()) {
-        return editor.chain().focus().deleteRow().run();
-      }
-      if (selection.isColSelection?.()) {
-        return editor.chain().focus().deleteColumn().run();
-      }
-    }
+  if (!(selection instanceof CellSelection)) {
+    return false;
   }
-  if (editor.isActive("table")) {
+  const isRow = selection.isRowSelection();
+  const isCol = selection.isColSelection();
+  const isWholeTableSelected = isRow && isCol;
+  if (isWholeTableSelected) {
     return editor.chain().focus().deleteTable().run();
-  } else return;
+  }
+  if (isRow) {
+    return editor.chain().focus().deleteRow().run();
+  }
+  if (isCol) {
+    return editor.chain().focus().deleteColumn().run();
+  }
+  return false;
 }
 
 function duplicateCodeBlock(editor: Editor) {

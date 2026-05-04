@@ -1,4 +1,4 @@
-import { getSettings, setSettings } from "@/api/settingsAPI";
+import { debouncedSetSettings, getSettings } from "@/api/settingsAPI";
 import { getElement } from "@/utils/helpers";
 import type { StyleKeys } from "@shared/schemas/store-schema";
 
@@ -49,7 +49,7 @@ async function setUpEditorSettings<T extends number | string>(
       currentValue = num as T;
     } else currentValue = newValue as T;
     editorEl.style.setProperty(cssVar, formatValue(currentValue));
-    setSettings({ [storageKey]: String(currentValue) });
+    debouncedSetSettings({ [storageKey]: String(currentValue) });
     syncUI(select, String(storageKey), String(currentValue));
   };
   apply(currentValue); // call function to represent current state

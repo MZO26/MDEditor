@@ -3,6 +3,8 @@ import { editor } from "@/components/editor/editor-init";
 import { createAsyncHandler, getElement } from "@/utils/helpers";
 import type { Theme } from "@shared/schemas/store-schema";
 
+const appContainer = getElement<HTMLDivElement>(".app-container");
+
 async function initFocusMode(appContainer: HTMLDivElement) {
   const newState = !appContainer.classList.contains("focus");
   appContainer.classList.toggle("focus", newState);
@@ -17,24 +19,33 @@ function setEditorWidth(editorElement: HTMLDivElement) {
   editorElement.dataset["width"] = next;
 }
 
+const handleToggleFocus = createAsyncHandler(async () => {
+  initFocusMode(appContainer);
+});
+
 function initHoverbar() {
   const focusBtn = getElement(".focus-btn");
-  const appContainer = getElement<HTMLDivElement>(".app-container");
   const editorEl = getElement<HTMLDivElement>("#editor");
-  const readOnlyBtn = getElement(".read-only-btn");
-  const editorWidthBtn = getElement(".editor-width-btn");
-  focusBtn.addEventListener(
-    "click",
-    createAsyncHandler(async () => {
-      initFocusMode(appContainer);
-    }),
-  );
-  readOnlyBtn.addEventListener("click", () => {
+  const readOnlyBtn = getElement(".readOnly-btn");
+  const editorWidthBtn = getElement(".editorWidth-btn");
+  const handleReadOnly = () => {
     editor?.setEditable(!editor.isEditable);
+  };
+  focusBtn.addEventListener("click", handleToggleFocus);
+  document.addEventListener("app:toggle-focus-mode", handleToggleFocus);
+  document.addEventListener("app:escape", (event) => {
+    if (appContainer.classList.contains("focus")) {
+      handleToggleFocus(event);
+    }
   });
+  readOnlyBtn.addEventListener("click", handleReadOnly);
+  document.addEventListener("app:toggle-read-only", handleReadOnly);
   editorWidthBtn.addEventListener("click", () => {
     setEditorWidth(editorEl);
   });
+  document.addEventListener("app:set-editor-width", () =>
+    setEditorWidth(editorEl),
+  );
 }
 
-export { initHoverbar };
+export { initFocusMode, initHoverbar, setEditorWidth };

@@ -1,4 +1,7 @@
-import { duplicateCodeBlock } from "@/components/toolbar/custom-actions";
+import {
+  duplicateCodeBlock,
+  handleTableDelete,
+} from "@/components/toolbar/custom-actions";
 import { promptImageUpload } from "@/extensions/image/image";
 import { Extension } from "@tiptap/core";
 
@@ -38,8 +41,15 @@ export const MasterShortcuts = Extension.create({
       "Mod-Alt-ArrowUp": () => this.editor.commands.addRowBefore(),
       "Mod-Alt-ArrowRight": () => this.editor.commands.addColumnAfter(),
       "Mod-Alt-ArrowLeft": () => this.editor.commands.addColumnBefore(),
-      "Mod-Alt-Backspace": () => this.editor.commands.deleteTable(),
+      "Mod-Alt-Backspace": () => {
+        handleTableDelete(this.editor);
+        return true;
+      },
       "Shift-Alt-ArrowDown": () => duplicateCodeBlock(this.editor),
+      "Mod-Shift-F": () => {
+        this.editor.view.dom.classList.toggle("focus-mode-active");
+        return true;
+      },
     };
   },
 });

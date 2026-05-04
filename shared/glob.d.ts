@@ -26,6 +26,8 @@ declare global {
         pinned: boolean,
         bookmarked: boolean,
       ) => Promise<IpcResponse<void>>;
+      onRequestFlush: (callback: () => void) => () => void;
+      confirmFlush: () => void;
     };
     noteAPI: {
       getAll: () => Promise<IpcResponse<Note[]>>;

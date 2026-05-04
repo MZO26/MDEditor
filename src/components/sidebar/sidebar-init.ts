@@ -5,42 +5,19 @@ import { handleSelectNote } from "@/features/note-actions";
 import { createNoteButton } from "@/features/note-ui";
 import { createAsyncHandler, getElement } from "@/utils/helpers";
 import { createContextMenu } from "@/utils/templates";
-import tippy from "tippy.js";
 
 async function initNotesSidebar() {
   const response = await getSettings("note-sidebar-state");
   const collapsed = response.success ? response.data === true : false;
   const appContainer = getElement<HTMLDivElement>(".app-container");
-  const collapseBtn = getElement<HTMLButtonElement>(".collapse-btn");
-  const tippyInstance = tippy(collapseBtn, {
-    placement: "top",
-    theme: "app-theme",
-    content: collapsed ? "Open sidebar" : "Close sidebar",
-  });
-  setSidebarState(
-    appContainer,
-    "note-sidebar-state",
-    collapsed,
-    tippyInstance,
-    "MOD+O",
-  );
+  setSidebarState(appContainer, "note-sidebar-state", collapsed);
   const toggleSidebar = () => {
+    console.log("clicked");
     const collapsed = appContainer.classList.contains("collapsed");
-    setSidebarState(
-      appContainer,
-      "note-sidebar-state",
-      !collapsed,
-      tippyInstance,
-      "MOD+O",
-    );
+    setSidebarState(appContainer, "note-sidebar-state", !collapsed);
   };
-  collapseBtn.addEventListener("click", toggleSidebar);
-  document.addEventListener("keydown", (event) => {
-    const isCmdOrCtrl = event.ctrlKey || event.metaKey;
-    if (isCmdOrCtrl && event.key.toLowerCase() === "o") {
-      event.preventDefault();
-      toggleSidebar();
-    }
+  document.addEventListener("app:toggle-sidebar", () => {
+    toggleSidebar();
   });
   void appContainer.offsetWidth;
   appContainer.classList.remove("no-transition");
@@ -51,6 +28,7 @@ async function initNotesSidebar() {
   );
   const addNoteBtn = getElement(".add-note-btn");
   addNoteBtn.addEventListener("click", createAsyncHandler(createNoteButton));
+  document.addEventListener("app:create-new-note", createNoteButton);
   container.addEventListener(
     "click",
     createAsyncHandler(async (event) => {

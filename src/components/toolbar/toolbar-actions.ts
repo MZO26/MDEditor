@@ -1,7 +1,12 @@
 import { promptImageUpload } from "@/extensions/image/image";
 import type { ActionMap } from "@shared/types";
 
-const ToolbarActions: ActionMap = {
+const ToolbarActions: ActionMap<any> = {
+  toggleSidebar: {
+    run: () => document.dispatchEvent(new CustomEvent("app:toggle-sidebar")),
+    icon: "arrow-left-from-line",
+    shortcut: "MOD+O",
+  },
   undo: {
     run: (editor) => editor.chain().focus().undo().run(),
     isDisabled: (editor) => !editor.can().undo(),

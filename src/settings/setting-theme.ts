@@ -1,9 +1,9 @@
 import { setTheme } from "@/api/electronAPI";
-import { getSettings, setSettings } from "@/api/settingsAPI";
+import { debouncedSetSettings, getSettings } from "@/api/settingsAPI";
 import { getElement } from "@/utils/helpers";
 import { showToast } from "@/utils/toast";
-import { CODE_THEME_MAP, THEME_MAP } from "@shared/constants";
 import type { CodeTheme, Theme } from "@shared/schemas/store-schema";
+import { CODE_THEME_MAP, THEME_MAP } from "@shared/theme-constants";
 import type { Code, ResolvedTheme } from "@shared/types";
 
 function resolveTheme(theme: Theme): ResolvedTheme {
@@ -32,7 +32,7 @@ const applyAppTheme = async (themeOverride?: Theme, onOSchange = false) => {
   themeSelect.value = appPref;
   const codePref = setCodeTheme(baseTheme);
   if (!onOSchange) {
-    await setSettings({ theme: appPref, "code-theme": codePref });
+    debouncedSetSettings({ theme: appPref, "code-theme": codePref });
   }
   await setTheme(domTheme);
 };

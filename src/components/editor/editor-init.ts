@@ -1,7 +1,10 @@
-import { buildMenu } from "@/components/toolbar/menu-builder";
+import {
+  buildMenu,
+  setupToolbarListeners,
+} from "@/components/toolbar/menu-builder";
 import { DragAutoScroll } from "@/extensions/autoscroll";
+import { MasterShortcuts } from "@/extensions/editor-shortcuts";
 import { lowlight } from "@/extensions/lowlight";
-import { MasterShortcuts } from "@/extensions/shortcuts";
 import { NoteTag } from "@/extensions/tag";
 import { Typography } from "@/extensions/typography";
 import { getElement } from "@/utils/helpers";
@@ -23,6 +26,7 @@ import {
 } from "@tiptap/extensions";
 import StarterKit from "@tiptap/starter-kit";
 import { debouncedStatUpdate } from "../sidebar/info-sidebar-actions";
+import { BubbleMenuActions } from "../toolbar/bubble-menu-actions";
 
 let editor: Editor | null = null;
 const bubbleMenuElement = getElement(".bubble-menu");
@@ -56,7 +60,8 @@ function initEditor(selector: string): Editor {
     debouncedStatUpdate(editor);
   });
   renderIcons(bubbleMenuElement);
-  buildMenu(bubbleMenuElement, editor, "bubble-menu");
+  buildMenu(bubbleMenuElement, editor, "bubble-menu", BubbleMenuActions);
+  setupToolbarListeners(bubbleMenuElement, BubbleMenuActions, editor);
   return editor;
 }
 
@@ -79,13 +84,13 @@ function getNoteEditorExtensions() {
       },
       shouldShow: ({ editor, from, to }) => {
         if (from === to) return false;
-        if (editor.isActive("code")) return false;
+        if (editor.isActive("code") || editor.isActive("image")) return false;
         return true;
       },
     }),
     Focus.configure({
       className: "has-focus",
-      mode: "all",
+      mode: "shallowest",
     }),
     Placeholder.configure({
       placeholder: "Start writing...",

@@ -16,8 +16,13 @@ function initSearchHandlers() {
     }, 500);
     searchInput.addEventListener("input", debouncedSearch);
   }
-
+  document.addEventListener("app:open-global-search", () =>
+    searchInput.focus(),
+  );
   const smartViewContainer = getElement(".smart-view-list");
+  document.addEventListener("app:toggle-view-filter", () =>
+    smartViewContainer.togglePopover(),
+  );
   const infoSidebarTagContainer = getElement<HTMLDivElement>(".tag-container");
 
   smartViewContainer.addEventListener(

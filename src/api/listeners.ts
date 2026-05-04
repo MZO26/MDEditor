@@ -1,6 +1,8 @@
 import { bookmark, pin } from "@/api/noteAPI";
+import { editor } from "@/components/editor/editor-init";
 import { reloadNoteList } from "@/components/sidebar/sidebar-actions";
 import { handleDeleteNote } from "@/features/note-actions";
+import { cleanup } from "@/features/note-ui";
 import { applyAppTheme } from "@/settings/setting-theme";
 import { showToast } from "@/utils/toast";
 
@@ -43,6 +45,16 @@ function initListeners() {
     if (lastAppliedTheme === newTheme) return;
     lastAppliedTheme = newTheme;
     await applyAppTheme(newTheme, true);
+  });
+
+  window.electronAPI.onRequestFlush(async () => {
+    if (editor) {
+      const controller = cleanup.get(editor);
+      if (controller) {
+        await controller.flush();
+      }
+    }
+    window.electronAPI.confirmFlush();
   });
 }
 

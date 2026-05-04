@@ -1,9 +1,7 @@
-import { BubbleMenuActions } from "@/components/toolbar/bubble-menu-actions";
 import {
   createBubbleMenuFragment,
   createToolbarFragment,
 } from "@/components/toolbar/creation-helpers";
-import { ToolbarActions } from "@/components/toolbar/toolbar-actions";
 import { renderIcons } from "@/utils/icons";
 import type { ActionMap } from "@shared/types";
 import type { Editor } from "@tiptap/core";
@@ -14,26 +12,27 @@ function getActiveMenu(editor: Editor): string {
   return "text";
 }
 
-function updateActiveStates(
+function updateActiveStates<T>(
   buttonElements: Map<string, HTMLButtonElement>,
-  actions: ActionMap,
+  actions: ActionMap<T>,
   editor: Editor,
 ): void {
   Object.entries(actions).forEach(([key, item]) => {
     if (item.type === "divider") return;
     const btn = buttonElements.get(key);
     if (!btn) return;
-    btn.classList.toggle("is-active", item.isActive?.(editor) ?? false);
-    btn.disabled = item.isDisabled?.(editor) ?? false;
+    btn.classList.toggle("is-active", item.isActive?.(editor as T) ?? false);
+    btn.disabled = item.isDisabled?.(editor as T) ?? false;
   });
 }
 
-function buildMenu(
+function buildMenu<T>(
   container: HTMLElement,
   editor: Editor,
   type: "toolbar" | "bubble-menu",
+  actions: ActionMap<T>,
 ): void {
-  let actions = type === "toolbar" ? ToolbarActions : BubbleMenuActions;
+  container.innerHTML = "";
   const buttonMap = new Map<string, HTMLButtonElement>();
   const fragment =
     type === "toolbar"
@@ -41,16 +40,6 @@ function buildMenu(
       : createBubbleMenuFragment(actions, buttonMap);
   container.appendChild(fragment);
   renderIcons(container);
-  container.addEventListener("click", (e) => {
-    const target = e.target as HTMLElement;
-    if (target === container) return;
-    const btn = target.closest<HTMLButtonElement>("[data-action]");
-    if (!btn) return;
-    const actionKey = btn.dataset["action"];
-    if (!actionKey) return;
-    const action = actions[actionKey];
-    if (action && action.type !== "divider") action.run(editor);
-  });
   if (type === "bubble-menu") {
     editor.on("selectionUpdate", () => {
       const activeMenu = getActiveMenu(editor);
@@ -63,4 +52,21 @@ function buildMenu(
   updateActiveStates(buttonMap, actions, editor);
 }
 
-export { buildMenu };
+function setupToolbarListeners<T>(
+  container: HTMLElement,
+  actions: ActionMap<T>,
+  context: T,
+) {
+  container.addEventListener("click", (e) => {
+    const btn = (e.target as Element).closest<HTMLButtonElement>(
+      "[data-action]",
+    );
+    const key = btn?.dataset["action"] as keyof typeof actions;
+    const item = actions[key];
+    if (item && "run" in item) {
+      item.run(context);
+    }
+  });
+}
+
+export { buildMenu, setupToolbarListeners };

@@ -1,4 +1,4 @@
-import { setSettings } from "@/api/settingsAPI";
+import { debouncedSetSettings } from "@/api/settingsAPI";
 import { setModalState } from "@/services/state";
 import { setUpEditorSettings } from "@/settings/setting-actions";
 import { buildSelects } from "@/settings/setting-items";
@@ -17,7 +17,14 @@ async function initAppSettings() {
   const closeModalBtn = getElement<HTMLButtonElement>(".closeModal-btn");
   closeModalBtn.addEventListener("click", () => setModalState(false));
   const openModalBtn = getElement<HTMLButtonElement>(".settings-btn");
+  const modal = getElement<HTMLDivElement>(".modal");
   openModalBtn.addEventListener("click", () => setModalState(true));
+  document.addEventListener("app:open-settings", () => setModalState(true));
+  document.addEventListener("app:escape", () => {
+    if (modal.classList.contains("show")) {
+      setModalState(false);
+    }
+  });
   const firstActiveBtn =
     buttonsContainer.querySelector<HTMLButtonElement>("button:first-child");
   if (firstActiveBtn) setActiveItem(firstActiveBtn, buttonsContainer);
@@ -66,7 +73,7 @@ async function initAppSettings() {
     createAsyncHandler(async () => {
       const baseTheme = resolveTheme(themeSelect.value as Theme);
       const codePref = setCodeTheme(baseTheme);
-      await setSettings({ "code-theme": codePref });
+      debouncedSetSettings({ "code-theme": codePref });
     }),
   );
   themeSelect.addEventListener("change", createAsyncHandler(setAppTheme));

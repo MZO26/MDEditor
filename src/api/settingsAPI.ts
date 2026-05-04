@@ -1,4 +1,5 @@
-import { safeIpcCall } from "@/utils/helpers";
+import { debounce, safeIpcCall } from "@/utils/helpers";
+import { showToast } from "@/utils/toast";
 import type { AppSettings } from "@shared/schemas/store-schema";
 import type { IpcResponse } from "@shared/types";
 
@@ -14,4 +15,18 @@ async function setSettings(
   return safeIpcCall(window.storeAPI.setSettings(settings));
 }
 
-export { getSettings, setSettings };
+const debouncedSetSettings = debounce(
+  async (settings: Partial<AppSettings>) => {
+    try {
+      const response = await setSettings(settings);
+      if (!response.success) {
+        showToast(response.message);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  },
+  1000,
+);
+
+export { debouncedSetSettings, getSettings };

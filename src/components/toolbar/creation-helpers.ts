@@ -10,8 +10,9 @@ const BUBBLE_MENU_GROUPS: BubbleMenuGroup[] = [
   "table",
 ];
 
-function createButton(key: string, item: Action): HTMLButtonElement {
+function createButton<T>(key: string, item: Action<T>): HTMLButtonElement {
   const btn = document.createElement("button");
+  btn.classList.add(`${key}-btn`);
   btn.dataset["action"] = key;
   const i = document.createElement("i");
   i.dataset["lucide"] = item.icon;
@@ -32,8 +33,8 @@ function createDivider(): HTMLDivElement {
   return el;
 }
 
-function createToolbarFragment(
-  actions: ActionMap,
+function createToolbarFragment<T>(
+  actions: ActionMap<T>,
   buttonMap: Map<string, HTMLButtonElement>,
 ): DocumentFragment {
   const fragment = document.createDocumentFragment();
@@ -49,8 +50,8 @@ function createToolbarFragment(
   return fragment;
 }
 
-function createBubbleMenuFragment(
-  actions: ActionMap,
+function createBubbleMenuFragment<T>(
+  actions: ActionMap<T>,
   buttonMap: Map<string, HTMLButtonElement>,
 ): DocumentFragment {
   const fragment = document.createDocumentFragment();
@@ -63,16 +64,20 @@ function createBubbleMenuFragment(
   }
   let currentGroup: BubbleMenuGroup = "text";
   for (const [key, item] of Object.entries(actions)) {
+    if (item.type !== "divider" && item.group) {
+      currentGroup = item.group;
+    }
+    const targetDiv = menuMap.get(currentGroup);
+    if (!targetDiv) continue;
     if (item.type === "divider") {
-      menuMap.get(currentGroup)!.appendChild(createDivider());
+      targetDiv.appendChild(createDivider());
     } else {
-      currentGroup = item.group ?? "text";
       const actionBtn = createButton(key, item);
-      menuMap.get(currentGroup)!.appendChild(actionBtn);
+      targetDiv.appendChild(actionBtn);
       buttonMap.set(key, actionBtn);
     }
   }
   return fragment;
 }
 
-export { createBubbleMenuFragment, createToolbarFragment };
+export { createBubbleMenuFragment, createButton, createToolbarFragment };

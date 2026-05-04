@@ -31,6 +31,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("saveImage", payload),
   showContextMenu: (id: string, pinned: boolean, bookmarked: boolean) =>
     ipcRenderer.send("show-note-menu", id, pinned, bookmarked),
+  onRequestFlush: (callback: () => void) =>
+    subscribe("request-flush", () => callback()),
+  confirmFlush: () => ipcRenderer.send("flush-confirmed"),
 });
 contextBridge.exposeInMainWorld("noteAPI", {
   getAll: () => ipcRenderer.invoke("note:getAll"),

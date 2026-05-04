@@ -1,23 +1,17 @@
-import { setSettings } from "@/api/settingsAPI";
+import { debouncedSetSettings } from "@/api/settingsAPI";
 import emptySidebar from "@/assets/emptySidebar.svg?raw";
 import searchNotFound from "@/assets/searchNotFound.svg?raw";
-import { createTooltipContent, getElement } from "@/utils/helpers";
-import type { Instance } from "tippy.js";
+import { getElement } from "@/utils/helpers";
 
 async function setSidebarState(
   element: HTMLElement,
   key: string,
   collapsed: boolean,
-  tippyInstance: Instance,
-  shortcut?: string,
 ): Promise<void> {
   const isCollapsed = element.classList.contains("collapsed");
   if (isCollapsed === collapsed) return;
   element.classList.toggle("collapsed", collapsed);
-  const baseText = collapsed ? "Open sidebar" : "Close sidebar";
-  const tooltipContent = createTooltipContent(baseText, shortcut);
-  tippyInstance.setContent(tooltipContent);
-  await setSettings({ [key]: collapsed });
+  debouncedSetSettings({ [key]: collapsed });
 }
 
 function handleSidebarEmptyState(

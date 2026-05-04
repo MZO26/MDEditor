@@ -1,6 +1,5 @@
 import type { Views } from "@electron/db/views";
 import type { Note } from "@shared/schemas/note-schema";
-import type { Editor } from "@tiptap/core";
 
 type NativeWindowColors = {
   backgroundColor: string;
@@ -53,11 +52,11 @@ type BubbleMenuCommands = (
 
 type BubbleMenuGroup = "text" | "inlineCode" | "codeBlock" | "table";
 
-type Action = {
+type Action<T> = {
   type?: "action";
-  run: (editor: Editor) => void;
-  isActive?: (editor: Editor) => boolean;
-  isDisabled?: (editor: Editor) => boolean;
+  run: (args: T) => void;
+  isActive?: (args: T) => boolean;
+  isDisabled?: (args: T) => boolean;
   icon: string;
   shortcut?: string;
   group?: BubbleMenuGroup;
@@ -67,8 +66,8 @@ type Divider = {
   type: "divider";
 };
 
-type ToolbarItem = Action | Divider;
-type ActionMap = Record<string, ToolbarItem>;
+type ToolbarItem<T> = Action<T> | Divider;
+type ActionMap<T> = Record<string, ToolbarItem<T>>;
 
 type Metadata = {
   title: string;

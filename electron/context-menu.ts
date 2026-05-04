@@ -1,6 +1,21 @@
 import { Menu, type BrowserWindow } from "electron";
 
-function setUpContextMenu(
+async function setUpEditorMenu() {
+  const { default: contextMenu } = await import("electron-context-menu");
+
+  contextMenu({
+    menu: (defaultActions) => [
+      defaultActions.selectAll({}),
+      defaultActions.copyImage({}),
+      defaultActions.copyImageAddress({}),
+      defaultActions.saveImage({}),
+      defaultActions.saveImageAs({}),
+      defaultActions.copyLink({}),
+      defaultActions.lookUpSelection({}),
+    ],
+  });
+}
+function setUpNoteMenu(
   win: BrowserWindow,
   id: string,
   pinned: boolean,
@@ -23,4 +38,5 @@ function setUpContextMenu(
   ]);
   return noteItemMenu;
 }
-export { setUpContextMenu };
+
+export { setUpEditorMenu, setUpNoteMenu };

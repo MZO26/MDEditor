@@ -115,7 +115,6 @@ function createTooltipContent(
 ): HTMLSpanElement {
   const tooltipContent = document.createElement("span");
   tooltipContent.textContent = baseText;
-
   if (shortcut) {
     const formatted = formatShortcut(shortcut);
     const kbdElement = document.createElement("kbd");
@@ -123,7 +122,6 @@ function createTooltipContent(
     kbdElement.textContent = formatted;
     tooltipContent.appendChild(kbdElement);
   }
-
   return tooltipContent;
 }
 
