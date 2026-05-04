@@ -1,7 +1,4 @@
-import {
-  duplicateCodeBlock,
-  handleTableDelete,
-} from "@/components/toolbar/custom-actions";
+import { handleTableDelete } from "@/components/toolbar/custom-actions";
 import { promptImageUpload } from "@/extensions/image/image";
 import { Extension } from "@tiptap/core";
 
@@ -45,7 +42,6 @@ export const MasterShortcuts = Extension.create({
         handleTableDelete(this.editor);
         return true;
       },
-      "Shift-Alt-ArrowDown": () => duplicateCodeBlock(this.editor),
       "Mod-Shift-F": () => {
         this.editor.view.dom.classList.toggle("focus-mode-active");
         return true;

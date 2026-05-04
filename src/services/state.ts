@@ -1,19 +1,14 @@
 import { getElement } from "@/utils/helpers";
 import { Editor } from "@tiptap/core";
-import { createStore } from "zustand/vanilla";
-
-interface AppState {
-  activeID: string | null;
-}
 
 let globalEditorInstance: Editor | null = null;
+let activeID: string | null = null;
 
-const stateStore = createStore<AppState>()(() => ({
-  activeID: null,
-}));
+const getNoteId = () => activeID;
 
-const getNoteId = () => stateStore.getState().activeID;
-const setNoteId = (id: string | null) => stateStore.setState({ activeID: id });
+const setNoteId = (id: string | null) => {
+  activeID = id;
+};
 
 function setGlobalEditor(editor: Editor) {
   globalEditorInstance = editor;
@@ -33,11 +28,4 @@ function setModalState(show: boolean): void {
   modal.classList.toggle("show", show);
 }
 
-export {
-  getEditor,
-  getNoteId,
-  setGlobalEditor,
-  setModalState,
-  setNoteId,
-  stateStore,
-};
+export { getEditor, getNoteId, setGlobalEditor, setModalState, setNoteId };

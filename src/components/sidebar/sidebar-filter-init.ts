@@ -3,28 +3,31 @@ import {
   handleViews,
   searchByTag,
 } from "@/components/sidebar/sidebar-filter";
-import { createAsyncHandler, debounce, getElement } from "@/utils/helpers";
+import {
+  createAsyncHandler,
+  debounce,
+  getElement,
+  registerAppEvents,
+} from "@/utils/helpers";
 import { delegate } from "tippy.js";
 
 function initSearchHandlers() {
   const searchInput = getElement<HTMLInputElement>("#searchInput");
   const notesContainer = getElement<HTMLDivElement>(".notes-container");
-  if (searchInput && notesContainer) {
-    const debouncedSearch = debounce(() => {
-      const value = searchInput.value.trim();
-      void handleSearchInput(value, notesContainer);
-    }, 500);
-    searchInput.addEventListener("input", debouncedSearch);
-  }
-  document.addEventListener("app:open-global-search", () =>
-    searchInput.focus(),
-  );
   const smartViewContainer = getElement(".smart-view-list");
-  document.addEventListener("app:toggle-view-filter", () =>
-    smartViewContainer.togglePopover(),
-  );
-  const infoSidebarTagContainer = getElement<HTMLDivElement>(".tag-container");
-
+  const tagContainer = getElement<HTMLDivElement>(".tag-container");
+  const tippyInstance = delegate(tagContainer, {
+    target: "[tippy-content]",
+    placement: "top",
+    theme: "app-theme",
+    content: (reference) =>
+      reference.getAttribute("tippy-content") || "filter notes by tag",
+  });
+  const debouncedSearch = debounce(() => {
+    const value = searchInput.value.trim();
+    void handleSearchInput(value, notesContainer);
+  }, 500);
+  searchInput.addEventListener("input", debouncedSearch);
   smartViewContainer.addEventListener(
     "click",
     createAsyncHandler(async (event) => {
@@ -39,18 +42,11 @@ function initSearchHandlers() {
       handleViews(view);
     }),
   );
-  const tippyInstance = delegate(infoSidebarTagContainer, {
-    target: "[tippy-content]",
-    placement: "top",
-    theme: "app-theme",
-    content: (reference) =>
-      reference.getAttribute("tippy-content") || "filter notes by tag",
-  });
-  infoSidebarTagContainer.addEventListener(
+  tagContainer.addEventListener(
     "click",
     createAsyncHandler(async (e: Event) => {
       const target = e.target as HTMLElement;
-      if (target === infoSidebarTagContainer) return;
+      if (target === tagContainer) return;
       const spanEl = target.closest(".tag") as HTMLSpanElement | null;
       if (!spanEl) return;
       const tag = spanEl.dataset["tag"];
@@ -59,6 +55,10 @@ function initSearchHandlers() {
       searchByTag(tag);
     }),
   );
+  registerAppEvents(document, {
+    "app:toggle-view-filter": () => smartViewContainer.togglePopover(),
+    "app:open-global-search": () => searchInput.focus(),
+  });
 }
 
 export { initSearchHandlers };

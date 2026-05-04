@@ -1,16 +1,11 @@
-import {
-  buildMenu,
-  setupToolbarListeners,
-} from "@/components/toolbar/menu-builder";
+import { debouncedStatUpdate } from "@/components/sidebar/info-sidebar-actions";
 import { DragAutoScroll } from "@/extensions/autoscroll";
 import { MasterShortcuts } from "@/extensions/editor-shortcuts";
 import { lowlight } from "@/extensions/lowlight";
 import { NoteTag } from "@/extensions/tag";
 import { Typography } from "@/extensions/typography";
 import { getElement } from "@/utils/helpers";
-import { renderIcons } from "@/utils/icons";
 import { Editor } from "@tiptap/core";
-import BubbleMenu from "@tiptap/extension-bubble-menu";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import Highlight from "@tiptap/extension-highlight";
 import Image from "@tiptap/extension-image";
@@ -25,11 +20,8 @@ import {
   Selection,
 } from "@tiptap/extensions";
 import StarterKit from "@tiptap/starter-kit";
-import { debouncedStatUpdate } from "../sidebar/info-sidebar-actions";
-import { BubbleMenuActions } from "../toolbar/bubble-menu-actions";
 
 let editor: Editor | null = null;
-const bubbleMenuElement = getElement(".bubble-menu");
 
 function initEditor(selector: string): Editor {
   const element = document.querySelector(selector);
@@ -59,9 +51,6 @@ function initEditor(selector: string): Editor {
     if (!editor) return;
     debouncedStatUpdate(editor);
   });
-  renderIcons(bubbleMenuElement);
-  buildMenu(bubbleMenuElement, editor, "bubble-menu", BubbleMenuActions);
-  setupToolbarListeners(bubbleMenuElement, BubbleMenuActions, editor);
   return editor;
 }
 
@@ -73,20 +62,6 @@ function getNoteEditorExtensions() {
       getScrollContainer: () => getElement(".editor-container"),
       edge: 60,
       maxSpeed: 10,
-    }),
-    BubbleMenu.configure({
-      element: bubbleMenuElement,
-      options: {
-        placement: "top",
-        offset: 15,
-        flip: true,
-        shift: true,
-      },
-      shouldShow: ({ editor, from, to }) => {
-        if (from === to) return false;
-        if (editor.isActive("code") || editor.isActive("image")) return false;
-        return true;
-      },
     }),
     Focus.configure({
       className: "has-focus",

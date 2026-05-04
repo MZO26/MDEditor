@@ -1,6 +1,10 @@
 import { setTheme } from "@/api/electronAPI";
 import { editor } from "@/components/editor/editor-init";
-import { createAsyncHandler, getElement } from "@/utils/helpers";
+import {
+  createAsyncHandler,
+  getElement,
+  registerAppEvents,
+} from "@/utils/helpers";
 import type { Theme } from "@shared/schemas/store-schema";
 
 const appContainer = getElement<HTMLDivElement>(".app-container");
@@ -28,24 +32,23 @@ function initHoverbar() {
   const editorEl = getElement<HTMLDivElement>("#editor");
   const readOnlyBtn = getElement(".readOnly-btn");
   const editorWidthBtn = getElement(".editorWidth-btn");
-  const handleReadOnly = () => {
-    editor?.setEditable(!editor.isEditable);
-  };
   focusBtn.addEventListener("click", handleToggleFocus);
-  document.addEventListener("app:toggle-focus-mode", handleToggleFocus);
-  document.addEventListener("app:escape", (event) => {
-    if (appContainer.classList.contains("focus")) {
-      handleToggleFocus(event);
-    }
+  readOnlyBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    editor?.setEditable(!editor.isEditable);
   });
-  readOnlyBtn.addEventListener("click", handleReadOnly);
-  document.addEventListener("app:toggle-read-only", handleReadOnly);
-  editorWidthBtn.addEventListener("click", () => {
-    setEditorWidth(editorEl);
+  editorWidthBtn.addEventListener("click", () => setEditorWidth(editorEl));
+  registerAppEvents(document, {
+    "app:set-editor-width": () => setEditorWidth(editorEl),
+    "app:toggle-read-only": () => editor?.setEditable(!editor.isEditable),
+    "app:toggle-focus-mode": (event) => handleToggleFocus(event),
+    "app:escape": (event) => {
+      if (appContainer.classList.contains("focus")) {
+        handleToggleFocus(event);
+      }
+    },
   });
-  document.addEventListener("app:set-editor-width", () =>
-    setEditorWidth(editorEl),
-  );
 }
 
 export { initFocusMode, initHoverbar, setEditorWidth };

@@ -1,16 +1,7 @@
-import {
-  createBubbleMenuFragment,
-  createToolbarFragment,
-} from "@/components/toolbar/creation-helpers";
+import { createToolbarFragment } from "@/components/toolbar/creation-helpers";
 import { renderIcons } from "@/utils/icons";
 import type { ActionMap } from "@shared/types";
 import type { Editor } from "@tiptap/core";
-
-function getActiveMenu(editor: Editor): string {
-  if (editor.isActive("table")) return "table";
-  if (editor.isActive("codeBlock")) return "codeBlock";
-  return "text";
-}
 
 function updateActiveStates<T>(
   buttonElements: Map<string, HTMLButtonElement>,
@@ -29,23 +20,13 @@ function updateActiveStates<T>(
 function buildMenu<T>(
   container: HTMLElement,
   editor: Editor,
-  type: "toolbar" | "bubble-menu",
   actions: ActionMap<T>,
 ): void {
   container.innerHTML = "";
   const buttonMap = new Map<string, HTMLButtonElement>();
-  const fragment =
-    type === "toolbar"
-      ? createToolbarFragment(actions, buttonMap)
-      : createBubbleMenuFragment(actions, buttonMap);
+  const fragment = createToolbarFragment(actions, buttonMap);
   container.appendChild(fragment);
   renderIcons(container);
-  if (type === "bubble-menu") {
-    editor.on("selectionUpdate", () => {
-      const activeMenu = getActiveMenu(editor);
-      container.dataset["activeMenu"] = activeMenu || "text";
-    });
-  }
   editor.on("transaction", () => {
     updateActiveStates(buttonMap, actions, editor);
   });

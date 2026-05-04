@@ -1,8 +1,8 @@
 import { showContextMenu } from "@/api/electronAPI";
 import { formatNoteDate } from "@/utils/date";
+import { renderIcons } from "@/utils/icons";
 import type { Note } from "@shared/schemas/note-schema";
 import "tippy.js/dist/tippy.css";
-import { renderIcons } from "./icons";
 
 // builds skeleton once
 

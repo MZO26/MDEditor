@@ -31,11 +31,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   initInfoSidebar();
   updateDateTime();
   const toolbarContainer = getElement("#toolbar");
-  buildMenu(toolbarContainer, editor, "toolbar", ToolbarActions);
+  buildMenu(toolbarContainer, editor, ToolbarActions);
   setupToolbarListeners(toolbarContainer, ToolbarActions, editor);
   initNotesSidebar();
   const hoverbar = getElement(".top-toolbar");
-  buildMenu(hoverbar, editor, "toolbar", topToolbarActions);
+  buildMenu(hoverbar, editor, topToolbarActions);
   setupToolbarListeners(hoverbar, topToolbarActions, editor);
   initHoverbar();
   initSearchHandlers();

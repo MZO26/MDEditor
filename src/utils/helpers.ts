@@ -125,12 +125,27 @@ function createTooltipContent(
   return tooltipContent;
 }
 
+function registerAppEvents(
+  target: EventTarget,
+  events: Record<string, EventListener>,
+) {
+  Object.entries(events).forEach(([eventName, handler]) => {
+    target.addEventListener(eventName, handler);
+  });
+  return function cleanup() {
+    Object.entries(events).forEach(([eventName, handler]) => {
+      target.removeEventListener(eventName, handler);
+    });
+  };
+}
+
 export {
   createAsyncHandler,
   createTooltipContent,
   debounce,
   formatShortcut,
   getElement,
+  registerAppEvents,
   safeIpcCall,
   setActiveItem,
 };

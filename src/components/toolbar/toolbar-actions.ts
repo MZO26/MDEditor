@@ -1,7 +1,8 @@
 import { promptImageUpload } from "@/extensions/image/image";
 import type { ActionMap } from "@shared/types";
+import type { Editor } from "@tiptap/core";
 
-const ToolbarActions: ActionMap<any> = {
+const ToolbarActions: ActionMap<Editor> = {
   toggleSidebar: {
     run: () => document.dispatchEvent(new CustomEvent("app:toggle-sidebar")),
     icon: "arrow-left-from-line",
@@ -89,6 +90,7 @@ const ToolbarActions: ActionMap<any> = {
     shortcut: "MOD+Shift+B",
   },
   divider4: { type: "divider" },
+
   inlineCode: {
     run: (editor) => editor.chain().focus().toggleCode().run(),
     isActive: (editor) => editor.isActive("code"),
@@ -103,10 +105,23 @@ const ToolbarActions: ActionMap<any> = {
   },
   hr: {
     run: (editor) => editor.chain().focus().setHorizontalRule().run(),
+    isActive: (editor) => editor.isActive("hr"),
     icon: "separator-horizontal",
     shortcut: "MOD-Shift--",
   },
   divider5: { type: "divider" },
+  link: {
+    run: (editor) => editor.chain().focus().toggleLink().run(),
+    isActive: (editor) => editor.isActive("link"),
+    icon: "link",
+    shortcut: "MOD+K",
+  },
+  image: {
+    run: (editor) => promptImageUpload(editor),
+    isActive: (editor) => editor.isActive("image"),
+    icon: "image",
+    shortcut: "MOD-Alt-I",
+  },
   table: {
     run: (editor) =>
       editor
@@ -114,13 +129,9 @@ const ToolbarActions: ActionMap<any> = {
         .focus()
         .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
         .run(),
+    isActive: (editor) => editor.isActive("table"),
     icon: "grid-2x2",
     shortcut: "MOD-Alt-T",
-  },
-  image: {
-    run: (editor) => promptImageUpload(editor),
-    icon: "image",
-    shortcut: "MOD-Alt-I",
   },
 };
 

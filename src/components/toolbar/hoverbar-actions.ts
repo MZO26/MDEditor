@@ -1,6 +1,9 @@
+import {
+  initFocusMode,
+  setEditorWidth,
+} from "@/components/toolbar/hoverbar-builder";
 import type { ActionMap } from "@shared/types";
 import { type Editor } from "@tiptap/core";
-import { initFocusMode, setEditorWidth } from "./hoverbar-builder";
 
 const topToolbarActions: ActionMap<any> = {
   readOnly: {

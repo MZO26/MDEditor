@@ -46,20 +46,13 @@ type AutoScrollOptions = {
   maxSpeed?: number;
 };
 
-type BubbleMenuCommands = (
-  value?: string | undefined,
-) => boolean | void | Promise<void>;
-
-type BubbleMenuGroup = "text" | "inlineCode" | "codeBlock" | "table";
-
 type Action<T> = {
   type?: "action";
   run: (args: T) => void;
   isActive?: (args: T) => boolean;
   isDisabled?: (args: T) => boolean;
   icon: string;
-  shortcut?: string;
-  group?: BubbleMenuGroup;
+  shortcut: string;
 };
 
 type Divider = {
@@ -67,6 +60,7 @@ type Divider = {
 };
 
 type ToolbarItem<T> = Action<T> | Divider;
+
 type ActionMap<T> = Record<string, ToolbarItem<T>>;
 
 type Metadata = {
@@ -84,8 +78,6 @@ export type {
   Action,
   ActionMap,
   AutoScrollOptions,
-  BubbleMenuCommands,
-  BubbleMenuGroup,
   Code,
   DbRow,
   IpcResponse,

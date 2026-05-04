@@ -3,32 +3,31 @@ import { editor } from "@/components/editor/editor-init";
 import { setSidebarState } from "@/components/sidebar/sidebar-state";
 import { handleSelectNote } from "@/features/note-actions";
 import { createNoteButton } from "@/features/note-ui";
-import { createAsyncHandler, getElement } from "@/utils/helpers";
+import {
+  createAsyncHandler,
+  getElement,
+  registerAppEvents,
+} from "@/utils/helpers";
 import { createContextMenu } from "@/utils/templates";
 
 async function initNotesSidebar() {
   const response = await getSettings("note-sidebar-state");
   const collapsed = response.success ? response.data === true : false;
   const appContainer = getElement<HTMLDivElement>(".app-container");
+  const container = getElement<HTMLDivElement>(".notes-container");
+  const addNoteBtn = getElement(".add-note-btn");
   setSidebarState(appContainer, "note-sidebar-state", collapsed);
+  void appContainer.offsetWidth;
+  appContainer.classList.remove("no-transition");
   const toggleSidebar = () => {
-    console.log("clicked");
     const collapsed = appContainer.classList.contains("collapsed");
     setSidebarState(appContainer, "note-sidebar-state", !collapsed);
   };
-  document.addEventListener("app:toggle-sidebar", () => {
-    toggleSidebar();
-  });
-  void appContainer.offsetWidth;
-  appContainer.classList.remove("no-transition");
-  const container = getElement<HTMLDivElement>(".notes-container");
   container.addEventListener(
     "contextmenu",
     createAsyncHandler(createContextMenu),
   );
-  const addNoteBtn = getElement(".add-note-btn");
   addNoteBtn.addEventListener("click", createAsyncHandler(createNoteButton));
-  document.addEventListener("app:create-new-note", createNoteButton);
   container.addEventListener(
     "click",
     createAsyncHandler(async (event) => {
@@ -49,6 +48,10 @@ async function initNotesSidebar() {
       }
     }),
   );
+  registerAppEvents(document, {
+    "app:toggle-sidebar": () => toggleSidebar(),
+    "app:create-new-note": () => createNoteButton(),
+  });
 }
 
 export { initNotesSidebar };
