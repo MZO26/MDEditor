@@ -16,6 +16,19 @@ const StoreSchema = z.object({
     .default("balanced"),
   "note-sidebar-state": z.boolean().default(false),
   "info-sidebar-state": z.boolean().default(false),
+  "open-window-mode": z
+    .enum(["restore", "centered", "maximized"])
+    .default("centered"),
+  "close-window-mode": z.enum(["normal", "tray", "minimize"]).default("normal"),
+  "minimize-mode": z.enum(["taskbar", "tray"]).default("taskbar"),
+  "window-bounds": z
+    .object({
+      width: z.number().min(1100).default(1100),
+      height: z.number().min(600).default(600),
+      x: z.number().optional(),
+      y: z.number().optional(),
+    })
+    .default({ width: 1100, height: 600 }),
 });
 type AppSettings = z.infer<typeof StoreSchema>;
 type Theme = AppSettings["theme"];

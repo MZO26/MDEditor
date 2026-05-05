@@ -1,4 +1,5 @@
 import { setUpEditorMenu, setUpNoteMenu } from "@electron/context-menu";
+import { setupGlobalErrorHandling } from "@electron/error-handler";
 import { registerIpcHandlers } from "@electron/ipc/ipc-handlers";
 import { wrapResult } from "@electron/ipc/ipc-validation";
 import {
@@ -13,12 +14,20 @@ import {
   initTheme,
   onOSThemeChange,
 } from "@electron/titlebar";
-import { app, BrowserWindow, ipcMain, Menu, nativeTheme } from "electron";
+import { saveWindowBounds } from "@electron/win";
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  Menu,
+  nativeTheme,
+  Tray,
+  type BrowserWindowConstructorOptions,
+} from "electron";
 import console from "node:console";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
-import { setupGlobalErrorHandling } from "./error-handler";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env["DIST"] = path.join(__dirname, "../dist");
@@ -26,24 +35,30 @@ process.env["VITE_PUBLIC"] = app.isPackaged
   ? process.env["DIST"]
   : path.join(process.env["DIST"], "../public");
 
-let win: BrowserWindow | null = null;
+export let win: BrowserWindow | null = null;
+let tray: Tray | null = null;
+let isForceQuitting = false;
+let isReadyToClose = false;
 
 registerCustomProtocol();
 setupGlobalErrorHandling({
   ignore: ["DownloadItem", "net::ERR_ABORTED", "net::ERR_CONNECTION_REFUSED"],
 });
 
+// window logic
+
 function createWindow() {
   const preloadPath = path.join(__dirname, "../preload/preload.js");
   const activeTheme = initTheme(store.get("theme"));
   const windowTheme = getTitleBarOverlay(activeTheme);
-
-  win = new BrowserWindow({
+  const openMode = store.get("open-window-mode", "centered");
+  const bounds = store.get("window-bounds");
+  const windowConfig: BrowserWindowConstructorOptions = {
     show: false,
-    width: 1100,
-    height: 600,
-    minWidth: 1000,
-    minHeight: 500,
+    width: bounds.width,
+    height: bounds.height,
+    minWidth: 1100,
+    minHeight: 600,
     titleBarStyle: "hidden",
     titleBarOverlay: windowTheme.overlayOptions,
     autoHideMenuBar: true,
@@ -63,7 +78,19 @@ function createWindow() {
       nodeIntegrationInSubFrames: false,
       spellcheck: false,
     },
-  });
+  };
+
+  if (openMode === "centered") {
+    windowConfig.center = true;
+  } else if (openMode === "restore") {
+    if (bounds.x !== undefined && bounds.y !== undefined) {
+      windowConfig.x = bounds.x;
+      windowConfig.y = bounds.y;
+    } else {
+      windowConfig.center = true;
+    }
+  }
+  win = new BrowserWindow(windowConfig);
   navigationHandler(win);
   win.webContents.openDevTools();
   win.setMenuBarVisibility(false);
@@ -72,10 +99,62 @@ function createWindow() {
   } else {
     win.loadFile(path.join(__dirname, "../../dist/index.html"));
   }
+  win?.on("close", (e) => {
+    const closeMode = store.get("close-window-mode");
+    if (!isForceQuitting) {
+      if (closeMode === "tray") {
+        e.preventDefault();
+        win?.hide();
+        return;
+      } else if (closeMode === "minimize") {
+        e.preventDefault();
+        win?.minimize();
+        return;
+      }
+    }
+    if (!isReadyToClose) {
+      e.preventDefault();
+      saveWindowBounds();
+      win?.webContents.send("request-flush");
+      return;
+    }
+  });
+  win.on("minimize", () => {
+    const minimizeMode = store.get("minimize-mode");
+    if (minimizeMode === "tray") {
+      win?.setSkipTaskbar(true);
+      win?.hide();
+    }
+  });
   win.once("ready-to-show", () => {
+    if (openMode === "maximized") {
+      win?.maximize();
+    }
     win?.show();
   });
 }
+
+// global ipc-listeners (registered once)
+
+ipcMain.on(
+  "show-note-menu",
+  (event, id: string, pinned: boolean, bookmarked: boolean) => {
+    return wrapResult(event, async () => {
+      console.log("show menu for", id);
+      if (win) {
+        const contextMenu = setUpNoteMenu(win, id, pinned, bookmarked);
+        contextMenu.popup({ window: win });
+      }
+    });
+  },
+);
+
+ipcMain.on("flush-confirmed", () => {
+  isReadyToClose = true;
+  win?.close();
+});
+
+// app start and tray
 
 app.whenReady().then(async () => {
   Menu.setApplicationMenu(null);
@@ -84,36 +163,48 @@ app.whenReady().then(async () => {
   setPermissions();
   registerIpcHandlers();
   setUpEditorMenu();
-  ipcMain.on(
-    "show-note-menu",
-    (event, id: string, pinned: boolean, bookmarked: boolean) => {
-      return wrapResult(event, async () => {
-        console.log("show menu for", id);
-        if (win) {
-          const contextMenu = setUpNoteMenu(win, id, pinned, bookmarked);
-          contextMenu.popup({ window: win });
-        }
-      });
+  const trayIcon = await app.getFileIcon(process.execPath);
+  tray = new Tray(trayIcon);
+  const contextMenu = Menu.buildFromTemplate([
+    { label: "open", click: () => win?.show() },
+    {
+      label: "quit",
+      click: () => {
+        isForceQuitting = true;
+        app.quit();
+      },
     },
-  );
-  let isReadyToClose = false;
-  win?.on("close", (e) => {
-    if (isReadyToClose) return;
-    e.preventDefault();
-    win?.webContents.send("request-flush");
-  });
-  ipcMain.on("flush-confirmed", () => {
-    isReadyToClose = true;
-    win?.close();
-  });
-  nativeTheme.on("updated", () => {
-    if (win) onOSThemeChange(win, store.get("theme"));
-  });
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+  ]);
+  tray.setContextMenu(contextMenu);
+  tray.on("click", () => {
+    if (win) {
+      if (win.isVisible() && !win.isMinimized()) {
+        win.focus();
+      } else {
+        win.setSkipTaskbar(false);
+        win.show();
+        if (win.isMinimized()) {
+          win.restore();
+        }
+        win.focus();
+      }
     }
   });
+});
+
+// global app events
+
+nativeTheme.on("updated", () => {
+  if (win) onOSThemeChange(win, store.get("theme"));
+});
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
+});
+
+app.on("before-quit", () => {
+  isForceQuitting = true;
 });
 
 app.on("window-all-closed", () => {

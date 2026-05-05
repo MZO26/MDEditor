@@ -64,6 +64,35 @@ function buildSelects(settingsContainer: HTMLDivElement) {
     ],
     "editor",
   );
+  selectBuilder(
+    settingsContainer,
+    "open-window-mode",
+    [
+      { value: "restore", label: "Restore" },
+      { value: "centered", label: "Centered" },
+      { value: "maximized", label: "Maximized" },
+    ],
+    "app",
+  );
+  selectBuilder(
+    settingsContainer,
+    "close-window-mode",
+    [
+      { value: "normal", label: "Normal" },
+      { value: "tray", label: "Tray" },
+      { value: "minimize", label: "Minimize" },
+    ],
+    "app",
+  );
+  selectBuilder(
+    settingsContainer,
+    "minimize-mode",
+    [
+      { value: "taskbar", label: "Minimize to taskbar" },
+      { value: "tray", label: "Minimize to tray" },
+    ],
+    "app",
+  );
 }
 
 function initSettingItems(
