@@ -1,21 +1,38 @@
+import { showContextMenu } from "@/api/electronAPI";
 import { editor } from "@/components/editor/editor-init";
 import { setSidebarState } from "@/components/sidebar/sidebar-state";
 import { handleSelectNote } from "@/features/note-actions";
 import { createNoteButton } from "@/features/note-ui";
 import {
   createAsyncHandler,
-  getElement,
+  getItem,
   registerAppEvents,
-} from "@/utils/helpers";
-import { getItem } from "@/utils/registry";
-import { createContextMenu } from "@/utils/templates";
+  requireElement,
+} from "@/utils";
+import { delegate } from "tippy.js";
 
 async function initNotesSidebar(state: boolean) {
-  const collapsed = state;
   const appContainer = getItem("appContainer");
   const sidebar = getItem("sidebar");
-  const addNoteBtn = getElement(".add-note-btn");
-  setSidebarState(appContainer, "note-sidebar-state", collapsed);
+  const addNoteBtn = requireElement(".add-note-btn");
+  delegate(sidebar, {
+    target: "[tippy-content]",
+    theme: "app-theme",
+    content: (reference) =>
+      reference.getAttribute("tippy-content") || "options",
+  });
+  async function createContextMenu(e: Event) {
+    const target = e.target as HTMLElement;
+    const item = target.closest<HTMLElement>(".noteItem");
+    if (!item) return;
+    e.preventDefault();
+    const id = item.dataset["id"];
+    const pinned = item.dataset["pinned"] === "true";
+    const bookmarked = item.dataset["bookmarked"] === "true";
+    if (!id) return;
+    await showContextMenu(id, pinned, bookmarked);
+  }
+  setSidebarState(appContainer, "note-sidebar-state", state);
   void appContainer.offsetWidth;
   appContainer.classList.remove("no-transition");
   const toggleSidebar = () => {

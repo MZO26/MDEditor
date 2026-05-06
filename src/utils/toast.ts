@@ -1,14 +1,20 @@
-import { getElement } from "@/utils/helpers";
+import { findElement } from "@/utils";
+
+let container: HTMLDivElement | null = null;
 
 function showToast(value: string, duration = 2000): void {
-  const container = getElement<HTMLDivElement>(".toast-container");
-  if (!container) return;
+  if (!container) {
+    container = findElement<HTMLDivElement>(".toast-container");
+  }
+  if (!container) {
+    console.warn("Toast container not found.");
+    return;
+  }
   const toast = document.createElement("div");
   toast.className = "toast";
   value = value.length > 50 ? value.slice(0, 50) + "..." : value;
   toast.textContent = value;
   container.appendChild(toast);
-
   setTimeout(() => {
     toast.classList.add("show");
   }, 10);

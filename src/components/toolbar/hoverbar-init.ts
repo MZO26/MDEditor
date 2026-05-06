@@ -1,7 +1,6 @@
 import { setTheme } from "@/api/electronAPI";
 import { editor } from "@/components/editor/editor-init";
-import { createAsyncHandler, registerAppEvents } from "@/utils/helpers";
-import { getItem } from "@/utils/registry";
+import { createAsyncHandler, getItem, registerAppEvents } from "@/utils";
 import type { Theme } from "@shared/schemas/store-schema";
 
 async function initFocusMode() {

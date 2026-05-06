@@ -1,4 +1,5 @@
 import { debouncedSetSettings, getAllSettings } from "@/api/settingsAPI";
+import { createSettingsMenu } from "@/settings/setting-builder";
 import { initSettingItems } from "@/settings/setting-items";
 import {
   applyAppTheme,
@@ -8,33 +9,39 @@ import {
 } from "@/settings/setting-theme";
 import {
   createAsyncHandler,
-  getElement,
+  findElement,
+  getItem,
   registerAppEvents,
+  requireElement,
   setActiveItem,
-} from "@/utils/helpers";
-import { getItem } from "@/utils/registry";
+} from "@/utils";
 import type { AppSettings, Theme } from "@shared/schemas/store-schema";
 
 function setModalState(show: boolean): void {
   const appContainer = getItem("appContainer");
-  const overlay = getElement<HTMLDivElement>(".overlay");
-  const modal = getElement<HTMLDivElement>(".modal");
-  overlay.classList.toggle("show", show);
-  modal.classList.toggle("show", show);
+  const overlay = findElement<HTMLDivElement>(".overlay");
+  const modal = findElement<HTMLDivElement>(".modal");
+  overlay?.classList.toggle("show", show);
+  modal?.classList.toggle("show", show);
   appContainer.inert = show;
 }
 
 async function initAppSettings(settings: AppSettings) {
-  const settingsContainer = getElement<HTMLDivElement>(".settings-content");
+  const modal = findElement<HTMLDivElement>(".modal");
+  const settingsContainer = findElement<HTMLDivElement>(".settings-content");
+  if (!modal || !settingsContainer) return;
+  settingsContainer.appendChild(createSettingsMenu());
   initSettingItems(settingsContainer, settings);
-  const buttonsContainer = getElement<HTMLDivElement>(".settings-buttons");
-  const modal = getElement<HTMLDivElement>(".modal");
-  const openModalBtn = getElement<HTMLButtonElement>(".settings-btn");
-  const closeModalBtn = getElement<HTMLButtonElement>(".closeModal-btn");
-  const firstActiveBtn =
-    buttonsContainer.querySelector<HTMLButtonElement>("button:first-child");
-  const themeSelect = getElement<HTMLSelectElement>("#theme");
-  const codeThemeSelect = getElement<HTMLSelectElement>("#code-theme");
+  const buttonsContainer = findElement<HTMLDivElement>(".settings-buttons");
+  if (!buttonsContainer) return;
+  const openModalBtn = requireElement<HTMLButtonElement>(".settings-btn");
+  const closeModalBtn = requireElement<HTMLButtonElement>(".closeModal-btn");
+  const firstActiveBtn = requireElement<HTMLButtonElement>(
+    "button:first-child",
+    buttonsContainer,
+  );
+  const themeSelect = requireElement<HTMLSelectElement>("#theme");
+  const codeThemeSelect = requireElement<HTMLSelectElement>("#code-theme");
   if (firstActiveBtn) setActiveItem(firstActiveBtn, buttonsContainer);
 
   closeModalBtn.addEventListener("click", () => setModalState(false));

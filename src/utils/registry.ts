@@ -29,4 +29,18 @@ function getItem<K extends keyof AppRegistry>(key: K): AppRegistry[K] {
   return value;
 }
 
-export { getItem, setItem, setItems, type AppRegistry };
+function registerAppEvents(
+  target: EventTarget,
+  events: Record<string, EventListener>,
+) {
+  Object.entries(events).forEach(([eventName, handler]) => {
+    target.addEventListener(eventName, handler);
+  });
+  return function cleanup() {
+    Object.entries(events).forEach(([eventName, handler]) => {
+      target.removeEventListener(eventName, handler);
+    });
+  };
+}
+
+export { getItem, registerAppEvents, setItem, setItems, type AppRegistry };

@@ -109,15 +109,7 @@
       </div>
       <div class="toast-container"></div>
     </div>
-    <div id="smart-views-popover">
-      <ul class="smart-view-list">
-        <li><button data-view="all">All Notes</button></li>
-        <li><button data-view="bookmarked">Bookmarked</button></li>
-        <li><button data-view="pinned">Pinned</button></li>
-        <li><button data-view="todos">Pending Todos</button></li>
-        <li><button data-view="untagged">Untagged Notes</button></li>
-      </ul>
-    </div>
+    <div id="smart-views-popover"></div>
     <div class="overlay"></div>
     <div class="modal">
       <button class="closeModal-btn" data-tippy-content="close">
@@ -125,32 +117,31 @@
       </button>
       <div class="settings-selection">
         <div class="settings-title">Settings</div>
-        <div class="settings-buttons">
-          <button
-            class="selection-btn"
-            data-category="appearance"
-            data-tippy-content="appearance"
-          >
-            <i data-lucide="palette"></i>
-          </button>
-          <button
-            class="selection-btn"
-            data-category="editor"
-            data-tippy-content="editor"
-          >
-            <i data-lucide="pen-line"></i>
-          </button>
-          <button
-            class="selection-btn"
-            data-category="app"
-            data-tippy-content="app"
-          >
-            <i data-lucide="app-window"></i>
-          </button>
-        </div>
       </div>
       <div class="settings-content" data-activetab="appearance"></div>
     </div>
+    <template id="noteItem-template">
+      <div class="noteItem">
+        <div class="note-header">
+          <div class="icon-div">
+            <i data-lucide="pin" data-tippy-content="pinned" class="pin"></i>
+            <i
+              data-lucide="bookmark"
+              data-tippy-content="bookmarked"
+              class="bookmark"
+            ></i>
+          </div>
+          <span class="note-title"></span>
+          <button class="menu-btn" data-tippy-content="options">
+            <span class="dots"></span>
+          </button>
+        </div>
+        <div class="note-metadata">
+          <div class="note-date"></div>
+        </div>
+        <div class="note-content"></div>
+      </div>
+    </template>
     <script type="module" src="src/app.ts" defer></script>
   </body>
 </html>

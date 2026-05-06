@@ -1,10 +1,10 @@
 import { calculateToDos } from "@/extensions/todo-bar";
-import { debounce, getElement } from "@/utils/helpers";
+import { debounce, requireElement } from "@/utils";
 import type { Note } from "@shared/schemas/note-schema";
 import type { Editor } from "@tiptap/core";
 
 function updateNoteTags(tags: Note["tags"]) {
-  const container = getElement(".tag-container");
+  const container = requireElement(".tag-container");
   container.innerHTML = "";
   if (!tags || tags.length === 0) return;
   tags.forEach((tag) => {
@@ -22,16 +22,16 @@ function updateStats(editor: Editor) {
   const charCount = editor.storage.characterCount.characters();
   const wordCount = editor.storage.characterCount.words();
 
-  const charCountEl = getElement("#char-count");
+  const charCountEl = requireElement("#char-count");
   charCountEl.innerText = charCount.toString();
 
-  const wordCountEl = getElement("#word-count");
+  const wordCountEl = requireElement("#word-count");
   if (wordCount === 1) {
     wordCountEl.innerText = "1 word";
   } else {
     wordCountEl.innerText = `${wordCount} words`;
   }
-  const readingTimeEl = getElement("#reading-time");
+  const readingTimeEl = requireElement("#reading-time");
   readingTimeEl.innerText = estimateReadingTime(wordCount);
   calculateToDos(content);
 }

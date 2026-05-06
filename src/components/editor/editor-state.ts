@@ -1,10 +1,10 @@
 import { getNoteId } from "@/services/state";
-import { el, getElement } from "@/utils/helpers";
+import { el, requireElement } from "@/utils";
 import { createElement, FileQuestion } from "lucide";
 
 function handleEditorEmptyState() {
-  const editorContainer = getElement(".editor-container");
-  const editorView = getElement(".editor-view");
+  const editorContainer = requireElement(".editor-container");
+  const editorView = requireElement(".editor-view");
   const emptyState = editorContainer.querySelector(".editor-empty-state");
   const id = getNoteId();
   if (!id) {

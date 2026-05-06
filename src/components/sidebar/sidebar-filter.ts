@@ -6,8 +6,20 @@ import {
 } from "@/components/sidebar/sidebar-actions";
 import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
 import { setNoteId } from "@/services/state";
-import { getItem } from "@/utils/registry";
-import { showToast } from "@/utils/toast";
+import { el, getItem, showToast } from "@/utils";
+
+interface ViewItem {
+  id: string;
+  label: string;
+}
+
+const views: ViewItem[] = [
+  { id: "all", label: "All Notes" },
+  { id: "bookmarked", label: "Bookmarked" },
+  { id: "pinned", label: "Pinned" },
+  { id: "todos", label: "Pending Todos" },
+  { id: "untagged", label: "Untagged Notes" },
+];
 
 async function handleSearchInput(searchInput: string) {
   const sidebar = getItem("sidebar");
@@ -32,6 +44,16 @@ async function handleSearchInput(searchInput: string) {
   handleSidebarEmptyState(searchInput);
 }
 
+function createViews(views: ViewItem[]) {
+  const listItems = views.map((view) => {
+    const btn = el("button", {}, view["label"]);
+    btn.setAttribute("data-view", view["id"]);
+
+    return el("li", {}, btn);
+  });
+  return el("ul", { className: "smart-view-list" }, ...listItems);
+}
+
 async function handleViews(view: string) {
   const response = await getViews(view);
   if (!response.success) {
@@ -50,4 +72,4 @@ async function searchByTag(tag: string) {
   await reloadNoteList(response.data);
 }
 
-export { handleSearchInput, handleViews, searchByTag };
+export { createViews, handleSearchInput, handleViews, searchByTag, views };

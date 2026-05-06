@@ -1,18 +1,20 @@
+import { searchByTag } from "@/components/sidebar/sidebar-filter";
 import { setSidebarState } from "@/components/sidebar/sidebar-state";
 import {
   createAsyncHandler,
-  getElement,
+  findElement,
+  getItem,
   registerAppEvents,
-} from "@/utils/helpers";
-import { getItem } from "@/utils/registry";
+  requireElement,
+} from "@/utils";
 import tippy, { delegate } from "tippy.js";
-import { searchByTag } from "./sidebar-filter";
 
 async function initInfoSidebar(collapsed: boolean = true) {
-  const toggleBtn = getElement<HTMLButtonElement>(".info-sidebar-toggle");
   const editorWrapper = getItem("editorWrapper");
-  const infoSidebar = getElement<HTMLDivElement>(".info-sidebar");
-  const tagContainer = getElement<HTMLDivElement>(".tag-container");
+  const toggleBtn = findElement<HTMLButtonElement>(".info-sidebar-toggle");
+  const infoSidebar = findElement<HTMLDivElement>(".info-sidebar");
+  if (!toggleBtn || !infoSidebar) return;
+  const tagContainer = requireElement<HTMLDivElement>(".tag-container");
   const tippyInstance = delegate(tagContainer, {
     target: "[tippy-content]",
     placement: "top",

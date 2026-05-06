@@ -35,6 +35,10 @@ process.env["VITE_PUBLIC"] = app.isPackaged
   ? process.env["DIST"]
   : path.join(process.env["DIST"], "../public");
 
+if (process.platform === "win32") {
+  app.setAppUserModelId("MZO26.MDEditor");
+}
+
 export let win: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let isForceQuitting = false;

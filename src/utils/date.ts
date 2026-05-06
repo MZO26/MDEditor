@@ -1,6 +1,6 @@
-import { getElement } from "@/utils/helpers";
+import { findElement } from "@/utils";
 
-const displayElement = getElement<HTMLDivElement>("#datetime-display");
+let displayElement: HTMLDivElement | null = null;
 
 const dateFormatter = new Intl.DateTimeFormat("de-DE", {
   year: "numeric",
@@ -14,19 +14,17 @@ const timeFormatter = new Intl.DateTimeFormat("de-DE", {
 });
 
 function updateDateTime() {
-  if (!displayElement) return;
+  if (!displayElement) {
+    displayElement = findElement<HTMLDivElement>("#datetime-display");
+  }
+  if (!displayElement) {
+    console.warn("Datetime display not found.");
+    return;
+  }
   const now = new Date();
   const dateString = dateFormatter.format(now);
   const timeString = timeFormatter.format(now);
   displayElement.textContent = `${dateString} - ${timeString}`;
-}
-
-function formatNoteDate(isoString: string) {
-  const date = new Date(isoString);
-  return new Intl.DateTimeFormat("de-DE", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
 }
 
 function startAppClock() {
@@ -46,4 +44,4 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
-export { formatNoteDate, startAppClock };
+export { startAppClock };

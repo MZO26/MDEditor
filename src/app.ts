@@ -13,19 +13,15 @@ import {
 import { ToolbarActions } from "@/components/toolbar/toolbar-actions";
 import { initAppSettings, loadSettings } from "@/settings/setting-init";
 import { initGlobalShortcuts } from "@/settings/shortcuts";
-import { startAppClock } from "@/utils/date";
-import { getElement } from "@/utils/helpers";
-import tippy, { delegate } from "tippy.js";
-import "tippy.js/dist/tippy.css";
-import { renderIcons } from "./utils/icons";
-import { setItems } from "./utils/registry";
+import { renderIcons, requireElement, setItems, startAppClock } from "@/utils";
+import tippy from "tippy.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   setItems({
-    appContainer: getElement<HTMLDivElement>(".app-container"),
-    sidebar: getElement<HTMLDivElement>(".notes-container"),
+    appContainer: requireElement<HTMLDivElement>(".app-container"),
+    sidebar: requireElement<HTMLDivElement>(".notes-container"),
     editor: initEditor(),
-    editorWrapper: getElement<HTMLDivElement>("#editor"),
+    editorWrapper: requireElement<HTMLDivElement>("#editor"),
   });
   const settings = await loadSettings();
   initGlobalShortcuts();
@@ -34,10 +30,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   await reloadNoteList();
   initNotesSidebar(settings["note-sidebar-state"]);
   initInfoSidebar(settings["info-sidebar-state"]);
-  const toolbarContainer = getElement("#toolbar");
+  const toolbarContainer = requireElement("#toolbar");
   buildMenu(toolbarContainer, ToolbarActions);
   setupToolbarListeners(toolbarContainer, ToolbarActions);
-  const hoverbar = getElement(".top-toolbar");
+  const hoverbar = requireElement(".top-toolbar");
   buildMenu(hoverbar, topToolbarActions);
   setupToolbarListeners(hoverbar, topToolbarActions);
   initHoverbar();
@@ -46,13 +42,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   tippy("[data-tippy-content]", {
     placement: "top",
     theme: "app-theme",
-  });
-
-  delegate(".notes-container", {
-    target: "[tippy-content]",
-    theme: "app-theme",
-    content: (reference) =>
-      reference.getAttribute("tippy-content") || "options",
   });
   startAppClock();
 });

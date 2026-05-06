@@ -1,5 +1,5 @@
 import { debouncedSetSettings } from "@/api/settingsAPI";
-import { getElement } from "@/utils/helpers";
+import { findElement, requireElement } from "@/utils";
 import type { StyleKeys } from "@shared/schemas/store-schema";
 
 // sets select value and body value
@@ -48,8 +48,9 @@ function setUpEditorSettings<T extends number | string>({
   max,
   formatValue = String,
 }: EditorStyleConfig<T>): void {
-  const editorEl = getElement(".ProseMirror");
-  const select = getElement<HTMLSelectElement>(selectId);
+  const editorEl = requireElement(".ProseMirror");
+  const select = findElement<HTMLSelectElement>(selectId);
+  if (!select) return;
   let current = (
     typeof defaultValue === "number" ? Number(value) || defaultValue : value
   ) as T;
@@ -60,7 +61,6 @@ function setUpEditorSettings<T extends number | string>({
     debouncedSetSettings({ [storageKey]: String(current) });
     syncUI(select, String(storageKey), String(current));
   };
-
   apply(current);
   select.addEventListener("change", () => apply(select.value));
 }

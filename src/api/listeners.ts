@@ -4,7 +4,7 @@ import { reloadNoteList } from "@/components/sidebar/sidebar-actions";
 import { handleDeleteNote } from "@/features/note-actions";
 import { cleanup } from "@/features/note-ui";
 import { applyAppTheme } from "@/settings/setting-theme";
-import { showToast } from "@/utils/toast";
+import { showToast } from "@/utils";
 
 function initListeners() {
   let lastAppliedTheme: string | null = null;

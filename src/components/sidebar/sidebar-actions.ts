@@ -2,11 +2,14 @@ import { getAll } from "@/api/noteAPI";
 import { handleEditorEmptyState } from "@/components/editor/editor-state";
 import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
 import { getNoteId, setNoteId } from "@/services/state";
-import { formatNoteDate } from "@/utils/date";
-import { getElement, setActiveItem } from "@/utils/helpers";
-import { getItem } from "@/utils/registry";
-import { createNoteItem } from "@/utils/templates";
-import { showToast } from "@/utils/toast";
+import {
+  createNoteItem,
+  findElement,
+  formatNoteDate,
+  getItem,
+  setActiveItem,
+  showToast,
+} from "@/utils";
 import type { Note } from "@shared/schemas/note-schema";
 
 function getNotePriority(note: Note): number {
@@ -62,8 +65,8 @@ function addManyNotesToList(notes: Note[]) {
   handleSidebarEmptyState();
   const id = getNoteId();
   if (!id) return;
-  const noteElement = getElement<HTMLDivElement>(`.noteItem[data-id="${id}"]`);
-  setActiveItem(noteElement, sidebar);
+  const noteElement = findElement<HTMLDivElement>(`.noteItem[data-id="${id}"]`);
+  if (noteElement) setActiveItem(noteElement, sidebar);
 }
 
 async function reloadNoteList(notes?: Note[]): Promise<void> {
@@ -80,9 +83,13 @@ async function reloadNoteList(notes?: Note[]): Promise<void> {
 }
 
 function updateNoteInList(note: Note): void {
-  const noteElement = getElement<HTMLDivElement>(
+  const noteElement = findElement<HTMLDivElement>(
     `.noteItem[data-id="${note.id}"]`,
   );
+  if (!noteElement) {
+    console.warn("Note Element not found.");
+    return;
+  }
   const titleContainer =
     noteElement.querySelector<HTMLDivElement>(".note-title");
   const snippetContainer =

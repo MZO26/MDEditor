@@ -1,4 +1,4 @@
-import { createTooltipContent } from "@/utils/helpers";
+import { createTooltipContent } from "@/utils";
 import type { Action, ActionMap } from "@shared/types";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";

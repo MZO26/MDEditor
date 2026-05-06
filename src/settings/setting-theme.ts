@@ -1,7 +1,6 @@
 import { setTheme } from "@/api/electronAPI";
 import { debouncedSetSettings } from "@/api/settingsAPI";
-import { getElement } from "@/utils/helpers";
-import { showToast } from "@/utils/toast";
+import { findElement, showToast } from "@/utils";
 import type { CodeTheme, Theme } from "@shared/schemas/store-schema";
 import { CODE_THEME_MAP, THEME_MAP } from "@shared/theme-constants";
 import type { Code, ResolvedTheme } from "@shared/types";
@@ -23,9 +22,10 @@ const applyAppTheme = async (
   themeRes?: Theme,
   codeRes?: CodeTheme,
 ) => {
-  const themeSelect = getElement<HTMLSelectElement>("#theme");
-  const codeThemeSelect = getElement<HTMLSelectElement>("#code-theme");
+  const themeSelect = findElement<HTMLSelectElement>("#theme");
+  const codeThemeSelect = findElement<HTMLSelectElement>("#code-theme");
   let appPref: Theme = themeOverride || "system";
+  if (!themeSelect || !codeThemeSelect) return;
   if (!themeOverride) {
     // no override means only on startup
     if (themeRes) appPref = themeRes;
@@ -55,8 +55,8 @@ function getDefaultCodeTheme(resolvedTheme: ResolvedTheme): {
   preference: CodeTheme;
   codeTheme: Code;
 } {
-  const codeThemeSelect = getElement<HTMLSelectElement>("#code-theme");
-  const preference = codeThemeSelect.value as CodeTheme;
+  const codeThemeSelect = findElement<HTMLSelectElement>("#code-theme");
+  const preference = codeThemeSelect?.value as CodeTheme;
   return {
     preference,
     codeTheme:
@@ -66,7 +66,8 @@ function getDefaultCodeTheme(resolvedTheme: ResolvedTheme): {
 }
 
 async function setAppTheme() {
-  const themeSelect = getElement<HTMLSelectElement>("#theme");
+  const themeSelect = findElement<HTMLSelectElement>("#theme");
+  if (!themeSelect) return;
   const themeValue = themeSelect.value;
   const validTheme = themeValue in THEME_MAP ? (themeValue as Theme) : "system";
   await applyAppTheme(validTheme, false);

@@ -1,4 +1,4 @@
-import { el } from "@/utils/helpers";
+import { el } from "@/utils";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 
@@ -28,4 +28,23 @@ function selectBuilder(
   container.append(row);
 }
 
-export { selectBuilder };
+function createSettingsMenu(): HTMLDivElement {
+  const createSettingsButton = (category: string, lucideIcon: string) => {
+    const icon = el("i");
+    icon.setAttribute("data-lucide", lucideIcon);
+    const btn = el("button", { className: "selection-btn" }, icon);
+    btn.setAttribute("data-category", category);
+    btn.setAttribute("data-tippy-content", category);
+    return btn;
+  };
+  return el(
+    "div",
+    { className: "settings-buttons" },
+    createSettingsButton("appearance", "palette"),
+    createSettingsButton("editor", "pen-line"),
+    createSettingsButton("app", "app-window"),
+    createSettingsButton("info", "info"),
+  );
+}
+
+export { createSettingsMenu, selectBuilder };

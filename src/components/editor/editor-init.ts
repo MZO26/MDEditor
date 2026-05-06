@@ -4,7 +4,7 @@ import { MasterShortcuts } from "@/extensions/editor-shortcuts";
 import { lowlight } from "@/extensions/lowlight";
 import { NoteTag } from "@/extensions/tag";
 import { Typography } from "@/extensions/typography";
-import { getElement } from "@/utils/helpers";
+import { requireElement } from "@/utils";
 import { Editor } from "@tiptap/core";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import Highlight from "@tiptap/extension-highlight";
@@ -24,7 +24,7 @@ import StarterKit from "@tiptap/starter-kit";
 let editor: Editor | null = null;
 
 function initEditor(): Editor {
-  const editorWrapper = getElement("#editor");
+  const editorWrapper = requireElement("#editor");
   if (editor) {
     return editor;
   }
@@ -54,7 +54,7 @@ function getNoteEditorExtensions() {
     MasterShortcuts,
     Typography,
     DragAutoScroll.configure({
-      getScrollContainer: () => getElement(".editor-container"),
+      getScrollContainer: () => requireElement(".editor-container"),
       edge: 60,
       maxSpeed: 10,
     }),
