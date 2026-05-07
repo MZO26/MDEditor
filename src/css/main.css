@@ -10,6 +10,10 @@
 }
 
 .frame-left {
+  grid-column: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 0 15px;
   background-color: var(--bg-sidebar-section);
   border-right: 1px solid var(--border-color);
@@ -19,7 +23,7 @@
 }
 
 .frame-right {
-  width: 100%;
+  grid-column: 2;
   background-color: var(--bg-sidebar);
   display: flex;
   justify-content: center;
@@ -60,7 +64,7 @@
   flex-direction: column;
   gap: 16px;
   border-radius: 18px;
-  background-color: var(--bg-editor, #fff);
+  background-color: var(--bg-editor);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   opacity: 0;
   visibility: hidden;
@@ -146,9 +150,10 @@ label {
 
 .settings-content[data-activetab="appearance"]
   .settings-row[data-category="appearance"],
-.settings-content[data-activetab="editor"]
-  .settings-row[data-category="editor"],
-.settings-content[data-activetab="app"] .settings-row[data-category="app"] {
+.settings-content[data-activetab="typography"]
+  .settings-row[data-category="typography"],
+.settings-content[data-activetab="app"] .settings-row[data-category="app"],
+.settings-content[data-category="info"] .settings-row[data-category="info"] {
   display: flex;
   animation: fadeIn 0.2s ease-out;
 }
@@ -190,43 +195,6 @@ select:focus {
   box-shadow: var(--shadow);
 }
 
-.toolbar-hover-zone {
-  margin-right: 300px;
-  -webkit-app-region: no-drag;
-}
-
-.top-toolbar {
-  opacity: 0;
-  visibility: hidden;
-  display: flex;
-  gap: 5px;
-  flex-wrap: nowrap;
-  flex-direction: row;
-  border-radius: 10px;
-  width: 150px;
-  cursor: pointer;
-  justify-content: space-between;
-  transition:
-    opacity 0.3s ease-in-out,
-    visibility 0.3s ease-in-out;
-}
-
-.toolbar-hover-zone:hover .top-toolbar {
-  opacity: 1;
-  visibility: visible;
-}
-
-.top-toolbar button {
-  -webkit-app-region: no-drag;
-}
-
-#toolbar {
-  display: flex;
-  gap: 5px;
-  flex-wrap: nowrap;
-  flex-direction: row;
-}
-
 .divider {
   width: 2px;
   height: 25px;
@@ -249,7 +217,8 @@ select:focus {
   color: var(--text-main);
   overflow: auto;
   height: 100%;
-  width: min(calc(100vw - 48px), 100%);
+  width: 100%;
+  max-width: min(calc(100% - 48px), 75ch);
   margin: 0 auto;
   min-height: 0;
   padding: 10px;
@@ -260,15 +229,64 @@ select:focus {
   outline: none;
 }
 
+#toolbar {
+  max-width: min(calc(100% - 48px), 75ch);
+  margin: 0 auto;
+  display: flex;
+  justify-content: safe center;
+  gap: 5px;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  width: max-content;
+  min-width: 100%;
+}
+
+.toolbar-hover-zone {
+  display: flex;
+  justify-content: center;
+  padding-right: 280px;
+  -webkit-app-region: no-drag;
+}
+
+.top-toolbar {
+  opacity: 0;
+  visibility: hidden;
+  display: flex;
+  gap: 5px;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  border-radius: 10px;
+  cursor: pointer;
+  justify-content: space-between;
+  width: 100%;
+  max-width: min(calc(100% - 48px), 75ch);
+  transition:
+    opacity 0.3s ease-in-out,
+    visibility 0.3s ease-in-out;
+}
+
+.toolbar-hover-zone:hover .top-toolbar {
+  opacity: 1;
+  visibility: visible;
+}
+
+.top-toolbar button {
+  -webkit-app-region: no-drag;
+}
+
 #editor,
-#editor[data-width="comfortable"] {
-  max-width: min(calc(100vw - 48px), 75ch);
+#toolbar,
+#editor[data-width="comfortable"],
+#toolbar[data-width="comfortable"] {
+  max-width: min(calc(100% - 48px), 75ch);
 }
-#editor[data-width="normal"] {
-  max-width: min(calc(100vw - 48px), 95ch);
+#editor[data-width="normal"],
+#toolbar[data-width="normal"] {
+  max-width: min(calc(100% - 48px), 95ch);
 }
-#editor[data-width="wide"] {
-  max-width: min(calc(100vw - 48px), 110ch);
+#editor[data-width="wide"],
+#toolbar[data-width="wide"] {
+  max-width: min(calc(100% - 48px), 110ch);
 }
 
 .app-container {
@@ -298,9 +316,15 @@ select:focus {
   border-color: transparent;
 }
 
-.app-container.collapsed.focus .frame-left {
-  background-color: transparent;
-  border-color: transparent;
+.app-container.collapsed .frame-left {
+  background-color: var(--bg-sidebar);
+  border: transparent;
+  transition: background-color 0.3s cubic-bezier(0.3, 0, 0.8, 0.15);
+}
+
+.app-container.collapsed .toolbar-hover-zone,
+.app-container.focus .toolbar-hover-zone {
+  padding-right: 0px;
 }
 
 .app-container.focus .editor-header {
@@ -333,11 +357,6 @@ select:focus {
 
 .app-container.collapsed .collapse-icon {
   transform: rotate(180deg);
-}
-
-.app-container.collapsed .frame-left {
-  background-color: var(--bg-sidebar);
-  border: transparent;
 }
 
 .toggleSidebar-btn i,
@@ -471,20 +490,6 @@ svg.empty-state-icon {
     transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
     opacity 0.3s ease,
     border-color 0.3s ease;
-}
-
-.zoom-controls {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-#zoom-level {
-  font-variant-numeric: tabular-nums;
-  min-width: 40px;
-  text-align: center;
-  font-size: 0.75rem;
-  font-weight: 500;
 }
 
 #datetime-display {

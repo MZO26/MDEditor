@@ -1,12 +1,15 @@
+import { setUpNoteMenu } from "@electron/context-menu";
 import db from "@electron/db/database";
 import { checkRateLimit, wrapResult } from "@electron/ipc/ipc-validation";
 import { store } from "@electron/store";
 import { getTitleBarOverlay, initTheme } from "@electron/titlebar";
+import { nextZoom } from "@electron/win";
 import {
   StoreSchema,
   type AppSettings,
   type Theme,
 } from "@shared/schemas/store-schema";
+import type { ZoomAction } from "@shared/types";
 import {
   validateCreate,
   validateId,
@@ -30,7 +33,15 @@ export const LIMITS = {
   READ_LIGHT: 100, // getById, store:get
 };
 
-function registerIpcHandlers() {
+function registerIpcHandlers(win: BrowserWindow) {
+  ipcMain.handle("platform:get", (event) => {
+    return wrapResult(event, async () => {
+      if (!checkRateLimit("platform:get", LIMITS.READ_LIGHT))
+        throw new Error("RATE_LIMIT");
+      return process.platform;
+    });
+  });
+
   ipcMain.handle("note:getAll", (event) => {
     return wrapResult(event, async () => {
       if (!checkRateLimit("note:getAll", LIMITS.READ_HEAVY))
@@ -200,6 +211,33 @@ function registerIpcHandlers() {
       };
     });
   });
+
+  ipcMain.handle("zoom", (event, action: ZoomAction) => {
+    return wrapResult(event, async () => {
+      if (!checkRateLimit("zoom", LIMITS.READ_LIGHT))
+        throw new Error("RATE_LIMIT");
+      const current = win.webContents.getZoomFactor();
+      const zoom = nextZoom(current, action);
+      if (action !== "get") {
+        win.webContents.setZoomFactor(zoom);
+      }
+      return zoom;
+    });
+  });
+
+  ipcMain.on(
+    "show-note-menu",
+    (event, id: string, pinned: boolean, bookmarked: boolean) => {
+      return wrapResult(event, async () => {
+        if (!checkRateLimit("zoom:get", LIMITS.READ_LIGHT))
+          throw new Error("RATE_LIMIT");
+        if (win) {
+          const contextMenu = setUpNoteMenu(win, id, pinned, bookmarked);
+          contextMenu.popup({ window: win });
+        }
+      });
+    },
+  );
 
   ipcMain.handle("electron-store:get", (event, key: string) => {
     return wrapResult(event, async () => {

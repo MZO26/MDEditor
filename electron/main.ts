@@ -1,13 +1,12 @@
-import { setUpEditorMenu, setUpNoteMenu } from "@electron/context-menu";
-import { setupGlobalErrorHandling } from "@electron/error-handler";
-import { registerIpcHandlers } from "@electron/ipc/ipc-handlers";
-import { wrapResult } from "@electron/ipc/ipc-validation";
+import { setUpEditorMenu } from "@electron/context-menu";
+import { setupGlobalErrorHandling } from "@electron/handler/error-handler";
 import {
   navigationHandler,
   registerCustomProtocol,
   setupLocalImageProtocol,
-} from "@electron/navigation-handler";
-import { setPermissions } from "@electron/permissions";
+} from "@electron/handler/navigation-handler";
+import { setPermissions } from "@electron/handler/permission-handler";
+import { registerIpcHandlers } from "@electron/ipc/ipc-handlers";
 import { store } from "@electron/store";
 import {
   getTitleBarOverlay,
@@ -24,7 +23,6 @@ import {
   Tray,
   type BrowserWindowConstructorOptions,
 } from "electron";
-import console from "node:console";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -140,19 +138,6 @@ function createWindow() {
 
 // global ipc-listeners (registered once)
 
-ipcMain.on(
-  "show-note-menu",
-  (event, id: string, pinned: boolean, bookmarked: boolean) => {
-    return wrapResult(event, async () => {
-      console.log("show menu for", id);
-      if (win) {
-        const contextMenu = setUpNoteMenu(win, id, pinned, bookmarked);
-        contextMenu.popup({ window: win });
-      }
-    });
-  },
-);
-
 ipcMain.on("flush-confirmed", () => {
   isReadyToClose = true;
   win?.close();
@@ -165,7 +150,7 @@ app.whenReady().then(async () => {
   createWindow();
   setupLocalImageProtocol();
   setPermissions();
-  registerIpcHandlers();
+  registerIpcHandlers(win!);
   setUpEditorMenu();
   const trayIcon = await app.getFileIcon(process.execPath);
   tray = new Tray(trayIcon);

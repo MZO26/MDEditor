@@ -47,7 +47,7 @@ function buildSelects() {
       { value: "garamond", label: "Garamond" },
       { value: "tahoma", label: "Tahoma" },
     ],
-    "editor",
+    "typography",
   );
   selectBuilder(
     settingsContainer,
@@ -60,7 +60,7 @@ function buildSelects() {
       { value: "20", label: "20" },
       { value: "24", label: "24" },
     ],
-    "editor",
+    "typography",
   );
   selectBuilder(
     settingsContainer,
@@ -73,7 +73,7 @@ function buildSelects() {
       { value: "1.6", label: "1.6" },
       { value: "1.7", label: "1.7" },
     ],
-    "editor",
+    "typography",
   );
   selectBuilder(
     settingsContainer,

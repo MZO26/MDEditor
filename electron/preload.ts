@@ -4,6 +4,7 @@ import type {
   UpdateNotePayload,
 } from "@shared/schemas/note-schema";
 import type { AppSettings, Theme } from "@shared/schemas/store-schema";
+import type { ZoomAction } from "@shared/types";
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from "electron";
 
 console.log("--- PRELOAD ACTIVE ---");
@@ -22,6 +23,7 @@ function subscribe<T>(
 }
 
 contextBridge.exposeInMainWorld("electronAPI", {
+  platform: () => ipcRenderer.invoke("platform:get"),
   setTheme: (theme: Theme, focus?: boolean) =>
     ipcRenderer.invoke("set:theme", theme, focus),
   onThemeChanged: (callback: (theme: Theme) => void) => {
@@ -34,6 +36,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onRequestFlush: (callback: () => void) =>
     subscribe("request-flush", () => callback()),
   confirmFlush: () => ipcRenderer.send("flush-confirmed"),
+  zoom: (action: ZoomAction) => ipcRenderer.invoke("zoom", action),
 });
 contextBridge.exposeInMainWorld("noteAPI", {
   getAll: () => ipcRenderer.invoke("note:getAll"),

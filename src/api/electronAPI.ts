@@ -1,7 +1,11 @@
 import { safeIpcCall } from "@/utils/ipc";
 import type { ImagePayload } from "@shared/schemas/image-schema";
 import type { Theme } from "@shared/schemas/store-schema";
-import type { IpcResponse } from "@shared/types";
+import type { IpcResponse, ZoomAction } from "@shared/types";
+
+async function getPlatform(): Promise<IpcResponse<string>> {
+  return safeIpcCall(window.electronAPI.platform());
+}
 
 async function setTheme(
   theme: Theme,
@@ -26,4 +30,10 @@ async function showContextMenu(
   );
 }
 
-export { saveImage, setTheme, showContextMenu };
+async function handleZoom(
+  action: ZoomAction,
+): Promise<IpcResponse<ZoomAction>> {
+  return safeIpcCall(window.electronAPI.zoom(action));
+}
+
+export { getPlatform, handleZoom, saveImage, setTheme, showContextMenu };

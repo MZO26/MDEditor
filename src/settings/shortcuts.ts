@@ -1,28 +1,29 @@
+import { handleZoom } from "@/api/electronAPI";
 import { tinykeys } from "tinykeys";
-
-function isTypingEvent(
-  event: KeyboardEvent,
-  allowInEditor: boolean = false,
-): boolean {
-  const target = event.target as HTMLElement;
-  const isInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA";
-  const isEditor = target.isContentEditable;
-  if (allowInEditor) {
-    return isInput;
-  } else {
-    return isInput || isEditor;
-  }
-}
 
 function initGlobalShortcuts() {
   tinykeys(window, {
+    "$mod++": async (e) => {
+      e.preventDefault();
+      await handleZoom("in");
+    },
+    "$mod+=": async (e) => {
+      e.preventDefault();
+      await handleZoom("in");
+    },
+    "$mod+-": async (e) => {
+      e.preventDefault();
+      await handleZoom("out");
+    },
+    "$mod+0": async (e) => {
+      e.preventDefault();
+      await handleZoom("reset");
+    },
     "$mod+o": (event) => {
-      if (isTypingEvent(event, true)) return;
       event.preventDefault();
       document.dispatchEvent(new CustomEvent("app:toggle-sidebar"));
     },
     "$mod+Shift+R": (e) => {
-      if (isTypingEvent(e, true)) return;
       e.preventDefault();
       document.dispatchEvent(new CustomEvent("app:toggle-read-only"));
     },

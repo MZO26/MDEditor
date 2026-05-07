@@ -93,7 +93,6 @@ function initAppearanceSettings() {
   const codeThemeSelect = findElement<HTMLSelectElement>("#code-theme");
   const highlightSelect = findElement<HTMLSelectElement>("#highlight-theme");
   if (!codeThemeSelect || !themeSelect || !highlightSelect) {
-    console.warn("Select items not found.");
     return;
   }
   codeThemeSelect.addEventListener(

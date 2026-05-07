@@ -1,6 +1,5 @@
 import { setTheme } from "@/api/electronAPI";
 import { debouncedSetSettings } from "@/api/settingsAPI";
-import { findElement } from "@/utils/dom";
 import { getSettingsItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
 import type { CodeTheme, Theme } from "@shared/schemas/store-schema";
@@ -57,7 +56,7 @@ function getDefaultCodeTheme(resolvedTheme: ResolvedTheme): {
   preference: CodeTheme;
   codeTheme: Code;
 } {
-  const codeThemeSelect = findElement<HTMLSelectElement>("#code-theme");
+  const codeThemeSelect = getSettingsItem("codeThemeSelect");
   const preference = codeThemeSelect?.value as CodeTheme;
   return {
     preference,

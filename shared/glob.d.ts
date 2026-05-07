@@ -12,6 +12,7 @@ declare module "*.css";
 declare global {
   interface Window {
     electronAPI: {
+      platform: () => Promise<IpcResponse<string>>;
       setTheme: (theme: Theme, focus?: boolean) => Promise<IpcResponse<Theme>>;
       saveImage: (
         payload: ImagePayload,
@@ -24,6 +25,7 @@ declare global {
       ) => Promise<IpcResponse<void>>;
       onRequestFlush: (callback: () => void) => () => void;
       confirmFlush: () => void;
+      zoom: (action: ZoomAction) => Promise<IpcResponse<number>>;
     };
     noteAPI: {
       getAll: () => Promise<IpcResponse<Note[]>>;

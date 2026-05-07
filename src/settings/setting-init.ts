@@ -6,6 +6,7 @@ import { applyAppTheme } from "@/settings/theme-actions";
 import { findElement, requireElement, setActiveItem } from "@/utils/dom";
 import { getAppItem, registerAppEvents } from "@/utils/registry";
 import type { AppSettings } from "@shared/schemas/store-schema";
+import { delegate } from "tippy.js";
 
 function setModalState(show: boolean): void {
   const appContainer = getAppItem("appContainer");
@@ -31,6 +32,12 @@ async function initAppSettings(settings: AppSettings) {
     "button:first-child",
     buttonsContainer,
   );
+  delegate(settingsContainer, {
+    target: "[data-tippy-content]",
+    content: (reference) => reference.getAttribute("data-tippy-content") || "",
+    placement: "top",
+    theme: "app-theme",
+  });
   if (firstActiveBtn) setActiveItem(firstActiveBtn, buttonsContainer);
   await applyAppTheme(undefined, false, settings.theme, settings["code-theme"]);
   applyModalListeners(

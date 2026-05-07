@@ -73,6 +73,8 @@ type DbRow = Omit<Note, "content" | "tags"> & {
   content: string;
 };
 
+type ZoomAction = "get" | "in" | "out" | "reset";
+
 export type {
   Action,
   ActionMap,
@@ -86,4 +88,5 @@ export type {
   ResolvedTheme,
   TitleBarOverlayOptions,
   WorkerResult,
+  ZoomAction,
 };

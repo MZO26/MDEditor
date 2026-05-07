@@ -18,6 +18,7 @@ import { requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
 import { setAppItem } from "@/utils/registry";
 import "tippy.js/dist/tippy.css";
+import { getPlatformData } from "./settings/platform";
 
 document.addEventListener("DOMContentLoaded", async () => {
   setAppItem({
@@ -43,4 +44,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   initSearchHandlers();
   renderIcons();
   startAppClock();
+  getPlatformData();
 });
