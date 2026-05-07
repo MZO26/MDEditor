@@ -1,35 +1,52 @@
 .drag-region {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   -webkit-app-region: drag;
   width: 100%;
-  grid-column: 1 / -1;
   grid-row: 1;
-  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 5;
 }
 
 .frame-left {
   grid-column: 1;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   padding: 0 15px;
   background-color: var(--bg-sidebar-section);
   border-right: 1px solid var(--border-color);
+  overflow: clip;
   transition:
-    border 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.frame-left time {
+  white-space: nowrap;
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-container.collapsed .frame-left time,
+.app-container.focus .frame-left time {
+  opacity: 0;
+  transform: scale(0.85);
+  pointer-events: none;
 }
 
 .frame-right {
   grid-column: 2;
   background-color: var(--bg-sidebar);
   display: flex;
+  position: relative;
   justify-content: center;
   align-items: center;
   transition:
-    border 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -215,13 +232,10 @@ select:focus {
   grid-row: 2;
   background-color: var(--bg-editor);
   color: var(--text-main);
-  overflow: auto;
-  height: 100%;
-  width: 100%;
-  max-width: min(calc(100% - 48px), 75ch);
-  margin: 0 auto;
-  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 10px;
+  margin: 0 auto;
 }
 
 #editor:focus-visible,
@@ -230,22 +244,27 @@ select:focus {
 }
 
 #toolbar {
-  max-width: min(calc(100% - 48px), 75ch);
   margin: 0 auto;
   display: flex;
   justify-content: safe center;
   gap: 5px;
   flex-wrap: nowrap;
   flex-direction: row;
-  width: max-content;
   min-width: 100%;
+  width: max-content;
 }
 
 .toolbar-hover-zone {
-  display: flex;
-  justify-content: center;
-  padding-right: 280px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  height: 60px;
+  transform: translate(-50%, -50%);
   -webkit-app-region: no-drag;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .top-toolbar {
@@ -257,9 +276,8 @@ select:focus {
   flex-direction: row;
   border-radius: 10px;
   cursor: pointer;
-  justify-content: space-between;
-  width: 100%;
-  max-width: min(calc(100% - 48px), 75ch);
+  justify-content: center;
+  margin: 0 auto;
   transition:
     opacity 0.3s ease-in-out,
     visibility 0.3s ease-in-out;
@@ -274,19 +292,22 @@ select:focus {
   -webkit-app-region: no-drag;
 }
 
-#editor,
-#toolbar,
-#editor[data-width="comfortable"],
-#toolbar[data-width="comfortable"] {
-  max-width: min(calc(100% - 48px), 75ch);
+.app-container[data-width="comfortable"] #editor,
+.app-container[data-width="comfortable"] #toolbar,
+.app-container[data-width="comfortable"] .top-toolbar {
+  max-width: 75ch;
 }
-#editor[data-width="normal"],
-#toolbar[data-width="normal"] {
-  max-width: min(calc(100% - 48px), 95ch);
+
+.app-container[data-width="normal"] #editor,
+.app-container[data-width="normal"] #toolbar,
+.app-container[data-width="normal"] .top-toolbar {
+  max-width: 95ch;
 }
-#editor[data-width="wide"],
-#toolbar[data-width="wide"] {
-  max-width: min(calc(100% - 48px), 110ch);
+
+.app-container[data-width="wide"] #editor,
+.app-container[data-width="wide"] #toolbar,
+.app-container[data-width="wide"] .top-toolbar {
+  max-width: 110ch;
 }
 
 .app-container {
@@ -299,6 +320,7 @@ select:focus {
     grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  will-change: grid-template-columns, grid-template-rows;
 }
 
 .app-container.focus {
@@ -309,17 +331,19 @@ select:focus {
   grid-template-rows: 0 1fr;
 }
 
-.app-container.focus .drag-region,
 .app-container.focus .frame-left,
 .app-container.focus .frame-right {
   background-color: transparent;
-  border-color: transparent;
+  border: transparent;
+  padding: 0;
+  overflow: clip;
 }
 
 .app-container.collapsed .frame-left {
   background-color: var(--bg-sidebar);
   border: transparent;
-  transition: background-color 0.3s cubic-bezier(0.3, 0, 0.8, 0.15);
+  padding: 0;
+  overflow: hidden;
 }
 
 .app-container.collapsed .toolbar-hover-zone,
@@ -327,15 +351,27 @@ select:focus {
   padding-right: 0px;
 }
 
+.editor-header {
+  grid-row: 1;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: var(--bg-sidebar);
+  overflow: auto;
+  border-bottom: 1px solid var(--border-color);
+  opacity: 1;
+  transform: translateY(0) scaleY(1);
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s ease;
+}
+
 .app-container.focus .editor-header {
   opacity: 0;
-  transform: translateY(-20px);
+  transform: translateY(-12px) scaleY(0.92);
   border-color: transparent;
-  overflow: hidden;
-  transition:
-    transform 0.3s cubic-bezier(0.3, 0, 0.8, 0.15),
-    opacity 0.3s ease,
-    border-color 0.3s ease;
 }
 
 .app-container.focus .info-sidebar,
@@ -368,10 +404,6 @@ select:focus {
 .app-container.collapsed .toggleSidebar-btn i,
 .app-container.collapsed .toggleSidebar-btn svg {
   transform: rotate(180deg);
-}
-
-.no-transition * {
-  transition: none !important;
 }
 
 .editor-container {
@@ -474,30 +506,11 @@ svg.empty-state-icon {
   box-shadow: var(--shadow);
 }
 
-.editor-header {
-  grid-row: 1;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background-color: var(--bg-sidebar);
-  overflow-x: scroll;
-  overflow-y: hidden;
-  border-bottom: 1px solid var(--border-color);
-  opacity: 1;
-  transform: translateY(0);
-  transition:
-    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.3s ease,
-    border-color 0.3s ease;
-}
-
 #datetime-display {
   color: var(--text-muted);
-  margin-right: auto;
-  transition: width 0.3s ease-in-out;
   font-size: 0.75rem;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .stats {

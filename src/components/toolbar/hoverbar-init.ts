@@ -1,7 +1,6 @@
 import { setTheme } from "@/api/electronAPI";
 import { editor } from "@/components/editor/editor-init";
 import { createAsyncHandler } from "@/utils/async";
-import { requireElement } from "@/utils/dom";
 import { getAppItem, registerAppEvents } from "@/utils/registry";
 import type { Theme } from "@shared/schemas/store-schema";
 
@@ -13,24 +12,18 @@ async function initFocusMode() {
   console.log("setting theme");
 }
 
-function setEditorWidth(
-  editorWrapper: HTMLDivElement,
-  toolbar: HTMLDivElement,
-) {
+function setEditorWidth(container: HTMLDivElement) {
   const widths = ["comfortable", "normal", "wide"];
-  const current = editorWrapper.dataset["width"] || "normal";
+  const current = container.dataset["width"] || "normal";
   const index = widths.indexOf(current as (typeof widths)[number]);
   const next = widths[(index + 1) % widths.length];
-  editorWrapper.dataset["width"] = next;
-  toolbar.dataset["width"] = next;
+  container.dataset["width"] = next;
 }
 
 function initHoverbar() {
   const appContainer = getAppItem("appContainer");
-  const editorWrapper = getAppItem("editorWrapper");
   registerAppEvents(document, {
-    "app:set-editor-width": () =>
-      setEditorWidth(editorWrapper, requireElement<HTMLDivElement>("#toolbar")),
+    "app:set-editor-width": () => setEditorWidth(appContainer),
     "app:toggle-read-only": () => editor?.setEditable(!editor.isEditable),
     "app:toggle-focus-mode": createAsyncHandler(initFocusMode),
     "app:escape": () => {
