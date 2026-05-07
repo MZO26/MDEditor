@@ -1,17 +1,18 @@
 import { calculateToDos } from "@/extensions/todo-bar";
 import { debounce } from "@/utils/async";
-import { requireElement } from "@/utils/dom";
+import { findElement } from "@/utils/dom";
 import type { Note } from "@shared/schemas/note-schema";
 import type { Editor } from "@tiptap/core";
 
 function updateNoteTags(tags: Note["tags"]) {
-  const container = requireElement(".tag-container");
+  const container = findElement(".tag-container");
+  if (!container) return;
   container.innerHTML = "";
   if (!tags || tags.length === 0) return;
   tags.forEach((tag) => {
     const span = document.createElement("span");
     span.classList.add("tag", "searchTag");
-    span.setAttribute("tippy-content", `filter notes with: ${tag}`);
+    span.setAttribute("data-tippy-content", `filter notes with: ${tag}`);
     span.dataset["tag"] = String(tag);
     span.textContent = `#${tag}`;
     container.append(span);
@@ -22,17 +23,16 @@ function updateStats(editor: Editor) {
   const content = editor.getJSON();
   const charCount = editor.storage.characterCount.characters();
   const wordCount = editor.storage.characterCount.words();
-
-  const charCountEl = requireElement("#char-count");
+  const wordCountEl = findElement<HTMLSpanElement>("#word-count");
+  const charCountEl = findElement<HTMLSpanElement>("#char-count");
+  const readingTimeEl = findElement("#reading-time");
+  if (!wordCountEl || !charCountEl || !readingTimeEl) return;
   charCountEl.innerText = charCount.toString();
-
-  const wordCountEl = requireElement("#word-count");
   if (wordCount === 1) {
     wordCountEl.innerText = "1 word";
   } else {
     wordCountEl.innerText = `${wordCount} words`;
   }
-  const readingTimeEl = requireElement("#reading-time");
   readingTimeEl.innerText = estimateReadingTime(wordCount);
   calculateToDos(content);
 }

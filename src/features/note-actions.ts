@@ -11,7 +11,7 @@ import { stopAutoSave } from "@/features/note-auto-save";
 import { getNoteId, setNoteId } from "@/features/note-state";
 import { viewNote } from "@/features/note-ui";
 import { setActiveItem } from "@/utils/dom";
-import { getItem } from "@/utils/registry";
+import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
 import { getMetadata } from "@shared/generators/generators";
 import type { CreateNotePayload } from "@shared/schemas/note-schema";
@@ -36,7 +36,7 @@ async function handleCreateNote() {
 }
 
 async function handleDeleteNote(id: string, noteElement: HTMLDivElement) {
-  const editor = getItem("editor");
+  const editor = getAppItem("editor");
   stopAutoSave(editor, "cancel");
   pendingDeletions.add(id);
   const response = await deleteNote(id);
@@ -86,8 +86,8 @@ async function handleSelectNote(noteItem: HTMLDivElement) {
   setNoteId(noteID);
   viewNote(response.data);
   debouncedTagUpdate(response.data.tags);
-  debouncedStatUpdate(getItem("editor"));
-  setActiveItem(noteItem, getItem("sidebar"));
+  debouncedStatUpdate(getAppItem("editor"));
+  setActiveItem(noteItem, getAppItem("sidebar"));
 }
 
 export { handleCreateNote, handleDeleteNote, handleSaveNote, handleSelectNote };

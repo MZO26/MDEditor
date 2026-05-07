@@ -1,4 +1,4 @@
-import { findElement } from "./dom";
+import { findElement } from "@/utils/dom";
 
 let displayElement: HTMLDivElement | null = null;
 

@@ -3,14 +3,15 @@ import { editor } from "@/components/editor/editor-init";
 import { reloadNoteList } from "@/components/sidebar/sidebar-actions";
 import { handleDeleteNote } from "@/features/note-actions";
 import { cleanup } from "@/features/note-ui";
-import { applyAppTheme } from "@/settings/setting-theme";
+import { applyAppTheme } from "@/settings/theme-actions";
+import { findElement } from "@/utils/dom";
 import { showToast } from "@/utils/toast";
 
 function initListeners() {
   let lastAppliedTheme: string | null = null;
 
   window.noteAPI.onTriggerDelete(async (id: string) => {
-    const noteElement = document.querySelector<HTMLDivElement>(
+    const noteElement = findElement<HTMLDivElement>(
       `.noteItem[data-id="${id}"]`,
     );
     if (!noteElement) return;

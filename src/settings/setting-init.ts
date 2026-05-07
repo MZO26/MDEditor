@@ -1,14 +1,14 @@
 import { getAllSettings } from "@/api/settingsAPI";
+import { buildSelects } from "@/settings/select-items";
 import { createSettingsMenu } from "@/settings/setting-builder";
 import { setSelectListeners } from "@/settings/setting-items-init";
-import { applyAppTheme } from "@/settings/setting-theme";
+import { applyAppTheme } from "@/settings/theme-actions";
 import { findElement, requireElement, setActiveItem } from "@/utils/dom";
-import { getItem, registerAppEvents } from "@/utils/registry";
+import { getAppItem, registerAppEvents } from "@/utils/registry";
 import type { AppSettings } from "@shared/schemas/store-schema";
-import { buildSelects } from "./select-items";
 
 function setModalState(show: boolean): void {
-  const appContainer = getItem("appContainer");
+  const appContainer = getAppItem("appContainer");
   const overlay = findElement<HTMLDivElement>(".overlay");
   const modal = findElement<HTMLDivElement>(".modal");
   overlay?.classList.toggle("show", show);
@@ -33,6 +33,28 @@ async function initAppSettings(settings: AppSettings) {
   );
   if (firstActiveBtn) setActiveItem(firstActiveBtn, buttonsContainer);
   await applyAppTheme(undefined, false, settings.theme, settings["code-theme"]);
+  applyModalListeners(
+    openModalBtn,
+    closeModalBtn,
+    buttonsContainer,
+    settingsContainer,
+  );
+  registerAppEvents(document, {
+    "app:open-settings": () => setModalState(true),
+    "app:escape": () => {
+      if (modal.classList.contains("show")) {
+        setModalState(false);
+      }
+    },
+  });
+}
+
+function applyModalListeners(
+  openModalBtn: HTMLButtonElement,
+  closeModalBtn: HTMLButtonElement,
+  buttonsContainer: HTMLDivElement,
+  settingsContainer: HTMLDivElement,
+) {
   closeModalBtn.addEventListener("click", () => setModalState(false));
   openModalBtn.addEventListener("click", () => setModalState(true));
   buttonsContainer.addEventListener("click", (e) => {
@@ -44,15 +66,6 @@ async function initAppSettings(settings: AppSettings) {
     if (!targetTab) return;
     settingsContainer.dataset["activetab"] = targetTab;
     setActiveItem(btn, buttonsContainer);
-  });
-
-  registerAppEvents(document, {
-    "app:open-settings": () => setModalState(true),
-    "app:escape": () => {
-      if (modal.classList.contains("show")) {
-        setModalState(false);
-      }
-    },
   });
 }
 

@@ -16,12 +16,6 @@
   outline: none;
 }
 
-:focus-visible:not(.ProseMirror) {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-  background: var(--accent-hover);
-}
-
 :root {
   --bg-editor: #fcfcfc;
   --bg-sidebar: #f2f2f4;
@@ -33,10 +27,10 @@
   --accent-hover: #e4e4e6;
   --border-color: #c8c8cc;
   --shadow: 0 0 0 1px rgba(200, 200, 205, 0.8), 0 1px 3px rgba(0, 0, 0, 0.08);
-  --tag-color: #1565c0;
-  --tag-bg: #e3f2fd;
+  --tag-color: #0284c7;
+  --tag-bg: rgba(2, 132, 199, 0.12);
   --selection-bg: rgba(82, 82, 91, 0.12);
-  --focus-ring: #52525b;
+  --focus-ring: #2563eb;
   --scrollbar-thumb: #c4c4c8;
   --tooltip-bg: #2c2c2f;
   --tooltip-text: #f4f4f5;
@@ -57,6 +51,11 @@
   --font-century: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
   --font-consolas: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
   --current-font: var(--font-system);
+  --editor-highlight: var(--highlight-done);
+  --highlight-done: rgba(74, 222, 128, 0.35);
+  --highlight-info: rgba(96, 165, 250, 0.35);
+  --highlight-idea: rgba(253, 224, 71, 0.45);
+  --highlight-focus: rgba(248, 113, 113, 0.25);
 }
 
 :root[data-theme="dark"] {
@@ -69,14 +68,19 @@
   --accent-primary: #a1a1aa;
   --accent-hover: #28282c;
   --border-color: #2a2a2d;
-  --tag-color: #4fc3f7;
-  --tag-bg: #1e293b;
+  --tag-color: #38bdf8;
+  --tag-bg: rgba(56, 189, 248, 0.15);
   --shadow: 0 0 0 1px rgba(49, 49, 53, 0.8), 0 1px 3px rgba(0, 0, 0, 0.3);
   --selection-bg: rgba(161, 161, 170, 0.18);
-  --focus-ring: #a1a1aa;
+  --focus-ring: #60a5fa;
   --scrollbar-thumb: #6a6a6e;
   --tooltip-bg: #e8e8eb;
   --tooltip-text: #18181b;
+  --current-font: var(--font-system);
+  --highlight-done: rgba(52, 211, 153, 0.2);
+  --highlight-info: rgba(56, 189, 248, 0.2);
+  --highlight-idea: rgba(250, 204, 21, 0.2);
+  --highlight-focus: rgba(251, 113, 133, 0.2);
 }
 
 [data-theme="light-warm"] {
@@ -90,13 +94,18 @@
   --accent-hover: #e2e0d8;
   --border-color: #c4c2ba;
   --shadow: 0 0 0 1px rgba(196, 194, 186, 0.8), 0 1px 3px rgba(0, 0, 0, 0.07);
-  --tag-color: #1456a8;
-  --tag-bg: #dbeafe;
+  --tag-color: #0f766e;
+  --tag-bg: rgba(15, 118, 110, 0.12);
   --selection-bg: rgba(68, 64, 60, 0.12);
-  --focus-ring: #44403c;
+  --focus-ring: #0d9488;
   --scrollbar-thumb: #c0beb6;
   --tooltip-bg: #2c2925;
   --tooltip-text: #f5f3ef;
+  --current-font: var(--font-system);
+  --highlight-done: rgba(132, 165, 157, 0.35);
+  --highlight-info: rgba(99, 102, 241, 0.2);
+  --highlight-idea: rgba(217, 119, 6, 0.2);
+  --highlight-focus: rgba(168, 85, 247, 0.2);
 }
 
 [data-theme="dark-warm"] {
@@ -109,14 +118,19 @@
   --accent-primary: #9e9890;
   --accent-hover: #28231c;
   --border-color: #2a2520;
-  --tag-color: #5bc3f5;
-  --tag-bg: #1c2030;
+  --tag-color: #fbbf24;
+  --tag-bg: rgba(251, 191, 36, 0.15);
   --shadow: 0 0 0 1px rgba(80, 72, 67, 0.85), 0 1px 3px rgba(0, 0, 0, 0.32);
   --selection-bg: rgba(158, 152, 144, 0.18);
-  --focus-ring: #9e9890;
+  --focus-ring: #d97706;
   --scrollbar-thumb: #6a645b;
   --tooltip-bg: #e4e2da;
   --tooltip-text: #1c1917;
+  --current-font: var(--font-system);
+  --highlight-done: rgba(132, 204, 22, 0.2);
+  --highlight-info: rgba(45, 212, 191, 0.2);
+  --highlight-idea: rgba(245, 158, 11, 0.25);
+  --highlight-focus: rgba(192, 132, 252, 0.2);
 }
 
 [data-font="system"] {
@@ -136,6 +150,22 @@
 }
 [data-font="tahoma"] {
   --current-font: var(--font-tahoma);
+}
+
+[data-highlight="done"] {
+  --editor-highlight: var(--highlight-done);
+}
+
+[data-highlight="info"] {
+  --editor-highlight: var(--highlight-info);
+}
+
+[data-highlight="idea"] {
+  --editor-highlight: var(--highlight-idea);
+}
+
+[data-highlight="focus"] {
+  --editor-highlight: var(--highlight-focus);
 }
 
 body,

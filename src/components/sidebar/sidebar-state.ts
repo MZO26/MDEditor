@@ -1,5 +1,5 @@
 import { debouncedSetSettings } from "@/api/settingsAPI";
-import { getItem } from "@/utils/registry";
+import { getAppItem } from "@/utils/registry";
 import { el } from "@/utils/ui";
 
 import { createElement, Library, SearchX } from "lucide";
@@ -16,7 +16,7 @@ async function setSidebarState(
 }
 
 function handleSidebarEmptyState(searchInput?: string) {
-  const sidebar = getItem("sidebar");
+  const sidebar = getAppItem("sidebar");
   const existing = sidebar.querySelector(".sidebar-empty-state");
   const hasNotes = sidebar.childElementCount > (existing ? 1 : 0);
   if (hasNotes) {

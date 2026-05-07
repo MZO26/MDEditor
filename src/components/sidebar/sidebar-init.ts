@@ -3,28 +3,38 @@ import { handleSelectNote } from "@/features/note-actions";
 import { createNoteButton } from "@/features/note-ui";
 import { createAsyncHandler } from "@/utils/async";
 import { requireElement } from "@/utils/dom";
-import { getItem, registerAppEvents } from "@/utils/registry";
+import { getAppItem, registerAppEvents } from "@/utils/registry";
 import { createContextMenu } from "@/utils/ui";
 import { delegate } from "tippy.js";
 import "tippy.js/dist/tippy.css";
 
+const toggleSidebar = (appContainer: HTMLDivElement) => {
+  const collapsed = appContainer.classList.contains("collapsed");
+  setSidebarState(appContainer, "note-sidebar-state", !collapsed);
+};
+
 async function initNotesSidebar(state: boolean) {
-  const appContainer = getItem("appContainer");
-  const sidebar = getItem("sidebar");
-  const addNoteBtn = requireElement(".add-note-btn");
-  delegate(sidebar, {
-    target: "[tippy-content]",
+  const appContainer = getAppItem("appContainer");
+  const sidebar = getAppItem("sidebar");
+  const sidebarContainer = requireElement<HTMLDivElement>(".sidebar-container");
+  const addNoteBtn = requireElement<HTMLButtonElement>(".add-note-btn");
+  delegate(sidebarContainer, {
+    target: "[data-tippy-content]",
     theme: "app-theme",
-    content: (reference) =>
-      reference.getAttribute("tippy-content") || "options",
+    trigger: "mouseenter",
   });
-  const toggleSidebar = () => {
-    const collapsed = appContainer.classList.contains("collapsed");
-    setSidebarState(appContainer, "note-sidebar-state", !collapsed);
-  };
   setSidebarState(appContainer, "note-sidebar-state", state);
-  void appContainer.offsetWidth;
-  appContainer.classList.remove("no-transition");
+  applySidebarListeners(sidebar, addNoteBtn);
+  registerAppEvents(document, {
+    "app:toggle-sidebar": () => toggleSidebar(appContainer),
+    "app:create-new-note": () => createNoteButton(),
+  });
+}
+
+function applySidebarListeners(
+  sidebar: HTMLDivElement,
+  addNoteBtn: HTMLButtonElement,
+) {
   addNoteBtn.addEventListener("click", createAsyncHandler(createNoteButton));
   sidebar.addEventListener(
     "click",
@@ -45,10 +55,6 @@ async function initNotesSidebar(state: boolean) {
       }
     }),
   );
-  registerAppEvents(document, {
-    "app:toggle-sidebar": () => toggleSidebar(),
-    "app:create-new-note": () => createNoteButton(),
-  });
 }
 
 export { initNotesSidebar };

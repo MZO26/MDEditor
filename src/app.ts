@@ -16,12 +16,11 @@ import { initGlobalShortcuts } from "@/settings/shortcuts";
 import { startAppClock } from "@/utils/date";
 import { requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
-import { setItems } from "@/utils/registry";
-import tippy from "tippy.js";
+import { setAppItem } from "@/utils/registry";
 import "tippy.js/dist/tippy.css";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  setItems({
+  setAppItem({
     appContainer: requireElement<HTMLDivElement>(".app-container"),
     sidebar: requireElement<HTMLDivElement>(".notes-container"),
     editor: initEditor(),
@@ -43,9 +42,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   initHoverbar();
   initSearchHandlers();
   renderIcons();
-  tippy("[data-tippy-content]", {
-    placement: "top",
-    theme: "app-theme",
-  });
   startAppClock();
 });

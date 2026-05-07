@@ -1,6 +1,6 @@
 import { createToolbarFragment } from "@/components/toolbar/creation-helpers";
 import { renderIcons } from "@/utils/icons";
-import { getItem } from "@/utils/registry";
+import { getAppItem } from "@/utils/registry";
 import type { ActionMap } from "@shared/types";
 import type { Editor } from "@tiptap/core";
 
@@ -19,7 +19,7 @@ function updateActiveStates<T>(
 }
 
 function buildMenu<T>(container: HTMLElement, actions: ActionMap<T>): void {
-  const editor = getItem("editor");
+  const editor = getAppItem("editor");
   container.innerHTML = "";
   const buttonMap = new Map<string, HTMLButtonElement>();
   const fragment = createToolbarFragment(actions, buttonMap);
@@ -35,7 +35,7 @@ function setupToolbarListeners<T>(
   container: HTMLElement,
   actions: ActionMap<T>,
 ) {
-  const editor = getItem("editor");
+  const editor = getAppItem("editor");
   container.addEventListener("click", (e) => {
     const btn = (e.target as Element).closest<HTMLButtonElement>(
       "[data-action]",

@@ -1,11 +1,11 @@
 import { setTheme } from "@/api/electronAPI";
 import { editor } from "@/components/editor/editor-init";
 import { createAsyncHandler } from "@/utils/async";
-import { getItem, registerAppEvents } from "@/utils/registry";
+import { getAppItem, registerAppEvents } from "@/utils/registry";
 import type { Theme } from "@shared/schemas/store-schema";
 
 async function initFocusMode() {
-  const appContainer = getItem("appContainer");
+  const appContainer = getAppItem("appContainer");
   const newState = !appContainer.classList.contains("focus");
   appContainer.classList.toggle("focus", newState);
   await setTheme(document.body.dataset["theme"] as Theme, newState);
@@ -21,8 +21,8 @@ function setEditorWidth(editorWrapper: HTMLDivElement) {
 }
 
 function initHoverbar() {
-  const appContainer = getItem("appContainer");
-  const editorWrapper = getItem("editorWrapper");
+  const appContainer = getAppItem("appContainer");
+  const editorWrapper = getAppItem("editorWrapper");
   registerAppEvents(document, {
     "app:set-editor-width": () => setEditorWidth(editorWrapper),
     "app:toggle-read-only": () => editor?.setEditable(!editor.isEditable),

@@ -9,9 +9,9 @@ function buildSelects() {
     [
       { value: "system", label: "System" },
       { value: "light", label: "Light" },
-      { value: "light-warm", label: "Light (warm)" },
+      { value: "light-warm", label: "Light · Warm" },
       { value: "dark", label: "Dark" },
-      { value: "dark-warm", label: "Dark (warm)" },
+      { value: "dark-warm", label: "Dark · Warm" },
     ],
     "appearance",
   );
@@ -22,6 +22,17 @@ function buildSelects() {
       { value: "focus", label: "Focus" },
       { value: "balanced", label: "Balanced" },
       { value: "eye-comfort", label: "Eye Comfort" },
+    ],
+    "appearance",
+  );
+  selectBuilder(
+    settingsContainer,
+    "highlight-theme",
+    [
+      { value: "done", label: "Done · Soft" },
+      { value: "info", label: "Info · Soft" },
+      { value: "idea", label: "Idea · Soft" },
+      { value: "focus", label: "Focus · Warm" },
     ],
     "appearance",
   );

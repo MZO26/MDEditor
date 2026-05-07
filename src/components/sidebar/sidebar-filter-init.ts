@@ -9,10 +9,17 @@ import { findElement, requireElement } from "@/utils/dom";
 import { registerAppEvents } from "@/utils/registry";
 import tippy from "tippy.js";
 
+const debouncedSearch = debounce((e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const value = target.value.trim();
+  void handleSearchInput(value);
+}, 500); // funktioniert nicht
+
 function initSearchHandlers() {
   const viewBtn = findElement(".sidebar-trigger-btn");
   const popoverEl = findElement<HTMLDivElement>("#smart-views-popover");
   if (!viewBtn || !popoverEl) return;
+  const searchInput = requireElement<HTMLInputElement>("#searchInput");
 
   const tippyInstance = tippy(viewBtn as Element, {
     content: popoverEl,
@@ -29,15 +36,22 @@ function initSearchHandlers() {
       handleViews(view);
     },
   });
-
-  const searchInput = requireElement<HTMLInputElement>("#searchInput");
   popoverEl.appendChild(createViews(views));
-  const debouncedSearch = debounce(() => {
-    const value = searchInput.value.trim();
-    void handleSearchInput(value);
-  }, 500);
-  searchInput.addEventListener("input", debouncedSearch);
+  applyFilterListeners(searchInput, popoverEl);
+  registerAppEvents(document, {
+    "app:toggle-view-filter": () =>
+      tippyInstance.state.isVisible
+        ? tippyInstance.hide()
+        : tippyInstance.show(),
+    "app:open-global-search": () => searchInput.focus(),
+  });
+}
 
+function applyFilterListeners(
+  searchInput: HTMLInputElement,
+  popoverEl: HTMLDivElement,
+) {
+  searchInput.addEventListener("input", debouncedSearch);
   popoverEl.addEventListener(
     "click",
     createAsyncHandler(async (event) => {
@@ -52,14 +66,6 @@ function initSearchHandlers() {
       handleViews(view);
     }),
   );
-
-  registerAppEvents(document, {
-    "app:toggle-view-filter": () =>
-      tippyInstance.state.isVisible
-        ? tippyInstance.hide()
-        : tippyInstance.show(),
-    "app:open-global-search": () => searchInput.focus(),
-  });
 }
 
 export { initSearchHandlers };

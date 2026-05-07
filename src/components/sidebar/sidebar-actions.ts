@@ -4,7 +4,7 @@ import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
 import { getNoteId, setNoteId } from "@/features/note-state";
 import { findElement, setActiveItem } from "@/utils/dom";
 import { formatNoteDate } from "@/utils/format";
-import { getItem } from "@/utils/registry";
+import { getAppItem } from "@/utils/registry";
 import { createNoteItem } from "@/utils/templates";
 import { showToast } from "@/utils/toast";
 
@@ -28,7 +28,7 @@ function compareNotes(a: Note, b: Note): number {
 function addOneNoteToList(note: Note) {
   const noteElement = createNoteItem(note);
   let target: Element | null = null;
-  const sidebar = getItem("sidebar");
+  const sidebar = getAppItem("sidebar");
   for (const child of sidebar.children) {
     const el = child as HTMLElement;
     if (
@@ -50,7 +50,7 @@ function addOneNoteToList(note: Note) {
 }
 
 function addManyNotesToList(notes: Note[]) {
-  const sidebar = getItem("sidebar");
+  const sidebar = getAppItem("sidebar");
   const fragment = document.createDocumentFragment();
   notes.forEach((note: Note) => {
     const noteElement = createNoteItem(note);
@@ -68,7 +68,7 @@ function addManyNotesToList(notes: Note[]) {
 }
 
 async function reloadNoteList(notes?: Note[]): Promise<void> {
-  const sidebar = getItem("sidebar");
+  const sidebar = getAppItem("sidebar");
   sidebar.innerHTML = "";
   if (notes) {
     addManyNotesToList(notes.sort(compareNotes));

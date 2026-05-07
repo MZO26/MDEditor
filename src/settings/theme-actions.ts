@@ -1,6 +1,7 @@
 import { setTheme } from "@/api/electronAPI";
 import { debouncedSetSettings } from "@/api/settingsAPI";
 import { findElement } from "@/utils/dom";
+import { getSettingsItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
 import type { CodeTheme, Theme } from "@shared/schemas/store-schema";
 import { CODE_THEME_MAP, THEME_MAP } from "@shared/theme-constants";
@@ -23,10 +24,10 @@ const applyAppTheme = async (
   themeRes?: Theme,
   codeRes?: CodeTheme,
 ) => {
-  const themeSelect = findElement<HTMLSelectElement>("#theme");
-  const codeThemeSelect = findElement<HTMLSelectElement>("#code-theme");
+  console.log("theme select called");
   let appPref: Theme = themeOverride || "system";
-  if (!themeSelect || !codeThemeSelect) return;
+  const codeThemeSelect = getSettingsItem("codeThemeSelect");
+  const themeSelect = getSettingsItem("themeSelect");
   if (!themeOverride) {
     // no override means only on startup
     if (themeRes) appPref = themeRes;
@@ -66,8 +67,7 @@ function getDefaultCodeTheme(resolvedTheme: ResolvedTheme): {
   };
 }
 
-async function setAppTheme() {
-  const themeSelect = findElement<HTMLSelectElement>("#theme");
+async function setAppTheme(themeSelect: HTMLSelectElement) {
   if (!themeSelect) return;
   const themeValue = themeSelect.value;
   const validTheme = themeValue in THEME_MAP ? (themeValue as Theme) : "system";

@@ -1,7 +1,7 @@
+import { requireElement } from "@/utils/dom";
+import { formatNoteDate } from "@/utils/format";
+import { renderIcons } from "@/utils/icons";
 import type { Note } from "@shared/schemas/note-schema";
-import { requireElement } from "./dom";
-import { formatNoteDate } from "./format";
-import { renderIcons } from "./icons";
 
 const templateElement =
   requireElement<HTMLTemplateElement>("#noteItem-template");

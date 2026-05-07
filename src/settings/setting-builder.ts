@@ -4,6 +4,7 @@ import "tippy.js/dist/tippy.css";
 
 type SelectOption = { value: string; label: string };
 
+// blueprint for select items and their options for specified categories
 function selectBuilder(
   container: HTMLDivElement,
   id: string,
@@ -28,6 +29,7 @@ function selectBuilder(
   container.append(row);
 }
 
+// builds the button palette and wraps it into the button container
 function createSettingsMenu(): HTMLDivElement {
   const createSettingsButton = (category: string, lucideIcon: string) => {
     const icon = el("i");
