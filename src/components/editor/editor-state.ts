@@ -1,4 +1,4 @@
-import { getNoteId } from "@/features/note-state";
+import { stateStore } from "@/features/note-state";
 import { requireElement } from "@/utils/dom";
 import { el } from "@/utils/ui";
 import { createElement, FileQuestion } from "lucide";
@@ -9,8 +9,8 @@ function handleEditorEmptyState() {
   const editorContainer = requireElement(".editor-container");
   const editorView = requireElement(".editor-view");
   const emptyState = editorContainer.querySelector(".editor-empty-state");
-  const id = getNoteId();
-  if (!id) {
+  const { activeId } = stateStore.getState();
+  if (!activeId) {
     editorView.classList.add("hidden");
     if (!emptyState) {
       editorContainer.appendChild(EMPTY_STATE);

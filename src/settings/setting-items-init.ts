@@ -1,12 +1,14 @@
 import { debouncedSetSettings } from "@/api/settingsAPI";
 import {
+  applyAppTheme,
+  currentDomTheme,
   resolveTheme,
-  setAppTheme,
   setCodeTheme,
 } from "@/settings/theme-actions";
 import { createAsyncHandler } from "@/utils/async";
 import { findElement } from "@/utils/dom";
 import { getAppItem, setSettingsItem } from "@/utils/registry";
+import { THEME_MAP } from "@shared/constants";
 import type {
   AppSettings,
   CloseWindowMode,
@@ -105,13 +107,19 @@ function initAppearanceSettings() {
   );
   themeSelect.addEventListener(
     "change",
-    createAsyncHandler(async () => setAppTheme(themeSelect)),
+    createAsyncHandler(async (e: Event) => {
+      const target = e.target as HTMLSelectElement;
+      themeSelect.value = target.value;
+      const validTheme =
+        target.value in THEME_MAP ? (target.value as Theme) : "system";
+      if (validTheme === currentDomTheme) return;
+      await applyAppTheme(validTheme, false);
+    }),
   );
 
   highlightSelect.addEventListener("change", (e: Event) => {
     const target = e.target as HTMLSelectElement;
     highlightSelect.value = target.value;
-    console.log(target.value);
     document.documentElement.setAttribute("data-highlight", target.value);
     debouncedSetSettings({
       highlight: target.value as HighlightTheme,

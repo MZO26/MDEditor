@@ -1,3 +1,4 @@
+import { ExportRequestSchema } from "@shared/schemas/export-schema";
 import { ImagePayloadSchema } from "@shared/schemas/image-schema";
 import {
   CreateNotePayloadSchema,
@@ -8,7 +9,6 @@ import {
 } from "@shared/schemas/note-schema";
 import { StoreSchema } from "@shared/schemas/store-schema";
 import z from "zod";
-import { ExportRequestSchema } from "./schemas/export-schema";
 
 function validation<T>(schema: z.ZodType<T>, payload: unknown): T {
   const validation = schema.safeParse(payload);
@@ -49,16 +49,16 @@ function validateStore(settings: unknown) {
   return storeValidation.data;
 }
 
-function validateExport(payload: unknown) {
-  return validation(ExportRequestSchema, payload);
-}
-
 function validateTheme(theme: unknown) {
   return validation(StoreSchema.shape.theme, theme);
 }
 
 function validateImage(payload: unknown) {
   return validation(ImagePayloadSchema, payload);
+}
+
+function validateExport(payload: unknown) {
+  return validation(ExportRequestSchema, payload);
 }
 
 export {

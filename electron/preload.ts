@@ -71,6 +71,7 @@ contextBridge.exposeInMainWorld("noteAPI", {
   pin: (id: string) => ipcRenderer.invoke("note:pin", id),
   bookmark: (id: string) => ipcRenderer.invoke("note:bookmark", id),
   getViews: (view: string) => ipcRenderer.invoke("views:get", view),
+  setActiveNote: (id: string | null) => ipcRenderer.send("set-active-note", id),
 });
 contextBridge.exposeInMainWorld("storeAPI", {
   getSettings: (key: string) => ipcRenderer.invoke("electron-store:get", key),

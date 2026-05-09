@@ -17,13 +17,12 @@ function resolveTheme(theme: Theme): ResolvedTheme {
   return THEME_MAP[theme];
 }
 
-const applyAppTheme = async (
+async function applyAppTheme(
   themeOverride?: Theme,
   onOSchange = false,
   themeRes?: Theme,
   codeRes?: CodeTheme,
-) => {
-  console.log("theme select called");
+) {
   let appPref: Theme = themeOverride || "system";
   const codeThemeSelect = getSettingsItem("codeThemeSelect");
   const themeSelect = getSettingsItem("themeSelect");
@@ -44,7 +43,8 @@ const applyAppTheme = async (
     currentDomTheme = domTheme;
     await setTheme(domTheme);
   }
-};
+  showToast(`Set app theme to: ${domTheme}`);
+}
 
 function setCodeTheme(resolvedTheme: ResolvedTheme): CodeTheme {
   const { preference, codeTheme } = getDefaultCodeTheme(resolvedTheme);
@@ -66,12 +66,4 @@ function getDefaultCodeTheme(resolvedTheme: ResolvedTheme): {
   };
 }
 
-async function setAppTheme(themeSelect: HTMLSelectElement) {
-  if (!themeSelect) return;
-  const themeValue = themeSelect.value;
-  const validTheme = themeValue in THEME_MAP ? (themeValue as Theme) : "system";
-  await applyAppTheme(validTheme, false);
-  showToast(`Set app theme to: ${validTheme}`);
-}
-
-export { applyAppTheme, resolveTheme, setAppTheme, setCodeTheme };
+export { applyAppTheme, currentDomTheme, resolveTheme, setCodeTheme };

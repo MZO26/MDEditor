@@ -1,7 +1,7 @@
 import { getAll } from "@/api/noteAPI";
 import { handleEditorEmptyState } from "@/components/editor/editor-state";
 import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
-import { getNoteId, setNoteId } from "@/features/note-state";
+import { stateStore } from "@/features/note-state";
 import { findElement, setActiveItem } from "@/utils/dom";
 import { formatNoteDate } from "@/utils/format";
 import { getAppItem } from "@/utils/registry";
@@ -45,7 +45,7 @@ function addOneNoteToList(note: Note) {
     sidebar.appendChild(noteElement);
   }
   handleSidebarEmptyState();
-  setNoteId(note.id);
+  stateStore.setState({ activeId: note.id });
   setActiveItem(noteElement, sidebar);
 }
 
@@ -61,9 +61,11 @@ function addManyNotesToList(notes: Note[]) {
   sidebar.appendChild(fragment);
   handleEditorEmptyState();
   handleSidebarEmptyState();
-  const id = getNoteId();
-  if (!id) return;
-  const noteElement = findElement<HTMLDivElement>(`.noteItem[data-id="${id}"]`);
+  const { activeId } = stateStore.getState();
+  if (!activeId) return;
+  const noteElement = findElement<HTMLDivElement>(
+    `.noteItem[data-id="${activeId}"]`,
+  );
   if (noteElement) setActiveItem(noteElement, sidebar);
 }
 

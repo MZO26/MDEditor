@@ -1,5 +1,10 @@
-import type { ExportRequest } from "@shared/schemas/export-schema";
-import { Menu, type BrowserWindow } from "electron";
+import { ipcMain, Menu, type BrowserWindow } from "electron";
+
+let activeId: string | null = null;
+
+ipcMain.on("set-active-note", (_event, id) => {
+  activeId = id;
+});
 
 async function setUpEditorMenu() {
   const { default: contextMenu } = await import("electron-context-menu");
@@ -28,7 +33,6 @@ function setUpNoteMenu(
   id: string,
   pinned: boolean,
   bookmarked: boolean,
-  exportRequest: ExportRequest,
 ) {
   const noteItemMenu = Menu.buildFromTemplate([
     {
@@ -41,8 +45,30 @@ function setUpNoteMenu(
     },
     { type: "separator" },
     {
-      label: "Export note",
-      click: () => win.webContents.send("note:trigger-export", exportRequest),
+      label: "Export Note as...",
+      enabled: activeId !== null && activeId === id,
+      submenu: [
+        {
+          label: "Markdown (.md)",
+          click: () => win.webContents.send("note:trigger-export", "md"),
+        },
+        {
+          label: "HTML (.html)",
+          click: () => win.webContents.send("note:trigger-export", "html"),
+        },
+        {
+          label: "JSON Document (.json)",
+          click: () => win.webContents.send("note:trigger-export", "json"),
+        },
+        {
+          label: "Plain Text (.txt)",
+          click: () => win.webContents.send("note:trigger-export", "txt"),
+        },
+        {
+          label: "PDF (.pdf)",
+          click: () => win.webContents.send("note:trigger-export", "pdf"),
+        },
+      ],
     },
     { type: "separator" },
     {

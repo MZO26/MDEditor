@@ -1,3 +1,4 @@
+import { checkRateLimit, safeResponse } from "@electron/ipc/ipc-validation";
 import { store } from "@electron/store";
 import { nextZoom } from "@electron/win";
 import { LIMITS } from "@shared/constants";
@@ -5,7 +6,6 @@ import { StoreSchema, type AppSettings } from "@shared/schemas/store-schema";
 import type { ZoomAction } from "@shared/types";
 import { validateStore } from "@shared/validation";
 import { BrowserWindow, ipcMain } from "electron";
-import { checkRateLimit, safeResponse } from "./ipc-validation";
 
 function registerSettingsIpc(win: BrowserWindow) {
   ipcMain.handle("zoom", (e, action: ZoomAction) => {

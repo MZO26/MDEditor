@@ -5,7 +5,7 @@ import {
   reloadNoteList,
 } from "@/components/sidebar/sidebar-actions";
 import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
-import { setNoteId } from "@/features/note-state";
+import { stateStore } from "@/features/note-state";
 import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
 import { el } from "@/utils/ui";
@@ -26,7 +26,7 @@ const views: ViewItem[] = [
 async function handleSearchInput(searchInput: string) {
   const sidebar = getAppItem("sidebar");
   sidebar.innerHTML = "";
-  setNoteId(null);
+  stateStore.setState({ activeId: null });
   try {
     if (searchInput === "") {
       await reloadNoteList();

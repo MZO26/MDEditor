@@ -2,6 +2,7 @@ import { win } from "@electron/main";
 import { store } from "@electron/store";
 import { StoreSchema } from "@shared/schemas/store-schema";
 import type { ZoomAction } from "@shared/types";
+import { BrowserWindow } from "electron";
 
 const ZOOMS = [1, 1.1, 1.25] as const;
 
@@ -33,4 +34,23 @@ function saveWindowBounds() {
   }
 }
 
-export { nextZoom, saveWindowBounds };
+const createHiddenPdfWindow = () => {
+  const hiddenWin = new BrowserWindow({
+    show: false,
+    skipTaskbar: true,
+    focusable: false,
+    width: 1100,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+      webSecurity: true,
+      allowRunningInsecureContent: false,
+      backgroundThrottling: false,
+    },
+  });
+  return hiddenWin;
+};
+
+export { createHiddenPdfWindow, nextZoom, saveWindowBounds };

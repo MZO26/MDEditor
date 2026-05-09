@@ -6,6 +6,7 @@
   width: 100%;
   grid-row: 1;
   z-index: 5;
+  position: relative;
 }
 
 .frame-left {
@@ -42,9 +43,9 @@
   grid-column: 2;
   background-color: var(--bg-sidebar);
   display: flex;
-  position: relative;
   justify-content: center;
   align-items: center;
+  position: relative;
   transition:
     border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -206,10 +207,12 @@ label {
   grid-row: 2;
   background-color: var(--bg-editor);
   color: var(--text-main);
+  margin: 0 auto;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 10px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 80ch;
 }
 
 #toolbar {
@@ -217,10 +220,11 @@ label {
   display: flex;
   justify-content: safe center;
   gap: 5px;
+  overflow: auto;
   flex-wrap: nowrap;
   flex-direction: row;
-  min-width: 100%;
-  width: max-content;
+  width: 100%;
+  max-width: 80ch;
 }
 
 .toolbar-hover-zone {
@@ -247,6 +251,8 @@ label {
   cursor: pointer;
   justify-content: center;
   margin: 0 auto;
+  min-width: 100%;
+  width: max-content;
   transition:
     opacity 0.3s ease-in-out,
     visibility 0.3s ease-in-out;
@@ -264,7 +270,7 @@ label {
 .app-container[data-width="comfortable"] #editor,
 .app-container[data-width="comfortable"] #toolbar,
 .app-container[data-width="comfortable"] .top-toolbar {
-  max-width: 75ch;
+  max-width: 80ch;
 }
 
 .app-container[data-width="normal"] #editor,
@@ -277,6 +283,12 @@ label {
 .app-container[data-width="wide"] #toolbar,
 .app-container[data-width="wide"] .top-toolbar {
   max-width: 110ch;
+}
+
+.app-container[data-width="comfortable"] .drag-region,
+.app-container[data-width="normal"] .drag-region,
+.app-container[data-width="wide"] .drag-region {
+  position: static;
 }
 
 .app-container {
@@ -326,8 +338,8 @@ label {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background-color: var(--bg-sidebar);
   overflow: auto;
+  background-color: var(--bg-sidebar);
   border-bottom: 1px solid var(--border-color);
   opacity: 1;
   transform: translateY(0) scaleY(1);
@@ -346,13 +358,11 @@ label {
 .app-container.focus .info-sidebar,
 .app-container.focus .info-sidebar-toggle,
 .app-container.focus .dots {
-  transform: translate3d(100%, 0, 0);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transition:
-    transform 0.3s cubic-bezier(0.3, 0, 0.8, 0.15),
-    opacity 0.2s ease,
+    opacity 0.2s ease-in-out,
     visibility 0s linear 0.3s;
 }
 
@@ -375,55 +385,6 @@ label {
   transform: rotate(180deg);
 }
 
-.slash-menu {
-  min-width: 260px;
-  max-width: 360px;
-  padding: 6px;
-  background: var(--bg-sidebar);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-
-.slash-menu-item {
-  all: unset;
-  box-sizing: border-box;
-  width: 100%;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  color: var(--text-main);
-}
-
-.slash-menu-item:hover,
-.slash-menu-item.active {
-  background: var(--accent-hover);
-}
-
-.slash-menu-item div {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.slash-menu-item b {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.2;
-  color: var(--text-main);
-}
-
-.slash-menu-item small {
-  font-size: 12px;
-  line-height: 1.3;
-  color: var(--text-muted);
-}
 .editor-container {
   position: relative;
   display: grid;

@@ -16,9 +16,7 @@ declare global {
       noteExport: (
         payload: ExportRequest,
       ) => Promise<IpcResponse<ExportRequest>>;
-      onTriggerExport: (
-        callback: (payload: ExportRequest) => void,
-      ) => () => void;
+      onTriggerExport: (callback: (extension: string) => void) => () => void;
     };
     electronAPI: {
       platform: () => Promise<IpcResponse<string>>;
@@ -61,6 +59,7 @@ declare global {
       pin: (id: string) => Promise<IpcResponse<boolean>>;
       bookmark: (id: string) => Promise<IpcResponse<boolean>>;
       getViews: (view) => Promise<IpcResponse<Note[]>>;
+      setActiveNote: (id: string | null) => void;
     };
     storeAPI: {
       getSettings: <K extends keyof AppSettings>(

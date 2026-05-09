@@ -1,5 +1,6 @@
 import { setUpNoteMenu } from "@electron/context-menu";
 import db from "@electron/db/database";
+import { checkRateLimit, safeResponse } from "@electron/ipc/ipc-validation";
 import { win } from "@electron/main";
 import { LIMITS } from "@shared/constants";
 import {
@@ -10,7 +11,6 @@ import {
   validateUpdate,
 } from "@shared/validation";
 import { ipcMain } from "electron";
-import { checkRateLimit, safeResponse } from "./ipc-validation";
 
 function registerNoteIpc() {
   ipcMain.handle("note:getAll", (e) => {

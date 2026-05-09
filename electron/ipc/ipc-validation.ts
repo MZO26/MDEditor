@@ -1,10 +1,10 @@
+import { registerElectronIpc } from "@electron/ipc/ipc-electron";
+import { registerExportIpc } from "@electron/ipc/ipc-export";
+import { registerNoteIpc } from "@electron/ipc/ipc-note";
+import { registerSettingsIpc } from "@electron/ipc/ipc-settings";
 import type { IpcResponse } from "@shared/types";
 import { app, BrowserWindow, type IpcMainInvokeEvent } from "electron";
 import z, { ZodError } from "zod";
-import { registerElectronIpc } from "./ipc-electron";
-import { registerExportIpc } from "./ipc-export";
-import { registerNoteIpc } from "./ipc-note";
-import { registerSettingsIpc } from "./ipc-settings";
 
 enum AppError {
   DBError = "NOT_FOUND",
@@ -12,7 +12,7 @@ enum AppError {
   SenderError = "UNAUTHORIZED_SENDER",
   UnknownError = "UNKNOWN_ERROR",
   InvalidViewError = "INVALID_VIEW",
-  CancelledOperation = "CANCELLED_ERROR",
+  CancelledOperation = "CANCELLED_OPERATION",
 }
 
 function validateSender(event: IpcMainInvokeEvent) {

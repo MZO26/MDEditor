@@ -75,15 +75,12 @@ type DbRow = Omit<Note, "content" | "tags"> & {
 
 type ZoomAction = "get" | "in" | "out" | "reset";
 
-type Export = "md" | "json" | "txt" | "html" | "pdf";
-
 export type {
   Action,
   ActionMap,
   AutoScrollOptions,
   Code,
   DbRow,
-  Export,
   IpcResponse,
   Metadata,
   NativeWindowColors,

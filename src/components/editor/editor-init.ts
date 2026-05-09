@@ -19,6 +19,7 @@ import {
   Placeholder,
   Selection,
 } from "@tiptap/extensions";
+import { Markdown } from "@tiptap/markdown";
 import StarterKit from "@tiptap/starter-kit";
 
 let editor: Editor | null = null;
@@ -51,6 +52,7 @@ function initEditor(): Editor {
 
 function getNoteEditorExtensions() {
   return [
+    Markdown,
     MasterShortcuts,
     Typography,
     DragAutoScroll.configure({

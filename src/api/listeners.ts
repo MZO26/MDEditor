@@ -1,3 +1,4 @@
+import { exportNote } from "@/api/exportAPI";
 import { bookmark, pin } from "@/api/noteAPI";
 import { editor } from "@/components/editor/editor-init";
 import { reloadNoteList } from "@/components/sidebar/sidebar-actions";
@@ -5,20 +6,58 @@ import { handleDeleteNote } from "@/features/note-actions";
 import { cleanup } from "@/features/note-ui";
 import { applyAppTheme } from "@/settings/theme-actions";
 import { findElement } from "@/utils/dom";
+import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
-import type { ExportRequest } from "@shared/schemas/export-schema";
-import { exportNote } from "./exportAPI";
+import { titleGenerator } from "@shared/generators/generators";
+import type { EditorDoc } from "@shared/schemas/editor-schema";
 
 function initListeners() {
   let lastAppliedTheme: string | null = null;
 
-  window.exportAPI.onTriggerExport(async (payload: ExportRequest) => {
-    const response = await exportNote(payload);
+  window.exportAPI.onTriggerExport(async (extension) => {
+    const editor = getAppItem("editor");
+    const fileName = titleGenerator(editor.getText());
+    let exportContent: string | EditorDoc;
+    try {
+      switch (extension) {
+        case "json":
+          exportContent = editor.getJSON();
+          break;
+
+        case "html":
+          exportContent = editor.getHTML();
+          break;
+
+        case "md":
+          exportContent = editor.getMarkdown();
+          break;
+
+        case "txt":
+          exportContent = editor.getText();
+          break;
+
+        case "pdf":
+          exportContent = editor.getHTML();
+          break;
+
+        default:
+          showToast(`Unsupported export format: ${extension}`);
+          return;
+      }
+    } catch (error) {
+      showToast(`Export conversion failed ${error}`);
+      return;
+    }
+    const response = await exportNote({
+      content: exportContent,
+      extension,
+      fileName,
+    });
     if (!response.success) {
       showToast(response.message);
       return;
     }
-    showToast(`Exported Note as ${response.data.extension}-file`);
+    showToast(`Exported Note as ${extension}-file`);
   });
 
   window.noteAPI.onTriggerDelete(async (id: string) => {

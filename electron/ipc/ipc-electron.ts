@@ -1,12 +1,12 @@
+import { checkRateLimit, safeResponse } from "@electron/ipc/ipc-validation";
+import { getTitleBarOverlay, initTheme } from "@electron/titlebar";
 import { LIMITS } from "@shared/constants";
+import type { Theme } from "@shared/schemas/store-schema";
 import { validateImage, validateTheme } from "@shared/validation";
 import { createHash } from "crypto";
 import { app, BrowserWindow, ipcMain } from "electron";
 import fs from "node:fs";
 import path from "path";
-import { checkRateLimit, safeResponse } from "./ipc-validation";
-import { initTheme, getTitleBarOverlay } from "@electron/titlebar";
-import type { Theme } from "@shared/schemas/store-schema";
 
 function registerElectronIpc() {
   ipcMain.handle("platform:get", (e) => {

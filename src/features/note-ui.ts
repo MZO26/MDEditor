@@ -2,7 +2,7 @@ import { handleEditorEmptyState } from "@/components/editor/editor-state";
 import { addOneNoteToList } from "@/components/sidebar/sidebar-actions";
 import { handleCreateNote } from "@/features/note-actions";
 import { setupAutoSave, stopAutoSave } from "@/features/note-auto-save";
-import { setNoteId } from "@/features/note-state";
+import { stateStore } from "@/features/note-state";
 import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
 import type { Note } from "@shared/schemas/note-schema";
@@ -21,7 +21,7 @@ async function createNoteButton() {
     return;
   }
   const note = response.data;
-  setNoteId(note.id);
+  stateStore.setState({ activeId: note.id });
   showToast("New note created");
   addOneNoteToList(note);
   handleEditorEmptyState();

@@ -8,7 +8,7 @@ import {
 import { updateNoteInList } from "@/components/sidebar/sidebar-actions";
 import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
 import { stopAutoSave } from "@/features/note-auto-save";
-import { getNoteId, setNoteId } from "@/features/note-state";
+import { stateStore } from "@/features/note-state";
 import { viewNote } from "@/features/note-ui";
 import { setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
@@ -48,9 +48,9 @@ async function handleDeleteNote(id: string, noteElement: HTMLDivElement) {
   showToast("Note deleted");
   noteElement.remove();
   handleSidebarEmptyState();
-  const noteID = getNoteId();
-  if (noteID === id) {
-    setNoteId(null);
+  const { activeId } = stateStore.getState();
+  if (activeId === id) {
+    stateStore.setState({ activeId: null });
     editor?.commands.clearContent();
     handleEditorEmptyState();
   }
@@ -83,7 +83,7 @@ async function handleSelectNote(noteItem: HTMLDivElement) {
     showToast(response.message);
     return;
   }
-  setNoteId(noteID);
+  stateStore.setState({ activeId: noteID });
   viewNote(response.data);
   debouncedTagUpdate(response.data.tags);
   debouncedStatUpdate(getAppItem("editor"));

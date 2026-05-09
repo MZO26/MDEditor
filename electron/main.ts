@@ -6,6 +6,7 @@ import {
   setupLocalImageProtocol,
 } from "@electron/handler/navigation-handler";
 import { setPermissions } from "@electron/handler/permission-handler";
+import { registerIpc } from "@electron/ipc/ipc-validation";
 import { store } from "@electron/store";
 import {
   getTitleBarOverlay,
@@ -25,7 +26,6 @@ import {
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
-import { registerIpc } from "./ipc/ipc-validation";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env["DIST"] = path.join(__dirname, "../dist");

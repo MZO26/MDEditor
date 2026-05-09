@@ -1,11 +1,12 @@
 import z from "zod";
 
 const ExportRequestSchema = z.object({
-  content: z.string().max(50_000_000, "Content exceeds maximum export size"), // 50mb
-
-  extension: z.enum(["md", "txt", "html", "json"]).default("md"),
-
-  defaultName: z
+  content: z.union([
+    z.string().max(50_000_000, "Content exceeds maximum export size"),
+    z.record(z.string(), z.unknown()),
+  ]),
+  extension: z.enum(["md", "txt", "html", "json", "pdf"]),
+  fileName: z
     .string()
     .min(1)
     .max(50)
