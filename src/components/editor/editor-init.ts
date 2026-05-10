@@ -1,5 +1,3 @@
-import { debouncedStatUpdate } from "@/components/sidebar/info-sidebar-actions";
-import { DragAutoScroll } from "@/extensions/auto-scroll";
 import { MasterShortcuts } from "@/extensions/editor-shortcuts";
 import { lowlight } from "@/extensions/lowlight";
 import { NoteTag } from "@/extensions/tag";
@@ -43,10 +41,6 @@ function initEditor(): Editor {
     },
     autofocus: true,
   });
-  editor.on("update", () => {
-    if (!editor) return;
-    debouncedStatUpdate(editor);
-  });
   return editor;
 }
 
@@ -55,11 +49,6 @@ function getNoteEditorExtensions() {
     Markdown,
     MasterShortcuts,
     Typography,
-    DragAutoScroll.configure({
-      getScrollContainer: () => requireElement(".editor-container"),
-      edge: 60,
-      maxSpeed: 10,
-    }),
     Focus.configure({
       className: "has-focus",
       mode: "shallowest",

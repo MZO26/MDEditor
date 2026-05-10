@@ -1,29 +1,74 @@
 import z from "zod";
 
-const ExportRequestSchema = z.object({
-  content: z.union([
-    z.string().max(50_000_000, "Content exceeds maximum export size"),
-    z.record(z.string(), z.unknown()),
-  ]),
-  extension: z.enum(["md", "txt", "html", "json", "pdf"]),
-  fileName: z
-    .string()
-    .min(1)
-    .max(50)
-    .transform((val) => {
-      return (
-        val
-          .trim()
-          // Replace spaces with underscores
-          .replace(/\s+/g, "_")
-          // Replace any char that is not a letter, number, dash, or underscore with an underscore
-          .replace(/[^a-zA-Z0-9_-]/g, "_")
-          // Collapse multiple consecutive underscores into a single one
-          .replace(/_+/g, "_")
-      );
-    }),
+const normalizeFileName = (val: string) =>
+  val
+    .trim()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .replace(/_+/g, "_");
+
+const FileNameSchema = z
+  .string()
+  .transform(normalizeFileName)
+  .pipe(z.string().min(1).max(255));
+
+// for md, txt, html and pdf (because html is used for pdf)
+const StringContentSchema = z
+  .string()
+  .min(1, "Content is empty")
+  .max(10_000_000, "Content exceeds maximum size");
+
+const MdSchema = z.object({
+  extension: z.literal("md"),
+  content: StringContentSchema,
+  fileName: FileNameSchema,
 });
 
+const TxtSchema = z.object({
+  extension: z.literal("txt"),
+  content: StringContentSchema,
+  fileName: FileNameSchema,
+});
+
+const HtmlSchema = z.object({
+  extension: z.literal("html"),
+  content: StringContentSchema,
+  fileName: FileNameSchema,
+});
+
+const JsonSchema = z.object({
+  extension: z.literal("json"),
+  content: StringContentSchema,
+  fileName: FileNameSchema,
+});
+
+const PdfSchema = z.object({
+  extension: z.literal("pdf"),
+  content: StringContentSchema,
+  fileName: FileNameSchema,
+});
+
+const ExportRequestSchema = z.discriminatedUnion("extension", [
+  HtmlSchema,
+  MdSchema,
+  TxtSchema,
+  JsonSchema,
+  PdfSchema,
+]);
+
+const ImportRequestSchema = z.discriminatedUnion("extension", [
+  HtmlSchema,
+  MdSchema,
+  TxtSchema,
+  JsonSchema,
+]);
+
+type ImportRequest = z.infer<typeof ImportRequestSchema>;
 type ExportRequest = z.infer<typeof ExportRequestSchema>;
 
-export { ExportRequestSchema, type ExportRequest };
+export {
+  ExportRequestSchema,
+  ImportRequestSchema,
+  type ExportRequest,
+  type ImportRequest,
+};

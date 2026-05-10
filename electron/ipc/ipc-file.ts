@@ -1,7 +1,7 @@
 import { createPDFCanvas } from "@electron/handler/export-handler";
 import { safeResponse } from "@electron/ipc/ipc-validation";
 import { createHiddenPdfWindow } from "@electron/win";
-import { validateExport } from "@shared/validation";
+import { validateExport, validateFiles } from "@shared/validation";
 import {
   dialog,
   ipcMain,
@@ -9,9 +9,42 @@ import {
   type PrintToPDFOptions,
 } from "electron";
 import fs from "fs/promises";
-import sanitizeHTML from "sanitize-html";
+import path from "path";
 
-function registerExportIpc(win: BrowserWindow) {
+function registerFileIpc(win: BrowserWindow) {
+  ipcMain.handle("note:import", (e) => {
+    return safeResponse(e, async () => {
+      const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+        title: "Import note",
+        properties: ["openFile"],
+        filters: [
+          {
+            name: "Supported files",
+            extensions: ["md", "txt", "html", "json"],
+          },
+          { name: "Markdown", extensions: ["md"] },
+          { name: "Text", extensions: ["txt"] },
+          { name: "HTML", extensions: ["html"] },
+          { name: "JSON", extensions: ["json"] },
+        ],
+      });
+      const filePath = filePaths[0];
+      if (canceled || !filePath) {
+        throw new Error("CANCELLED_OPERATION");
+      }
+      const content = await fs.readFile(filePath, "utf8");
+      const extension = path.extname(filePath).slice(1).toLowerCase();
+      const fileName = path.basename(filePath, path.extname(filePath));
+      const validatedData = validateFiles({
+        extension,
+        content,
+        fileName,
+      });
+
+      return validatedData;
+    });
+  });
+
   ipcMain.handle("note:export", (e, payload: unknown) => {
     return safeResponse(e, async () => {
       const validatedData = validateExport(payload);
@@ -34,7 +67,6 @@ function registerExportIpc(win: BrowserWindow) {
           : JSON.stringify(content, null, 2); // null as "replacer argument" means nothing gets filtered or changed and 2 is the "space argument" to add line breaks and indent nested objects in json
       if (extension === "pdf") {
         // sanitize html for it to be safe to be put in rendering window
-        const safeData = sanitizeHTML(data);
         const hiddenWin = createHiddenPdfWindow();
         console.log(
           `[PDF-Export] Created hidden window with ID: ${hiddenWin.id}`,
@@ -44,7 +76,7 @@ function registerExportIpc(win: BrowserWindow) {
           printBackground: true,
           landscape: false,
         };
-        const htmlString = createPDFCanvas(safeData);
+        const htmlString = createPDFCanvas(data);
         try {
           console.log("[PDF-Export]: Loading HTML into canvas.");
           // converts htmlString into bytes using utf8 encoding (Buffer is Node.js's raw byte array). toString(base64) then takes those bytes and encodes them as base64 which only allows A-Z a-z 0-9 + / = chars.
@@ -73,4 +105,4 @@ function registerExportIpc(win: BrowserWindow) {
   });
 }
 
-export { registerExportIpc };
+export { registerFileIpc };

@@ -1,6 +1,6 @@
 import { setSidebarState } from "@/components/sidebar/sidebar-state";
 import { handleSelectNote } from "@/features/note-actions";
-import { createNoteButton } from "@/features/note-ui";
+import { createNoteButton, importNoteButton } from "@/features/note-ui";
 import { createAsyncHandler } from "@/utils/async";
 import { requireElement } from "@/utils/dom";
 import { getAppItem, registerAppEvents } from "@/utils/registry";
@@ -18,13 +18,14 @@ async function initNotesSidebar(state: boolean) {
   const sidebar = getAppItem("sidebar");
   const sidebarContainer = requireElement<HTMLDivElement>(".sidebar-container");
   const addNoteBtn = requireElement<HTMLButtonElement>(".add-note-btn");
+  const importBtn = requireElement<HTMLButtonElement>(".import-btn");
   delegate(sidebarContainer, {
     target: "[data-tippy-content]",
     theme: "app-theme",
     trigger: "mouseenter",
   });
   setSidebarState(appContainer, "note-sidebar-state", state);
-  applySidebarListeners(sidebar, addNoteBtn);
+  applySidebarListeners(sidebar, addNoteBtn, importBtn);
   registerAppEvents(document, {
     "app:toggle-sidebar": () => toggleSidebar(appContainer),
     "app:create-new-note": () => createNoteButton(),
@@ -34,8 +35,10 @@ async function initNotesSidebar(state: boolean) {
 function applySidebarListeners(
   sidebar: HTMLDivElement,
   addNoteBtn: HTMLButtonElement,
+  importBtn: HTMLButtonElement,
 ) {
   addNoteBtn.addEventListener("click", createAsyncHandler(createNoteButton));
+  importBtn.addEventListener("click", createAsyncHandler(importNoteButton));
   sidebar.addEventListener(
     "click",
     createAsyncHandler(async (e) => {

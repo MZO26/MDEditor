@@ -1,4 +1,7 @@
-import { ExportRequestSchema } from "@shared/schemas/export-schema";
+import {
+  ExportRequestSchema,
+  ImportRequestSchema,
+} from "@shared/schemas/export-schema";
 import { ImagePayloadSchema } from "@shared/schemas/image-schema";
 import {
   CreateNotePayloadSchema,
@@ -13,7 +16,10 @@ import z from "zod";
 function validation<T>(schema: z.ZodType<T>, payload: unknown): T {
   const validation = schema.safeParse(payload);
   if (!validation.success) {
-    console.error("Validation failed:", z.treeifyError(validation.error));
+    console.error(
+      "Validation failed:",
+      JSON.stringify(z.treeifyError(validation.error), null, 2),
+    );
 
     throw validation.error;
   }
@@ -41,12 +47,7 @@ function validateSearch(searchTerm: unknown, limit: unknown) {
 }
 
 function validateStore(settings: unknown) {
-  const storeValidation = StoreSchema.safeParse(settings);
-  if (!storeValidation.success) {
-    console.error("Validation failed:", z.treeifyError(storeValidation.error));
-    throw storeValidation.error;
-  }
-  return storeValidation.data;
+  return validation(StoreSchema, settings);
 }
 
 function validateTheme(theme: unknown) {
@@ -61,11 +62,21 @@ function validateExport(payload: unknown) {
   return validation(ExportRequestSchema, payload);
 }
 
+function validateImport(payload: unknown) {
+  return validation(ImportRequestSchema, payload);
+}
+
+function validateFiles(payload: unknown) {
+  return validation(ImportRequestSchema, payload);
+}
+
 export {
   validateCreate,
   validateExport,
+  validateFiles,
   validateId,
   validateImage,
+  validateImport,
   validateSearch,
   validateStore,
   validateTag,

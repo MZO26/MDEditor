@@ -2,8 +2,8 @@ import { createNote, deleteNote, getNoteById, updateNote } from "@/api/noteAPI";
 import { editor } from "@/components/editor/editor-init";
 import { handleEditorEmptyState } from "@/components/editor/editor-state";
 import {
-  debouncedStatUpdate,
-  debouncedTagUpdate,
+  updateNoteTags,
+  updateStats,
 } from "@/components/sidebar/info-sidebar-actions";
 import { updateNoteInList } from "@/components/sidebar/sidebar-actions";
 import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
@@ -71,7 +71,8 @@ async function handleSaveNote(
     showToast(response.message);
     return;
   }
-  debouncedTagUpdate(response.data.tags);
+  updateStats();
+  updateNoteTags(response.data.tags);
   updateNoteInList(response.data);
 }
 
@@ -85,8 +86,8 @@ async function handleSelectNote(noteItem: HTMLDivElement) {
   }
   stateStore.setState({ activeId: noteID });
   viewNote(response.data);
-  debouncedTagUpdate(response.data.tags);
-  debouncedStatUpdate(getAppItem("editor"));
+  updateNoteTags(response.data.tags);
+  updateStats();
   setActiveItem(noteItem, getAppItem("sidebar"));
 }
 

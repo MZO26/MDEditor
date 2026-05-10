@@ -1,8 +1,7 @@
 import { calculateToDos } from "@/extensions/todo-bar";
-import { debounce } from "@/utils/async";
 import { findElement } from "@/utils/dom";
+import { getAppItem } from "@/utils/registry";
 import type { Note } from "@shared/schemas/note-schema";
-import type { Editor } from "@tiptap/core";
 
 function updateNoteTags(tags: Note["tags"]) {
   const container = findElement(".tag-container");
@@ -19,7 +18,8 @@ function updateNoteTags(tags: Note["tags"]) {
   });
 }
 
-function updateStats(editor: Editor) {
+function updateStats() {
+  const editor = getAppItem("editor");
   const content = editor.getJSON();
   const charCount = editor.storage.characterCount.characters();
   const wordCount = editor.storage.characterCount.words();
@@ -43,8 +43,4 @@ function estimateReadingTime(wordCount: number, wpm = 238): string {
   return s < 30 ? "< 1 min read" : s < 60 ? "1 min read" : `${m} min read`;
 }
 
-const debouncedStatUpdate = debounce(updateStats, 300);
-
-const debouncedTagUpdate = debounce(updateNoteTags, 300);
-
-export { debouncedStatUpdate, debouncedTagUpdate };
+export { updateNoteTags, updateStats };

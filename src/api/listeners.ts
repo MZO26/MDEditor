@@ -1,4 +1,4 @@
-import { exportNote } from "@/api/exportAPI";
+import { exportNote } from "@/api/fileAPI";
 import { bookmark, pin } from "@/api/noteAPI";
 import { editor } from "@/components/editor/editor-init";
 import { reloadNoteList } from "@/components/sidebar/sidebar-actions";
@@ -7,57 +7,65 @@ import { cleanup } from "@/features/note-ui";
 import { applyAppTheme } from "@/settings/theme-actions";
 import { findElement } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
+import { sanitize } from "@/utils/sanitize";
 import { showToast } from "@/utils/toast";
 import { titleGenerator } from "@shared/generators/generators";
-import type { EditorDoc } from "@shared/schemas/editor-schema";
+import type { ExportRequest } from "@shared/schemas/export-schema";
 
 function initListeners() {
   let lastAppliedTheme: string | null = null;
 
-  window.exportAPI.onTriggerExport(async (extension) => {
+  window.fileAPI.onTriggerExport(async (extension) => {
     const editor = getAppItem("editor");
     const fileName = titleGenerator(editor.getText());
-    let exportContent: string | EditorDoc;
+
     try {
+      let payload: ExportRequest;
       switch (extension) {
         case "json":
-          exportContent = editor.getJSON();
+          payload = {
+            extension: "json",
+            content: JSON.stringify(editor.getJSON()),
+            fileName,
+          };
           break;
-
         case "html":
-          exportContent = editor.getHTML();
+          payload = {
+            extension: "html",
+            content: sanitize(editor.getHTML()),
+            fileName,
+          };
           break;
-
         case "md":
-          exportContent = editor.getMarkdown();
+          payload = {
+            extension: "md",
+            content: editor.getMarkdown(),
+            fileName,
+          };
           break;
-
         case "txt":
-          exportContent = editor.getText();
+          payload = { extension: "txt", content: editor.getText(), fileName };
           break;
-
         case "pdf":
-          exportContent = editor.getHTML();
+          payload = { extension: "pdf", content: editor.getHTML(), fileName };
           break;
-
         default:
           showToast(`Unsupported export format: ${extension}`);
           return;
       }
+      const response = await exportNote(payload);
+      if (!response.success) {
+        showToast(response.message || "Failed to export note.");
+        return response;
+      }
+      showToast(`Successfully exported ${extension.toUpperCase()} file`);
+      return response;
     } catch (error) {
-      showToast(`Export conversion failed ${error}`);
-      return;
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      showToast(`Export process failed: ${errorMessage}`);
+      return { success: false, message: errorMessage };
     }
-    const response = await exportNote({
-      content: exportContent,
-      extension,
-      fileName,
-    });
-    if (!response.success) {
-      showToast(response.message);
-      return;
-    }
-    showToast(`Exported Note as ${extension}-file`);
   });
 
   window.noteAPI.onTriggerDelete(async (id: string) => {

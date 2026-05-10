@@ -325,14 +325,6 @@
   opacity: 1;
   pointer-events: auto;
 }
-.ProseMirror li {
-  list-style-position: inside;
-}
-
-.ProseMirror li p {
-  display: inline;
-  margin: 0;
-}
 
 ul[data-type="taskList"] {
   list-style: none;
@@ -344,42 +336,87 @@ ul[data-type="taskList"] li {
   display: flex;
   align-items: flex-start;
   margin-bottom: 0.5em;
+  gap: 0.5em;
 }
 
 ul[data-type="taskList"] li > label {
   flex: 0 0 auto;
   user-select: none;
-  margin-right: 0.75em;
   display: flex;
   align-items: center;
-  height: 1.5em;
+  padding-top: 0.2em;
+  cursor: pointer;
 }
 
 ul[data-type="taskList"] li > div {
   flex: 1 1 auto;
+  min-width: 0;
 }
 
 ul[data-type="taskList"] li > div > p {
   margin: 0;
-  line-height: 1.5em;
   transition:
     color 0.2s ease,
     text-decoration-color 0.2s ease;
+}
+
+ul[data-type="taskList"] li > label input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  border: 1.5px solid var(--border-color);
+  border-radius: 3px;
+  background-color: transparent;
+  cursor: pointer;
+  position: relative;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+ul[data-type="taskList"] li > label input[type="checkbox"]:not(:checked):hover {
+  border-color: var(--tag-color);
+}
+
+ul[data-type="taskList"] li > label input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--tag-color);
+  outline-offset: 2px;
+}
+
+ul[data-type="taskList"] li > label input[type="checkbox"]:checked {
+  background-color: var(--tag-color);
+  border-color: var(--tag-color);
+}
+
+ul[data-type="taskList"] li > label input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--bg-button);
+  clip-path: polygon(14% 44%, 0% 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  transform: scale(0.55);
 }
 
 ul[data-type="taskList"] li[data-checked="true"] > div > p {
   text-decoration: line-through;
   text-decoration-thickness: 2px;
   color: var(--text-muted);
+  transition:
+    color 0.2s ease,
+    text-decoration-color 0.2s ease;
 }
 
-ul[data-type="taskList"]
-  li[data-checked="true"]
-  > label
-  input[type="checkbox"] {
-  accent-color: var(--tag-color);
+.ProseMirror li {
+  list-style-position: inside;
 }
 
+.ProseMirror li p {
+  display: inline;
+  margin: 0;
+}
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   color: var(--text-muted);

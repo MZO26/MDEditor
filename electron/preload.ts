@@ -22,12 +22,13 @@ function subscribe<T>(
     ipcRenderer.removeListener(channel, listener);
   };
 }
-contextBridge.exposeInMainWorld("exportAPI", {
+contextBridge.exposeInMainWorld("fileAPI", {
   noteExport: (payload: ExportRequest) =>
     ipcRenderer.invoke("note:export", payload),
   onTriggerExport: (callback: (payload: ExportRequest) => void) => {
     subscribe("note:trigger-export", callback);
   },
+  noteImport: () => ipcRenderer.invoke("note:import"),
 });
 contextBridge.exposeInMainWorld("electronAPI", {
   platform: () => ipcRenderer.invoke("platform:get"),

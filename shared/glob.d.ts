@@ -1,4 +1,7 @@
-import type { ExportRequest } from "@shared/schemas/export-schema";
+import type {
+  ExportRequest,
+  ImportRequest,
+} from "@shared/schemas/export-schema";
 import type { Note } from "@shared/schemas/note-schema";
 import type { AppSettings, Theme } from "@shared/schemas/store-schema";
 import {
@@ -12,11 +15,12 @@ declare module "*.css";
 
 declare global {
   interface Window {
-    exportAPI: {
+    fileAPI: {
       noteExport: (
         payload: ExportRequest,
       ) => Promise<IpcResponse<ExportRequest>>;
       onTriggerExport: (callback: (extension: string) => void) => () => void;
+      noteImport: () => Promise<IpcResponse<ImportRequest>>;
     };
     electronAPI: {
       platform: () => Promise<IpcResponse<string>>;
@@ -36,7 +40,6 @@ declare global {
       search: (text: string) => void;
       searchNext: (text: string) => void;
       onResults: (callback: (result: SearchResult) => void) => () => void;
-      saveMarkdown: (content: any) => Promise<IpcResponse<boolean>>;
     };
     noteAPI: {
       getAll: () => Promise<IpcResponse<Note[]>>;
