@@ -6,7 +6,7 @@ import type {
 import type { Note } from "@shared/schemas/note-schema";
 import type { AppSettings, Theme } from "@shared/schemas/store-schema";
 import {
-  IpcResponse,
+  Result,
   type CreateNotePayload,
   type ImagePayload,
   type UpdateNotePayload,
@@ -17,45 +17,41 @@ declare module "*.css";
 declare global {
   interface Window {
     fileAPI: {
-      selectFolder: () => Promise<IpcResponse<void>>;
-      noteExport: (
-        payload: ExportRequest,
-      ) => Promise<IpcResponse<ExportRequest>>;
+      selectFolder: () => Promise<Result<void>>;
+      noteExport: (payload: ExportRequest) => Promise<Result<ExportRequest>>;
       onTriggerExport: (callback: (extension: string) => void) => () => void;
       noteExportMany: (
         payload: ExportManyRequest,
-      ) => Promise<IpcResponse<ExportManyRequest>>;
-      noteImport: () => Promise<IpcResponse<ImportRequest[]>>;
+      ) => Promise<Result<ExportManyRequest>>;
+      noteImport: () => Promise<Result<ImportRequest[]>>;
     };
     electronAPI: {
-      platform: () => Promise<IpcResponse<string>>;
-      setTheme: (theme: Theme, focus?: boolean) => Promise<IpcResponse<Theme>>;
+      platform: () => Promise<Result<string>>;
+      setTheme: (theme: Theme, focus?: boolean) => Promise<Result<Theme>>;
       saveImage: (
         payload: ImagePayload,
-      ) => Promise<IpcResponse<{ imageSrc: string }>>;
+      ) => Promise<Result<{ imageSrc: string }>>;
       onThemeChanged: (callback: (theme: Theme) => void) => () => void;
       showContextMenu: (
         id: string,
         pinned: boolean,
         bookmarked: boolean,
-      ) => Promise<IpcResponse<void>>;
+      ) => Promise<Result<void>>;
       onRequestFlush: (callback: () => void) => () => void;
       confirmFlush: () => void;
-      zoom: (action: ZoomAction) => Promise<IpcResponse<number>>;
+      zoom: (action: ZoomAction) => Promise<Result<number>>;
     };
     noteAPI: {
-      getAll: () => Promise<IpcResponse<Note[]>>;
-      getById: (id: string) => Promise<IpcResponse<Note>>;
-      create: (payload: CreateNotePayload) => Promise<IpcResponse<Note>>;
-      createMany: (
-        payload: CreateNotePayload[],
-      ) => Promise<IpcResponse<Note[]>>;
+      getAll: () => Promise<Result<Note[]>>;
+      getById: (id: string) => Promise<Result<Note>>;
+      create: (payload: CreateNotePayload) => Promise<Result<Note>>;
+      createMany: (payload: CreateNotePayload[]) => Promise<Result<Note[]>>;
       update: (
         payload: UpdateNotePayload,
         flush: boolean,
-      ) => Promise<IpcResponse<Note>>;
-      delete: (id: string) => Promise<IpcResponse<void>>;
-      getByTag: (tag: string) => Promise<IpcResponse<Note[]>>;
+      ) => Promise<Result<Note>>;
+      delete: (id: string) => Promise<Result<void>>;
+      getByTag: (tag: string) => Promise<Result<Note[]>>;
       onTriggerDelete: (callback: (id: string) => void) => () => void;
       onTriggerDuplicate: (callback: (id: string) => void) => () => void;
       onTriggerPin: (callback: (id: string) => void) => () => void;
@@ -63,10 +59,10 @@ declare global {
       searchNotes: (
         searchTerm: string,
         limit: number,
-      ) => Promise<IpcResponse<Note[]>>;
-      pin: (id: string) => Promise<IpcResponse<boolean>>;
-      bookmark: (id: string) => Promise<IpcResponse<boolean>>;
-      getViews: (view) => Promise<IpcResponse<Note[]>>;
+      ) => Promise<Result<Note[]>>;
+      pin: (id: string) => Promise<Result<boolean>>;
+      bookmark: (id: string) => Promise<Result<boolean>>;
+      getViews: (view) => Promise<Result<Note[]>>;
       setActiveNote: (id: string | null) => void;
     };
     storeAPI: {
@@ -75,11 +71,11 @@ declare global {
       ) => () => void;
       getSettings: <K extends keyof AppSettings>(
         key: K,
-      ) => Promise<IpcResponse<AppSettings[K]>>;
-      getAllSettings: () => Promise<IpcResponse<AppSettings>>;
+      ) => Promise<Result<AppSettings[K]>>;
+      getAllSettings: () => Promise<Result<AppSettings>>;
       setSettings: (
         settings: Partial<AppSettings>,
-      ) => Promise<IpcResponse<AppSettings>>;
+      ) => Promise<Result<AppSettings>>;
     };
   }
 }

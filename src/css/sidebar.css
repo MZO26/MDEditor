@@ -142,6 +142,7 @@
   display: flex;
   height: 50px;
   flex-direction: row;
+  justify-content: center;
   align-items: center;
 }
 
@@ -189,8 +190,7 @@
   right: 0;
   bottom: 0;
   width: 250px;
-  background: transparent;
-  backdrop-filter: blur(6px);
+  background: var(--bg-sidebar);
   box-shadow: var(--shadow);
   border: 1px solid var(--border-color);
   border-top: none;
@@ -417,7 +417,8 @@
 }
 
 .noteItem.is-active {
-  background-color: var(--bg-sidebar-section);
+  background: var(--bg-editor);
+  box-shadow: var(--shadow);
   border-left: 2px solid var(--accent-primary);
 }
 
@@ -467,27 +468,31 @@
   margin-top: 7px;
 }
 
+.tag-node,
 .tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: top;
+  padding: 0.15em 0.4em;
+  margin: 0 0.1em;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 500;
   background: var(--tag-bg);
   color: var(--tag-color);
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 0.75em;
+  border: var(--border-color);
+  box-shadow: none;
   white-space: nowrap;
-}
-
-.tag-node {
-  background: var(--tag-bg);
-  color: var(--tag-color);
-  white-space: nowrap;
-}
-
-.searchTag {
-  overflow-wrap: break-word;
-  word-break: break-all;
-  max-width: 100%;
-  min-width: 0;
   cursor: pointer;
+  user-select: all;
+  transition: all 0.2s ease;
+}
+
+.tag-node:hover,
+.tag:hover {
+  background-color: var(--accent-hover);
+  box-shadow: var(--shadow);
 }
 
 .noteItem p {

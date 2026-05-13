@@ -1,7 +1,7 @@
 import { saveImage } from "@/api/electronAPI";
 import { compressImage } from "@/extensions/image/image-utils";
 import { showToast } from "@/utils/toast";
-import type { WorkerResult } from "@shared/types";
+import type { Result } from "@shared/types";
 import type { Editor } from "@tiptap/core";
 
 const worker = new Worker(new URL("./image-worker.ts", import.meta.url), {
@@ -12,7 +12,7 @@ function compressImageInWorker(
   file: File,
   maxWidth = 800,
   quality = 0.8,
-): Promise<WorkerResult> {
+): Promise<Result<Uint8Array>> {
   return new Promise((resolve) => {
     // uuid for compression job. functions like a tracking number to identify request
     const id = crypto.randomUUID();

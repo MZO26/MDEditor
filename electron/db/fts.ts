@@ -32,21 +32,10 @@ class FTS5 {
       );`);
     this.db.exec(`
     DROP VIEW IF EXISTS notes_view;
-
     CREATE VIEW notes_view AS
-    SELECT 
-      n.id,
-      n.title, 
-      n.content,
-      n.plainText,
-      n.snippet,
-      (
-        SELECT json_group_array(tag_name) 
-        FROM note_tags 
-        WHERE note_id = n.id
-      ) AS tags
+    SELECT n.id, n.title, n.content, n.plainText, n.snippet, (SELECT json_group_array(tag_name) FROM note_tags WHERE note_id = n.id) AS tags
     FROM notes n
-  `);
+    `);
 
     this.db.exec(`
     -- on creation of note
@@ -66,26 +55,15 @@ class FTS5 {
       INSERT INTO notes_fts(id, title, plainText) 
       VALUES (new.id, new.title, new.plainText);
     END;
-`);
+  `);
   }
 
   searchNotes(searchTerm: string, limit: number): Note[] {
     const ftsQuery = ftsQueryGenerator(searchTerm);
     if (ftsQuery === "") return [];
     const stmt = this.db.prepare(`
-    SELECT 
-      n.id, 
-      n.title,
-      n.content,
-      n.snippet,
-      (
-        SELECT json_group_array(tag_name)
-        FROM note_tags
-        WHERE note_id = n.id
-      ) AS tags,
-      n.created_at,
-      n.updated_at,
-      bm25(notes_fts, 0.0, 10.0, 1.0) as rank
+    SELECT n.id, n.title, n.content, n.snippet, (SELECT json_group_array(tag_name) FROM note_tags WHERE note_id = n.id) AS tags, n.created_at, n.updated_at,
+    bm25(notes_fts, 0.0, 10.0, 1.0) as rank
     FROM notes_fts
     JOIN notes n ON notes_fts.id = n.id
     WHERE notes_fts MATCH ?

@@ -1,3 +1,5 @@
+import type { Content } from "@tiptap/core";
+
 type NativeWindowColors = {
   backgroundColor: string;
   overlayOptions: TitleBarOverlayOptions;
@@ -20,28 +22,16 @@ type Code =
   | "solarized-dark"
   | "solarized-light";
 
-type IpcResponse<T> =
+type Result<T, E = string> =
   | { success: true; data: T }
   | {
       success: false;
-      message: string;
+      message: E;
     };
 
-type WorkerResult =
-  | { success: true; data: Uint8Array }
-  | { success: false; message: string };
+type Success<T> = Extract<Result<T>, { success: true }>;
 
-type NoteItemElements = {
-  snippetContainer: HTMLDivElement | null;
-  dateContainer: HTMLDivElement | null;
-  titleContainer: HTMLDivElement | null;
-};
-
-type AutoScrollOptions = {
-  getScrollContainer: (editorRoot: HTMLElement) => HTMLElement;
-  edge?: number;
-  maxSpeed?: number;
-};
+type Failure = Extract<Result<unknown>, { success: false }>;
 
 type Action<T> = {
   type?: "action";
@@ -84,7 +74,7 @@ type NoteRow = {
 
 type ImportedContent = {
   title: string;
-  content: string;
+  content: Content;
   extension: "md" | "html" | "json" | "txt";
 };
 
@@ -103,18 +93,17 @@ type ZoomAction = "get" | "in" | "out" | "reset";
 export type {
   Action,
   ActionMap,
-  AutoScrollOptions,
   BatchExportData,
   Code,
   ContentType,
+  Failure,
   ImportedContent,
-  IpcResponse,
   Metadata,
   NativeWindowColors,
-  NoteItemElements,
   NoteRow,
   ResolvedTheme,
+  Result,
+  Success,
   TitleBarOverlayOptions,
-  WorkerResult,
   ZoomAction,
 };

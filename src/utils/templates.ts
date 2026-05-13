@@ -11,7 +11,6 @@ const baseNoteItem = templateElement.content
 function createNoteItem(note: Note): HTMLDivElement {
   // Deep clone with true
   const item = baseNoteItem.cloneNode(true) as HTMLDivElement;
-  console.log(note);
   item.dataset["id"] = note.id;
   item.dataset["pinned"] = String(note.pinned === true);
   item.dataset["bookmarked"] = String(note.bookmarked === true);

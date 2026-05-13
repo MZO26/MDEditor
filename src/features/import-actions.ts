@@ -4,10 +4,10 @@ import { sanitize } from "@/utils/sanitize";
 import { showToast } from "@/utils/toast";
 import { getMetadata } from "@shared/generators/generators";
 import type { CreateNotePayload } from "@shared/schemas/note-schema";
-import type { ContentType } from "@shared/types";
-import { Editor, type Content } from "@tiptap/core";
+import type { ContentType, ImportedContent, Result } from "@shared/types";
+import { Editor, type Content, type JSONContent } from "@tiptap/core";
 
-async function handleImportFile() {
+async function handleImportFile(): Promise<Result<ImportedContent[]>> {
   const response = await importNote();
   if (!response.success) {
     console.error(response.message);
@@ -45,8 +45,7 @@ async function handleImportFile() {
   } else if (processedNotes.length > 0) {
     showToast(`Successfully imported ${processedNotes.length} note(s)`);
   }
-
-  return { success: true, notes: processedNotes };
+  return { success: true, data: processedNotes };
 }
 
 const extensionToContentType = (ext: string): ContentType | undefined => {
@@ -58,40 +57,69 @@ const extensionToContentType = (ext: string): ContentType | undefined => {
   return map[ext];
 };
 
+function importTxtToJSON(txt: string): JSONContent[] | undefined {
+  if (!txt) return undefined;
+  const lines = txt.split(/\r?\n/);
+  const content: JSONContent[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]?.trim();
+    if (line && line.length > 0) {
+      content.push({
+        type: "paragraph",
+        content: [{ type: "text", text: line }],
+      });
+    }
+  }
+  return content;
+}
+
 async function getImportedContent(
   files: {
     title: string;
     extension: "html" | "md" | "txt" | "json";
     content: Content;
   }[],
-) {
-  const processedPayloads: CreateNotePayload[] = [];
+): Promise<Result<CreateNotePayload[]>> {
   const headlessEditor = new Editor({
     extensions: getNoteEditorExtensions(),
   });
-  for (const file of files) {
-    const contentType = extensionToContentType(file.extension);
-    if (contentType !== undefined) {
-      headlessEditor.commands.setContent(file.content, { contentType });
-    } else {
-      headlessEditor.commands.setContent(file.content);
+  try {
+    const processedPayloads: CreateNotePayload[] = [];
+    for (const file of files) {
+      const contentType = extensionToContentType(file.extension);
+      if (contentType !== undefined) {
+        headlessEditor.commands.setContent(file.content, { contentType });
+      } else {
+        const content = importTxtToJSON(file.content as string);
+        if (content)
+          headlessEditor.commands.setContent({
+            type: "doc",
+            content: content,
+          });
+      }
+      const json = headlessEditor.getJSON();
+      const plainText = headlessEditor.getText();
+      const markdown = headlessEditor.getMarkdown();
+      const metadata = getMetadata(json, plainText);
+      const payload: CreateNotePayload = {
+        content: json,
+        plainText: plainText,
+        markdown: markdown,
+        ...metadata,
+        pinned: false,
+        bookmarked: false,
+      };
+      processedPayloads.push(payload);
     }
-    const json = headlessEditor.getJSON();
-    const plainText = headlessEditor.getText();
-    const markdown = headlessEditor.getMarkdown();
-    const metadata = getMetadata(json, plainText);
-    const payload: CreateNotePayload = {
-      content: json,
-      plainText: plainText,
-      markdown: markdown,
-      ...metadata,
-      pinned: false,
-      bookmarked: false,
+    return { success: true, data: processedPayloads };
+  } catch (error) {
+    return {
+      success: false,
+      message: "One or more files couldn't be imported.",
     };
-    processedPayloads.push(payload);
+  } finally {
+    headlessEditor.destroy();
   }
-  headlessEditor.destroy();
-  return processedPayloads;
 }
 
 export { getImportedContent, handleImportFile };

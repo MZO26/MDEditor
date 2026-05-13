@@ -2,7 +2,7 @@ import { registerElectronIpc } from "@electron/ipc/ipc-electron";
 import { registerFileIpc } from "@electron/ipc/ipc-fs";
 import { registerNoteIpc } from "@electron/ipc/ipc-note";
 import { registerSettingsIpc } from "@electron/ipc/ipc-settings";
-import type { IpcResponse } from "@shared/types";
+import type { Failure, Result } from "@shared/types";
 import { app, BrowserWindow, type IpcMainInvokeEvent } from "electron";
 import z, { ZodError } from "zod";
 
@@ -44,7 +44,7 @@ function validateSender(event: IpcMainInvokeEvent) {
 async function safeResponse<T>(
   event: IpcMainInvokeEvent,
   action: () => Promise<T>,
-): Promise<IpcResponse<T>> {
+): Promise<Result<T>> {
   try {
     validateSender(event);
     const data = await action();
@@ -54,7 +54,7 @@ async function safeResponse<T>(
   }
 }
 
-function handleIpcError(err: unknown): { success: false; message: string } {
+function handleIpcError(err: unknown): Failure {
   if (err instanceof ZodError) {
     console.error("[IPC Validation]: ", z.treeifyError(err));
     return { success: false, message: "Invalid data provided." };

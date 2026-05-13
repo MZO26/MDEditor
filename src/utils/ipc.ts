@@ -1,8 +1,8 @@
-import type { IpcResponse } from "@shared/types";
+import type { Result } from "@shared/types";
 
 async function safeInvoke<T>(
-  ipcPromise: Promise<IpcResponse<T>>,
-): Promise<IpcResponse<T>> {
+  ipcPromise: Promise<Result<T>>,
+): Promise<Result<T>> {
   try {
     return await ipcPromise;
   } catch (err: unknown) {

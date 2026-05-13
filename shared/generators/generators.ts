@@ -1,4 +1,4 @@
-import { getTodoStats } from "@shared/generators/note-metadata";
+import { getTags, getTodoStats } from "@shared/generators/note-metadata";
 import type { Metadata } from "@shared/types";
 import type { JSONContent } from "@tiptap/core";
 
@@ -14,7 +14,7 @@ function getMetadata(
     title: titleGenerator(plainText),
     snippet: snippetGenerator(plainText),
     todos_left: left,
-    tags: tagsGenerator(plainText),
+    tags: getTags(content),
   };
 }
 
@@ -56,21 +56,6 @@ function snippetGenerator(text: unknown) {
     .trim();
 }
 
-function tagsGenerator(input: unknown): string[] {
-  if (typeof input !== "string") return [];
-  const arr: string[] = [];
-  const seen = new Set<string>();
-  for (const tag of input.match(/#[\p{L}\p{N}_]+/gu) ?? []) {
-    const t = tag.slice(1).trim().toLowerCase();
-    if (t.length === 0 || t.length > 40) continue;
-    if (seen.has(t)) continue;
-    seen.add(t);
-    arr.push(t);
-    if (arr.length === 3) break;
-  }
-  return arr;
-}
-
 function ftsQueryGenerator(searchTerm: unknown): string {
   if (typeof searchTerm !== "string") return "";
   const shortened = searchTerm.substring(0, 100).trim();
@@ -81,10 +66,4 @@ function ftsQueryGenerator(searchTerm: unknown): string {
   return `"${cleanSearch}"*`;
 }
 
-export {
-  ftsQueryGenerator,
-  getMetadata,
-  snippetGenerator,
-  tagsGenerator,
-  titleGenerator,
-};
+export { ftsQueryGenerator, getMetadata, snippetGenerator, titleGenerator };

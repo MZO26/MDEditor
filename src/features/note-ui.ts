@@ -39,11 +39,15 @@ async function createNoteButton(): Promise<void> {
 async function importNoteButton(): Promise<void> {
   const imported = await handleImportFile();
   if (!imported.success) {
-    showToast("Failed to import files");
+    showToast(imported.message);
     return;
   }
-  const files = await getImportedContent(imported.notes);
-  const response = await createManyNotes(files);
+  const content = await getImportedContent(imported.data);
+  if (!content.success) {
+    showToast(content.message);
+    return;
+  }
+  const response = await createManyNotes(content.data);
   if (!response.success) {
     showToast(response.message);
     return;

@@ -82,7 +82,6 @@ function createNoteTransactions(db: DatabaseType): NoteTransactions {
         throw new Error("NOT_FOUND");
       }
       const result = DBRowSchema.parse({ ...rawResult, tags: params.tags });
-      console.log(result);
       deleteTagsStmt.run({ note_id: result.id });
       if (tags && tags.length > 0) {
         for (const tag of tags) {

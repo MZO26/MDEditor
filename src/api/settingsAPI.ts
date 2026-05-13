@@ -2,20 +2,20 @@ import { debounce } from "@/utils/async";
 import { safeInvoke } from "@/utils/ipc";
 import { showToast } from "@/utils/toast";
 import type { AppSettings } from "@shared/schemas/store-schema";
-import type { IpcResponse } from "@shared/types";
+import type { Result } from "@shared/types";
 async function getSettings<K extends keyof AppSettings>(
   key: K,
-): Promise<IpcResponse<AppSettings[K]>> {
+): Promise<Result<AppSettings[K]>> {
   return safeInvoke(window.storeAPI.getSettings(key));
 }
 
-async function getAllSettings(): Promise<IpcResponse<AppSettings>> {
+async function getAllSettings(): Promise<Result<AppSettings>> {
   return safeInvoke(window.storeAPI.getAllSettings());
 }
 
 async function setSettings(
   settings: Partial<AppSettings>,
-): Promise<IpcResponse<AppSettings>> {
+): Promise<Result<AppSettings>> {
   return safeInvoke(window.storeAPI.setSettings(settings));
 }
 

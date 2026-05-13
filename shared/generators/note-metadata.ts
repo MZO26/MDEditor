@@ -32,4 +32,27 @@ function getTodoStats(content: JSONContent) {
   };
 }
 
-export { getTodoStats };
+function getTags(jsonDoc: JSONContent): string[] {
+  if (!jsonDoc) return [];
+  const tags: string[] = [];
+  const seen = new Set<string>();
+  const stack: JSONContent[] = [jsonDoc];
+  while (stack.length > 0) {
+    const node = stack.pop()!;
+    if (node.content) {
+      for (let i = node.content.length - 1; i >= 0; i--) {
+        stack.push(node.content[i] as JSONContent);
+      }
+    }
+    if (node.type !== "noteTag" || !node.attrs?.["id"]) continue;
+    const tagText = node.attrs["id"].trim().toLowerCase();
+    if (tagText.length === 0 || tagText.length > 40) continue;
+    if (seen.has(tagText)) continue;
+    seen.add(tagText);
+    tags.push(tagText);
+    if (tags.length === 3) break;
+  }
+  return tags;
+}
+
+export { getTags, getTodoStats };
