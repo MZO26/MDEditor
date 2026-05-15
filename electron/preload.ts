@@ -58,6 +58,8 @@ contextBridge.exposeInMainWorld("noteAPI", {
     ipcRenderer.invoke("note:create", payload),
   createMany: (payload: CreateNotePayload[]) =>
     ipcRenderer.invoke("note:create-many", payload),
+  merge: (idA: string, idB: string) =>
+    ipcRenderer.invoke("note:merge", idA, idB),
   update: (payload: UpdateNotePayload, flush: boolean) =>
     ipcRenderer.invoke("note:update", payload, flush),
   delete: (id: string) => ipcRenderer.invoke("note:delete", id),
@@ -66,6 +68,9 @@ contextBridge.exposeInMainWorld("noteAPI", {
   },
   onTriggerId: (callback: (id: string) => void) => {
     subscribe("note:trigger-id", callback);
+  },
+  onTriggerMerge: (callback: (id: string) => void) => {
+    subscribe("note:trigger-merge", callback);
   },
   onTriggerDuplicate: (callback: (id: string) => void) => {
     subscribe("note:trigger-duplicate", callback);

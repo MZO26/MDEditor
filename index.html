@@ -66,6 +66,7 @@
             >
               <i data-lucide="sliders-horizontal"></i>
             </button>
+            <span class="info-span note-count"></span>
             <button class="sidebar-trigger-btn">
               <i data-lucide="list-filter"></i>
             </button>
@@ -119,7 +120,33 @@
     </div>
     <div id="smart-views-popover"></div>
     <div class="overlay"></div>
-    <div class="modal">
+    <div class="confirmation">
+      <button class="close-btn">
+        <i data-lucide="x"></i>
+      </button>
+      <div class="confirmation-selection">
+        <div class="confirmation-title">Merge Note</div>
+      </div>
+      <div class="confirmation-content">
+        <label for="noteId">Note ID (UUID)</label>
+        <input
+          type="text"
+          id="noteId"
+          name="noteId"
+          placeholder="00000000-0000-0000-0000-000000000000"
+          maxlength="36"
+          spellcheck="false"
+          autocomplete="off"
+          pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+        />
+        <button class="confirm-btn" data-tippy-content="confirm merge"></button>
+        <p class="info-note">
+          Note with this ID gets merged into the selected one.
+        </p>
+        <div id="loadingSpinner" class="spinner" style="display: none"></div>
+      </div>
+    </div>
+    <div class="modal-settings modal">
       <button class="closeModal-btn" data-tippy-content="close">
         <i data-lucide="x"></i>
       </button>

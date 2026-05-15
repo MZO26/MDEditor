@@ -1,5 +1,7 @@
 import { getAllSettings } from "@/api/settingsAPI";
+import { updateNoteCount } from "@/components/sidebar/sidebar-actions";
 import { getAppItem } from "@/utils/registry";
+import type { Note } from "@shared/schemas/note-schema";
 import type { AppSettings } from "@shared/schemas/store-schema";
 
 const DEFAULT_STORE: AppSettings = {
@@ -28,10 +30,21 @@ const STATE_STORE: AppState = {
 };
 
 let previousId: string | null = null;
+let previousNotesLength: number | null = null;
 
 const stateStore = createStore<AppState>(STATE_STORE);
 
 const settingsStore = createStore<AppSettings>(DEFAULT_STORE);
+
+interface NoteStore {
+  notes: Note[];
+}
+
+const NOTE_STORE: NoteStore = {
+  notes: [],
+};
+
+const noteStore = createStore<NoteStore>(NOTE_STORE);
 
 function createStore<T>(initialState: T) {
   let state = initialState;
@@ -75,6 +88,13 @@ stateStore.subscribe((state) => {
   }
 });
 
+noteStore.subscribe((state) => {
+  if (state.notes.length !== previousNotesLength) {
+    previousNotesLength = state.notes.length;
+    updateNoteCount(state.notes);
+  }
+});
+
 settingsStore.subscribe((settings) => {
   const editor = getAppItem("editor");
   const editorDom = editor.view.dom;
@@ -85,4 +105,4 @@ settingsStore.subscribe((settings) => {
   }
 });
 
-export { loadSettings, settingsStore, stateStore };
+export { loadSettings, noteStore, settingsStore, stateStore };

@@ -1,15 +1,26 @@
 import { exportNote } from "@/api/fileAPI";
-import { bookmark, createNote, getNoteById, pin } from "@/api/noteAPI";
+import {
+  bookmark,
+  createNote,
+  getNoteById,
+  mergeNotes,
+  pin,
+} from "@/api/noteAPI";
 import { editor } from "@/components/editor/editor-init";
+import {
+  updateNoteTags,
+  updateStats,
+} from "@/components/sidebar/info-sidebar-actions";
 import {
   addOneNoteToList,
   reloadNoteList,
 } from "@/components/sidebar/sidebar-actions";
 import { handleDeleteNote } from "@/features/note-actions";
-import { cleanup } from "@/features/note-ui";
-import { settingsStore } from "@/settings/app-state";
+import { cleanup, viewNote } from "@/features/note-ui";
+import { settingsStore, stateStore } from "@/settings/app-state";
 import { applyAppTheme } from "@/settings/theme-actions";
-import { findElement } from "@/utils/dom";
+import { debounce } from "@/utils/async";
+import { findElement, setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
 import { sanitize } from "@/utils/sanitize";
 import { showToast } from "@/utils/toast";
@@ -93,6 +104,69 @@ function initListeners() {
       showToast("Failed to copy ID.");
       console.error("Failed to copy text: ", err);
     }
+  });
+
+  function setModalState(show: boolean): void {
+    const appContainer = getAppItem("appContainer");
+    const modal = findElement<HTMLDivElement>(".confirmation");
+    modal?.classList.toggle("show", show);
+    appContainer.inert = show;
+  }
+
+  window.noteAPI.onTriggerMerge((id: string) => {
+    setModalState(true);
+    const UUID_REGEX =
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+    const input = findElement<HTMLInputElement>("#noteId");
+    const spinner = findElement<HTMLDivElement>("#loadingSpinner");
+    const overlay = findElement<HTMLDivElement>(".overlay");
+    if (!input || !spinner || !overlay) return;
+    const handleUUIDInput = debounce(async (event) => {
+      const value = event.target.value.trim();
+      if (value.length !== 36) {
+        return;
+      }
+      if (!UUID_REGEX.test(value)) {
+        showToast("No valid UUID format.");
+        return;
+      }
+      let spinnerTimeout;
+      try {
+        spinnerTimeout = setTimeout(() => {
+          overlay?.classList.toggle("show", true);
+          spinner.style.display = "block";
+        }, 300);
+        const mergeResult = await mergeNotes(id, value);
+        if (!mergeResult.success) {
+          showToast("Failed to save merged note.");
+          return;
+        }
+        const noteBItem = findElement<HTMLDivElement>(
+          `div[data-id="${value}"]`,
+        );
+        if (!noteBItem) return;
+        await handleDeleteNote(value, noteBItem);
+        stateStore.setState({ activeId: mergeResult.data.id });
+        const noteItem = findElement<HTMLDivElement>(
+          `div[data-id="${mergeResult.data.id}"]`,
+        );
+        if (!noteItem) return;
+        viewNote(mergeResult.data);
+        updateNoteTags(mergeResult.data.tags);
+        updateStats();
+        setActiveItem(noteItem, getAppItem("sidebar"));
+        showToast("Notes merged successfully!");
+        input.value = "";
+        setModalState(false);
+      } catch (error) {
+        console.error("Record not found", error);
+      } finally {
+        clearTimeout(spinnerTimeout);
+        spinner.style.display = "none";
+        overlay?.classList.toggle("show", false);
+      }
+    }, 1000);
+    input.addEventListener("input", handleUUIDInput);
   });
 
   window.noteAPI.onTriggerPin(async (id: string) => {

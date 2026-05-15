@@ -10,7 +10,7 @@ import {
 } from "@/features/import-actions";
 import { handleCreateNote } from "@/features/note-actions";
 import { setupAutoSave, stopAutoSave } from "@/features/note-auto-save";
-import { stateStore } from "@/settings/app-state";
+import { noteStore, stateStore } from "@/settings/app-state";
 import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
 import type { Note } from "@shared/schemas/note-schema";
@@ -29,6 +29,9 @@ async function createNoteButton(): Promise<void> {
     return;
   }
   const note = response.data;
+  noteStore.setState((state) => ({
+    notes: [...state.notes, note],
+  }));
   stateStore.setState({ activeId: note.id });
   showToast("New note created");
   addOneNoteToList(note);

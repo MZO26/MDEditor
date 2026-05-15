@@ -1,13 +1,20 @@
 import { getAll } from "@/api/noteAPI";
 import { handleEditorEmptyState } from "@/components/editor/editor-state";
 import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
-import { settingsStore, stateStore } from "@/settings/app-state";
+import { noteStore, settingsStore, stateStore } from "@/settings/app-state";
 import { findElement, setActiveItem } from "@/utils/dom";
 import { formatNoteDate } from "@/utils/format";
 import { getAppItem } from "@/utils/registry";
 import { createNoteItem, createNoteItemMinimal } from "@/utils/templates";
 import { showToast } from "@/utils/toast";
 import type { Note } from "@shared/schemas/note-schema";
+
+function updateNoteCount(notes: Note[]) {
+  const noteCount = findElement<HTMLSpanElement>(".note-count");
+  if (!noteCount) return;
+  const count = notes.length;
+  noteCount.textContent = `${count} ${count === 1 ? "note" : "notes"}`;
+}
 
 function getNotePriority(note: Note): number {
   if (note.pinned && note.bookmarked) return 0;
@@ -79,13 +86,17 @@ async function reloadNoteList(notes?: Note[]): Promise<void> {
   sidebar.innerHTML = "";
   if (notes) {
     addManyNotesToList(notes.sort(compareNotes));
+    noteStore.setState({ notes });
     return;
   }
   const response = await getAll();
   if (!response.success) {
     showToast(response.message);
+    return;
   } else {
-    addManyNotesToList(response.data.sort(compareNotes));
+    const notes = response.data;
+    addManyNotesToList(notes.sort(compareNotes));
+    noteStore.setState({ notes });
   }
 }
 
@@ -114,5 +125,6 @@ export {
   addManyNotesToList,
   addOneNoteToList,
   reloadNoteList,
+  updateNoteCount,
   updateNoteInList,
 };

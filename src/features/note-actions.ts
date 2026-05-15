@@ -9,7 +9,7 @@ import { updateNoteInList } from "@/components/sidebar/sidebar-actions";
 import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
 import { stopAutoSave } from "@/features/note-auto-save";
 import { viewNote } from "@/features/note-ui";
-import { stateStore } from "@/settings/app-state";
+import { noteStore, stateStore } from "@/settings/app-state";
 import { setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
@@ -57,6 +57,9 @@ async function handleDeleteNote(id: string, noteElement: HTMLDivElement) {
   }
   showToast("Note deleted");
   noteElement.remove();
+  noteStore.setState((state) => ({
+    notes: state.notes.filter((n) => n.id !== id),
+  }));
   handleSidebarEmptyState();
   const { activeId } = stateStore.getState();
   if (activeId === id) {

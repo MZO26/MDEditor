@@ -39,6 +39,7 @@ function setUpNoteMenu(
       label: "Copy Note ID",
       click: () => win.webContents.send("note:trigger-id", id),
     },
+    { type: "separator" },
     {
       label: pinned ? "Unpin Note" : "Pin to Top",
       click: () => win.webContents.send("note:trigger-pin", id),
@@ -50,6 +51,10 @@ function setUpNoteMenu(
     {
       label: "Duplicate Note",
       click: () => win.webContents.send("note:trigger-duplicate", id),
+    },
+    {
+      label: "Merge Note",
+      click: () => win.webContents.send("note:trigger-merge", id),
     },
     { type: "separator" },
     {

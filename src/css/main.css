@@ -76,7 +76,6 @@
   left: 50%;
   transform: translate(-50%, -50%) scale(0.95);
   width: 550px;
-  max-width: 90vw;
   height: 400px;
   display: flex;
   flex-direction: column;
@@ -100,17 +99,44 @@
   transform: translate(-50%, -50%) scale(1);
 }
 
-.closeModal-btn {
+.confirmation {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  width: 350px;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-radius: 18px;
+  background-color: var(--bg-editor);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 4;
+  transition:
+    opacity 0.3s ease,
+    visibility 0s transform 0.3s ease;
+}
+
+.confirmation.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.closeModal-btn,
+.close-btn {
   position: absolute;
   top: 8px;
   right: 3px;
 }
 
-.settings-wrapper {
-  padding: 20px;
-}
-
-.settings-title {
+.settings-title,
+.confirmation-title {
   border-radius: 18px 18px 0 0;
   display: flex;
   width: 100%;
@@ -143,8 +169,49 @@
   background: var(--bg-editor);
 }
 
+.settings-content label {
+  flex: 0 0 170px;
+}
+
+.confirmation-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.spinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0%, var(--text-main) 360%);
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 3px),
+    #fff calc(100% - 3px)
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 3px),
+    #fff calc(100% - 3px)
+  );
+  animation: spin 0.8s linear infinite;
+  z-index: 4;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 label {
-  flex: 0 0 145px;
   font-size: 14px;
   color: var(--text-muted);
   font-weight: 500;
@@ -152,6 +219,29 @@ label {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.confirmation-content label {
+  flex: 0 0 30px;
+}
+
+#noteId {
+  width: 280px;
+  flex: 1;
+  border-radius: 5px;
+  background-color: var(--bg-sidebar-section);
+  border: none;
+  color: var(--text-main);
+  font-size: 0.8rem;
+  padding: 10px 17px;
+  outline: none;
+}
+
+.info-note {
+  padding: 0;
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 .settings-row {

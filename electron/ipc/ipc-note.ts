@@ -44,6 +44,27 @@ function registerNoteIpc() {
     });
   });
 
+  ipcMain.handle("note:merge", (e, idA: unknown, idB: unknown) => {
+    return safeResponse(e, async () => {
+      if (!checkRateLimit("note:merge", LIMITS.WRITE_STANDARD))
+        throw new Error("RATE_LIMIT");
+      const validatedidA = validation(IdSchema, idA);
+      const validatedidB = validation(IdSchema, idB);
+      const resultA = db.getById(validatedidA);
+      const resultB = db.getById(validatedidB);
+      const mergedJSON = {
+        type: "doc" as const,
+        content: [
+          ...resultA.content.content,
+          { type: "horizontalRule" },
+          ...resultB.content.content,
+        ],
+      };
+      const updateResult = db.update({ ...resultA, content: mergedJSON });
+      return updateResult;
+    });
+  });
+
   ipcMain.handle("note:update", (e, payload: unknown, flush: unknown) => {
     return safeResponse(e, async () => {
       if (!flush) {
@@ -80,7 +101,7 @@ function registerNoteIpc() {
     });
   });
 
-  ipcMain.handle("note:getByTag", (e, tag: string) => {
+  ipcMain.handle("note:getByTag", (e, tag: unknown) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("note:getById", LIMITS.READ_LIGHT))
         throw new Error("RATE_LIMIT");
@@ -102,7 +123,7 @@ function registerNoteIpc() {
     });
   });
 
-  ipcMain.handle("note:pin", (e, id: string) => {
+  ipcMain.handle("note:pin", (e, id: unknown) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("note:pin", LIMITS.READ_LIGHT))
         throw new Error("RATE_LIMIT");
@@ -112,7 +133,7 @@ function registerNoteIpc() {
     });
   });
 
-  ipcMain.handle("note:bookmark", (e, id: string) => {
+  ipcMain.handle("note:bookmark", (e, id: unknown) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("note:bookmark", LIMITS.READ_LIGHT))
         throw new Error("RATE_LIMIT");
@@ -122,7 +143,7 @@ function registerNoteIpc() {
     });
   });
 
-  ipcMain.handle("views:get", (e, view) => {
+  ipcMain.handle("views:get", (e, view: unknown) => {
     let result;
     return safeResponse(e, async () => {
       if (!checkRateLimit(`get:view:${view}`, LIMITS.READ_HEAVY))

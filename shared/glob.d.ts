@@ -46,6 +46,7 @@ declare global {
       getById: (id: string) => Promise<Result<Note>>;
       create: (payload: CreateNotePayload) => Promise<Result<Note>>;
       createMany: (payload: CreateNotePayload[]) => Promise<Result<Note[]>>;
+      merge: (idA: string, idB: string) => Promise<Result<Note>>;
       update: (
         payload: UpdateNotePayload,
         flush: boolean,
@@ -54,6 +55,7 @@ declare global {
       getByTag: (tag: string) => Promise<Result<Note[]>>;
       onTriggerDelete: (callback: (id: string) => void) => () => void;
       onTriggerId: (callback: (id: string) => void) => () => void;
+      onTriggerMerge: (callback: (id: string) => void) => () => void;
       onTriggerDuplicate: (callback: (id: string) => void) => () => void;
       onTriggerPin: (callback: (id: string) => void) => () => void;
       onTriggerBookmark: (callback: (id: string) => void) => () => void;

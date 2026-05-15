@@ -16,6 +16,10 @@ async function createManyNotes(
   return safeInvoke(window.noteAPI.createMany(payload));
 }
 
+async function mergeNotes(idA: string, idB: string): Promise<Result<Note>> {
+  return safeInvoke(window.noteAPI.merge(idA, idB));
+}
+
 async function updateNote(
   note: UpdateNotePayload,
   flush: boolean,
@@ -67,6 +71,7 @@ export {
   getByTag,
   getNoteById,
   getViews,
+  mergeNotes,
   pin,
   searchNotes,
   updateNote,

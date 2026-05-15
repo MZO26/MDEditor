@@ -10,14 +10,14 @@ import { delegate } from "tippy.js";
 function setModalState(show: boolean): void {
   const appContainer = getAppItem("appContainer");
   const overlay = findElement<HTMLDivElement>(".overlay");
-  const modal = findElement<HTMLDivElement>(".modal");
+  const modal = findElement<HTMLDivElement>(".modal-settings");
   overlay?.classList.toggle("show", show);
   modal?.classList.toggle("show", show);
   appContainer.inert = show;
 }
 
 async function initAppSettings(settings: AppSettings) {
-  const modal = findElement<HTMLDivElement>(".modal");
+  const modal = findElement<HTMLDivElement>(".modal-settings");
   const settingsContainer = findElement<HTMLDivElement>(".settings-content");
   if (!modal || !settingsContainer) return;
   settingsContainer.appendChild(createSettingsMenu());
@@ -75,4 +75,4 @@ function applyModalListeners(
   });
 }
 
-export { initAppSettings };
+export { initAppSettings, setModalState };
