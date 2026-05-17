@@ -85,9 +85,8 @@
 
 .ProseMirror p {
   font-size: 1em;
-  line-height: inherit;
   margin-top: 0;
-  margin-bottom: 1.25em;
+  margin-bottom: 1em;
   color: var(--text-main);
 }
 

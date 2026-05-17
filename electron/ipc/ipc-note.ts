@@ -7,6 +7,8 @@ import {
   CreateNotePayloadSchema,
   CreateNotesPayloadsSchema,
   IdSchema,
+  IdsSchema,
+  MergeTransactionSchema,
   SearchSchema,
   TagSchema,
   UpdateNotePayloadSchema,
@@ -36,7 +38,7 @@ function registerNoteIpc() {
 
   ipcMain.handle("note:create-many", (e, payloads: unknown) => {
     return safeResponse(e, async () => {
-      if (!checkRateLimit("note:create", LIMITS.WRITE_STANDARD))
+      if (!checkRateLimit("note:create-many", LIMITS.WRITE_STANDARD))
         throw new Error("RATE_LIMIT");
       const validatedData = validation(CreateNotesPayloadsSchema, payloads);
       const result = db.createMany(validatedData);
@@ -48,32 +50,8 @@ function registerNoteIpc() {
     return safeResponse(e, async () => {
       if (!checkRateLimit("note:merge", LIMITS.WRITE_STANDARD))
         throw new Error("RATE_LIMIT");
-      const validatedidA = validation(IdSchema, idA);
-      const validatedidB = validation(IdSchema, idB);
-      const resultA = db.getById(validatedidA);
-      const resultB = db.getById(validatedidB);
-      const mergedJSON = {
-        type: "doc" as const,
-        content: [
-          ...resultA.content.content,
-          { type: "horizontalRule" },
-          ...resultB.content.content,
-        ],
-      };
-      const outgoingA = resultA.links
-        .filter((l) => l.dir === "out")
-        .map((l) => l.id);
-      const outgoingB = resultB.links
-        .filter((l) => l.dir === "out")
-        .map((l) => l.id);
-      const mergedOutgoingLinks = [...new Set([...outgoingA, ...outgoingB])];
-      const validatedData = validation(UpdateNotePayloadSchema, {
-        ...resultA,
-        content: mergedJSON,
-        links: mergedOutgoingLinks,
-      });
-      const result = db.update(validatedData);
-      return result;
+      const validatedIds = validation(MergeTransactionSchema, { idA, idB });
+      return db.transactions.safeMerge(validatedIds);
     });
   });
 
@@ -95,7 +73,7 @@ function registerNoteIpc() {
 
   ipcMain.handle("note:delete", (e, id: unknown) => {
     return safeResponse(e, async () => {
-      if (!checkRateLimit("note:search", LIMITS.WRITE_STANDARD))
+      if (!checkRateLimit("note:delete", LIMITS.WRITE_STANDARD))
         throw new Error("RATE_LIMIT");
       const validatedData = validation(IdSchema, id);
       const result = db.delete(validatedData);
@@ -113,9 +91,19 @@ function registerNoteIpc() {
     });
   });
 
+  ipcMain.handle("note:getManyById", (e, id: unknown) => {
+    return safeResponse(e, async () => {
+      if (!checkRateLimit("note:getManyById", LIMITS.READ_LIGHT))
+        throw new Error("RATE_LIMIT");
+      const validatedData = validation(IdsSchema, id);
+      const result = db.getManyById(validatedData);
+      return result;
+    });
+  });
+
   ipcMain.handle("note:getByTag", (e, tag: unknown) => {
     return safeResponse(e, async () => {
-      if (!checkRateLimit("note:getById", LIMITS.READ_LIGHT))
+      if (!checkRateLimit("note:getByTag", LIMITS.READ_LIGHT))
         throw new Error("RATE_LIMIT");
       const validatedData = validation(TagSchema, tag);
       const result = db.searchByTag(validatedData);

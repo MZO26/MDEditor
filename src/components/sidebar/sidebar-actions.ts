@@ -41,8 +41,8 @@ function addOneNoteToList(note: Note) {
   for (const child of sidebar.children) {
     const el = child as HTMLElement;
     if (
-      el.dataset["pinned"] !== "true" &&
-      el.dataset["bookmarked"] !== "true"
+      el.getAttribute("data-pinned") !== "true" &&
+      el.getAttribute("data-bookmarked") !== "true"
     ) {
       target = el;
       break;

@@ -9,10 +9,11 @@ function setupAutoSave(editor: Editor, id: string) {
   let pendingSave: Promise<void> | null = null;
   const debouncedSave = debounce(async () => {
     if (!id || pendingDeletions.has(id)) return;
+    const currentDoc = lastSavedDoc;
     if (editor.state.doc.eq(lastSavedDoc)) return;
     pendingSave = handleSaveNote(id, false);
     await pendingSave;
-    lastSavedDoc = editor.state.doc;
+    lastSavedDoc = currentDoc;
     pendingSave = null;
   }, 1000);
   const updateHandler = () => debouncedSave();

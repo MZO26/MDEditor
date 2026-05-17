@@ -1,15 +1,6 @@
 import { showContextMenu } from "@/api/electronAPI";
 import { formatShortcut } from "@/utils/format";
-
-function el<K extends keyof HTMLElementTagNameMap>(
-  tag: K,
-  props?: Partial<HTMLElementTagNameMap[K]>,
-  ...children: (Node | string)[]
-): HTMLElementTagNameMap[K] {
-  const element = Object.assign(document.createElement(tag), props);
-  element.append(...children);
-  return element;
-}
+import { findElement } from "./dom";
 
 function createTooltipContent(
   baseText: string,
@@ -27,6 +18,21 @@ function createTooltipContent(
   return tooltipContent;
 }
 
+function useDelayedSpinner(delay = 300) {
+  const spinner = findElement<HTMLDivElement>("#loadingSpinner");
+  const overlay = findElement<HTMLDivElement>(".overlay");
+  if (!spinner || !overlay) return;
+  const spinnerTimeout = setTimeout(() => {
+    overlay?.classList.toggle("show", true);
+    spinner.style.display = "block";
+  }, delay);
+  return function cleanup() {
+    clearTimeout(spinnerTimeout);
+    overlay?.classList.toggle("show", false);
+    spinner.style.display = "none";
+  };
+}
+
 async function createContextMenu(e: Event) {
   const target = e.target as HTMLElement;
   const item = target.closest<HTMLElement>(".noteItem");
@@ -39,4 +45,4 @@ async function createContextMenu(e: Event) {
   await showContextMenu(id, pinned, bookmarked);
 }
 
-export { createContextMenu, createTooltipContent, el };
+export { createContextMenu, createTooltipContent, useDelayedSpinner };

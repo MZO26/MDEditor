@@ -110,12 +110,6 @@ const ToolbarActions: ActionMap<Editor> = {
     shortcut: "MOD-Shift--",
   },
   divider5: { type: "divider" },
-  link: {
-    run: (editor) => editor.chain().focus().toggleLink().run(),
-    isActive: (editor) => editor.isActive("link"),
-    icon: "link",
-    shortcut: "MOD+K",
-  },
   image: {
     run: (editor) => promptImageUpload(editor),
     isActive: (editor) => editor.isActive("image"),

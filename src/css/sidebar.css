@@ -108,20 +108,6 @@
   opacity: 0;
 }
 
-.sidebar-empty-state svg {
-  width: 150px;
-  height: 150px;
-  margin-bottom: 1em;
-}
-
-.sidebar-empty-state p {
-  margin: 15px;
-}
-
-.notes-container:has(.sidebar-empty-state) {
-  overflow-y: hidden;
-}
-
 @keyframes fadeSlideIn {
   0% {
     opacity: 0;
@@ -135,17 +121,31 @@
 
 .sidebar-section {
   border: none;
+  width: 100%;
   border-top: 1px solid var(--border-color);
-  margin: 8px 12px;
+  margin: 15px 0;
 }
 
-.sidebar-header,
-.info-sidebar-header {
+.sidebar-header {
   display: flex;
   height: 50px;
   flex-direction: row;
   justify-content: center;
   align-items: center;
+}
+
+.info-sidebar-metadata .creation-date {
+  margin-bottom: -12px;
+}
+
+.info-sidebar-header h4 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre-wrap;
+  margin: 0;
+  padding-top: 15px;
+  padding-left: 3px;
 }
 
 .sidebar-header {
@@ -157,7 +157,7 @@
 
 .info-sidebar-toggle {
   position: absolute;
-  top: 60px;
+  top: 65px;
   right: 15px;
   z-index: 2;
   border-radius: 8px;
@@ -188,6 +188,10 @@
 
 .info-sidebar {
   position: absolute;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 10px;
   top: 50px;
   right: 0;
   bottom: 0;
@@ -197,6 +201,8 @@
   border: 1px solid var(--border-color);
   border-top: none;
   z-index: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .info-sidebar,
@@ -224,18 +230,8 @@
 .info-sidebar-metadata {
   display: flex;
   flex-direction: column;
-  padding: 0 15px;
+  padding: 5px 15px;
   gap: 10px;
-}
-
-.info-sidebar-title {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-muted);
 }
 
 .todo-progress-container,
@@ -247,6 +243,14 @@
 
 .tag-container {
   gap: 10px;
+  flex-wrap: wrap;
+}
+
+.link-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+  gap: 5px;
   flex-wrap: wrap;
 }
 
@@ -300,6 +304,14 @@
 .search-icon {
   width: 15px;
   height: 15px;
+  color: var(--text-muted);
+  margin: 8px;
+  flex-shrink: 0;
+}
+
+#sidebar-empty-icon {
+  width: 50px;
+  height: 50px;
   color: var(--text-muted);
   margin: 8px;
   flex-shrink: 0;
@@ -373,8 +385,7 @@
 }
 
 .noteItem {
-  min-height: 90px;
-  max-height: 90px;
+  height: 90px;
   width: 100%;
   padding: 5px 10px;
   display: grid;
@@ -387,8 +398,7 @@
 }
 
 .noteItem-minimal {
-  min-height: 40px;
-  max-height: 40px;
+  height: 40px;
   grid-template-rows: 1fr;
   contain-intrinsic-size: auto 40px;
 }
@@ -516,7 +526,6 @@
   box-shadow: none;
   white-space: nowrap;
   cursor: pointer;
-  user-select: all;
   transition: all 0.2s ease;
 }
 
@@ -524,6 +533,21 @@
 .tag:hover {
   background-color: var(--accent-hover);
   box-shadow: var(--shadow);
+}
+
+.link {
+  font-size: 0.8em;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.link:hover {
+  color: var(--text-main);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
 .noteItem p {

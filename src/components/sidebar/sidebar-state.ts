@@ -1,7 +1,7 @@
 import { updateSettings } from "@/api/settingsAPI";
+import { requireElement } from "@/utils/dom";
+import { renderIcons } from "@/utils/icons";
 import { getAppItem } from "@/utils/registry";
-import { el } from "@/utils/ui";
-import { createElement, Library, SearchX } from "lucide";
 
 async function setSidebarState(
   element: HTMLElement,
@@ -30,30 +30,35 @@ function handleSidebarEmptyState(searchInput?: string) {
   }
 }
 
+const template = requireElement<HTMLTemplateElement>(
+  "#sidebar-empty-state-template",
+);
+
+const sidebarEmptyState = template.content.firstElementChild as HTMLDivElement;
+
 function showSidebarEmptyState(searchInput?: string) {
   const isSearch = Boolean(searchInput?.trim());
-  const iconNode = createElement(isSearch ? SearchX : Library);
-  iconNode.classList.add("empty-state-icon");
-  const titleText = isSearch ? "No results found" : "No notes here";
-  const descriptionNode = isSearch
-    ? el(
-        "p",
-        { className: "empty-state-description" },
-        "No notes matching ",
-        el("strong", {}, `"${searchInput}"`),
-      )
-    : el(
-        "p",
-        { className: "empty-state-description" },
-        "Create a note to get started.",
-      );
-  return el(
-    "div",
-    { className: "sidebar-empty-state empty-state-content" },
-    iconNode,
-    el("h3", { className: "empty-state-title" }, titleText),
-    descriptionNode,
+  const emptyState = sidebarEmptyState.cloneNode(true) as HTMLDivElement;
+  const iconEl = emptyState.querySelector<HTMLElement>("#sidebar-empty-icon");
+  const titleEl =
+    emptyState.querySelector<HTMLHeadingElement>(".empty-state-title");
+  const descEl = emptyState.querySelector<HTMLParagraphElement>(
+    ".empty-state-description",
   );
+  if (isSearch) {
+    iconEl!.setAttribute("data-lucide", "search-x");
+    titleEl!.textContent = "No results found";
+    const strongEl = document.createElement("strong");
+    strongEl.textContent = `"${searchInput}"`;
+    descEl!.replaceChildren("No notes matching ", strongEl);
+  } else {
+    iconEl!.setAttribute("data-lucide", "library");
+    titleEl!.textContent = "No notes here";
+    descEl!.textContent = "Create a note to get started.";
+  }
+  renderIcons(emptyState);
+
+  return emptyState;
 }
 
 export { handleSidebarEmptyState, setSidebarState };

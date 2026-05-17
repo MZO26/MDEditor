@@ -8,7 +8,6 @@ import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
 import { stateStore } from "@/settings/app-state";
 import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
-import { el } from "@/utils/ui";
 
 interface ViewItem {
   id: string;
@@ -47,13 +46,17 @@ async function handleSearchInput(searchInput: string) {
 }
 
 function createViews(views: ViewItem[]) {
-  const listItems = views.map((view) => {
-    const btn = el("button", {}, view["label"]);
+  const ul = document.createElement("ul");
+  ul.className = "smart-view-list";
+  for (const view of views) {
+    const btn = document.createElement("button");
+    btn.textContent = view["label"];
     btn.setAttribute("data-view", view["id"]);
-
-    return el("li", {}, btn);
-  });
-  return el("ul", { className: "smart-view-list" }, ...listItems);
+    const li = document.createElement("li");
+    li.append(btn);
+    ul.append(li);
+  }
+  return ul;
 }
 
 async function handleViews(view: string) {

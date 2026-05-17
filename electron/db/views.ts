@@ -1,4 +1,4 @@
-import type { NoteRow } from "@shared/types";
+import type { NoteRow } from "@shared/schemas/note-schema";
 import type { Database as DatabaseType } from "better-sqlite3";
 import BetterSqlite from "better-sqlite3";
 

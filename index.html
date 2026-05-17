@@ -87,10 +87,10 @@
           </button>
           <div id="editor"></div>
           <div class="info-sidebar">
-            <div class="info-sidebar-header">
-              <h4>Note-Info</h4>
-            </div>
             <div class="info-sidebar-metadata">
+              <span class="info-span creation-date">Creation date:</span>
+              <div class="info-sidebar-header"></div>
+              <div class="sidebar-section"></div>
               <span class="info-span">Task status: </span>
               <div class="todo-progress-container" style="display: none">
                 <div class="todo-stats">
@@ -104,6 +104,9 @@
               <div class="sidebar-section"></div>
               <span class="info-span">Tags: </span>
               <div class="tag-container"></div>
+              <div class="sidebar-section"></div>
+              <span class="info-span">Links: </span>
+              <div class="link-container"></div>
               <div class="sidebar-section"></div>
               <div class="stats">
                 <div class="count-stats">
@@ -155,6 +158,27 @@
       </div>
       <div class="settings-content" data-activetab="appearance"></div>
     </div>
+    <template id="sidebar-empty-state-template">
+      <div class="sidebar-empty-state empty-state-content">
+        <div class="empty-state-icon">
+          <i id="sidebar-empty-icon" data-lucide=""></i>
+        </div>
+        <h3 class="empty-state-title"></h3>
+        <p class="empty-state-description"></p>
+      </div>
+    </template>
+    <template id="editor-empty-state-template">
+      <div class="editor-empty-state" inert>
+        <div class="empty-state-content">
+          <i data-lucide="file-question" class="empty-state-icon"></i>
+          <h2 class="empty-state-title">No note selected</h2>
+          <p class="empty-state-description">
+            Create a new note by clicking the <strong>+</strong> button,<br />
+            or select an existing note from the sidebar.
+          </p>
+        </div>
+      </div>
+    </template>
     <template id="noteItem-minimal-template">
       <div class="noteItem noteItem-minimal">
         <div class="note-header">

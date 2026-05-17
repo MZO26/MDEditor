@@ -82,6 +82,7 @@ contextBridge.exposeInMainWorld("noteAPI", {
     subscribe("note:trigger-bookmark", callback);
   },
   getById: (id: string) => ipcRenderer.invoke("note:getById", id),
+  getManyById: (ids: string[]) => ipcRenderer.invoke("note:getManyById", ids),
   getByTag: (tag: string) => ipcRenderer.invoke("note:getByTag", tag),
   searchNotes: (searchTerm: string) =>
     ipcRenderer.invoke("note:search", searchTerm),

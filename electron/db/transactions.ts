@@ -1,11 +1,13 @@
 import NoteDB from "@electron/db/database";
 import {
   NoteFromDB,
+  UpdateNotePayloadSchema,
   type CreateTransaction,
+  type MergeTransaction,
   type Note,
+  type NoteRow,
   type UpdateTransaction,
 } from "@shared/schemas/note-schema";
-import type { NoteRow } from "@shared/types";
 import { validation } from "@shared/validation";
 import type { Database as DatabaseType } from "better-sqlite3";
 import BetterSqlite from "better-sqlite3";
@@ -144,6 +146,37 @@ class Transactions {
       tags: NoteDB.getTagsById(noteId),
       links: NoteDB.getLinksById(noteId),
     });
+  }
+
+  safeMerge(params: MergeTransaction): Note {
+    const { idA, idB } = params;
+    const results = NoteDB.getManyById([idA, idB]);
+    const recordsMap = new Map(results.map((row) => [row.id, row]));
+    const resultA = recordsMap.get(idA);
+    const resultB = recordsMap.get(idB);
+    if (!resultA || !resultB) {
+      throw new Error("NOT_FOUND");
+    }
+    const mergedJSON = {
+      type: "doc" as const,
+      content: [resultA.content, { type: "horizontalRule" }, resultB.content],
+    };
+    const outgoingA = [];
+    for (const l of resultA.links) {
+      if (l.dir === "out") outgoingA.push(l.id);
+    }
+    const outgoingB = [];
+    for (const l of resultB.links) {
+      if (l.dir === "out") outgoingB.push(l.id);
+    }
+    const mergedOutgoingLinks = [...new Set([...outgoingA, ...outgoingB])];
+    NoteDB.delete(resultB.id);
+    const validatedData = validation(UpdateNotePayloadSchema, {
+      ...resultA,
+      content: mergedJSON,
+      links: mergedOutgoingLinks,
+    });
+    return NoteDB.update(validatedData);
   }
 }
 

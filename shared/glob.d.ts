@@ -44,6 +44,7 @@ declare global {
     noteAPI: {
       getAll: () => Promise<Result<Note[]>>;
       getById: (id: string) => Promise<Result<Note>>;
+      getManyById: (ids: string[]) => Promise<Result<Note[]>>;
       create: (payload: CreateNotePayload) => Promise<Result<Note>>;
       createMany: (payload: CreateNotePayload[]) => Promise<Result<Note[]>>;
       merge: (idA: string, idB: string) => Promise<Result<Note>>;

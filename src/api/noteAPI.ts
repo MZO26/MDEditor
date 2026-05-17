@@ -39,6 +39,10 @@ async function getNoteById(id: string): Promise<Result<Note>> {
   return safeInvoke(window.noteAPI.getById(id));
 }
 
+async function getManyById(ids: string[]): Promise<Result<Note[]>> {
+  return safeInvoke(window.noteAPI.getManyById(ids));
+}
+
 async function getByTag(tag: string): Promise<Result<Note[]>> {
   return safeInvoke(window.noteAPI.getByTag(tag));
 }
@@ -69,6 +73,7 @@ export {
   deleteNote,
   getAll,
   getByTag,
+  getManyById,
   getNoteById,
   getViews,
   mergeNotes,

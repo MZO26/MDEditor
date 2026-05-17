@@ -144,7 +144,21 @@ function getNoteEditorExtensions() {
         target: "_blank",
         rel: "noopener noreferrer",
       },
-      validate: (href) => !href.startsWith("appimg://"),
+      validate: (href) => {
+        const protocolMatch = href.match(/^([a-zA-Z0-9\+\-\.]+):/);
+        if (!protocolMatch) {
+          return true;
+        }
+        const protocol = protocolMatch[0].toLowerCase();
+        const allowedProtocols = [
+          "http:",
+          "https:",
+          "mailto:",
+          "tel:",
+          "appimg:",
+        ];
+        return allowedProtocols.includes(protocol);
+      },
     }),
   ];
 }

@@ -6,6 +6,9 @@ import {
 } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 
+const UUID_REGEX =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
 function normalizeWikiId(value: unknown): string {
   if (typeof value !== "string") return "";
   return value.replace(/[\[\]]/g, "").trim();
@@ -58,9 +61,10 @@ export const WikiLink = Node.create<WikiLinkOptions>({
       nodeInputRule({
         find: /\[{2,}([^[\]]+)\]{2,}$/,
         type: this.type,
-        getAttributes: (match) => ({
-          id: normalizeWikiId(match[1]),
-        }),
+        getAttributes: (match) => {
+          const id = normalizeWikiId(match[1]);
+          return UUID_REGEX.test(id) ? { id } : null;
+        },
       }),
     ];
   },
@@ -69,9 +73,10 @@ export const WikiLink = Node.create<WikiLinkOptions>({
       nodePasteRule({
         find: /\[{2,}([^[\]]+)\]{2,}/g,
         type: this.type,
-        getAttributes: (match) => ({
-          id: normalizeWikiId(match[1]),
-        }),
+        getAttributes: (match) => {
+          const id = normalizeWikiId(match[1]);
+          return UUID_REGEX.test(id) ? { id } : null;
+        },
       }),
     ];
   },

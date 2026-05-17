@@ -301,9 +301,10 @@ label {
   margin: 0 auto;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 10px;
+  padding: 10px 0;
   width: 100%;
   max-width: 80ch;
+  scrollbar-gutter: stable both-edges;
 }
 
 #toolbar {
@@ -360,7 +361,7 @@ label {
 
 .app-container[data-width="comfortable"] #editor,
 .app-container[data-width="comfortable"] #toolbar,
-.app-container[data-width="comfortable"] .top-toolbar {
+.app-container[data-width="comfortable"].top-toolbar {
   max-width: 80ch;
 }
 
@@ -538,8 +539,8 @@ label {
 }
 
 svg.empty-state-icon {
-  width: 58px;
-  height: 58px;
+  width: 50px;
+  height: 50px;
   color: var(--text-muted);
   opacity: 0.6;
   stroke-width: 1.5;

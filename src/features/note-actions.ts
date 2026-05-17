@@ -1,10 +1,7 @@
 import { createNote, deleteNote, getNoteById, updateNote } from "@/api/noteAPI";
 import { editor } from "@/components/editor/editor-init";
 import { handleEditorEmptyState } from "@/components/editor/editor-state";
-import {
-  updateNoteTags,
-  updateStats,
-} from "@/components/sidebar/info-sidebar-actions";
+import { updateStats } from "@/components/sidebar/info-sidebar-actions";
 import { updateNoteInList } from "@/components/sidebar/sidebar-actions";
 import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
 import { stopAutoSave } from "@/features/note-auto-save";
@@ -45,6 +42,23 @@ async function handleCreateNote() {
   return await createNote(payload);
 }
 
+function cleanupDeletedNoteUI(id: string, noteElement?: HTMLDivElement) {
+  if (noteElement) {
+    noteElement.remove();
+  }
+  noteStore.setState((state) => ({
+    notes: state.notes.filter((n) => n.id !== id),
+  }));
+  handleSidebarEmptyState();
+  const { activeId } = stateStore.getState();
+  if (activeId === id) {
+    stateStore.setState({ activeId: null });
+    const editor = getAppItem("editor");
+    editor?.commands.clearContent();
+    handleEditorEmptyState();
+  }
+}
+
 async function handleDeleteNote(id: string, noteElement: HTMLDivElement) {
   const editor = getAppItem("editor");
   stopAutoSave(editor, "cancel");
@@ -56,17 +70,7 @@ async function handleDeleteNote(id: string, noteElement: HTMLDivElement) {
     return;
   }
   showToast("Note deleted");
-  noteElement.remove();
-  noteStore.setState((state) => ({
-    notes: state.notes.filter((n) => n.id !== id),
-  }));
-  handleSidebarEmptyState();
-  const { activeId } = stateStore.getState();
-  if (activeId === id) {
-    stateStore.setState({ activeId: null });
-    editor?.commands.clearContent();
-    handleEditorEmptyState();
-  }
+  cleanupDeletedNoteUI(id, noteElement);
   setTimeout(() => pendingDeletions.delete(id), 1000);
 }
 
@@ -82,15 +86,13 @@ async function handleSaveNote(
     ...editorContent,
     ...metaData,
   };
-  console.log(payload);
   const response = await updateNote(payload, flush);
   if (!response.success) {
     console.error("save failed for id", id);
     showToast(response.message);
     return;
   }
-  updateStats();
-  updateNoteTags(response.data.tags);
+  updateStats(response.data);
   updateNoteInList(response.data);
 }
 
@@ -104,9 +106,14 @@ async function handleSelectNote(noteItem: HTMLDivElement) {
   }
   stateStore.setState({ activeId: noteID });
   viewNote(response.data);
-  updateNoteTags(response.data.tags);
-  updateStats();
+  updateStats(response.data);
   setActiveItem(noteItem, getAppItem("sidebar"));
 }
 
-export { handleCreateNote, handleDeleteNote, handleSaveNote, handleSelectNote };
+export {
+  cleanupDeletedNoteUI,
+  handleCreateNote,
+  handleDeleteNote,
+  handleSaveNote,
+  handleSelectNote,
+};

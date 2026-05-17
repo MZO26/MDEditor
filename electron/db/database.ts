@@ -30,6 +30,7 @@ class NoteDB {
   public views: Views;
   private getAllNotesStmt: BetterSqlite.Statement;
   private getNoteByIdStmt: BetterSqlite.Statement;
+  private getManyNotesByIdStmt: BetterSqlite.Statement;
   private getAllTagsStmt: BetterSqlite.Statement;
   private getAllLinksStmt: BetterSqlite.Statement;
   public getTagsByIdStmt: BetterSqlite.Statement;
@@ -56,6 +57,9 @@ class NoteDB {
     this.getNoteByIdStmt = this.db.prepare(
       "SELECT * FROM notes WHERE id = @id",
     );
+    this.getManyNotesByIdStmt = this.db.prepare(`
+      SELECT * FROM notes WHERE id IN (SELECT value FROM json_each(@idsList))
+    `);
     this.getAllTagsStmt = this.db.prepare(
       "SELECT note_id, tag_name FROM note_tags",
     );
@@ -231,6 +235,19 @@ class NoteDB {
       ...dbRow,
       tags: this.getTagsById(id) ?? [],
       links: this.getLinksById(id) ?? [],
+    });
+  }
+
+  getManyById(ids: string[]): Note[] {
+    if (ids.length === 0) return [];
+    const params = { idsList: JSON.stringify(ids) };
+    const rows = this.getManyNotesByIdStmt.all(params) as NoteRow[];
+    return rows.map((row) => {
+      return validation(NoteFromDB, {
+        ...row,
+        tags: this.getTagsById(row.id) ?? [],
+        links: this.getLinksById(row.id) ?? [],
+      });
     });
   }
 
