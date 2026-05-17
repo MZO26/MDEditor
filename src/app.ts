@@ -32,9 +32,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   initGlobalShortcuts();
   initAppSettings(settings);
   initListeners();
-  await reloadNoteList();
   initNotesSidebar(settings["note-sidebar-state"]);
   initInfoSidebar(settings["info-sidebar-state"]);
+  await reloadNoteList();
   const toolbarContainer = requireElement("#toolbar");
   buildMenu(toolbarContainer, ToolbarActions);
   setupToolbarListeners(toolbarContainer, ToolbarActions);

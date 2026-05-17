@@ -53,7 +53,7 @@ function applyInfoSidebarListeners(
       if (!spanEl) return;
       const tag = spanEl.dataset["tag"];
       if (!tag) return;
-      searchByTag(tag);
+      await searchByTag(tag);
     }),
   );
   linkContainer.addEventListener(

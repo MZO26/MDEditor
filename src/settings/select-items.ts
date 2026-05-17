@@ -41,8 +41,12 @@ function buildSelects() {
     "note-item-display",
     [
       {
-        value: "normal",
-        label: "Normal",
+        value: "tags",
+        label: "Tags",
+      },
+      {
+        value: "snippet",
+        label: "Snippet",
       },
       {
         value: "minimal",

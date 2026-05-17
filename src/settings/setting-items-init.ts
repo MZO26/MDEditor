@@ -89,10 +89,9 @@ function initEditorSettings(settings: AppSettings) {
     applyLineHeight(lineHeightSelect.value),
   );
 
+  focusSelect.value = settings["editor-focus"];
   focusSelect.addEventListener("change", (e: Event) => {
     const target = e.target as HTMLSelectElement;
-    focusSelect.value = target.value;
-    console.log(target.value);
     updateSettings({
       "editor-focus": target.value as EditorFocus,
     });
@@ -106,22 +105,27 @@ function initEditorSettings(settings: AppSettings) {
   });
 }
 
-function initAppearanceSettings() {
+function initAppearanceSettings(settings: AppSettings) {
   const themeSelect = findElement<HTMLSelectElement>("#theme");
   const codeThemeSelect = findElement<HTMLSelectElement>("#code-theme");
   const highlightSelect = findElement<HTMLSelectElement>("#highlight-theme");
   const noteItemSelect = findElement<HTMLSelectElement>("#note-item-display");
+  const sidebar = getAppItem("sidebar");
   if (!codeThemeSelect || !themeSelect || !highlightSelect || !noteItemSelect) {
     return;
   }
-  codeThemeSelect.addEventListener(
-    "change",
-    createAsyncHandler(async () => {
-      const baseTheme = resolveTheme(themeSelect.value as Theme);
-      const codePref = setCodeTheme(baseTheme);
-      updateSettings({ "code-theme": codePref });
-    }),
+  document.documentElement.setAttribute(
+    "data-code-theme",
+    settings["code-theme"],
   );
+  codeThemeSelect.value = settings["code-theme"];
+  codeThemeSelect.addEventListener("change", () => {
+    const baseTheme = resolveTheme(themeSelect.value as Theme);
+    const codePref = setCodeTheme(baseTheme);
+    updateSettings({ "code-theme": codePref });
+  });
+  document.documentElement.setAttribute("data-theme", settings["theme"]);
+  themeSelect.value = settings["theme"];
   themeSelect.addEventListener(
     "change",
     createAsyncHandler(async (e: Event) => {
@@ -133,25 +137,28 @@ function initAppearanceSettings() {
       await applyAppTheme(validTheme, false);
     }),
   );
-
+  document.documentElement.setAttribute(
+    "data-highlight",
+    settings["highlight"],
+  );
+  highlightSelect.value = settings["highlight"];
   highlightSelect.addEventListener("change", (e: Event) => {
     const target = e.target as HTMLSelectElement;
-    highlightSelect.value = target.value;
     document.documentElement.setAttribute("data-highlight", target.value);
     updateSettings({
       highlight: target.value as HighlightTheme,
     });
   });
-
+  sidebar.setAttribute("data-noteItem", settings["note-item-display"]);
+  noteItemSelect.value = settings["note-item-display"];
   noteItemSelect.addEventListener(
     "change",
     createAsyncHandler(async (e: Event) => {
       const target = e.target as HTMLSelectElement;
-      noteItemSelect.value = target.value;
       updateSettings({
         "note-item-display": target.value as NoteItemDisplay,
       });
-      document.documentElement.setAttribute("data-noteItem", target.value);
+      sidebar.setAttribute("data-noteItem", target.value);
       await reloadNoteList();
     }),
   );
@@ -164,7 +171,7 @@ function initAppearanceSettings() {
   });
 }
 
-function initWindowSettings() {
+function initWindowSettings(settings: AppSettings) {
   const openWindowSelect = findElement<HTMLSelectElement>("#open-window-mode");
   const closeWindowSelect =
     findElement<HTMLSelectElement>("#close-window-mode");
@@ -172,36 +179,27 @@ function initWindowSettings() {
     "#minimize-window-mode",
   );
   if (!openWindowSelect || !closeWindowSelect || !minimizeWindowSelect) return;
-  openWindowSelect.addEventListener(
-    "change",
-    createAsyncHandler(async (e: Event) => {
-      const target = e.target as HTMLSelectElement;
-      openWindowSelect.value = target.value;
-      updateSettings({
-        "open-window-mode": target.value as OpenWindowMode,
-      });
-    }),
-  );
-  closeWindowSelect.addEventListener(
-    "change",
-    createAsyncHandler(async (e: Event) => {
-      const target = e.target as HTMLSelectElement;
-      closeWindowSelect.value = target.value;
-      updateSettings({
-        "close-window-mode": target.value as CloseWindowMode,
-      });
-    }),
-  );
-  minimizeWindowSelect.addEventListener(
-    "change",
-    createAsyncHandler(async (e: Event) => {
-      const target = e.target as HTMLSelectElement;
-      minimizeWindowSelect.value = target.value;
-      updateSettings({
-        "minimize-window-mode": target.value as MinimizeWindowMode,
-      });
-    }),
-  );
+  openWindowSelect.value = settings["open-window-mode"];
+  openWindowSelect.addEventListener("change", (e: Event) => {
+    const target = e.target as HTMLSelectElement;
+    updateSettings({
+      "open-window-mode": target.value as OpenWindowMode,
+    });
+  });
+  closeWindowSelect.value = settings["close-window-mode"];
+  closeWindowSelect.addEventListener("change", (e: Event) => {
+    const target = e.target as HTMLSelectElement;
+    updateSettings({
+      "close-window-mode": target.value as CloseWindowMode,
+    });
+  });
+  minimizeWindowSelect.value = settings["minimize-window-mode"];
+  minimizeWindowSelect.addEventListener("change", (e: Event) => {
+    const target = e.target as HTMLSelectElement;
+    updateSettings({
+      "minimize-window-mode": target.value as MinimizeWindowMode,
+    });
+  });
 
   setSettingsItem({
     openWindowSelect,
@@ -213,6 +211,7 @@ function initWindowSettings() {
 function initStorageSettings() {
   const batchExportSelect = findElement<HTMLSelectElement>("#file-backup");
   if (!batchExportSelect) return;
+  batchExportSelect.value = "";
   batchExportSelect.addEventListener(
     "change",
     createAsyncHandler(async (e) => {
@@ -229,9 +228,9 @@ function initStorageSettings() {
 }
 
 function setSelectListeners(settings: AppSettings) {
-  initAppearanceSettings();
+  initAppearanceSettings(settings);
   initEditorSettings(settings);
-  initWindowSettings();
+  initWindowSettings(settings);
   initStorageSettings();
 }
 

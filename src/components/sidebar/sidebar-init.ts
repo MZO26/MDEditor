@@ -7,6 +7,7 @@ import { getAppItem, registerAppEvents } from "@/utils/registry";
 import { createContextMenu } from "@/utils/ui";
 import { delegate } from "tippy.js";
 import "tippy.js/dist/tippy.css";
+import { searchByTag } from "./sidebar-filter";
 
 const toggleSidebar = (appContainer: HTMLDivElement) => {
   const collapsed = appContainer.classList.contains("collapsed");
@@ -45,6 +46,14 @@ function applySidebarListeners(
       const target = e.target as HTMLElement;
       if (target === sidebar) return;
       const actionBtn = target.closest<HTMLButtonElement>("button");
+      const span = target.closest<HTMLSpanElement>(".searchTag");
+      const tag = span?.getAttribute("tag");
+      if (tag) {
+        e.preventDefault();
+        e.stopPropagation();
+        await searchByTag(tag);
+        return;
+      }
       if (actionBtn) {
         e.preventDefault();
         e.stopPropagation();

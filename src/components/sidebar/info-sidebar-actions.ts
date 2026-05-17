@@ -1,12 +1,13 @@
 import { getManyById } from "@/api/noteAPI";
-import { calculateToDos } from "@/extensions/todo-bar";
-import { findElement } from "@/utils/dom";
+import { findElement, requireElement } from "@/utils/dom";
 import { formatNoteDate } from "@/utils/format";
 import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
+import { getTodoStats } from "@shared/generators/note-metadata";
 import type { Note } from "@shared/schemas/note-schema";
+import type { JSONContent } from "@tiptap/core";
 
-function updateNoteData(date: Note["created_at"], title: Note["title"]) {
+function updateInfoHeader(date: Note["created_at"], title: Note["title"]) {
   const container = findElement(".info-sidebar-header");
   if (!container) return;
   container.innerHTML = "";
@@ -82,7 +83,7 @@ async function updateStats(note: Note) {
   calculateToDos(note.content);
   updateNoteTags(note.tags);
   await updateNoteLinks(note.links);
-  updateNoteData(note.created_at, note.title);
+  updateInfoHeader(note.created_at, note.title);
 }
 
 function estimateReadingTime(wordCount: number, wpm = 238): string {
@@ -91,4 +92,23 @@ function estimateReadingTime(wordCount: number, wpm = 238): string {
   return s < 30 ? "< 1 min read" : s < 60 ? "1 min read" : `${m} min read`;
 }
 
-export { updateNoteData, updateNoteLinks, updateNoteTags, updateStats };
+function calculateToDos(content: JSONContent) {
+  const stats = getTodoStats(content);
+  const container = requireElement(".todo-progress-container");
+  if (stats.total === 0) {
+    if (container.style.display !== "none") container.style.display = "none";
+    return;
+  }
+  if (container.style.display !== "block") container.style.display = "block";
+  const countLabel = requireElement<HTMLElement>("#todo-count");
+  const progressBar = requireElement<HTMLElement>("#todo-progress");
+  if (countLabel) countLabel.innerText = `${stats.completed}/${stats.total}`;
+  if (progressBar) {
+    const percentage = (stats.completed / stats.total) * 100;
+    progressBar.style.width = `${percentage}%`;
+    progressBar.style.backgroundColor =
+      percentage === 100 ? "var(--tag-color)" : "var(--text-muted)";
+  }
+}
+
+export { updateStats };

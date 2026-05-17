@@ -9,7 +9,6 @@ async function initFocusMode() {
   const newState = !appContainer.classList.contains("focus");
   appContainer.classList.toggle("focus", newState);
   await setTheme(document.body.dataset["theme"] as Theme, newState);
-  console.log("setting theme");
 }
 
 function setEditorWidth(container: HTMLDivElement) {

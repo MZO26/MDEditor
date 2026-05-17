@@ -8,23 +8,10 @@ import type {
   UpdateNotePayload,
 } from "@shared/schemas/note-schema";
 import type { AppSettings, Theme } from "@shared/schemas/store-schema";
+import { subscribe } from "@shared/subscribe";
 import type { ZoomAction } from "@shared/types";
-import { contextBridge, ipcRenderer, type IpcRendererEvent } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 
-console.log("--- PRELOAD ACTIVE ---");
-
-function subscribe<T>(
-  channel: string,
-  callback: (payload: T) => void,
-): () => void {
-  const listener = (_e: IpcRendererEvent, payload: T) => {
-    callback(payload);
-  };
-  ipcRenderer.on(channel, listener);
-  return () => {
-    ipcRenderer.removeListener(channel, listener);
-  };
-}
 contextBridge.exposeInMainWorld("fileAPI", {
   selectFolder: () => ipcRenderer.invoke("select-folder"),
   noteExport: (payload: ExportRequest) =>

@@ -8,13 +8,19 @@ function setupAutoSave(editor: Editor, id: string) {
   let lastSavedDoc: Node = editor.state.doc;
   let pendingSave: Promise<void> | null = null;
   const debouncedSave = debounce(async () => {
-    if (!id || pendingDeletions.has(id)) return;
-    const currentDoc = lastSavedDoc;
-    if (editor.state.doc.eq(lastSavedDoc)) return;
-    pendingSave = handleSaveNote(id, false);
-    await pendingSave;
-    lastSavedDoc = currentDoc;
-    pendingSave = null;
+    if (!id || pendingDeletions.has(id) || pendingSave) return;
+    const docToSave = editor.state.doc;
+    if (docToSave.eq(lastSavedDoc)) return;
+    const savePromise = handleSaveNote(id, false);
+    pendingSave = savePromise;
+    try {
+      await savePromise;
+      lastSavedDoc = docToSave;
+    } catch (err) {
+      console.error("Autosave failed:", err);
+    } finally {
+      pendingSave = null;
+    }
   }, 1000);
   const updateHandler = () => debouncedSave();
   editor.on("update", updateHandler);

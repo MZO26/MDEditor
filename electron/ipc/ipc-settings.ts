@@ -54,7 +54,7 @@ function registerSettingsIpc(win: BrowserWindow) {
 
   ipcMain.handle("electron-store:set", async (e, settings: AppSettings) => {
     return safeResponse(e, async () => {
-      if (!checkRateLimit("electron-store:set", LIMITS.WRITE_STANDARD))
+      if (!checkRateLimit("electron-store:set", LIMITS.WRITE_LIGHT))
         throw new Error("RATE_LIMIT");
       const validValue = validation(StoreSchema, settings);
       store.set(validValue);

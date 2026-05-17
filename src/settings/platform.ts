@@ -5,7 +5,6 @@ async function getPlatformData() {
   const response = await getPlatform();
   console.log("Response received:", response);
   if (!response.success) {
-    console.log("no success");
     return;
   }
   const platform = response.data as string;

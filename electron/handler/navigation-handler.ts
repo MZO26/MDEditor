@@ -66,7 +66,6 @@ function processUrl(url: string, preventDefault?: () => void) {
       return;
       // this means protocol is valid but electron shouldn't open it in its window. Instead it hands off the URL to the os to open it with users default browser
     }
-    // safe internal routing
     if (
       (isWebProtocol && isLocalhost) ||
       isSafeLocalFile ||
@@ -74,11 +73,9 @@ function processUrl(url: string, preventDefault?: () => void) {
     ) {
       return;
     }
-    // unknown protocol. gets blocked
     if (preventDefault) preventDefault();
     console.warn(`Blocked dangerous protocol: ${parsedUrl.protocol}`);
   } catch (error) {
-    // also gets blocked on error if URL processing fails
     if (preventDefault) preventDefault();
     console.error(`Blocked invalid URL: ${url}`);
   }
@@ -87,32 +84,25 @@ function processUrl(url: string, preventDefault?: () => void) {
 function navigationHandler(win: BrowserWindow) {
   win.webContents.setWindowOpenHandler(({ url }) => {
     processUrl(url);
-    // always blocks electron if it is trying to open a new window
     return { action: "deny" };
   });
 
   win.webContents.on("will-navigate", (e, url) => {
-    // intercepts client side navigation (before any network request leaves the app)
     processUrl(url, () => e.preventDefault());
   });
 
   win.webContents.on("will-redirect", (e, url) => {
-    // if any server responds with an http redirect after clicking on an allowed link, this handles it
     processUrl(url, () => e.preventDefault());
   });
-  // 1. Intercept navigation inside IFrames
   win.webContents.on("will-frame-navigate", (e) => {
-    // isMainFrame is true for the main window, false for iframes
     if (!e.isMainFrame) {
       processUrl(e.url, () => e.preventDefault());
     }
   });
-  // 2. Prevent arbitrary file downloads
   win.webContents.session.on("will-download", (e, item) => {
     e.preventDefault();
     console.log(`Blocked attempt to download: ${item.getURL()}`);
   });
-  // 3. Disable <webview> creation entirely (Security Best Practice)
   win.webContents.on("will-attach-webview", (e) => {
     e.preventDefault();
   });

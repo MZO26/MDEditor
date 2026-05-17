@@ -12,7 +12,7 @@ const DEFAULT_STORE: AppSettings = {
   "editor-focus": "off",
   "code-theme": "balanced",
   highlight: "done",
-  "note-item-display": "normal",
+  "note-item-display": "tags",
   "note-sidebar-state": false,
   "info-sidebar-state": false,
   "open-window-mode": "centered",

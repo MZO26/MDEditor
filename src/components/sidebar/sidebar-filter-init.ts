@@ -13,7 +13,7 @@ const debouncedSearch = debounce((e: Event) => {
   const target = e.target as HTMLInputElement;
   const value = target.value.trim();
   void handleSearchInput(value);
-}, 500); // funktioniert nicht
+}, 500);
 
 function initSearchHandlers() {
   const viewBtn = findElement(".sidebar-trigger-btn");

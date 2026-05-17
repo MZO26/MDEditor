@@ -1,13 +1,13 @@
 import { getAll } from "@/api/noteAPI";
 import { handleEditorEmptyState } from "@/components/editor/editor-state";
 import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
-import { noteStore, settingsStore, stateStore } from "@/settings/app-state";
+import { noteStore, stateStore } from "@/settings/app-state";
 import { findElement, setActiveItem } from "@/utils/dom";
 import { formatNoteDate } from "@/utils/format";
 import { getAppItem } from "@/utils/registry";
-import { createNoteItem, createNoteItemMinimal } from "@/utils/templates";
 import { showToast } from "@/utils/toast";
 import type { Note } from "@shared/schemas/note-schema";
+import { createNoteItem } from "./sidebar-items";
 
 function updateNoteCount(notes: Note[]) {
   const noteCount = findElement<HTMLSpanElement>(".note-count");
@@ -32,10 +32,7 @@ function compareNotes(a: Note, b: Note): number {
 }
 
 function addOneNoteToList(note: Note) {
-  const template = settingsStore.get("note-item-display");
-  const renderNoteItem: (note: Note) => HTMLDivElement =
-    template === "minimal" ? createNoteItemMinimal : createNoteItem;
-  const noteElement = renderNoteItem(note);
+  const noteElement = createNoteItem(note);
   let target: Element | null = null;
   const sidebar = getAppItem("sidebar");
   for (const child of sidebar.children) {
@@ -59,17 +56,14 @@ function addOneNoteToList(note: Note) {
 }
 
 function addManyNotesToList(notes: Note[]) {
-  const template = settingsStore.get("note-item-display");
   const sidebar = getAppItem("sidebar");
   const fragment = document.createDocumentFragment();
-  const renderNoteItem: (note: Note) => HTMLDivElement =
-    template === "minimal" ? createNoteItemMinimal : createNoteItem;
-  notes.forEach((note: Note) => {
-    const noteElement = renderNoteItem(note);
+  for (const note of notes) {
+    const noteElement = createNoteItem(note);
     if (noteElement) {
       fragment.appendChild(noteElement);
     }
-  });
+  }
   sidebar.appendChild(fragment);
   handleEditorEmptyState();
   handleSidebarEmptyState();
@@ -113,9 +107,22 @@ function updateNoteInList(note: Note): void {
   const snippetContainer =
     noteElement.querySelector<HTMLDivElement>(".note-content");
   const dateContainer = noteElement.querySelector<HTMLDivElement>(".note-date");
+  const tagContainer = noteElement.querySelector<HTMLDivElement>(".note-tags");
   document.startViewTransition(() => {
-    titleContainer!.textContent = note.title;
+    if (titleContainer) titleContainer.textContent = note.title;
     if (snippetContainer) snippetContainer.textContent = note.snippet;
+    if (tagContainer) {
+      if (note.tags && note.tags.length > 0) {
+        tagContainer.innerHTML = "";
+        for (const tag of note.tags) {
+          const span = document.createElement("span");
+          span.classList.add("tag", "searchTag");
+          span.dataset["tag"] = String(tag);
+          span.textContent = `#${tag}`;
+          tagContainer!.append(span);
+        }
+      }
+    }
     if (dateContainer)
       dateContainer.textContent = formatNoteDate(note.updated_at);
   });
