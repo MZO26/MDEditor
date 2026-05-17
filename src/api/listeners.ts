@@ -157,7 +157,9 @@ function initListeners() {
         );
         if (!noteItem) return;
         viewNote(mergeResult.data);
-        updateStats(mergeResult.data);
+        document.startViewTransition(async () => {
+          await updateStats(mergeResult.data);
+        });
         setActiveItem(noteItem, getAppItem("sidebar"));
         showToast("Notes merged successfully.");
         input.value = "";

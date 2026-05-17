@@ -92,7 +92,9 @@ async function handleSaveNote(
     showToast(response.message);
     return;
   }
-  updateStats(response.data);
+  document.startViewTransition(async () => {
+    await updateStats(response.data);
+  });
   updateNoteInList(response.data);
 }
 
@@ -106,7 +108,9 @@ async function handleSelectNote(noteItem: HTMLDivElement) {
   }
   stateStore.setState({ activeId: noteID });
   viewNote(response.data);
-  updateStats(response.data);
+  document.startViewTransition(async () => {
+    await updateStats(response.data);
+  });
   setActiveItem(noteItem, getAppItem("sidebar"));
 }
 
