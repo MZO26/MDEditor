@@ -39,6 +39,56 @@ function initListeners() {
     settingsStore.setState(settings);
   });
 
+  window.electronAPI.onTriggerTableAction((action) => {
+    const editor = getAppItem("editor");
+    if (!editor) return;
+    const chain = editor.chain().focus();
+    switch (action) {
+      case "addRowBefore":
+        chain.addRowBefore().run();
+        break;
+      case "addRowAfter":
+        chain.addRowAfter().run();
+        break;
+      case "addColumnBefore":
+        chain.addColumnBefore().run();
+        break;
+      case "addColumnAfter":
+        chain.addColumnAfter().run();
+        break;
+      case "deleteRow":
+        chain.deleteRow().run();
+        break;
+      case "deleteColumn":
+        chain.deleteColumn().run();
+        break;
+      case "deleteTable":
+        chain.deleteTable().run();
+        break;
+    }
+  });
+
+  window.electronAPI.onTriggerNoteAction((payload) => {
+    const noteElement = document.querySelector(
+      `.noteItem[data-id="${payload.id}"]`,
+    ) as HTMLElement;
+    if (!noteElement) return;
+    switch (payload.action) {
+      case "pin":
+        noteElement.dataset["pinned"] = "true";
+        break;
+      case "unpin":
+        noteElement.dataset["pinned"] = "false";
+        break;
+      case "bookmark":
+        noteElement.dataset["bookmarked"] = "true";
+        break;
+      case "unbookmark":
+        noteElement.dataset["bookmarked"] = "false";
+        break;
+    }
+  });
+
   window.fileAPI.onTriggerExport(async (extension) => {
     const editor = getAppItem("editor");
     const fileName = titleGenerator(editor.getText());
@@ -158,14 +208,7 @@ function initListeners() {
         );
         if (!noteItem) return;
         viewNote(mergeResult.data);
-        const transition = document.startViewTransition(async () => {
-          await updateStats(mergeResult.data);
-        });
-        transition.finished.catch((error: Error) => {
-          if (error.name === "AbortError") {
-            return;
-          }
-        });
+        await updateStats(mergeResult.data);
         setActiveItem(noteItem, getAppItem("sidebar"));
         showToast("Notes merged successfully.");
         input.value = "";

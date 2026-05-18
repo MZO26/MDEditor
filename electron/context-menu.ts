@@ -1,3 +1,4 @@
+import type { NoteMenuPayload } from "@shared/types";
 import { ipcMain, Menu, type BrowserWindow } from "electron";
 
 let activeId: string | null = null;
@@ -28,12 +29,46 @@ async function setUpEditorMenu() {
     ],
   });
 }
-function setUpNoteMenu(
-  win: BrowserWindow,
-  id: string,
-  pinned: boolean,
-  bookmarked: boolean,
-) {
+function setUpTableMenu(win: BrowserWindow) {
+  const tableMenu = Menu.buildFromTemplate([
+    {
+      label: "Add Row Before",
+      click: () => win.webContents.send("trigger:table-action", "addRowBefore"),
+    },
+    {
+      label: "Add Row After",
+      click: () => win.webContents.send("trigger:table-action", "addRowAfter"),
+    },
+    { type: "separator" },
+    {
+      label: "Add Column Before",
+      click: () =>
+        win.webContents.send("trigger:table-action", "addColumnBefore"),
+    },
+    {
+      label: "Add Column After",
+      click: () =>
+        win.webContents.send("trigger:table-action", "addColumnAfter"),
+    },
+    { type: "separator" },
+    {
+      label: "Delete Row",
+      click: () => win.webContents.send("trigger:table-action", "deleteRow"),
+    },
+    {
+      label: "Delete Column",
+      click: () => win.webContents.send("trigger:table-action", "deleteColumn"),
+    },
+    {
+      label: "Delete Table",
+      click: () => win.webContents.send("trigger:table-action", "deleteTable"),
+    },
+  ]);
+  return tableMenu;
+}
+
+function setUpNoteMenu(win: BrowserWindow, payload: NoteMenuPayload) {
+  const { id, pinned, bookmarked } = payload;
   const noteItemMenu = Menu.buildFromTemplate([
     {
       label: "Copy Note ID",
@@ -92,4 +127,4 @@ function setUpNoteMenu(
   return noteItemMenu;
 }
 
-export { setUpEditorMenu, setUpNoteMenu };
+export { setUpEditorMenu, setUpNoteMenu, setUpTableMenu };

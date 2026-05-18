@@ -11,6 +11,7 @@ import {
   type ImagePayload,
   type UpdateNotePayload,
 } from "@shared/shared/types";
+import type { MenuType } from "./types";
 
 declare module "*.css";
 
@@ -32,14 +33,14 @@ declare global {
         payload: ImagePayload,
       ) => Promise<Result<{ imageSrc: string }>>;
       onThemeChanged: (callback: (theme: Theme) => void) => () => void;
-      showContextMenu: (
-        id: string,
-        pinned: boolean,
-        bookmarked: boolean,
-      ) => Promise<Result<void>>;
+      showContextMenu: (menuType: MenuType, payload?: NoteMenuPayload) => void;
+      onTriggerTableAction: (callback: (action: string) => void) => void;
+      onTriggerNoteAction: (
+        callback: (payload: NoteMenuPayload) => void,
+      ) => void;
       onRequestFlush: (callback: () => void) => () => void;
       confirmFlush: () => void;
-      zoom: (action: ZoomAction) => Promise<Result<number>>;
+      zoom: (action: string) => Promise<Result<number>>;
     };
     noteAPI: {
       getAll: () => Promise<Result<Note[]>>;

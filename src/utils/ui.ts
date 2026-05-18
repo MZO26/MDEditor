@@ -1,4 +1,3 @@
-import { showContextMenu } from "@/api/electronAPI";
 import { formatShortcut } from "@/utils/format";
 import { findElement } from "./dom";
 
@@ -44,16 +43,20 @@ function useDelayedSpinner(delay = 300) {
   };
 }
 
-async function createContextMenu(e: Event) {
-  const target = e.target as HTMLElement;
-  const item = target.closest<HTMLElement>(".noteItem");
-  if (!item) return;
-  e.preventDefault();
-  const id = item.dataset["id"];
-  const pinned = item.dataset["pinned"] === "true";
-  const bookmarked = item.dataset["bookmarked"] === "true";
-  if (!id) return;
-  await showContextMenu(id, pinned, bookmarked);
+function transition(el: Element, update: () => void) {
+  const { left, top } = el.getBoundingClientRect();
+  update();
+  const after = el.getBoundingClientRect();
+  const dx = left - after.left;
+  const dy = top - after.top;
+  if (dx || dy)
+    el.animate(
+      [{ transform: `translate(${dx}px,${dy}px)` }, { transform: "" }],
+      {
+        duration: 300,
+        easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+      },
+    );
 }
 
-export { createContextMenu, createTooltipContent, useDelayedSpinner };
+export { createTooltipContent, transition, useDelayedSpinner };

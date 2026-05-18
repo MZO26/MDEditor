@@ -1,15 +1,17 @@
+import { setUpNoteMenu, setUpTableMenu } from "@electron/context-menu";
 import { checkRateLimit, safeResponse } from "@electron/ipc/ipc-validation";
 import { getTitleBarOverlay, initTheme } from "@electron/titlebar";
 import { LIMITS } from "@shared/constants";
 import { validation } from "@shared/ipc-helpers";
 import { ImagePayloadSchema } from "@shared/schemas/image-schema";
 import { StoreSchema, type Theme } from "@shared/schemas/store-schema";
+import type { MenuType, NoteMenuPayload } from "@shared/types";
 import { createHash } from "crypto";
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, Menu } from "electron";
 import fs from "node:fs";
 import path from "path";
 
-function registerElectronIpc() {
+function registerElectronIpc(win: BrowserWindow) {
   ipcMain.handle("platform:get", (e) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("platform:get", LIMITS.READ_LIGHT))
@@ -17,6 +19,26 @@ function registerElectronIpc() {
       return process.platform;
     });
   });
+
+  ipcMain.on(
+    "show-context-menu",
+    (e, menuType: MenuType, payload: NoteMenuPayload) => {
+      return safeResponse(e, async () => {
+        if (!checkRateLimit("show-context-menu", LIMITS.READ_LIGHT))
+          throw new Error("RATE_LIMIT");
+        if (!win) return;
+        let menu: Menu;
+        if (menuType === "table") {
+          menu = setUpTableMenu(win);
+        } else if (menuType === "note") {
+          menu = setUpNoteMenu(win, payload);
+        } else {
+          return;
+        }
+        menu.popup({ window: win });
+      });
+    },
+  );
 
   ipcMain.handle("set:theme", (e, theme: Theme, focus?: boolean) => {
     return safeResponse(e, async () => {
@@ -36,7 +58,7 @@ function registerElectronIpc() {
 
   ipcMain.handle("save:image", (e, payload: unknown) => {
     return safeResponse(e, async () => {
-      if (!checkRateLimit("save-image", LIMITS.WRITE_HEAVY))
+      if (!checkRateLimit("save:image", LIMITS.WRITE_HEAVY))
         throw new Error("RATE_LIMIT");
       const validatedData = validation(ImagePayloadSchema, payload);
       const userDataPath = app.getPath("userData");

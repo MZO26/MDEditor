@@ -8,7 +8,7 @@ import type {
   UpdateNotePayload,
 } from "@shared/schemas/note-schema";
 import type { AppSettings, Theme } from "@shared/schemas/store-schema";
-import type { ZoomAction } from "@shared/types";
+import type { MenuType, NoteMenuPayload, ZoomAction } from "@shared/types";
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from "electron";
 
 function subscribe<T>(
@@ -44,8 +44,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
   saveImage: (payload: ImagePayload) =>
     ipcRenderer.invoke("save:image", payload),
-  showContextMenu: (id: string, pinned: boolean, bookmarked: boolean) =>
-    ipcRenderer.send("show-note-menu", id, pinned, bookmarked),
+  showContextMenu: (menuType: MenuType, payload?: NoteMenuPayload) =>
+    ipcRenderer.send("show-context-menu", menuType, payload),
+  onTriggerTableAction: (callback: (action: string) => void) => {
+    subscribe("trigger:table-action", callback);
+  },
+  onTriggerNoteAction: (callback: (payload: NoteMenuPayload) => void) => {
+    subscribe("trigger:note-action", callback);
+  },
   onRequestFlush: (callback: () => void) =>
     subscribe("request-flush", () => callback()),
   confirmFlush: () => ipcRenderer.send("flush-confirmed"),

@@ -29,6 +29,14 @@ function initEditor(): Editor {
   if (editor) {
     return editor;
   }
+  editorWrapper.addEventListener("contextmenu", (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest(".ProseMirror") && target.closest("table")) {
+      e.preventDefault();
+      window.electronAPI.showContextMenu("table");
+      return;
+    }
+  });
   editor = new Editor({
     element: editorWrapper,
     extensions: getNoteEditorExtensions(),

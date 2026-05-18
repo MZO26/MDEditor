@@ -3,6 +3,7 @@ import { findElement, requireElement } from "@/utils/dom";
 import { formatNoteDate } from "@/utils/format";
 import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
+import { transition } from "@/utils/ui";
 import { getTodoStats } from "@shared/generators/generators";
 import type { Note } from "@shared/schemas/note-schema";
 import type { JSONContent } from "@tiptap/core";
@@ -100,10 +101,12 @@ function calculateToDos(content: JSONContent) {
   const progressBar = requireElement<HTMLElement>("#todo-progress");
   if (countLabel) countLabel.innerText = `${stats.completed}/${stats.total}`;
   if (progressBar) {
-    const percentage = (stats.completed / stats.total) * 100;
-    progressBar.style.width = `${percentage}%`;
-    progressBar.style.backgroundColor =
-      percentage === 100 ? "var(--tag-color)" : "var(--text-muted)";
+    transition(progressBar, () => {
+      const percentage = (stats.completed / stats.total) * 100;
+      progressBar.style.width = `${percentage}%`;
+      progressBar.style.backgroundColor =
+        percentage === 100 ? "var(--tag-color)" : "var(--text-muted)";
+    });
   }
 }
 

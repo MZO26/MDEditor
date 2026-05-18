@@ -17,16 +17,8 @@ async function saveImage(
   return safeInvoke(window.electronAPI.saveImage(payload));
 }
 
-async function showContextMenu(
-  id: string,
-  pinned: boolean,
-  bookmarked: boolean,
-): Promise<Result<void>> {
-  return safeInvoke(window.electronAPI.showContextMenu(id, pinned, bookmarked));
-}
-
 async function handleZoom(action: ZoomAction): Promise<Result<ZoomAction>> {
   return safeInvoke(window.electronAPI.zoom(action));
 }
 
-export { getPlatform, handleZoom, saveImage, setTheme, showContextMenu };
+export { getPlatform, handleZoom, saveImage, setTheme };

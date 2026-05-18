@@ -85,6 +85,14 @@ type DBBackupResult = {
   remainingPages: number;
 };
 
+type MenuType = "table" | "text" | "note";
+
+type NoteMenuPayload = {
+  id: string;
+  bookmarked: boolean;
+  pinned: boolean;
+};
+
 export type {
   Action,
   ActionMap,
@@ -96,8 +104,10 @@ export type {
   DbOptimization,
   Failure,
   ImportedContent,
+  MenuType,
   Metadata,
   NativeWindowColors,
+  NoteMenuPayload,
   ResolvedTheme,
   Result,
   Success,

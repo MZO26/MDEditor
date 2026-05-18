@@ -6,7 +6,6 @@
   margin: 0;
   outline: none;
   position: relative;
-  view-transition-name: none !important;
 }
 
 .ProseMirror ::selection {

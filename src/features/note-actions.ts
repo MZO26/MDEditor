@@ -94,14 +94,7 @@ async function handleSaveNote(
     showToast(response.message);
     return;
   }
-  const transition = document.startViewTransition(async () => {
-    await updateStats(response.data);
-  });
-  transition.finished.catch((error: Error) => {
-    if (error.name === "AbortError") {
-      return;
-    }
-  });
+  await updateStats(response.data);
   updateNoteInList(response.data);
 }
 
@@ -115,14 +108,7 @@ async function handleSelectNote(noteItem: HTMLDivElement) {
   }
   stateStore.setState({ activeId: noteID });
   viewNote(response.data);
-  const transition = document.startViewTransition(async () => {
-    await updateStats(response.data);
-  });
-  transition.finished.catch((error: Error) => {
-    if (error.name === "AbortError") {
-      return;
-    }
-  });
+  await updateStats(response.data);
   setActiveItem(noteItem, getAppItem("sidebar"));
 }
 

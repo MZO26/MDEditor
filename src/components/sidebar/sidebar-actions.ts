@@ -7,6 +7,7 @@ import { findElement, setActiveItem } from "@/utils/dom";
 import { formatNoteDate } from "@/utils/format";
 import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
+import { transition } from "@/utils/ui";
 import type { Note } from "@shared/schemas/note-schema";
 
 function updateNoteCount(notes: Note[]) {
@@ -108,7 +109,7 @@ function updateNoteInList(note: Note): void {
     noteElement.querySelector<HTMLDivElement>(".note-content");
   const dateContainer = noteElement.querySelector<HTMLDivElement>(".note-date");
   const tagContainer = noteElement.querySelector<HTMLDivElement>(".note-tags");
-  const transition = document.startViewTransition(() => {
+  transition(noteElement, () => {
     if (titleContainer) titleContainer.textContent = note.title;
     if (snippetContainer) snippetContainer.textContent = note.snippet;
     if (tagContainer) {
@@ -125,11 +126,6 @@ function updateNoteInList(note: Note): void {
     }
     if (dateContainer)
       dateContainer.textContent = formatNoteDate(note.updated_at);
-  });
-  transition.finished.catch((error: Error) => {
-    if (error.name === "AbortError") {
-      return;
-    }
   });
 }
 

@@ -1,4 +1,3 @@
-import { setUpNoteMenu } from "@electron/context-menu";
 import db from "@electron/db/database";
 import { checkRateLimit, safeResponse } from "@electron/ipc/ipc-validation";
 import { LIMITS } from "@shared/constants";
@@ -146,7 +145,7 @@ function registerNoteIpc(win: BrowserWindow) {
   ipcMain.handle("views:get", (e, view: unknown) => {
     let result;
     return safeResponse(e, async () => {
-      if (!checkRateLimit(`get:view:${view}`, LIMITS.READ_HEAVY))
+      if (!checkRateLimit(`views:get:${view}`, LIMITS.READ_HEAVY))
         throw new Error("RATE_LIMIT");
       switch (view) {
         case "bookmarked":
@@ -211,20 +210,6 @@ function registerNoteIpc(win: BrowserWindow) {
       }
     });
   });
-
-  ipcMain.on(
-    "show-note-menu",
-    (e, id: string, pinned: boolean, bookmarked: boolean) => {
-      return safeResponse(e, async () => {
-        if (!checkRateLimit("zoom:get", LIMITS.READ_LIGHT))
-          throw new Error("RATE_LIMIT");
-        if (win) {
-          const contextMenu = setUpNoteMenu(win, id, pinned, bookmarked);
-          contextMenu.popup({ window: win });
-        }
-      });
-    },
-  );
 }
 
 export { registerNoteIpc };

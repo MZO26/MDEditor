@@ -5,7 +5,6 @@ import { createNoteButton, importNoteButton } from "@/features/note-buttons";
 import { createAsyncHandler } from "@/utils/async";
 import { requireElement } from "@/utils/dom";
 import { getAppItem, registerAppEvents } from "@/utils/registry";
-import { createContextMenu } from "@/utils/ui";
 import { delegate } from "tippy.js";
 import "tippy.js/dist/tippy.css";
 
@@ -57,7 +56,19 @@ function applySidebarListeners(
       if (actionBtn) {
         e.preventDefault();
         e.stopPropagation();
-        await createContextMenu(e);
+        const target = e.target as HTMLElement;
+        const item = target.closest<HTMLElement>(".noteItem");
+        if (!item) return;
+        e.preventDefault();
+        const id = item.dataset["id"];
+        if (!id) return;
+        const isPinned = item.dataset["pinned"] === "true";
+        const isBookmarked = item.dataset["bookmarked"] === "true";
+        window.electronAPI.showContextMenu("note", {
+          id: id,
+          pinned: isPinned,
+          bookmarked: isBookmarked,
+        });
         return;
       }
       const noteItem = target.closest<HTMLDivElement>(".noteItem");

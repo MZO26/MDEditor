@@ -130,7 +130,7 @@ function checkRateLimit(channel: string, cooldownMs: number): boolean {
 }
 
 function registerIpc(win: BrowserWindow) {
-  registerElectronIpc();
+  registerElectronIpc(win);
   registerNoteIpc(win);
   registerSettingsIpc(win);
   registerFileIpc(win);
