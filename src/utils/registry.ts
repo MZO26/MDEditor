@@ -19,6 +19,7 @@ type SettingsKeys =
   | "openWindowSelect"
   | "closeWindowSelect"
   | "minimizeWindowSelect"
+  | "spellcheckSelect"
   | "batchExportSelect"
   | "noteItemSelect"
   | "dbOptimizeSelect";

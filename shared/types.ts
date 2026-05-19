@@ -71,7 +71,7 @@ interface BatchExportData {
   content?: string;
 }
 
-type ExportFormat = "json" | "txt" | "md" | "html";
+type ExportFormat = "json" | "txt" | "md" | "html" | "pdf";
 
 type ExportItem = {
   id: string;

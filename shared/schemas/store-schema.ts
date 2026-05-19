@@ -32,9 +32,11 @@ const StoreSchema = z.object({
       y: z.number().optional(),
     })
     .default({ width: 1100, height: 600 }),
+  spellcheck: z.boolean().default(false),
 });
 
 type AppSettings = z.infer<typeof StoreSchema>;
+type Spellcheck = AppSettings["spellcheck"];
 type EditorFocus = AppSettings["editor-focus"];
 type NoteItemDisplay = AppSettings["note-item-display"];
 type HighlightTheme = AppSettings["highlight"];
@@ -67,6 +69,7 @@ export {
   type MinimizeWindowMode,
   type NoteItemDisplay,
   type OpenWindowMode,
+  type Spellcheck,
   type StateKeys,
   type StyleKeys,
   type Theme,

@@ -43,7 +43,7 @@ function createAsyncHandler<T extends Event>(
   return async (e: T) => {
     if (isProcessing) return;
     isProcessing = true;
-    const stopSpinner = useDelayedSpinner(300);
+    const stopSpinner = useDelayedSpinner(100);
     try {
       await callback(e);
     } catch (error) {

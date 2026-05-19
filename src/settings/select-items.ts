@@ -132,18 +132,28 @@ function buildSelects() {
     ],
     "app",
   );
-  selectBuilder(
+  (selectBuilder(
     settingsContainer,
-    "file-backup",
+    "spellcheck",
     [
-      { value: "json", label: "JSON" },
-      { value: "md", label: "Markdown" },
-      { value: "txt", label: "Plain Text" },
-      { value: "html", label: "HTML" },
+      { value: "true", label: "Enable spellcheck" },
+      { value: "false", label: "Disable spellcheck" },
     ],
-    "storage",
-    "Backup Format",
-  );
+    "app",
+  ),
+    selectBuilder(
+      settingsContainer,
+      "file-backup",
+      [
+        { value: "json", label: "JSON" },
+        { value: "md", label: "Markdown" },
+        { value: "txt", label: "Plain Text" },
+        { value: "html", label: "HTML" },
+        { value: "pdf", label: "PDF" },
+      ],
+      "storage",
+      "Backup Format",
+    ));
   selectBuilder(
     settingsContainer,
     "db-optimization",

@@ -1,6 +1,7 @@
+import { batchExport } from "@electron/fs/fs-export";
+import { batchPDFExport } from "@electron/fs/fs-export-pdf";
 import { batchImport } from "@electron/fs/fs-import";
-import { batchExport } from "@electron/fs/fs-write-batch";
-import { createPDFCanvas } from "@electron/handler/pdf-handler";
+import { loadPDFAssets, renderPDFCanvas } from "@electron/handler/pdf-handler";
 import { safeResponse } from "@electron/ipc/ipc-validation";
 import { createHiddenPdfWindow } from "@electron/win";
 import { validation } from "@shared/ipc-helpers";
@@ -69,6 +70,13 @@ function registerFileIpc(win: BrowserWindow) {
       if (canceled || !selectedFolder) {
         throw new Error("CANCELLED_OPERATION");
       }
+      const hasPdf = validatedData.some(
+        (item) => "extension" in item && item.extension === "pdf",
+      );
+      if (hasPdf) {
+        await batchPDFExport(selectedFolder, validatedData);
+        return;
+      }
       await batchExport(selectedFolder, validatedData);
     });
   });
@@ -103,7 +111,8 @@ function registerFileIpc(win: BrowserWindow) {
           printBackground: true,
           landscape: false,
         };
-        const htmlString = createPDFCanvas(data);
+        const assets = loadPDFAssets();
+        const htmlString = renderPDFCanvas(data, assets);
         try {
           console.log("[PDF-Export]: Loading HTML into canvas.");
           // converts htmlString into bytes using utf8 encoding (Buffer is Node.js's raw byte array). toString(base64) then takes those bytes and encodes them as base64 which only allows A-Z a-z 0-9 + / = chars.

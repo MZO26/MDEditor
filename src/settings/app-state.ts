@@ -19,6 +19,7 @@ const DEFAULT_STORE: AppSettings = {
   "close-window-mode": "normal",
   "minimize-window-mode": "taskbar",
   "window-bounds": { width: 1100, height: 600 },
+  spellcheck: false,
 };
 
 interface AppState {

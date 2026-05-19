@@ -68,9 +68,6 @@ function initEditor(): Editor {
         }
         return false;
       },
-      attributes: {
-        spellcheck: "false",
-      },
     },
     content: {
       type: "doc",

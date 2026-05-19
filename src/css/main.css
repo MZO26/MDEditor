@@ -715,7 +715,7 @@ svg.empty-state-icon {
 
 #datetime-display {
   position: absolute;
-  top: 5px;
+  top: 3px;
   left: 10px;
   padding: 5px;
   margin: 0;

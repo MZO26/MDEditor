@@ -1,10 +1,10 @@
 import { writeAtomic } from "@electron/fs/fs-atomic-write";
+import { processWithLimit } from "@electron/fs/fs-limiter";
 import { validation } from "@shared/ipc-helpers";
 import { FileNameSchema } from "@shared/schemas/export-schema";
 import type { ExportItem } from "@shared/types";
 import fs from "fs/promises";
 import path from "path";
-import { processWithLimit } from "./fs-limiter";
 
 async function batchExport(folder: string, payload: ExportItem[]) {
   await fs.mkdir(folder, { recursive: true });

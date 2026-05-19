@@ -25,6 +25,7 @@ import type {
   MinimizeWindowMode,
   NoteItemDisplay,
   OpenWindowMode,
+  Spellcheck,
   Theme,
 } from "@shared/schemas/store-schema";
 import type { DbOptimization, ExportFormat } from "@shared/types";
@@ -181,7 +182,14 @@ function initWindowSettings(settings: AppSettings) {
   const minimizeWindowSelect = findElement<HTMLSelectElement>(
     "#minimize-window-mode",
   );
-  if (!openWindowSelect || !closeWindowSelect || !minimizeWindowSelect) return;
+  const spellcheckSelect = findElement<HTMLSelectElement>("#spellcheck");
+  if (
+    !openWindowSelect ||
+    !closeWindowSelect ||
+    !minimizeWindowSelect ||
+    !spellcheckSelect
+  )
+    return;
   openWindowSelect.value = settings["open-window-mode"];
   openWindowSelect.addEventListener("change", (e: Event) => {
     const target = e.target as HTMLSelectElement;
@@ -203,11 +211,21 @@ function initWindowSettings(settings: AppSettings) {
       "minimize-window-mode": target.value as MinimizeWindowMode,
     });
   });
+  spellcheckSelect.value = settings["spellcheck"] ? "true" : "false";
+  spellcheckSelect.addEventListener("change", (e: Event) => {
+    const editor = getAppItem("editor");
+    const target = e.target as HTMLSelectElement;
+    const enabled = target.value === "true";
+    editor.view.dom.spellcheck = enabled;
+    editor.commands.focus();
+    updateSettings({ spellcheck: enabled as Spellcheck });
+  });
 
   setSettingsItem({
     openWindowSelect,
     closeWindowSelect,
     minimizeWindowSelect,
+    spellcheckSelect,
   });
 }
 
@@ -216,7 +234,7 @@ function initStorageSettings() {
   const dbOptimizeSelect = findElement<HTMLSelectElement>("#db-optimization");
   if (!batchExportSelect || !dbOptimizeSelect) return;
   batchExportSelect.value = "";
-  batchExportSelect.addEventListener(
+  (batchExportSelect.addEventListener(
     "change",
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLSelectElement;
@@ -234,8 +252,8 @@ function initStorageSettings() {
       }
       showToast(`Successfully exported all files to ${selectedExtension}`);
     }),
-  );
-  dbOptimizeSelect.value = "";
+  ),
+    (dbOptimizeSelect.value = ""));
   dbOptimizeSelect.addEventListener(
     "change",
     createAsyncHandler(async (e) => {

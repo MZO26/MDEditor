@@ -66,6 +66,7 @@ const ExportItemSchema = z.discriminatedUnion("extension", [
   MdSchema,
   TxtSchema,
   JsonSchema,
+  PdfSchema,
 ]);
 
 const ExportManyRequestSchema = z.array(ExportItemSchema);
