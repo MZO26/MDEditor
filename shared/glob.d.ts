@@ -1,5 +1,4 @@
 import type {
-  ExportManyRequest,
   ExportRequest,
   ImportRequest,
 } from "@shared/schemas/export-schema";
@@ -11,7 +10,7 @@ import {
   type ImagePayload,
   type UpdateNotePayload,
 } from "@shared/shared/types";
-import type { MenuType } from "./types";
+import type { ExportItem, MenuType } from "./types";
 
 declare module "*.css";
 
@@ -20,10 +19,10 @@ declare global {
     fileAPI: {
       selectFolder: () => Promise<Result<void>>;
       noteExport: (payload: ExportRequest) => Promise<Result<ExportRequest>>;
-      onTriggerExport: (callback: (extension: string) => void) => () => void;
-      noteExportMany: (
-        payload: ExportManyRequest,
-      ) => Promise<Result<ExportManyRequest>>;
+      onTriggerExport: (
+        callback: (id: string, extension: string) => void,
+      ) => () => void;
+      noteExportMany: (payload: ExportItem[]) => Promise<Result<ExportItem[]>>;
       noteImport: () => Promise<Result<ImportRequest[]>>;
     };
     electronAPI: {

@@ -11,12 +11,12 @@ import type { AppSettings, Theme } from "@shared/schemas/store-schema";
 import type { MenuType, NoteMenuPayload, ZoomAction } from "@shared/types";
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from "electron";
 
-function subscribe<T>(
+function subscribe<T extends unknown[]>(
   channel: string,
-  callback: (payload: T) => void,
+  callback: (...args: T) => void,
 ): () => void {
-  const listener = (_e: IpcRendererEvent, payload: T) => {
-    callback(payload);
+  const listener = (_e: IpcRendererEvent, ...args: T) => {
+    callback(...args);
   };
   ipcRenderer.on(channel, listener);
   return () => {
@@ -28,7 +28,7 @@ contextBridge.exposeInMainWorld("fileAPI", {
   selectFolder: () => ipcRenderer.invoke("select-folder"),
   noteExport: (payload: ExportRequest) =>
     ipcRenderer.invoke("note:export", payload),
-  onTriggerExport: (callback: (payload: ExportRequest) => void) => {
+  onTriggerExport: (callback: (id: string, extension: string) => void) => {
     subscribe("note:trigger-export", callback);
   },
   noteExportMany: (payload: ExportManyRequest) =>

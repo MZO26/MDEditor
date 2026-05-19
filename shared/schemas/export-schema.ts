@@ -27,34 +27,30 @@ const StringContentSchema = z
   .min(1, "Content is empty")
   .max(10_000_000, "Content exceeds maximum size");
 
-const MdSchema = z.object({
+const ExportBaseSchema = z.object({
+  id: z.string(),
+  fileName: FileNameSchema,
+  content: StringContentSchema,
+});
+
+const MdSchema = ExportBaseSchema.extend({
   extension: z.literal("md"),
-  content: StringContentSchema,
-  fileName: FileNameSchema,
 });
 
-const TxtSchema = z.object({
+const TxtSchema = ExportBaseSchema.extend({
   extension: z.literal("txt"),
-  content: StringContentSchema,
-  fileName: FileNameSchema,
 });
 
-const HtmlSchema = z.object({
+const HtmlSchema = ExportBaseSchema.extend({
   extension: z.literal("html"),
-  content: StringContentSchema,
-  fileName: FileNameSchema,
 });
 
-const JsonSchema = z.object({
+const JsonSchema = ExportBaseSchema.extend({
   extension: z.literal("json"),
-  content: StringContentSchema,
-  fileName: FileNameSchema,
 });
 
-const PdfSchema = z.object({
+const PdfSchema = ExportBaseSchema.extend({
   extension: z.literal("pdf"),
-  content: StringContentSchema,
-  fileName: FileNameSchema,
 });
 
 const ExportRequestSchema = z.discriminatedUnion("extension", [
@@ -65,11 +61,14 @@ const ExportRequestSchema = z.discriminatedUnion("extension", [
   PdfSchema,
 ]);
 
-const ExportManyRequestSchema = z.discriminatedUnion("extension", [
-  MdSchema.pick({ extension: true }),
-  TxtSchema.pick({ extension: true }),
-  JsonSchema.pick({ extension: true }),
+const ExportItemSchema = z.discriminatedUnion("extension", [
+  HtmlSchema,
+  MdSchema,
+  TxtSchema,
+  JsonSchema,
 ]);
+
+const ExportManyRequestSchema = z.array(ExportItemSchema);
 
 const ImportRequestSchema = z.discriminatedUnion("extension", [
   HtmlSchema,

@@ -98,23 +98,23 @@ function setUpNoteMenu(win: BrowserWindow, payload: NoteMenuPayload) {
       submenu: [
         {
           label: "Markdown (.md)",
-          click: () => win.webContents.send("note:trigger-export", "md"),
+          click: () => win.webContents.send("note:trigger-export", id, "md"),
         },
         {
           label: "HTML (.html)",
-          click: () => win.webContents.send("note:trigger-export", "html"),
+          click: () => win.webContents.send("note:trigger-export", id, "html"),
         },
         {
           label: "JSON Document (.json)",
-          click: () => win.webContents.send("note:trigger-export", "json"),
+          click: () => win.webContents.send("note:trigger-export", id, "json"),
         },
         {
           label: "Plain Text (.txt)",
-          click: () => win.webContents.send("note:trigger-export", "txt"),
+          click: () => win.webContents.send("note:trigger-export", id, "txt"),
         },
         {
           label: "PDF (.pdf)",
-          click: () => win.webContents.send("note:trigger-export", "pdf"),
+          click: () => win.webContents.send("note:trigger-export", id, "pdf"),
         },
       ],
     },

@@ -1,49 +1,29 @@
-import db from "@electron/db/database";
 import { writeAtomic } from "@electron/fs/fs-atomic-write";
 import { validation } from "@shared/ipc-helpers";
 import { FileNameSchema } from "@shared/schemas/export-schema";
+import type { ExportItem } from "@shared/types";
 import fs from "fs/promises";
 import path from "path";
+import { processWithLimit } from "./fs-limiter";
 
-async function batchExport(folder: string, format: "json" | "md" | "txt") {
+async function batchExport(folder: string, payload: ExportItem[]) {
   await fs.mkdir(folder, { recursive: true });
-  const iterator = db.exportIterator(format);
-  const results: { id: string; filePath: string }[] = [];
-  const activeWrites = new Set<Promise<void>>();
-  const LIMIT = 100;
   const absoluteTargetFolder = path.resolve(folder);
-  for (const note of iterator) {
-    const fileName = `${validation(FileNameSchema, note.title)}_${note.id.slice(0, 6)}.${format}`;
+  const exported = await processWithLimit(payload, 100, async (note) => {
+    const fileName = `${validation(FileNameSchema, note.fileName)}_${note.id.slice(0, 6)}.${note.extension}`;
     const absoluteFilePath = path.resolve(absoluteTargetFolder, fileName);
     const relative = path.relative(absoluteTargetFolder, absoluteFilePath);
     const isOutside = relative.startsWith("..") || path.isAbsolute(relative);
     if (isOutside) {
-      continue;
+      return null;
     }
-    let content: string;
-    switch (format) {
-      case "json":
-        content = note.content ?? "";
-        break;
-      case "md":
-        content = note.markdown ?? "";
-        break;
-      case "txt":
-        content = note.plainText ?? "";
-        break;
-    }
-    const writeTask = writeAtomic(absoluteFilePath, content).then(() => {
-      results.push({ id: note.id, filePath: absoluteFilePath });
-    });
-    activeWrites.add(writeTask);
-    writeTask.finally(() => activeWrites.delete(writeTask));
-
-    if (activeWrites.size >= LIMIT) {
-      await Promise.race(activeWrites);
-    }
-  }
-  await Promise.all(activeWrites);
-  return results;
+    await writeAtomic(absoluteFilePath, note.content);
+    return {
+      id: note.id,
+      filePath: absoluteFilePath,
+    };
+  });
+  return exported.filter((note) => note !== null);
 }
 
 export { batchExport };

@@ -90,15 +90,15 @@ function initListeners() {
     }
   });
 
-  window.fileAPI.onTriggerExport(async (extension) => {
+  window.fileAPI.onTriggerExport(async (id: string, extension) => {
     const editor = getAppItem("editor");
     const fileName = titleGenerator(editor.getText());
-
     try {
       let payload: ExportRequest;
       switch (extension) {
         case "json":
           payload = {
+            id,
             extension: "json",
             content: JSON.stringify(editor.getJSON()),
             fileName,
@@ -106,6 +106,7 @@ function initListeners() {
           break;
         case "html":
           payload = {
+            id,
             extension: "html",
             content: sanitize(editor.getHTML()),
             fileName,
@@ -113,16 +114,27 @@ function initListeners() {
           break;
         case "md":
           payload = {
+            id,
             extension: "md",
             content: editor.getMarkdown(),
             fileName,
           };
           break;
         case "txt":
-          payload = { extension: "txt", content: editor.getText(), fileName };
+          payload = {
+            id,
+            extension: "txt",
+            content: editor.getText(),
+            fileName,
+          };
           break;
         case "pdf":
-          payload = { extension: "pdf", content: editor.getHTML(), fileName };
+          payload = {
+            id,
+            extension: "pdf",
+            content: editor.getHTML(),
+            fileName,
+          };
           break;
         default:
           showToast(`Unsupported export format: ${extension}`);

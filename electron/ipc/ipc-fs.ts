@@ -1,4 +1,4 @@
-import { processWithLimit } from "@electron/fs/fs-limiter";
+import { batchImport } from "@electron/fs/fs-import";
 import { batchExport } from "@electron/fs/fs-write-batch";
 import { createPDFCanvas } from "@electron/handler/pdf-handler";
 import { safeResponse } from "@electron/ipc/ipc-validation";
@@ -7,7 +7,7 @@ import { validation } from "@shared/ipc-helpers";
 import {
   ExportManyRequestSchema,
   ExportRequestSchema,
-  ImportRequestSchema,
+  FileNameSchema,
 } from "@shared/schemas/export-schema";
 import {
   dialog,
@@ -16,7 +16,6 @@ import {
   type PrintToPDFOptions,
 } from "electron";
 import fs from "fs/promises";
-import path from "path";
 
 function registerFileIpc(win: BrowserWindow) {
   ipcMain.handle("select-folder", async () => {
@@ -47,31 +46,11 @@ function registerFileIpc(win: BrowserWindow) {
           { name: "JSON", extensions: ["json"] },
         ],
       });
-      const filePath = filePaths[0];
-      if (canceled || !filePath || filePath.length === 0) {
+      const hasFiles = filePaths.length > 0;
+      if (canceled || !hasFiles) {
         throw new Error("CANCELLED_OPERATION");
       }
-      const imported = await processWithLimit(
-        filePaths,
-        50,
-        async (filePath) => {
-          try {
-            const content = await fs.readFile(filePath, "utf8");
-            const extension = path.extname(filePath).slice(1).toLowerCase();
-            const fileName = path.basename(filePath, path.extname(filePath));
-            return validation(ImportRequestSchema, {
-              extension,
-              fileName,
-              content,
-            });
-          } catch (error) {
-            console.error(`Failed to read/validate file: ${filePath}`, error);
-            return null;
-          }
-        },
-      );
-      const validNotes = imported.filter((note) => note !== null);
-      return validNotes;
+      await batchImport(filePaths);
     });
   });
 
@@ -81,19 +60,16 @@ function registerFileIpc(win: BrowserWindow) {
       if (!validatedData) {
         throw new Error("CANCELLED_OPERATION");
       }
-      const { extension } = validatedData;
       const { canceled, filePaths } = await dialog.showOpenDialog({
         title: "Select Folder for Export",
         buttonLabel: "Export Here",
         properties: ["openDirectory", "createDirectory", "promptToCreate"],
       });
-
       const selectedFolder = filePaths[0];
       if (canceled || !selectedFolder) {
         throw new Error("CANCELLED_OPERATION");
       }
-      await batchExport(selectedFolder, extension);
-      return selectedFolder;
+      await batchExport(selectedFolder, validatedData);
     });
   });
 
@@ -103,10 +79,10 @@ function registerFileIpc(win: BrowserWindow) {
       if (!validatedData) {
         throw new Error("CANCELLED_OPERATION");
       }
-      const { content, extension, fileName } = validatedData;
+      const { id, content, extension, fileName } = validatedData;
       const { canceled, filePath } = await dialog.showSaveDialog(win, {
         title: "Export Note",
-        defaultPath: `${fileName}.${extension}`,
+        defaultPath: `${validation(FileNameSchema, fileName)}_${id.slice(0, 6)}.${extension}`,
         filters: [{ name: extension.toUpperCase(), extensions: [extension] }],
       });
       if (canceled || !filePath) {

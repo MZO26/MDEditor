@@ -2,6 +2,7 @@ import { exportManyNotes } from "@/api/fileAPI";
 import { dbMaintenance } from "@/api/noteAPI";
 import { updateSettings } from "@/api/settingsAPI";
 import { reloadNoteList } from "@/components/sidebar/sidebar-actions";
+import { getExportContent } from "@/features/export-actions";
 import {
   applyAppTheme,
   currentDomTheme,
@@ -26,7 +27,7 @@ import type {
   OpenWindowMode,
   Theme,
 } from "@shared/schemas/store-schema";
-import type { BatchExportExtensions, DbOptimization } from "@shared/types";
+import type { DbOptimization, ExportFormat } from "@shared/types";
 
 function initEditorSettings(settings: AppSettings) {
   const editorWrapper = getAppItem("editorWrapper");
@@ -219,8 +220,13 @@ function initStorageSettings() {
     "change",
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLSelectElement;
-      const selectedExtension = target.value as BatchExportExtensions;
-      const result = await exportManyNotes({ extension: selectedExtension });
+      const selectedExtension = target.value as ExportFormat;
+      const exportContent = await getExportContent(selectedExtension);
+      if (!exportContent.success) {
+        showToast(exportContent.message);
+        return;
+      }
+      const result = await exportManyNotes(exportContent.data);
       target.value = "";
       if (!result.success) {
         showToast(result.message);

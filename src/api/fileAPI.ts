@@ -1,10 +1,9 @@
 import { safeInvoke } from "@/utils/ipc";
 import type {
-  ExportManyRequest,
   ExportRequest,
   ImportRequest,
 } from "@shared/schemas/export-schema";
-import type { Result } from "@shared/types";
+import type { ExportItem, Result } from "@shared/types";
 
 async function exportNote(
   payload: ExportRequest,
@@ -13,8 +12,8 @@ async function exportNote(
 }
 
 async function exportManyNotes(
-  payload: ExportManyRequest,
-): Promise<Result<ExportManyRequest>> {
+  payload: ExportItem[],
+): Promise<Result<ExportItem[]>> {
   return safeInvoke(window.fileAPI.noteExportMany(payload));
 }
 

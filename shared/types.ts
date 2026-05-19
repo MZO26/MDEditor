@@ -29,6 +29,9 @@ type Result<T, E = string> =
       message: E;
     };
 
+type Success<T> = Extract<Result<T>, { success: true }>;
+type Failure<E = string> = Extract<Result<never, E>, { success: false }>;
+
 type Action<T> = {
   type?: "action";
   run: (args: T) => void;
@@ -68,7 +71,14 @@ interface BatchExportData {
   content?: string;
 }
 
-type BatchExportExtensions = "md" | "txt" | "json";
+type ExportFormat = "json" | "txt" | "md" | "html";
+
+type ExportItem = {
+  id: string;
+  fileName: string;
+  content: string;
+  extension: ExportFormat;
+};
 
 type ContentType = "markdown" | "html" | "json";
 
@@ -93,11 +103,13 @@ export type {
   Action,
   ActionMap,
   BatchExportData,
-  BatchExportExtensions,
   Code,
   ContentType,
   DBBackupResult,
   DbOptimization,
+  ExportFormat,
+  ExportItem,
+  Failure,
   ImportedContent,
   MenuType,
   Metadata,
@@ -105,6 +117,7 @@ export type {
   NoteMenuPayload,
   ResolvedTheme,
   Result,
+  Success,
   TitleBarOverlayOptions,
   ZoomAction,
 };

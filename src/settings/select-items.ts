@@ -139,6 +139,7 @@ function buildSelects() {
       { value: "json", label: "JSON" },
       { value: "md", label: "Markdown" },
       { value: "txt", label: "Plain Text" },
+      { value: "html", label: "HTML" },
     ],
     "storage",
     "Backup Format",

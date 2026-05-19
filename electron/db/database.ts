@@ -18,7 +18,7 @@ import {
   type TagName,
   type UpdateNotePayload,
 } from "@shared/schemas/note-schema";
-import type { BatchExportData, DBBackupResult } from "@shared/types";
+import type { DBBackupResult } from "@shared/types";
 import BetterSqlite from "better-sqlite3";
 import { app } from "electron";
 import path from "path";
@@ -345,25 +345,6 @@ class NoteDB {
 
   async backupDb(destination: string): Promise<DBBackupResult> {
     return this.db.backup(destination);
-  }
-
-  exportIterator(format: "json" | "md" | "txt") {
-    let query: string;
-    switch (format) {
-      case "json":
-        query = "SELECT id, title, content FROM notes";
-        break;
-      case "md":
-        query = "SELECT id, title, markdown FROM notes";
-        break;
-      case "txt":
-        query = "SELECT id, title, plainText FROM notes";
-        break;
-    }
-
-    return this.db
-      .prepare(query)
-      .iterate() as IterableIterator<BatchExportData>;
   }
 }
 
