@@ -336,7 +336,10 @@ class NoteDB {
   }
 
   optimizeDb() {
-    this.db.pragma("optimize");
+    this.db.exec(`
+    INSERT INTO notes_fts(notes_fts) VALUES('rebuild');
+    PRAGMA optimize;
+    `);
   }
 
   vacuumDb() {
