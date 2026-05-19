@@ -3,7 +3,7 @@ import { findElement, requireElement } from "@/utils/dom";
 import { formatNoteDate } from "@/utils/format";
 import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
-import { transition } from "@/utils/ui";
+import { animateTextChange } from "@/utils/ui";
 import { getTodoStats } from "@shared/generators/generators";
 import type { Note } from "@shared/schemas/note-schema";
 import type { JSONContent } from "@tiptap/core";
@@ -64,19 +64,20 @@ async function updateNoteLinks(links: Note["links"]) {
 
 async function updateStats(note: Note) {
   const editor = getAppItem("editor");
-  const charCount = editor.storage.characterCount.characters();
-  const wordCount = editor.storage.characterCount.words();
+  const infoSidebar = findElement<HTMLDivElement>(".info-sidebar");
   const wordCountEl = findElement<HTMLSpanElement>("#word-count");
   const charCountEl = findElement<HTMLSpanElement>("#char-count");
-  const readingTimeEl = findElement("#reading-time");
-  if (!wordCountEl || !charCountEl || !readingTimeEl) return;
-  charCountEl.innerText = charCount.toString();
-  if (wordCount === 1) {
-    wordCountEl.innerText = "1 word";
-  } else {
-    wordCountEl.innerText = `${wordCount} words`;
-  }
-  readingTimeEl.innerText = estimateReadingTime(wordCount);
+  const readingTimeEl = findElement<HTMLSpanElement>("#reading-time");
+  const charCount = editor.storage.characterCount.characters();
+  const wordCount = editor.storage.characterCount.words();
+
+  if (!infoSidebar || !wordCountEl || !charCountEl || !readingTimeEl) return;
+  animateTextChange(charCountEl, charCount.toString());
+  animateTextChange(
+    wordCountEl,
+    wordCount === 1 ? "1 word" : `${wordCount} words`,
+  );
+  animateTextChange(readingTimeEl, estimateReadingTime(wordCount));
   calculateToDos(note.content);
   updateNoteTags(note.tags);
   await updateNoteLinks(note.links);
@@ -101,12 +102,10 @@ function calculateToDos(content: JSONContent) {
   const progressBar = requireElement<HTMLElement>("#todo-progress");
   if (countLabel) countLabel.innerText = `${stats.completed}/${stats.total}`;
   if (progressBar) {
-    transition(progressBar, () => {
-      const percentage = (stats.completed / stats.total) * 100;
-      progressBar.style.width = `${percentage}%`;
-      progressBar.style.backgroundColor =
-        percentage === 100 ? "var(--tag-color)" : "var(--text-muted)";
-    });
+    const percentage = (stats.completed / stats.total) * 100;
+    progressBar.style.width = `${percentage}%`;
+    progressBar.style.backgroundColor =
+      percentage === 100 ? "var(--tag-color)" : "var(--text-muted)";
   }
 }
 

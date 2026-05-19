@@ -7,7 +7,7 @@ import { findElement, setActiveItem } from "@/utils/dom";
 import { formatNoteDate } from "@/utils/format";
 import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
-import { transition } from "@/utils/ui";
+import { animateTextChange } from "@/utils/ui";
 import type { Note } from "@shared/schemas/note-schema";
 
 function updateNoteCount(notes: Note[]) {
@@ -95,7 +95,7 @@ async function reloadNoteList(notes?: Note[]): Promise<void> {
   }
 }
 
-function updateNoteInList(note: Note): void {
+async function updateNoteInList(note: Note): Promise<void> {
   const noteElement = findElement<HTMLDivElement>(
     `.noteItem[data-id="${note.id}"]`,
   );
@@ -109,24 +109,22 @@ function updateNoteInList(note: Note): void {
     noteElement.querySelector<HTMLDivElement>(".note-content");
   const dateContainer = noteElement.querySelector<HTMLDivElement>(".note-date");
   const tagContainer = noteElement.querySelector<HTMLDivElement>(".note-tags");
-  transition(noteElement, () => {
-    if (titleContainer) titleContainer.textContent = note.title;
-    if (snippetContainer) snippetContainer.textContent = note.snippet;
-    if (tagContainer) {
-      if (note.tags && note.tags.length > 0) {
-        tagContainer.innerHTML = "";
-        for (const tag of note.tags) {
-          const span = document.createElement("span");
-          span.classList.add("tag", "searchTag");
-          span.dataset["tag"] = String(tag);
-          span.textContent = `#${tag}`;
-          tagContainer!.append(span);
-        }
+  if (titleContainer) animateTextChange(titleContainer, note.title);
+  if (snippetContainer) animateTextChange(snippetContainer, note.snippet);
+  if (tagContainer) {
+    if (note.tags && note.tags.length > 0) {
+      tagContainer.innerHTML = "";
+      for (const tag of note.tags) {
+        const span = document.createElement("span");
+        span.classList.add("tag", "searchTag");
+        span.dataset["tag"] = String(tag);
+        span.textContent = `#${tag}`;
+        tagContainer.append(span);
       }
     }
-    if (dateContainer)
-      dateContainer.textContent = formatNoteDate(note.updated_at);
-  });
+  }
+  if (dateContainer)
+    animateTextChange(dateContainer, formatNoteDate(note.updated_at));
 }
 
 export {

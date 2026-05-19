@@ -43,20 +43,25 @@ function useDelayedSpinner(delay = 300) {
   };
 }
 
-function transition(el: Element, update: () => void) {
-  const { left, top } = el.getBoundingClientRect();
-  update();
-  const after = el.getBoundingClientRect();
-  const dx = left - after.left;
-  const dy = top - after.top;
-  if (dx || dy)
-    el.animate(
-      [{ transform: `translate(${dx}px,${dy}px)` }, { transform: "" }],
-      {
-        duration: 300,
-        easing: "cubic-bezier(0.25, 1, 0.5, 1)",
-      },
-    );
+function animateTextChange(
+  el: HTMLElement | null,
+  text: string,
+  duration = 200,
+) {
+  if (!el || el.textContent === text) return;
+  const half = duration / 2;
+  el.animate([{ opacity: 1 }, { opacity: 0 }], {
+    duration: half,
+    easing: "linear",
+    fill: "forwards",
+  }).finished.then(() => {
+    el.textContent = text;
+    el.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: half,
+      easing: "linear",
+      fill: "forwards",
+    });
+  });
 }
 
-export { createTooltipContent, transition, useDelayedSpinner };
+export { animateTextChange, createTooltipContent, useDelayedSpinner };

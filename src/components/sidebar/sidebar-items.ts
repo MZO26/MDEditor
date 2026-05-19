@@ -1,6 +1,7 @@
 import { requireElement } from "@/utils/dom";
 import { formatNoteDate } from "@/utils/format";
 import { renderIcons } from "@/utils/icons";
+import { animateTextChange } from "@/utils/ui";
 import type { Note } from "@shared/schemas/note-schema";
 
 const template = requireElement<HTMLTemplateElement>("#noteItem-template");
@@ -22,14 +23,14 @@ function createNoteItem(note: Note): HTMLDivElement {
     note.updated_at,
   );
   item.querySelector(".note-content")!.textContent = note.snippet;
-  if (note.tags && note.tags.length > 0) {
-    tagsContainer!.innerHTML = "";
+  if (tagsContainer && note.tags && note.tags.length > 0) {
+    tagsContainer.innerHTML = "";
     for (const tag of note.tags) {
       const span = document.createElement("span");
       span.classList.add("tag", "searchTag");
       span.setAttribute("tag", tag);
-      span.textContent = `#${tag}`;
-      tagsContainer!.append(span);
+      animateTextChange(span, `#${tag}`);
+      tagsContainer.append(span);
     }
   }
   return item;

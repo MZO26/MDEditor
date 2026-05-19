@@ -124,40 +124,53 @@
     <div id="smart-views-popover"></div>
     <div class="overlay"></div>
     <div id="loadingSpinner" class="spinner" style="display: none"></div>
-    <div class="confirmation">
-      <button class="close-btn">
-        <i data-lucide="x"></i>
-      </button>
-      <div class="confirmation-selection">
-        <div class="confirmation-title">Merge Note</div>
-      </div>
-      <div class="confirmation-content">
-        <label for="noteId">Note ID (UUID)</label>
-        <input
-          type="text"
-          id="noteId"
-          name="noteId"
-          placeholder="00000000-0000-0000-0000-000000000000"
-          maxlength="36"
-          spellcheck="false"
-          autocomplete="off"
-          pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
-        />
-        <button class="confirm-btn" data-tippy-content="confirm merge"></button>
-        <p class="info-note">
-          Note with this ID gets merged into the selected one.
-        </p>
-      </div>
-    </div>
-    <div class="modal-settings modal">
-      <button class="closeModal-btn" data-tippy-content="close">
-        <i data-lucide="x"></i>
-      </button>
-      <div class="settings-selection">
-        <div class="settings-title">Settings</div>
-      </div>
-      <div class="settings-content" data-activetab="appearance"></div>
-    </div>
+    <dialog class="merge-modal">
+      <form method="dialog" novalidate>
+        <button class="close-btn" value="cancel">
+          <i data-lucide="x"></i>
+        </button>
+        <div class="merge-modal-selection">
+          <div class="merge-title">Merge Note</div>
+        </div>
+        <div class="merge-modal-content">
+          <label for="noteId">Note ID (UUID)</label>
+          <input
+            type="text"
+            id="noteId"
+            name="noteId"
+            placeholder="00000000-0000-0000-0000-000000000000"
+            maxlength="40"
+            spellcheck="false"
+            autocomplete="off"
+          />
+          <button
+            class="confirm-btn"
+            value="confirm"
+            data-tippy-content="confirm merge"
+          >
+            Merge
+          </button>
+          <p class="info-note">
+            Note with this ID gets merged into the selected one.
+          </p>
+        </div>
+      </form>
+    </dialog>
+    <dialog class="modal-settings modal">
+      <form method="dialog" novalidate>
+        <button
+          class="closeModal-btn"
+          value="cancel"
+          data-tippy-content="close"
+        >
+          <i data-lucide="x"></i>
+        </button>
+        <div class="settings-selection">
+          <div class="settings-title">Settings</div>
+        </div>
+        <div class="settings-content" data-activetab="appearance"></div>
+      </form>
+    </dialog>
     <template id="sidebar-empty-state-template">
       <div class="sidebar-empty-state empty-state-content">
         <div class="empty-state-icon">

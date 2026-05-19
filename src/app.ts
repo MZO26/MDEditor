@@ -1,5 +1,8 @@
 import { initListeners } from "@/api/listeners";
-import { initEditor } from "@/components/editor/editor-init";
+import {
+  initEditor,
+  setupEditorListeners,
+} from "@/components/editor/editor-init";
 import { initInfoSidebar } from "@/components/sidebar/info-sidebar-init";
 import { reloadNoteList } from "@/components/sidebar/sidebar-actions";
 import { initSearchHandlers } from "@/components/sidebar/sidebar-filter-init";
@@ -18,7 +21,7 @@ import { initGlobalShortcuts } from "@/settings/shortcuts";
 import { startAppClock } from "@/utils/date";
 import { requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
-import { setAppItem } from "@/utils/registry";
+import { getAppItem, setAppItem } from "@/utils/registry";
 import "tippy.js/dist/tippy.css";
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -28,6 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     editor: initEditor(),
     editorWrapper: requireElement<HTMLDivElement>("#editor"),
   });
+  setupEditorListeners(getAppItem("editorWrapper"), getAppItem("editor"));
   const settings = await loadSettings();
   initGlobalShortcuts();
   initAppSettings(settings);

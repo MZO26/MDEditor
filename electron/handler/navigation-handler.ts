@@ -34,7 +34,10 @@ async function setupLocalImageProtocol() {
       if (!result.ok) throw new Error("File not found");
       return result;
     } catch {
-      return new Response(null, { status: 204 });
+      return new Response("Image not found", {
+        status: 404,
+        headers: { "Content-Type": "text/plain" },
+      });
     }
   });
 }

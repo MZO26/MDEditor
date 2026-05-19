@@ -70,74 +70,212 @@
   pointer-events: all;
 }
 
-.modal {
-  position: fixed;
-  user-select: none;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.95);
+.modal-settings {
   width: 550px;
   height: 400px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  border: none;
   border-radius: 18px;
   background-color: var(--bg-editor);
   box-shadow: var(--shadow);
+  user-select: none;
+  overflow: hidden;
+  padding: 0;
   opacity: 0;
+  transform: scale(0.95);
   visibility: hidden;
-  pointer-events: none;
-  z-index: 4;
   transition:
     opacity 0.3s ease,
-    visibility 0s transform 0.3s ease;
+    transform 0.3s ease,
+    visibility 0.3s ease,
+    display 0.3s allow-discrete,
+    overlay 0.3s allow-discrete;
 }
 
-.modal.show {
+.modal-settings[open] {
+  opacity: 1;
+  transform: scale(1);
+  visibility: visible;
+}
+
+@starting-style {
+  .modal-settings[open] {
+    opacity: 0;
+    transform: scale(0.95);
+    visibility: hidden;
+  }
+}
+
+.closeModal-btn {
+  margin: 0 5px;
+  z-index: 2;
+  border: none;
+  cursor: pointer;
+  color: var(--text-main);
+}
+
+.settings-selection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-sidebar-section);
+  padding: 12px;
+}
+
+.settings-title {
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.modal-settings::backdrop {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease,
+    display 0.3s allow-discrete,
+    overlay 0.3s allow-discrete;
+}
+
+.modal-settings[open]::backdrop {
   opacity: 1;
   visibility: visible;
-  pointer-events: all;
-  transform: translate(-50%, -50%) scale(1);
 }
 
-.confirmation {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.95);
+@starting-style {
+  .modal-settings[open]::backdrop {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+.merge-modal {
   width: 350px;
-  height: 200px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  border: none;
+  user-select: none;
   border-radius: 18px;
   background-color: var(--bg-editor);
   box-shadow: var(--shadow);
+  margin: auto;
+  padding: 0;
   opacity: 0;
   visibility: hidden;
-  pointer-events: none;
-  z-index: 4;
+  transform: scale(0.95);
+  transition:
+    visibility 0.3s ease,
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    display 0.3s allow-discrete,
+    overlay 0.3s allow-discrete;
+}
+
+.merge-modal[open] {
+  opacity: 1;
+  transform: scale(1);
+  visibility: visible;
+}
+
+@starting-style {
+  .merge-modal[open] {
+    opacity: 0;
+    transform: scale(0.95);
+    visibility: hidden;
+  }
+}
+
+.merge-modal::backdrop {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
   transition:
     opacity 0.3s ease,
-    visibility 0s transform 0.3s ease;
+    visibility 0.3s ease,
+    display 0.3s allow-discrete,
+    overlay 0.3s allow-discrete;
 }
 
-.confirmation.show {
+.merge-modal[open]::backdrop {
   opacity: 1;
   visibility: visible;
-  pointer-events: all;
-  transform: translate(-50%, -50%) scale(1);
 }
 
-.closeModal-btn,
+@starting-style {
+  .merge-modal[open]::backdrop {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.merge-modal form {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
 .close-btn {
+  position: absolute;
+  top: 8px;
+  right: 14px;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-main);
+}
+
+.merge-modal-selection {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background-color: var(--bg-sidebar-section);
+  padding: 14px;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 18px 18px 0 0;
+}
+
+.merge-title {
+  font-weight: 800;
+}
+
+.merge-modal-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  gap: 12px;
+}
+
+.merge-modal-content input,
+.merge-modal-content .confirm-btn {
+  width: 100%;
+}
+
+.info-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.closeModal-btn {
   position: absolute;
   top: 8px;
   right: 3px;
 }
 
-.settings-title,
-.confirmation-title {
+.settings-title {
   border-radius: 18px 18px 0 0;
   display: flex;
   width: 100%;
@@ -172,15 +310,6 @@
 
 .settings-content label {
   flex: 0 0 170px;
-}
-
-.confirmation-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin: 0;
-  padding: 0;
 }
 
 .spinner {

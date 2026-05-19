@@ -45,6 +45,7 @@ function createSettingsMenu(): HTMLDivElement {
     btn.className = "selection-btn";
     btn.appendChild(icon);
     btn.setAttribute("data-category", category);
+    btn.type = "button";
     btn.setAttribute("data-tippy-content", category);
     return btn;
   };

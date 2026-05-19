@@ -55,10 +55,6 @@ function initGlobalShortcuts() {
       e.preventDefault();
       document.dispatchEvent(new CustomEvent("app:toggle-focus-mode"));
     },
-    Escape: (e) => {
-      e.preventDefault();
-      document.dispatchEvent(new CustomEvent("app:escape"));
-    },
   });
 }
 

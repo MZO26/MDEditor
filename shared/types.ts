@@ -29,10 +29,6 @@ type Result<T, E = string> =
       message: E;
     };
 
-type Success<T> = Extract<Result<T>, { success: true }>;
-
-type Failure = Extract<Result<unknown>, { success: false }>;
-
 type Action<T> = {
   type?: "action";
   run: (args: T) => void;
@@ -102,7 +98,6 @@ export type {
   ContentType,
   DBBackupResult,
   DbOptimization,
-  Failure,
   ImportedContent,
   MenuType,
   Metadata,
@@ -110,7 +105,6 @@ export type {
   NoteMenuPayload,
   ResolvedTheme,
   Result,
-  Success,
   TitleBarOverlayOptions,
   ZoomAction,
 };
