@@ -59,11 +59,7 @@
           </div>
           <div class="notes-container"></div>
           <div class="sidebar-footer">
-            <button
-              class="settings-btn"
-              popovertarget="settings-panel"
-              data-tippy-content="settings"
-            >
+            <button class="settings-btn" data-tippy-content="settings">
               <i data-lucide="sliders-horizontal"></i>
             </button>
             <span class="info-span note-count"></span>
@@ -79,10 +75,7 @@
           <div class="editor-header">
             <div id="toolbar"></div>
           </div>
-          <button
-            class="info-sidebar-toggle"
-            data-tippy-content="toggle infobar"
-          >
+          <button class="info-sidebar-toggle" data-tippy-content="open infobar">
             <span class="dots"></span>
           </button>
           <div id="editor"></div>
@@ -127,7 +120,7 @@
     <dialog class="merge-modal">
       <form method="dialog" novalidate>
         <button class="close-btn" value="cancel">
-          <i data-lucide="x"></i>
+          <i data-lucide="x" data-tippy-content="close"></i>
         </button>
         <div class="merge-modal-selection">
           <div class="merge-title">Merge Note</div>
@@ -142,6 +135,7 @@
             maxlength="40"
             spellcheck="false"
             autocomplete="off"
+            data-tippy-content="valid note ID required"
           />
           <button
             class="confirm-btn"

@@ -31,6 +31,7 @@ import { validateUUID } from "@/utils/validate";
 import { titleGenerator } from "@shared/generators/generators";
 import type { ExportRequest } from "@shared/schemas/export-schema";
 import type { CreateNotePayload } from "@shared/schemas/note-schema";
+import { delegate } from "tippy.js";
 
 function initListeners() {
   let lastAppliedTheme: string | null = null;
@@ -160,9 +161,20 @@ function initListeners() {
     }
   });
 
+  const mergeDialog = findElement<HTMLDialogElement>(".merge-modal");
+  const mergeInput = findElement<HTMLInputElement>("#noteId");
+  if (mergeDialog) {
+    delegate(mergeDialog, {
+      target: "[data-tippy-content]",
+      content: (reference) =>
+        reference.getAttribute("data-tippy-content") || "",
+      placement: "top",
+      theme: "app-theme",
+      appendTo: mergeDialog,
+    });
+  }
+
   window.noteAPI.onTriggerMerge((id: string) => {
-    const mergeDialog = findElement<HTMLDialogElement>(".merge-modal");
-    const mergeInput = findElement<HTMLInputElement>("noteId");
     if (!mergeDialog || !mergeInput) return;
     mergeInput.value = "";
     mergeDialog.returnValue = "";

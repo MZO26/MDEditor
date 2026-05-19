@@ -20,6 +20,12 @@ function initSearchHandlers() {
   const popoverEl = findElement<HTMLDivElement>("#smart-views-popover");
   if (!viewBtn || !popoverEl) return;
   const searchInput = requireElement<HTMLInputElement>("#searchInput");
+  const tooltipInstance = tippy(viewBtn as Element, {
+    content: "Change View",
+    trigger: "mouseenter focus",
+    placement: "auto",
+    theme: "app-theme",
+  });
 
   const tippyInstance = tippy(viewBtn as Element, {
     content: popoverEl,
@@ -30,6 +36,9 @@ function initSearchHandlers() {
     interactive: true,
     theme: "none",
     duration: [100, 200],
+    onShow() {
+      tooltipInstance.hide();
+    },
     onTrigger(instance) {
       const view = (instance.reference as HTMLButtonElement).dataset["view"];
       if (!view) return;
