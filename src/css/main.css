@@ -463,11 +463,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0%,
-    var(--border-color) 360%
-  );
+  background: conic-gradient(from 0deg, transparent 0%, var(--text-main) 360%);
   -webkit-mask: radial-gradient(
     farthest-side,
     transparent calc(100% - 3px),
@@ -844,9 +840,9 @@ svg.empty-state-icon {
 
 .empty-state-add-note-btn {
   display: inline-flex;
-  background-color: var(--border-color);
   cursor: pointer;
   padding: 0;
+  margin: 0;
   margin-bottom: 3px;
   vertical-align: middle;
 }

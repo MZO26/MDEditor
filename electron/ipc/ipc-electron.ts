@@ -78,16 +78,16 @@ function registerElectronIpc(win: BrowserWindow) {
       }
       try {
         fs.writeFileSync(filePath, imageBuffer, { flag: "wx" });
-      } catch (err) {
+      } catch (error) {
         if (
-          err instanceof Error &&
-          (err as NodeJS.ErrnoException).code === "EEXIST"
+          error instanceof Error &&
+          (error as NodeJS.ErrnoException).code === "EEXIST"
         ) {
           return {
             imageSrc: `appimg:///${fileName}`,
           };
         } else {
-          throw err;
+          throw error;
         }
       }
       return { imageSrc: `appimg:///${fileName}` };

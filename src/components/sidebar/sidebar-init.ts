@@ -54,7 +54,6 @@ function applySidebarListeners(
         const target = e.target as HTMLElement;
         const item = target.closest<HTMLElement>(".noteItem");
         if (!item) return;
-        e.preventDefault();
         const id = item.dataset["id"];
         if (!id) return;
         const isPinned = item.dataset["pinned"] === "true";

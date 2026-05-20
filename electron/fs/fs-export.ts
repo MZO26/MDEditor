@@ -1,8 +1,10 @@
+import { sanitizeExportString } from "@electron/fs/fs-assets";
 import { writeAtomic } from "@electron/fs/fs-atomic-write";
 import { processWithLimit } from "@electron/fs/fs-limiter";
 import { validation } from "@shared/ipc-helpers";
 import { FileNameSchema } from "@shared/schemas/export-schema";
 import type { ExportItem } from "@shared/types";
+import { app } from "electron";
 import fs from "fs/promises";
 import path from "path";
 
@@ -17,7 +19,15 @@ async function batchExport(folder: string, payload: ExportItem[]) {
     if (isOutside) {
       return null;
     }
-    await writeAtomic(absoluteFilePath, note.content);
+    const rawContent = note.content;
+    const userDataPath = app.getPath("userData");
+    const imagesFolder = path.join(userDataPath, "editor-images");
+    const portableContent = sanitizeExportString(
+      rawContent,
+      absoluteTargetFolder,
+      imagesFolder,
+    );
+    await writeAtomic(absoluteFilePath, portableContent);
     return {
       id: note.id,
       filePath: absoluteFilePath,

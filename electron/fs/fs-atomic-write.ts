@@ -1,6 +1,9 @@
 import { open, rename, unlink, type FileHandle } from "node:fs/promises";
 
-async function writeAtomic(targetPath: string, content: string): Promise<void> {
+async function writeAtomic(
+  targetPath: string,
+  content: string | Buffer | Uint8Array,
+): Promise<void> {
   const tempPath = `${targetPath}.tmp`;
   let fileHandle: FileHandle | undefined;
 
@@ -8,7 +11,7 @@ async function writeAtomic(targetPath: string, content: string): Promise<void> {
     // open the temp file for writing
     fileHandle = await open(tempPath, "w");
     // writes all new data into the temp file. If an error comes up, it jumps to finally and closes the temp file
-    await fileHandle.writeFile(content, "utf8");
+    await fileHandle.writeFile(content);
     // flush saves file contents from memory to the fs
     await fileHandle.sync();
   } finally {

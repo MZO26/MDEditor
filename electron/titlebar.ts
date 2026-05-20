@@ -23,12 +23,6 @@ function getTitleBarOverlay(
 // tells electron if theme is dark or light
 function initTheme(savedTheme: unknown): Exclude<Theme, "system"> {
   const validTheme = StoreSchema.shape.theme.safeParse(savedTheme);
-  if (!validTheme.success) {
-    console.warn(
-      "[initTheme]: Invalid saved theme, falling back to system:",
-      savedTheme,
-    );
-  }
   const theme = validTheme.success ? validTheme.data : "system";
   if (theme === "system") {
     nativeTheme.themeSource = "system";

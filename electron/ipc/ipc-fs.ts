@@ -1,3 +1,5 @@
+import { sanitizeExportString } from "@electron/fs/fs-assets";
+import { writeAtomic } from "@electron/fs/fs-atomic-write";
 import { batchExport } from "@electron/fs/fs-export";
 import { batchPDFExport } from "@electron/fs/fs-export-pdf";
 import { batchImport } from "@electron/fs/fs-import";
@@ -11,12 +13,13 @@ import {
   FileNameSchema,
 } from "@shared/schemas/export-schema";
 import {
+  app,
   dialog,
   ipcMain,
   type BrowserWindow,
   type PrintToPDFOptions,
 } from "electron";
-import fs from "fs/promises";
+import path from "path";
 
 function registerFileIpc(win: BrowserWindow) {
   ipcMain.handle("select-folder", async () => {
@@ -98,10 +101,19 @@ function registerFileIpc(win: BrowserWindow) {
       if (canceled || !filePath) {
         throw new Error("CANCELLED_OPERATION");
       }
+      const absoluteTargetFolder = path.dirname(filePath);
       const data =
         typeof content === "string"
           ? content
-          : JSON.stringify(content, null, 2); // null as "replacer argument" means nothing gets filtered or changed and 2 is the "space argument" to add line breaks and indent nested objects in json
+          : JSON.stringify(content, null, 2);
+      const userDataPath = app.getPath("userData");
+      const imagesFolder = path.join(userDataPath, "editor-images");
+      const portableContent = sanitizeExportString(
+        data,
+        absoluteTargetFolder,
+        imagesFolder,
+      );
+      // null as "replacer argument" means nothing gets filtered or changed and 2 is the "space argument" to add line breaks and indent nested objects in json
       if (extension === "pdf") {
         // sanitize html for it to be safe to be put in rendering window
         const hiddenWin = createHiddenPdfWindow();
@@ -122,7 +134,7 @@ function registerFileIpc(win: BrowserWindow) {
           // data:text/html tells chrome parse as html and base64 tells chrome to decode before parsing with the exact html bytes. Base64 is required to load the css correctly because chrome expects URL's to have URL-encoded content.
           await hiddenWin.loadURL(`data:text/html;base64,${encoded}`);
           const pdfBuffer = await hiddenWin.webContents.printToPDF(pdfOptions);
-          await fs.writeFile(filePath, pdfBuffer);
+          await writeAtomic(filePath, pdfBuffer);
           console.log("[PDF-Export]: Successful.");
           return filePath;
         } catch (error) {
@@ -137,7 +149,7 @@ function registerFileIpc(win: BrowserWindow) {
           }
         }
       }
-      await fs.writeFile(filePath, data, "utf-8");
+      await writeAtomic(filePath, portableContent);
       return filePath;
     });
   });
