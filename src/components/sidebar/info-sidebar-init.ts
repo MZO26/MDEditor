@@ -2,17 +2,17 @@ import { searchByTag } from "@/components/sidebar/sidebar-filter";
 import { setSidebarState } from "@/components/sidebar/sidebar-state";
 import { handleSelectNote } from "@/features/note-actions";
 import { createAsyncHandler } from "@/utils/async";
-import { findElement } from "@/utils/dom";
+import { findElement, requireElement } from "@/utils/dom";
 import { registerAppEvents } from "@/utils/registry";
 import { delegate } from "tippy.js";
 import "tippy.js/dist/tippy.css";
 
 const collapseInfoSidebar = (infoSidebar: HTMLDivElement) => {
   const collapsed = infoSidebar.classList.contains("collapsed");
-  setSidebarState(infoSidebar, "info-sidebar-state", !collapsed);
+  setSidebarState(infoSidebar, !collapsed);
 };
 
-async function initInfoSidebar(collapsed: boolean = true) {
+async function initInfoSidebar() {
   const toggleBtn = findElement<HTMLButtonElement>(".info-sidebar-toggle");
   const infoSidebar = findElement<HTMLDivElement>(".info-sidebar");
   const tagContainer = findElement<HTMLDivElement>(".tag-container");
@@ -26,7 +26,6 @@ async function initInfoSidebar(collapsed: boolean = true) {
     touch: false,
     hideOnClick: true,
   });
-  setSidebarState(infoSidebar, "info-sidebar-state", collapsed);
   applyInfoSidebarListeners(
     tagContainer,
     linkContainer,
@@ -47,6 +46,7 @@ function applyInfoSidebarListeners(
   tagContainer.addEventListener(
     "click",
     createAsyncHandler(async (e: Event) => {
+      const searchInput = requireElement<HTMLInputElement>(".search-input");
       const target = e.target as HTMLElement;
       if (target === tagContainer) return;
       const spanEl = target.closest(".tag") as HTMLSpanElement | null;
@@ -54,6 +54,8 @@ function applyInfoSidebarListeners(
       const tag = spanEl.dataset["tag"];
       if (!tag) return;
       await searchByTag(tag);
+      searchInput.focus();
+      searchInput.value = `#${tag}`;
     }),
   );
   linkContainer.addEventListener(

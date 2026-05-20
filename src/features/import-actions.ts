@@ -10,10 +10,10 @@ import { Editor, type Content, type JSONContent } from "@tiptap/core";
 async function handleImportFile(): Promise<Result<ImportedContent[]>> {
   const response = await importNote();
   if (!response.success) {
-    console.error(response.message);
     showToast(response.message);
     return response;
   }
+  console.log("RAW RESPONSE:", response);
   const filesToProcess = response.data;
   const processedNotes = [];
   const failedFiles = [];

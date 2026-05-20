@@ -72,10 +72,10 @@ const ExportItemSchema = z.discriminatedUnion("extension", [
 const ExportManyRequestSchema = z.array(ExportItemSchema);
 
 const ImportRequestSchema = z.discriminatedUnion("extension", [
-  HtmlSchema,
-  MdSchema,
-  TxtSchema,
-  JsonSchema,
+  HtmlSchema.omit({ id: true }),
+  MdSchema.omit({ id: true }),
+  TxtSchema.omit({ id: true }),
+  JsonSchema.omit({ id: true }),
 ]);
 
 type ExportManyRequest = z.infer<typeof ExportManyRequestSchema>;

@@ -27,8 +27,7 @@ function createNoteItem(note: Note): HTMLDivElement {
     tagsContainer.innerHTML = "";
     for (const tag of note.tags) {
       const span = document.createElement("span");
-      span.classList.add("tag", "searchTag");
-      span.setAttribute("tag", tag);
+      span.classList.add("tag");
       animateTextChange(span, `#${tag}`);
       tagsContainer.append(span);
     }

@@ -60,45 +60,6 @@
   color: var(--text-main);
 }
 
-#smart-views-popover {
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  background: var(--bg-editor);
-  box-shadow: var(--shadow);
-  color: var(--text-main);
-  width: 140px;
-  display: flex;
-  justify-content: center;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-}
-
-.smart-view-list {
-  list-style: none;
-  margin: 0;
-  padding: 5px;
-  padding-right: 7px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: stretch;
-  gap: 5px;
-  width: 100%;
-  overflow: hidden;
-}
-
-.smart-view-list button {
-  display: flex;
-  min-height: 35px;
-  color: var(--text-main);
-  text-align: left;
-  font-size: 13px;
-  font-weight: 500;
-  width: stretch;
-  transition: background-color 0.2s ease;
-}
-
 .sidebar-empty-state {
   flex-grow: 1;
   display: flex;
@@ -384,7 +345,22 @@
   align-items: center;
   justify-content: space-between;
   height: 40px;
-  padding: 2px;
+  padding: 10px;
+}
+
+.view-select {
+  width: fit-content;
+  color: var(--text-muted);
+  border: none;
+  background: none;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6px 0;
+}
+
+.note-count {
+  margin-right: 3px;
 }
 
 .noteItem {

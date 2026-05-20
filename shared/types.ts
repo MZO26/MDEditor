@@ -73,6 +73,8 @@ type ExportItem = {
   extension: ExportFormat;
 };
 
+type View = "all" | "bookmarked" | "pinned" | "todos" | "untagged";
+
 type ContentType = "markdown" | "html" | "json";
 
 type ZoomAction = "get" | "in" | "out" | "reset";
@@ -111,5 +113,6 @@ export type {
   Result,
   Success,
   TitleBarOverlayOptions,
+  View,
   ZoomAction,
 };

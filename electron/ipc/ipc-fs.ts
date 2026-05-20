@@ -47,11 +47,12 @@ function registerFileIpc(win: BrowserWindow) {
           { name: "JSON", extensions: ["json"] },
         ],
       });
-      const hasFiles = filePaths.length > 0;
+      const hasFiles = filePaths?.length > 0;
       if (canceled || !hasFiles) {
         throw new Error("CANCELLED_OPERATION");
       }
-      await batchImport(filePaths);
+      const result = await batchImport(filePaths);
+      return result;
     });
   });
 
@@ -74,10 +75,11 @@ function registerFileIpc(win: BrowserWindow) {
         (item) => "extension" in item && item.extension === "pdf",
       );
       if (hasPdf) {
-        await batchPDFExport(selectedFolder, validatedData);
-        return;
+        const result = await batchPDFExport(selectedFolder, validatedData);
+        return result;
       }
-      await batchExport(selectedFolder, validatedData);
+      const result = await batchExport(selectedFolder, validatedData);
+      return result;
     });
   });
 

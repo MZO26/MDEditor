@@ -46,12 +46,14 @@ function addOneNoteToList(note: Note) {
       break;
     }
   }
-  if (target) {
-    sidebar.insertBefore(noteElement, target);
-  } else {
-    sidebar.appendChild(noteElement);
-  }
-  handleSidebarEmptyState();
+  requestAnimationFrame(() => {
+    if (target && sidebar.contains(target)) {
+      sidebar.insertBefore(noteElement, target);
+    } else {
+      sidebar.appendChild(noteElement);
+    }
+    handleSidebarEmptyState();
+  });
   stateStore.setState({ activeId: note.id });
   setActiveItem(noteElement, sidebar);
 }
@@ -65,9 +67,11 @@ function addManyNotesToList(notes: Note[]) {
       fragment.appendChild(noteElement);
     }
   }
-  sidebar.appendChild(fragment);
-  handleEditorEmptyState();
-  handleSidebarEmptyState();
+  requestAnimationFrame(() => {
+    sidebar.appendChild(fragment);
+    handleEditorEmptyState();
+    handleSidebarEmptyState();
+  });
   const { activeId } = stateStore.getState();
   if (!activeId) return;
   const noteElement = findElement<HTMLDivElement>(
@@ -116,8 +120,7 @@ async function updateNoteInList(note: Note): Promise<void> {
       tagContainer.innerHTML = "";
       for (const tag of note.tags) {
         const span = document.createElement("span");
-        span.classList.add("tag", "searchTag");
-        span.dataset["tag"] = String(tag);
+        span.classList.add("tag");
         span.textContent = `#${tag}`;
         tagContainer.append(span);
       }

@@ -1,17 +1,14 @@
-import { updateSettings } from "@/api/settingsAPI";
 import { requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
 import { getAppItem } from "@/utils/registry";
 
 async function setSidebarState(
   element: HTMLElement,
-  key: string,
   collapsed: boolean,
 ): Promise<void> {
   const isCollapsed = element.classList.contains("collapsed");
   if (isCollapsed === collapsed) return;
   element.classList.toggle("collapsed", collapsed);
-  updateSettings({ [key]: collapsed });
 }
 
 function handleSidebarEmptyState(searchInput?: string) {

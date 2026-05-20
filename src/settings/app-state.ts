@@ -12,7 +12,6 @@ const DEFAULT_STORE: AppSettings = {
   "code-theme": "balanced",
   highlight: "done",
   "note-item-display": "tags",
-  "info-sidebar-state": false,
   "open-window-mode": "centered",
   "close-window-mode": "normal",
   "minimize-window-mode": "taskbar",

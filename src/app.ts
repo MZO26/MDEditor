@@ -5,7 +5,6 @@ import {
 } from "@/components/editor/editor-init";
 import { initInfoSidebar } from "@/components/sidebar/info-sidebar-init";
 import { reloadNoteList } from "@/components/sidebar/sidebar-actions";
-import { initSearchHandlers } from "@/components/sidebar/sidebar-filter-init";
 import { initNotesSidebar } from "@/components/sidebar/sidebar-init";
 import { topToolbarActions } from "@/components/toolbar/hoverbar-actions";
 import { initHoverbar } from "@/components/toolbar/hoverbar-init";
@@ -38,7 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initAppSettings(settings);
   initListeners();
   initNotesSidebar();
-  initInfoSidebar(settings["info-sidebar-state"]);
+  initInfoSidebar();
   await reloadNoteList();
   const toolbarContainer = requireElement("#toolbar");
   buildMenu(toolbarContainer, ToolbarActions);
@@ -47,7 +46,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   buildMenu(hoverbar, topToolbarActions);
   setupToolbarListeners(hoverbar, topToolbarActions);
   initHoverbar();
-  initSearchHandlers();
   renderIcons();
   startAppClock();
   getPlatformData();

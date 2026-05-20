@@ -6,6 +6,7 @@ import {
 } from "@/components/sidebar/sidebar-actions";
 import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
 import { stateStore } from "@/settings/app-state";
+import { requireElement } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
 
@@ -46,17 +47,14 @@ async function handleSearchInput(searchInput: string) {
 }
 
 function createViews(views: ViewItem[]) {
-  const ul = document.createElement("ul");
-  ul.className = "smart-view-list";
+  const select = requireElement<HTMLSelectElement>(".view-select");
   for (const view of views) {
-    const btn = document.createElement("button");
-    btn.textContent = view["label"];
-    btn.setAttribute("data-view", view["id"]);
-    const li = document.createElement("li");
-    li.append(btn);
-    ul.append(li);
+    const option = document.createElement("option");
+    option.textContent = view["label"];
+    option.value = view["id"];
+    select.append(option);
   }
-  return ul;
+  return select;
 }
 
 async function handleViews(view: string) {

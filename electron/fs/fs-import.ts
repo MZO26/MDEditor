@@ -1,8 +1,8 @@
+import { processWithLimit } from "@electron/fs/fs-limiter";
 import { validation } from "@shared/ipc-helpers";
 import { ImportRequestSchema } from "@shared/schemas/export-schema";
 import fs from "fs/promises";
 import path from "path";
-import { processWithLimit } from "./fs-limiter";
 
 async function batchImport(filePaths: string[]) {
   const imported = await processWithLimit(filePaths, 100, async (file) => {
