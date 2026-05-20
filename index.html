@@ -31,6 +31,7 @@
         <div class="frame-left"></div>
         <div class="frame-right">
           <time id="datetime-display"></time>
+          <div class="filter-container"></div>
           <div class="toolbar-hover-zone">
             <div class="top-toolbar"></div>
           </div>
@@ -115,7 +116,29 @@
     </div>
     <div id="smart-views-popover"></div>
     <div class="overlay"></div>
-    <div id="loadingSpinner" class="spinner" style="display: none"></div>
+    <div id="loadingSpinner" class="spinner" popover="manual"></div>
+    <dialog id="delete-dialog" class="delete-dialog">
+      <form method="dialog" class="delete-dialog-form">
+        <button class="delete-close-btn" data-tippy-content="close">
+          <i data-lucide="x" class="delete-close-icon"></i>
+        </button>
+        <div class="delete-dialog-header">
+          <span class="delete-dialog-title">Delete this note?</span>
+        </div>
+        <div class="delete-dialog-content">
+          <p class="delete-dialog-description">
+            This action is permanent and cannot be undone.
+          </p>
+          <button
+            value="confirm"
+            class="delete-confirm-btn"
+            id="confirm-delete-btn"
+          >
+            Delete Note
+          </button>
+        </div>
+      </form>
+    </dialog>
     <dialog class="merge-modal">
       <form method="dialog" novalidate>
         <button class="close-btn" value="cancel">

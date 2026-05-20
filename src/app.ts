@@ -25,18 +25,19 @@ import { getAppItem, setAppItem } from "@/utils/registry";
 import "tippy.js/dist/tippy.css";
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const settings = await loadSettings();
   setAppItem({
     appContainer: requireElement<HTMLDivElement>(".app-container"),
     sidebar: requireElement<HTMLDivElement>(".notes-container"),
-    editor: initEditor(),
+    editor: initEditor(settings["spellcheck"]),
     editorWrapper: requireElement<HTMLDivElement>("#editor"),
   });
   setupEditorListeners(getAppItem("editorWrapper"), getAppItem("editor"));
-  const settings = await loadSettings();
+
   initGlobalShortcuts();
   initAppSettings(settings);
   initListeners();
-  initNotesSidebar(settings["note-sidebar-state"]);
+  initNotesSidebar();
   initInfoSidebar(settings["info-sidebar-state"]);
   await reloadNoteList();
   const toolbarContainer = requireElement("#toolbar");

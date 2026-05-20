@@ -6,6 +6,7 @@ import { Typography } from "@/extensions/typography";
 import { WikiLink } from "@/extensions/wikilinks";
 import { handleSelectNote } from "@/features/note-actions";
 import { findElement, requireElement } from "@/utils/dom";
+import type { AppSettings } from "@shared/schemas/store-schema";
 import { Editor } from "@tiptap/core";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import Highlight from "@tiptap/extension-highlight";
@@ -24,7 +25,7 @@ import StarterKit from "@tiptap/starter-kit";
 
 let editor: Editor | null = null;
 
-function initEditor(): Editor {
+function initEditor(settings: AppSettings["spellcheck"]): Editor {
   const editorWrapper = requireElement<HTMLDivElement>("#editor");
   if (editor) {
     return editor;
@@ -33,6 +34,9 @@ function initEditor(): Editor {
     element: editorWrapper,
     extensions: getNoteEditorExtensions(),
     editorProps: {
+      attributes: {
+        spellcheck: settings ? "true" : "false",
+      },
       handleDrop(view, event, _slice, moved) {
         if (!editor) return false;
         if (!moved && event.dataTransfer?.files?.length) {

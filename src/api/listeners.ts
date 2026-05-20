@@ -155,12 +155,33 @@ function initListeners() {
     }
   });
 
+  const deleteDialog = findElement("#delete-dialog") as HTMLDialogElement;
+  const confirmBtn = findElement("#confirm-delete-btn") as HTMLButtonElement;
+  if (deleteDialog) {
+    delegate(deleteDialog, {
+      target: "[data-tippy-content]",
+      content: (reference) =>
+        reference.getAttribute("data-tippy-content") || "",
+      placement: "top",
+      theme: "app-theme",
+      appendTo: deleteDialog,
+    });
+  }
+
   window.noteAPI.onTriggerDelete(async (id: string) => {
-    const noteElement = findElement<HTMLDivElement>(
-      `.noteItem[data-id="${id}"]`,
-    );
-    if (!noteElement) return;
-    await handleDeleteNote(id, noteElement);
+    if (!deleteDialog || !confirmBtn) return;
+    const handleClose = async () => {
+      if (deleteDialog.returnValue !== "confirm") return;
+      const noteElement = findElement<HTMLDivElement>(
+        `.noteItem[data-id="${id}"]`,
+      );
+      if (!noteElement) return;
+      await handleDeleteNote(id, noteElement);
+      deleteDialog.close();
+    };
+    deleteDialog.addEventListener("close", handleClose, { once: true });
+    deleteDialog.returnValue = "";
+    deleteDialog.showModal();
   });
 
   window.noteAPI.onTriggerId(async (id: string) => {
@@ -234,6 +255,7 @@ function initListeners() {
       }
     };
     mergeDialog.addEventListener("close", handleClose, { once: true });
+    mergeDialog.returnValue = "";
     mergeDialog.showModal();
   });
 

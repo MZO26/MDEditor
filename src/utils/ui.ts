@@ -18,27 +18,18 @@ function createTooltipContent(
 }
 
 function useDelayedSpinner(delay = 300) {
-  const spinner = findElement("#loadingSpinner");
-  const overlay = findElement(".overlay");
-  if (!spinner || !overlay) return () => {};
-  const overlayExisting = overlay.classList.contains("show");
-  const spinnerExisting = spinner.classList.contains("show");
+  const spinner = findElement<HTMLDivElement>("#loadingSpinner");
+  if (!spinner) return () => {};
+  const wasAlreadyOpen = spinner.matches(":popover-open");
   const spinnerTimeout = setTimeout(() => {
-    if (!overlayExisting) {
-      overlay.classList.add("show");
-    }
-    if (!spinnerExisting) {
-      spinner.classList.add("show");
+    if (!wasAlreadyOpen && !spinner.matches(":popover-open")) {
+      spinner.showPopover();
     }
   }, delay);
-
   return function cleanup() {
     clearTimeout(spinnerTimeout);
-    if (!overlayExisting) {
-      overlay.classList.remove("show");
-    }
-    if (!spinnerExisting) {
-      spinner.classList.remove("show");
+    if (!wasAlreadyOpen && spinner.matches(":popover-open")) {
+      spinner.hidePopover();
     }
   };
 }
