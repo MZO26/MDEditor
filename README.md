@@ -56,7 +56,6 @@ npm run dev
 | `npm run pack:win`   | Build Windows app                     |
 | `npm run pack:linux` | Build Linux app                       |
 | `npm run typecheck`  | Run TypeScript type check             |
-| `npm run preview`    | Preview production build              |
 | `npm run rebuild`    | Rebuild better sqlite 3 native module |
 
 ## Keyboard Shortcuts

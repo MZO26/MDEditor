@@ -25,7 +25,6 @@ function subscribe<T extends unknown[]>(
 }
 
 contextBridge.exposeInMainWorld("fileAPI", {
-  selectFolder: () => ipcRenderer.invoke("select-folder"),
   noteExport: (payload: ExportRequest) =>
     ipcRenderer.invoke("note:export", payload),
   onTriggerExport: (callback: (id: string, extension: string) => void) => {

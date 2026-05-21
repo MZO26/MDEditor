@@ -17,7 +17,6 @@ declare module "*.css";
 declare global {
   interface Window {
     fileAPI: {
-      selectFolder: () => Promise<Result<void>>;
       noteExport: (payload: ExportRequest) => Promise<Result<ExportRequest>>;
       onTriggerExport: (
         callback: (id: string, extension: string) => void,
