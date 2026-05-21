@@ -7,8 +7,13 @@ import type { Theme } from "@shared/schemas/store-schema";
 async function initFocusMode() {
   const appContainer = getAppItem("appContainer");
   const newState = !appContainer.classList.contains("focus");
-  appContainer.classList.toggle("focus", newState);
-  await setTheme(document.body.dataset["theme"] as Theme, newState);
+  requestAnimationFrame(() => {
+    appContainer.classList.toggle("focus", newState);
+    // doesn't get awaited to animation is smooth. Gets pushed to the background while focus class is being applied
+    setTheme(document.body.dataset["theme"] as Theme, newState).catch((err) => {
+      console.error("Failed to sync theme with main process.", err);
+    });
+  });
 }
 
 function setEditorWidth(container: HTMLDivElement) {

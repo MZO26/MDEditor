@@ -1,12 +1,15 @@
 import { sanitizeImportString } from "@electron/fs/fs-assets";
-import { processWithLimit } from "@electron/fs/fs-limiter";
 import { validation } from "@shared/ipc-helpers";
-import { ImportRequestSchema } from "@shared/schemas/export-schema";
+import { processWithLimit } from "@shared/limiter";
+import {
+  ImportRequestSchema,
+  type ImportRequest,
+} from "@shared/schemas/export-schema";
 import { app } from "electron";
 import fs from "fs/promises";
 import path from "path";
 
-async function batchImport(filePaths: string[]) {
+async function batchImport(filePaths: string[]): Promise<ImportRequest[]> {
   const imported = await processWithLimit(filePaths, 100, async (file) => {
     try {
       const content = await fs.readFile(file, "utf8");
@@ -30,7 +33,7 @@ async function batchImport(filePaths: string[]) {
       return null;
     }
   });
-  return imported.filter((note) => note !== null);
+  return imported.filter((note): note is ImportRequest => note !== null);
 }
 
 export { batchImport };

@@ -1,10 +1,7 @@
 import { selectBuilder } from "@/settings/setting-builder";
-import { requireElement } from "@/utils/dom";
 
 function buildSelects() {
-  const settingsContainer = requireElement<HTMLDivElement>(".settings-content");
   selectBuilder(
-    settingsContainer,
     "theme",
     [
       { value: "system", label: "System" },
@@ -16,7 +13,6 @@ function buildSelects() {
     "appearance",
   );
   selectBuilder(
-    settingsContainer,
     "code-theme",
     [
       { value: "focus", label: "Focus" },
@@ -26,7 +22,6 @@ function buildSelects() {
     "appearance",
   );
   selectBuilder(
-    settingsContainer,
     "highlight-theme",
     [
       { value: "done", label: "Done" },
@@ -37,7 +32,6 @@ function buildSelects() {
     "appearance",
   );
   selectBuilder(
-    settingsContainer,
     "note-item-display",
     [
       {
@@ -56,7 +50,6 @@ function buildSelects() {
     "appearance",
   );
   selectBuilder(
-    settingsContainer,
     "font-family",
     [
       { value: "system", label: "System" },
@@ -69,7 +62,6 @@ function buildSelects() {
     "typography",
   );
   selectBuilder(
-    settingsContainer,
     "font-size",
     [
       { value: "12", label: "12" },
@@ -82,7 +74,6 @@ function buildSelects() {
     "typography",
   );
   selectBuilder(
-    settingsContainer,
     "line-height",
     [
       { value: "1.2", label: "1.2" },
@@ -95,7 +86,6 @@ function buildSelects() {
     "typography",
   );
   selectBuilder(
-    settingsContainer,
     "editor-focus",
     [
       { value: "on", label: "Activate Editor Focus" },
@@ -104,7 +94,6 @@ function buildSelects() {
     "typography",
   );
   selectBuilder(
-    settingsContainer,
     "open-window-mode",
     [
       { value: "restore", label: "Restore" },
@@ -114,7 +103,6 @@ function buildSelects() {
     "app",
   );
   selectBuilder(
-    settingsContainer,
     "close-window-mode",
     [
       { value: "normal", label: "Normal" },
@@ -124,7 +112,6 @@ function buildSelects() {
     "app",
   );
   selectBuilder(
-    settingsContainer,
     "minimize-window-mode",
     [
       { value: "taskbar", label: "Minimize to taskbar" },
@@ -133,7 +120,6 @@ function buildSelects() {
     "app",
   );
   (selectBuilder(
-    settingsContainer,
     "spellcheck",
     [
       { value: "true", label: "Enable spellcheck" },
@@ -142,7 +128,6 @@ function buildSelects() {
     "app",
   ),
     selectBuilder(
-      settingsContainer,
       "file-backup",
       [
         { value: "json", label: "JSON" },
@@ -155,13 +140,11 @@ function buildSelects() {
       "Backup Format",
     ));
   selectBuilder(
-    settingsContainer,
     "db-optimization",
     [
       { value: "optimize-db", label: "Optimize database" },
       { value: "vacuum-db", label: "Free up disk space" },
       { value: "backup-db", label: "Backup database" },
-      // { value: "empty-trash", label: "Clear last deleted" },
     ],
     "storage",
     "Database Settings",

@@ -36,6 +36,7 @@ contextBridge.exposeInMainWorld("fileAPI", {
   noteImport: () => ipcRenderer.invoke("note:import"),
 });
 contextBridge.exposeInMainWorld("electronAPI", {
+  startupReady: () => ipcRenderer.send("app:start-ready"),
   setTheme: (theme: Theme, focus?: boolean) =>
     ipcRenderer.invoke("set:theme", theme, focus),
   onThemeChanged: (callback: (theme: Theme) => void) => {

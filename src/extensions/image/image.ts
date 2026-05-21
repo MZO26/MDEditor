@@ -43,7 +43,7 @@ function compressImageInWorker(
   });
 }
 
-async function processAndInsertImage(file: File, editor: Editor, pos: number) {
+async function processAndInsertImage(file: File, editor: Editor) {
   if (!ALLOWED_TYPES.includes(file.type)) {
     showToast("Error: Only JPG, PNG, GIF, and WebP are allowed.");
     return;
@@ -52,7 +52,6 @@ async function processAndInsertImage(file: File, editor: Editor, pos: number) {
     showToast("Error: Image must be under 25MB.");
     return;
   }
-  const stopSpinner = useDelayedSpinner(100);
   try {
     const response = await compressImageInWorker(file);
     if (!response.success) {
@@ -65,10 +64,11 @@ async function processAndInsertImage(file: File, editor: Editor, pos: number) {
       showToast(saved.message);
       return;
     }
+    const currentPos = editor.state.selection.to;
     editor
       .chain()
       .focus()
-      .insertContentAt(pos, {
+      .insertContentAt(currentPos, {
         type: "image",
         attrs: { src: saved.data.imageSrc },
       })
@@ -76,8 +76,6 @@ async function processAndInsertImage(file: File, editor: Editor, pos: number) {
   } catch (error) {
     console.error("Failed to process and insert image:", error);
     showToast("Error: Image compression failed.");
-  } finally {
-    if (stopSpinner) stopSpinner();
   }
 }
 
@@ -90,8 +88,10 @@ async function promptImageUpload(editor: Editor) {
     input.remove();
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    const pos = editor.state.selection.to;
-    await processAndInsertImage(file, editor, pos);
+    const stopSpinner = useDelayedSpinner(100);
+    await processAndInsertImage(file, editor).finally(() => {
+      if (stopSpinner) stopSpinner();
+    });
   };
   input.click();
 }

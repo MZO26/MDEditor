@@ -22,7 +22,6 @@ async function exportPdfNote(params: {
   // data:text/html tells chrome parse as html and base64 tells chrome to decode before parsing with the exact html bytes. Base64 is required to load the css correctly because chrome expects URL's to have URL-encoded content.
   const pdfBuffer = await win.webContents.printToPDF(pdfOptions);
   await writeAtomic(filePath, pdfBuffer);
-
   return filePath;
 }
 

@@ -26,6 +26,7 @@ declare global {
       noteImport: () => Promise<Result<ImportRequest[]>>;
     };
     electronAPI: {
+      startupReady: () => void;
       setTheme: (theme: Theme, focus?: boolean) => Promise<Result<Theme>>;
       saveImage: (
         payload: ImagePayload,

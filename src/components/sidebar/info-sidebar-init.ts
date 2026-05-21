@@ -26,6 +26,7 @@ async function initInfoSidebar() {
     touch: false,
     hideOnClick: true,
   });
+  setSidebarState(infoSidebar, true);
   applyInfoSidebarListeners(
     tagContainer,
     linkContainer,

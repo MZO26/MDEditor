@@ -73,6 +73,11 @@ type ExportItem = {
   extension: ExportFormat;
 };
 
+type ExportResult = {
+  id: string;
+  filePath: string;
+};
+
 type View = "all" | "bookmarked" | "pinned" | "todos" | "untagged";
 
 type ContentType = "markdown" | "html" | "json";
@@ -103,6 +108,7 @@ export type {
   DbOptimization,
   ExportFormat,
   ExportItem,
+  ExportResult,
   Failure,
   ImportedContent,
   MenuType,

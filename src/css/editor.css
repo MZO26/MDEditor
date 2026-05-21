@@ -359,7 +359,7 @@
   border-radius: 50%;
   background-color: var(--bg-sidebar);
   border: 2px solid var(--border-color);
-  z-index: 20;
+  z-index: 1;
   transition:
     background-color 0.2s ease,
     opacity 0.2s ease-in-out;

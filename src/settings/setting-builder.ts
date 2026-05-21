@@ -1,15 +1,16 @@
+import { requireElement } from "@/utils/dom";
 import "tippy.js/dist/tippy.css";
 
 type SelectOption = { value: string; label: string };
 
 // blueprint for select items and their options for specified categories
 function selectBuilder(
-  container: HTMLDivElement,
   id: string,
   options: SelectOption[],
   category: "appearance" | "typography" | "app" | "storage",
   placeholderText?: string,
 ) {
+  const settingsContainer = requireElement<HTMLDivElement>(".settings-content");
   const label = document.createElement("label");
   label.htmlFor = id;
   label.textContent = id;
@@ -32,7 +33,7 @@ function selectBuilder(
   row.className = "settings-row";
   row.dataset["category"] = category;
   row.append(label, select);
-  container.append(row);
+  settingsContainer.append(row);
 }
 
 // builds the button palette and wraps it into the button container

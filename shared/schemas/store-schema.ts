@@ -50,10 +50,7 @@ type StyleKeys = Extract<
   keyof AppSettings,
   "theme" | "font-family" | "font-size" | "line-height" | "code-theme"
 >;
-type StateKeys = Extract<
-  keyof AppSettings,
-  "note-sidebar-state" | "info-sidebar-state"
->;
+
 export {
   StoreSchema,
   type AppSettings,
@@ -68,7 +65,6 @@ export {
   type NoteItemDisplay,
   type OpenWindowMode,
   type Spellcheck,
-  type StateKeys,
   type StyleKeys,
   type Theme,
 };

@@ -47,4 +47,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initHoverbar();
   renderIcons();
   startAppClock();
+  requestAnimationFrame(() => {
+    window.electronAPI.startupReady();
+  });
 });

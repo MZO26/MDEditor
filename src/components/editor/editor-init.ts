@@ -5,7 +5,10 @@ import { NoteTag } from "@/extensions/tag";
 import { Typography } from "@/extensions/typography";
 import { WikiLink } from "@/extensions/wikilinks";
 import { handleSelectNote } from "@/features/note-actions";
+import { sleep } from "@/utils/async";
 import { findElement, requireElement } from "@/utils/dom";
+import { useDelayedSpinner } from "@/utils/ui";
+import { processWithLimit } from "@shared/limiter";
 import type { AppSettings } from "@shared/schemas/store-schema";
 import { Editor } from "@tiptap/core";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
@@ -38,39 +41,45 @@ function initEditor(settings: AppSettings["spellcheck"]): Editor {
         spellcheck: settings ? "true" : "false",
       },
       handleDrop(view, event, _slice, moved) {
-        if (!editor) return false;
-        if (!moved && event.dataTransfer?.files?.length) {
-          event.preventDefault();
-          const pos =
-            view.posAtCoords({ left: event.clientX, top: event.clientY })
-              ?.pos ?? view.state.doc.content.size;
-          let handled = false;
-          for (const file of event.dataTransfer.files) {
-            if (file.type.startsWith("image/")) {
-              processAndInsertImage(file, editor, pos);
-              handled = true;
-            }
-          }
-          return handled;
+        if (!editor || !event.dataTransfer?.files?.length || moved)
+          return false;
+        const images = Array.from(event.dataTransfer.files).filter((f: File) =>
+          f.type.startsWith("image/"),
+        );
+        if (images.length === 0) return false;
+        event.preventDefault();
+        const coordinates = view.posAtCoords({
+          left: event.clientX,
+          top: event.clientY,
+        });
+        if (coordinates) {
+          editor.commands.setTextSelection(coordinates.pos);
         }
-        return false;
-      },
-      handlePaste(view, event) {
-        if (!editor) return false;
-        if (event.clipboardData?.files?.length) {
-          const pos = view.state.selection.to;
+        const stopSpinner = useDelayedSpinner(100);
+        void processWithLimit(images, 1, async (file) => {
+          await sleep(1000);
+          await processAndInsertImage(file, editor!);
+        }).finally(() => {
+          if (stopSpinner) stopSpinner();
+        });
 
-          let handled = false;
-          for (const file of event.clipboardData.files) {
-            if (file.type.startsWith("image/")) {
-              event.preventDefault();
-              processAndInsertImage(file, editor, pos);
-              handled = true;
-            }
-          }
-          return handled;
-        }
-        return false;
+        return true;
+      },
+      handlePaste(_view, event) {
+        if (!editor || !event.clipboardData?.files?.length) return false;
+        const images = Array.from(event.clipboardData.files).filter((f: File) =>
+          f.type.startsWith("image/"),
+        );
+        if (images.length === 0) return false;
+        event.preventDefault();
+        const stopSpinner = useDelayedSpinner(100);
+        void processWithLimit(images, 1, async (file) => {
+          await sleep(1000);
+          await processAndInsertImage(file, editor!);
+        }).finally(() => {
+          if (stopSpinner) stopSpinner();
+        });
+        return true;
       },
     },
     content: {
@@ -215,9 +224,6 @@ function setupEditorListeners(editorWrapper: HTMLDivElement, editor: Editor) {
       if (target && target.tagName === "IMG") {
         const pos = editor.view.posAtDOM(target, 0);
         if (pos !== null) {
-          console.log(
-            "Broken image detected by protocol, deleting from Tiptap state...",
-          );
           editor
             .chain()
             .focus()

@@ -34,7 +34,7 @@ process.env["VITE_PUBLIC"] = app.isPackaged
   : path.join(process.env["DIST"], "../public");
 
 if (process.platform === "win32") {
-  app.setAppUserModelId("MZO26.MDEditor");
+  app.setAppUserModelId("MZO26.Editor");
 }
 
 export let win: BrowserWindow | null = null;
@@ -95,8 +95,8 @@ function createWindow() {
   }
   win = new BrowserWindow(windowConfig);
   // attach listeners to win after it's assigned to BrowserWindow and not null
-  navigationHandler(win);
   win.webContents.openDevTools();
+  navigationHandler(win);
   win.setMenuBarVisibility(false);
   if (process.env["ELECTRON_RENDERER_URL"]) {
     win.loadURL(process.env["ELECTRON_RENDERER_URL"]);
@@ -131,7 +131,7 @@ function createWindow() {
       win?.hide();
     }
   });
-  win.once("ready-to-show", () => {
+  ipcMain.once("app:start-ready", () => {
     if (openMode === "maximized") {
       win?.maximize();
     }

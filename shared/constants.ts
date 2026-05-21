@@ -2,9 +2,9 @@ import type { CodeTheme, Theme } from "@shared/schemas/store-schema";
 import type { Code, ResolvedTheme } from "@shared/types";
 
 const LIMITS = {
-  WRITE_HEAVY: 2000, // saveImage
-  WRITE_STANDARD: 1000, // create, delete, store:set
-  WRITE_LIGHT: 300, // update, setTheme
+  WRITE_HEAVY: 500, // saveImage
+  WRITE_STANDARD: 500, // create, delete, store:set
+  WRITE_LIGHT: 300, // update
   READ_HEAVY: 500, // search, getAll
   READ_LIGHT: 100, // getById, store:get
   WRITE_FLUSH: 5, // update with flush arg

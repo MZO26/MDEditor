@@ -34,8 +34,6 @@ function registerElectronIpc(win: BrowserWindow) {
 
   ipcMain.handle("set:theme", (e, theme: Theme, focus?: boolean) => {
     return safeResponse(e, async () => {
-      if (!checkRateLimit("set:theme", LIMITS.WRITE_LIGHT))
-        throw new Error("RATE_LIMIT");
       const validatedData = validation(StoreSchema.shape.theme, theme);
       const activeTheme = initTheme(validatedData);
       const windowTheme = focus
@@ -65,7 +63,6 @@ function registerElectronIpc(win: BrowserWindow) {
       const fileName = `${hash}.${validatedData.extension}`;
       const filePath = path.join(imagesFolder, fileName);
       if (fs.existsSync(filePath)) {
-        console.log("Image already existing. Skipping saving process");
         return { imageSrc: `appimg:///${fileName}` };
       }
       try {
