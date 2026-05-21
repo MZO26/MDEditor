@@ -95,7 +95,6 @@ function createWindow() {
   }
   win = new BrowserWindow(windowConfig);
   // attach listeners to win after it's assigned to BrowserWindow and not null
-  win.webContents.openDevTools();
   navigationHandler(win);
   win.setMenuBarVisibility(false);
   if (process.env["ELECTRON_RENDERER_URL"]) {

@@ -51,25 +51,6 @@
     background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(6px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  z-index: 3;
-}
-
-.overlay.show {
-  opacity: 1;
-  pointer-events: all;
-}
-
 .modal-settings {
   width: 550px;
   height: 400px;

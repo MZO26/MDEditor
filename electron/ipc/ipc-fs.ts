@@ -110,11 +110,7 @@ function registerFileIpc(win: BrowserWindow) {
       );
       // null as "replacer argument" means nothing gets filtered or changed and 2 is the "space argument" to add line breaks and indent nested objects in json
       if (extension === "pdf") {
-        // sanitize html for it to be safe to be put in rendering window
         const hiddenWin = createHiddenPdfWindow();
-        console.log(
-          `[PDF-Export] Created hidden window with ID: ${hiddenWin.id}`,
-        );
         const assets = loadPDFAssets();
         try {
           await exportPdfNote({ win: hiddenWin, filePath, html: data, assets });
@@ -124,10 +120,6 @@ function registerFileIpc(win: BrowserWindow) {
         } finally {
           if (hiddenWin && !hiddenWin.isDestroyed()) {
             hiddenWin.destroy();
-            console.log(
-              `[PDF-Export] Window ID ${hiddenWin.id} destroyed`,
-              hiddenWin.isDestroyed(),
-            );
           }
         }
       }

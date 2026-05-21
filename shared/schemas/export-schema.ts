@@ -24,8 +24,14 @@ const FileNameSchema = z
 // for md, txt, html and pdf (because html is used for pdf)
 const StringContentSchema = z
   .string()
-  .min(1, "Content is empty")
-  .max(10_000_000, "Content exceeds maximum size");
+  .max(10_000_000, "Content exceeds maximum size")
+  .optional()
+  .transform((val) => {
+    if (!val || val.trim() === "") {
+      return "New Note";
+    }
+    return val;
+  });
 
 const ExportBaseSchema = z.object({
   id: z.string(),
