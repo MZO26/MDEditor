@@ -46,24 +46,33 @@
                 type="search"
                 class="search-input"
                 placeholder="search notes"
-                data-tippy-content="search note content"
+                data-tippy-content="Search Note Content"
+                data-shortcut="Mod+F"
               />
             </div>
-            <button class="import-btn" data-tippy-content="import file">
+            <button class="import-btn" data-tippy-content="Import File">
               <i data-lucide="file-up"></i>
             </button>
-            <button class="add-note-btn" data-tippy-content="add new note">
+            <button
+              class="add-note-btn"
+              data-tippy-content="New Note"
+              data-shortcut="Mod+N"
+            >
               <i data-lucide="plus"></i>
             </button>
           </div>
           <div class="notes-container"></div>
           <div class="sidebar-footer">
-            <button class="settings-btn" data-tippy-content="settings">
+            <button
+              class="settings-btn"
+              data-tippy-content="Settings"
+              data-shortcut="Mod+,"
+            >
               <i data-lucide="sliders-horizontal"></i>
             </button>
             <select
               class="view-select"
-              data-tippy-content="filter notes"
+              data-tippy-content="Filter Notes"
             ></select>
             <span class="info-span note-count"></span>
           </div>
@@ -75,7 +84,7 @@
           <div class="editor-header">
             <div id="toolbar"></div>
           </div>
-          <button class="info-sidebar-toggle" data-tippy-content="open infobar">
+          <button class="info-sidebar-toggle">
             <span class="dots"></span>
           </button>
           <div id="editor"></div>
@@ -117,7 +126,7 @@
     <div class="spinner" popover="manual"></div>
     <dialog id="delete-dialog" class="delete-dialog">
       <form method="dialog" class="delete-dialog-form">
-        <button class="delete-close-btn" data-tippy-content="close">
+        <button class="delete-close-btn" data-tippy-content="Close">
           <i data-lucide="x" class="delete-close-icon"></i>
         </button>
         <div class="delete-dialog-header">
@@ -140,7 +149,7 @@
     <dialog class="merge-modal">
       <form method="dialog" novalidate>
         <button class="close-btn" value="cancel">
-          <i data-lucide="x" data-tippy-content="close"></i>
+          <i data-lucide="x" data-tippy-content="Close"></i>
         </button>
         <div class="merge-modal-selection">
           <div class="merge-title">Merge Note</div>
@@ -155,12 +164,12 @@
             maxlength="40"
             spellcheck="false"
             autocomplete="off"
-            data-tippy-content="valid note ID required"
+            data-tippy-content="Valid Note ID Required"
           />
           <button
             class="confirm-btn"
             value="confirm"
-            data-tippy-content="confirm merge"
+            data-tippy-content="Confirm Merge"
           >
             Merge
           </button>
@@ -175,14 +184,14 @@
         <button
           class="close-setting-modal-btn"
           value="cancel"
-          data-tippy-content="close"
+          data-tippy-content="Close"
         >
           <i data-lucide="x"></i>
         </button>
         <div class="settings-selection">
           <div class="settings-title">Settings</div>
         </div>
-        <div class="settings-content" data-activetab="appearance"></div>
+        <div class="settings-content" data-activetab="Appearance"></div>
       </form>
     </dialog>
     <template id="sidebar-empty-state-template">
@@ -214,10 +223,10 @@
       <div class="note-item">
         <div class="note-header">
           <div class="icon-div">
-            <i data-lucide="pin" data-tippy-content="pinned" class="pin"></i>
+            <i data-lucide="pin" data-tippy-content="Pinned" class="pin"></i>
             <i
               data-lucide="bookmark"
-              data-tippy-content="bookmarked"
+              data-tippy-content="Bookmarked"
               class="bookmark"
             ></i>
           </div>

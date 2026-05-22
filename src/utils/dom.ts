@@ -2,11 +2,11 @@ function requireElement<T extends HTMLElement>(
   selector: string,
   parent: Document | HTMLElement = document,
 ): T {
-  const el = parent.querySelector<T>(selector);
-  if (!el) {
+  const element = parent.querySelector<T>(selector);
+  if (!element) {
     throw new Error(`Element not found: "${selector}"`);
   }
-  return el;
+  return element;
 }
 
 function findElement<T extends HTMLElement>(selector: string): T | null {

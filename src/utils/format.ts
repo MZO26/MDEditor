@@ -9,22 +9,13 @@ function formatNoteDate(isoString: string) {
 function formatShortcut(shortcut?: string): string {
   if (!shortcut) return "";
 
-  const isMac =
-    typeof window !== "undefined"
-      ? navigator.userAgent.toUpperCase().indexOf("MAC") >= 0
-      : false;
+  const isMac = typeof process !== "undefined" && process.platform === "darwin";
 
-  const modifier = isMac ? "⌘" : "Ctrl+";
-  let formatted = shortcut.replace(/mod[-+]?/gi, modifier);
-
-  if (isMac) {
-    formatted = formatted.replace(/shift[-+]?/gi, "⇧");
-    formatted = formatted.replace(/alt[-+]?/gi, "⌥");
-  } else {
-    formatted = formatted.replace(/shift[-+]?/gi, "Shift+");
-    formatted = formatted.replace(/alt[-+]?/gi, "Alt+");
-  }
-  return formatted.toUpperCase();
+  return shortcut
+    .replace(/mod[-+]?/gi, isMac ? "⌘" : "Ctrl+")
+    .replace(/shift[-+]?/gi, isMac ? "⇧" : "Shift+")
+    .replace(/alt[-+]?/gi, isMac ? "⌥" : "Alt+")
+    .replace(/meta[-+]?/gi, isMac ? "⌘" : "Meta+");
 }
 
 export { formatNoteDate, formatShortcut };

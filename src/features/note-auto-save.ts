@@ -24,7 +24,7 @@ function setupAutoSave(editor: Editor, id: string) {
     } finally {
       pendingSave = null;
     }
-  }, 2000);
+  }, 1000);
   const updateHandler = () => debouncedSave();
   editor.on("update", updateHandler);
   return {

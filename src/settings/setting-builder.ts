@@ -7,7 +7,7 @@ type SelectOption = { value: string; label: string };
 function selectBuilder(
   id: string,
   options: SelectOption[],
-  category: "appearance" | "editor" | "app",
+  category: "Appearance" | "Editor" | "App",
   placeholderText?: string,
 ) {
   const settingsContainer = requireElement<HTMLDivElement>(".settings-content");
@@ -28,7 +28,6 @@ function selectBuilder(
   }
   const optionNodes = options.map((opt) => new Option(opt.label, opt.value));
   select.append(...optionNodes);
-  select.setAttribute("data-tippy-content", `select ${id}`);
   const row = document.createElement("div");
   row.className = "settings-row";
   row.dataset["category"] = category;
@@ -52,9 +51,9 @@ function createSettingsMenu(): HTMLDivElement {
   const container = document.createElement("div");
   container.className = "settings-buttons";
   container.append(
-    createSettingsButton("appearance", "palette"),
-    createSettingsButton("editor", "pen-line"),
-    createSettingsButton("app", "app-window"),
+    createSettingsButton("Appearance", "palette"),
+    createSettingsButton("Editor", "pen-line"),
+    createSettingsButton("App", "app-window"),
   );
 
   return container;

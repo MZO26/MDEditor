@@ -33,15 +33,15 @@ function saveWindowBounds() {
   }
 
   try {
-    const rawBounds =
+    const bounds =
       typeof win.getNormalBounds === "function"
         ? win.getNormalBounds()
         : win.getBounds();
     const preparedBounds = {
-      x: rawBounds.x,
-      y: rawBounds.y,
-      width: Math.max(1100, rawBounds.width),
-      height: Math.max(600, rawBounds.height),
+      x: bounds.x,
+      y: bounds.y,
+      width: Math.max(1100, bounds.width),
+      height: Math.max(600, bounds.height),
     };
     const result = StoreSchema.shape["window-bounds"].safeParse(preparedBounds);
     if (!result.success) {

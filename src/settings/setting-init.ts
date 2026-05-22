@@ -29,7 +29,7 @@ async function initAppSettings(settings: AppSettings) {
     appendTo: modal,
   });
   if (firstActiveBtn) setActiveItem(firstActiveBtn, buttonsContainer);
-  await applyAppTheme(undefined, false, settings.theme);
+  await applyAppTheme(settings["theme"], false, settings["theme"]);
   applyModalListeners(openModalBtn, buttonsContainer, settingsContainer, modal);
   registerAppEvents(document, {
     "app:open-settings": () => modal.showModal(),

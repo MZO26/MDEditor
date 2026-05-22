@@ -34,7 +34,7 @@ function registerElectronIpc(win: BrowserWindow) {
 
   ipcMain.handle("set:theme", (e, theme: Theme, focus?: boolean) => {
     return safeResponse(e, async () => {
-      if (!checkRateLimit("save:image", LIMITS.WRITE_LIGHT))
+      if (!checkRateLimit("set:theme", LIMITS.WRITE_LIGHT))
         throw new Error("RATE_LIMIT");
       const validatedData = validation(StoreSchema.shape.theme, theme);
       const activeTheme = initTheme(validatedData);

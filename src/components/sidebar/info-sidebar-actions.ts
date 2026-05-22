@@ -82,7 +82,7 @@ async function updateStats(note: Note) {
   updateInfoHeader(note.created_at, note.title);
 }
 
-const debouncedUpdateStats = debounce(updateStats, 300);
+const debouncedUpdateStats = debounce(updateStats, 1000);
 
 function estimateReadingTime(wordCount: number, wpm = 238): string {
   const s = Math.round((wordCount / wpm) * 60);

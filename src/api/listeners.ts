@@ -211,8 +211,8 @@ function initListeners() {
     mergeDialog.returnValue = "";
     const handleClose = async () => {
       if (mergeDialog.returnValue !== "confirm") return;
-      const rawValue = mergeInput.value.trim();
-      const validatedId = validateUUID(rawValue);
+      const value = mergeInput.value.trim();
+      const validatedId = validateUUID(value);
       if (!validatedId) {
         showToast("Invalid Note ID format.");
         return;

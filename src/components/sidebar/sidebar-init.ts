@@ -6,6 +6,7 @@ import { createNoteButton, importNoteButton } from "@/features/note-buttons";
 import { createAsyncHandler } from "@/utils/async";
 import { requireElement } from "@/utils/dom";
 import { getAppItem, registerAppEvents } from "@/utils/registry";
+import { createTooltipContent } from "@/utils/ui";
 import { delegate } from "tippy.js";
 import "tippy.js/dist/tippy.css";
 
@@ -25,6 +26,14 @@ async function initNotesSidebar() {
     target: "[data-tippy-content]",
     theme: "app-theme",
     trigger: "mouseenter",
+    onCreate: (instance) => {
+      const reference = instance.reference;
+      const baseText = reference.getAttribute("data-tippy-content") || "";
+      if (reference.hasAttribute("data-shortcut")) {
+        const shortcut = reference.getAttribute("data-shortcut") ?? undefined;
+        instance.setContent(createTooltipContent(baseText, shortcut));
+      }
+    },
   });
   const viewSelect = createViews(views);
   applyFilterListeners(searchInput, viewSelect);

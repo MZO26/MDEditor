@@ -55,11 +55,11 @@ class Transactions {
     const rows: Note[] = [];
     for (const params of paramsArr) {
       const { tags, links, ...noteParams } = params;
-      const rawResult = this.createNoteStmt.get(noteParams) as NoteRow;
-      if (!rawResult) {
+      const result = this.createNoteStmt.get(noteParams) as NoteRow;
+      if (!result) {
         throw new Error("NOT_FOUND");
       }
-      const noteId = rawResult.id;
+      const noteId = result.id;
       if (links && links.length > 0) {
         for (const link of links) {
           const exists = this.checkNoteStmt.get({ id: link });
@@ -74,7 +74,7 @@ class Transactions {
         }
       }
       const createdNote = validation(NoteFromDB, {
-        ...rawResult,
+        ...result,
         tags: NoteDB.getTagsById(noteId),
         links: NoteDB.getLinksById(noteId),
       });
@@ -85,11 +85,11 @@ class Transactions {
 
   safeCreate(params: CreateTransaction): Note {
     const { tags, links, ...noteParams } = params;
-    const rawResult = this.createNoteStmt.get(noteParams) as NoteRow;
-    if (!rawResult) {
+    const result = this.createNoteStmt.get(noteParams) as NoteRow;
+    if (!result) {
       throw new Error("NOT_FOUND");
     }
-    const noteId = rawResult.id;
+    const noteId = result.id;
     if (links && links.length > 0) {
       for (const link of links) {
         const exists = this.checkNoteStmt.get({ id: link });
@@ -104,7 +104,7 @@ class Transactions {
       }
     }
     return validation(NoteFromDB, {
-      ...rawResult,
+      ...result,
       tags: NoteDB.getTagsById(noteId),
       links: NoteDB.getLinksById(noteId),
     });
@@ -121,11 +121,11 @@ class Transactions {
 
   safeUpdate(params: UpdateTransaction): Note {
     const { tags, links, ...noteParams } = params;
-    const rawResult = this.updateNoteStmt.get(noteParams) as NoteRow;
-    if (!rawResult) {
+    const result = this.updateNoteStmt.get(noteParams) as NoteRow;
+    if (!result) {
       throw new Error("NOT_FOUND");
     }
-    const noteId = rawResult.id;
+    const noteId = result.id;
     this.deleteLinksStmt.run({ source_id: noteId });
     if (links && links.length > 0) {
       for (const link of links) {
@@ -142,7 +142,7 @@ class Transactions {
       }
     }
     return validation(NoteFromDB, {
-      ...rawResult,
+      ...result,
       tags: NoteDB.getTagsById(noteId),
       links: NoteDB.getLinksById(noteId),
     });

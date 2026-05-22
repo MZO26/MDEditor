@@ -17,18 +17,6 @@ import { app, dialog, ipcMain, type BrowserWindow } from "electron";
 import path from "path";
 
 function registerFileIpc(win: BrowserWindow) {
-  ipcMain.handle("select-folder", async () => {
-    const { canceled, filePaths } = await dialog.showOpenDialog({
-      properties: ["openDirectory"],
-    });
-
-    if (canceled || filePaths.length === 0) {
-      return null;
-    }
-    const selectedPath = filePaths[0];
-    return selectedPath;
-  });
-
   ipcMain.handle("note:import", (e) => {
     return safeResponse(e, async () => {
       const { canceled, filePaths } = await dialog.showOpenDialog(win, {

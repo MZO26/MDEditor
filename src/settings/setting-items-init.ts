@@ -45,13 +45,11 @@ function initAppearanceSettings(settings: AppSettings) {
     const codePref = setCodeTheme(baseTheme);
     updateSettings({ "code-theme": codePref });
   });
-  document.documentElement.setAttribute("data-theme", settings["theme"]);
   themeSelect.value = settings["theme"];
   themeSelect.addEventListener(
     "change",
     createAsyncHandler(async (e: Event) => {
       const target = e.target as HTMLSelectElement;
-      themeSelect.value = target.value;
       const validTheme =
         target.value in THEME_MAP ? (target.value as Theme) : "system";
       await applyAppTheme(validTheme, false);

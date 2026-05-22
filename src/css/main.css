@@ -529,11 +529,11 @@ label {
   border-bottom: none;
 }
 
-.settings-content[data-activetab="appearance"]
-  .settings-row[data-category="appearance"],
-.settings-content[data-activetab="editor"]
-  .settings-row[data-category="editor"],
-.settings-content[data-activetab="app"] .settings-row[data-category="app"] {
+.settings-content[data-activetab="Appearance"]
+  .settings-row[data-category="Appearance"],
+.settings-content[data-activetab="Editor"]
+  .settings-row[data-category="Editor"],
+.settings-content[data-activetab="App"] .settings-row[data-category="App"] {
   display: flex;
   animation: fadeIn 0.2s ease-out;
 }

@@ -35,12 +35,12 @@ function addOneNoteToList(note: Note) {
   let target: Element | null = null;
   const sidebar = getAppItem("sidebar");
   for (const child of sidebar.children) {
-    const el = child as HTMLElement;
+    const element = child as HTMLElement;
     if (
-      el.getAttribute("data-pinned") !== "true" &&
-      el.getAttribute("data-bookmarked") !== "true"
+      element.getAttribute("data-pinned") !== "true" &&
+      element.getAttribute("data-bookmarked") !== "true"
     ) {
-      target = el;
+      target = element;
       break;
     }
   }
@@ -97,7 +97,7 @@ async function reloadNoteList(notes?: Note[]): Promise<void> {
   }
 }
 
-async function updateNoteInList(note: Note): Promise<void> {
+async function updateNoteInList(note: Note) {
   const noteElement = findElement<HTMLDivElement>(
     `.note-item[data-id="${note.id}"]`,
   );

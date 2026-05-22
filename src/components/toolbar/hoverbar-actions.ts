@@ -4,12 +4,11 @@ import {
 } from "@/components/toolbar/hoverbar-init";
 import { getAppItem } from "@/utils/registry";
 import type { ActionMap } from "@shared/types";
-import { type Editor } from "@tiptap/core";
 
-const topToolbarActions: ActionMap<Editor> = {
+const topToolbarActions: ActionMap = {
   readOnly: {
     type: "action",
-    run: (editor: Editor) => editor?.setEditable(!editor.isEditable),
+    run: (editor) => editor?.setEditable(!editor.isEditable),
     icon: "glasses",
     shortcut: "MOD+Shift+R",
   },

@@ -1,4 +1,4 @@
-import type { Content } from "@tiptap/core";
+import type { Content, Editor } from "@tiptap/core";
 import type { Code } from "lucide";
 
 type NativeWindowColors = {
@@ -33,11 +33,11 @@ type Result<T, E = string> =
 type Success<T> = Extract<Result<T>, { success: true }>;
 type Failure<E = string> = Extract<Result<never, E>, { success: false }>;
 
-type Action<T> = {
+type Action = {
   type?: "action";
-  run: (args: T) => void;
-  isActive?: (args: T) => boolean;
-  isDisabled?: (args: T) => boolean;
+  run: (args?: Editor | null) => void;
+  isActive?: (args: Editor) => boolean;
+  isDisabled?: (args: Editor) => boolean;
   icon: string;
   shortcut: string;
 };
@@ -46,9 +46,9 @@ type Divider = {
   type: "divider";
 };
 
-type ToolbarItem<T> = Action<T> | Divider;
+type ToolbarItem = Action | Divider;
 
-type ActionMap<T> = Record<string, ToolbarItem<T>>;
+type ActionMap = Record<string, ToolbarItem>;
 
 type Metadata = {
   title: string;

@@ -10,7 +10,7 @@ function buildSelects() {
       { value: "dark", label: "Dark" },
       { value: "dark-warm", label: "Dark · Warm" },
     ],
-    "appearance",
+    "Appearance",
   );
   selectBuilder(
     "code-theme",
@@ -19,7 +19,7 @@ function buildSelects() {
       { value: "balanced", label: "Balanced" },
       { value: "eye-comfort", label: "Eye Comfort" },
     ],
-    "appearance",
+    "Appearance",
   );
   selectBuilder(
     "highlight-theme",
@@ -29,7 +29,7 @@ function buildSelects() {
       { value: "idea", label: "Idea" },
       { value: "focus", label: "Focus" },
     ],
-    "appearance",
+    "Appearance",
   );
   selectBuilder(
     "note-item-display",
@@ -47,7 +47,7 @@ function buildSelects() {
         label: "Minimal",
       },
     ],
-    "appearance",
+    "Appearance",
   );
   selectBuilder(
     "font-family",
@@ -59,7 +59,7 @@ function buildSelects() {
       { value: "garamond", label: "Garamond" },
       { value: "tahoma", label: "Tahoma" },
     ],
-    "editor",
+    "Editor",
   );
   selectBuilder(
     "font-size",
@@ -71,7 +71,7 @@ function buildSelects() {
       { value: "20", label: "20" },
       { value: "24", label: "24" },
     ],
-    "editor",
+    "Editor",
   );
   selectBuilder(
     "line-height",
@@ -83,7 +83,7 @@ function buildSelects() {
       { value: "1.6", label: "1.6" },
       { value: "1.7", label: "1.7" },
     ],
-    "editor",
+    "Editor",
   );
   selectBuilder(
     "editor-focus",
@@ -91,7 +91,7 @@ function buildSelects() {
       { value: "on", label: "Activate Editor Focus" },
       { value: "off", label: "Deactivate Editor Focus" },
     ],
-    "editor",
+    "Editor",
   );
   (selectBuilder(
     "spellcheck",
@@ -99,7 +99,7 @@ function buildSelects() {
       { value: "true", label: "Enable spellcheck" },
       { value: "false", label: "Disable spellcheck" },
     ],
-    "app",
+    "App",
   ),
     selectBuilder(
       "file-backup",
@@ -110,7 +110,7 @@ function buildSelects() {
         { value: "html", label: "HTML" },
         { value: "pdf", label: "PDF" },
       ],
-      "app",
+      "App",
       "Backup Format",
     ));
   selectBuilder(
@@ -120,7 +120,7 @@ function buildSelects() {
       { value: "vacuum-db", label: "Free up disk space" },
       { value: "backup-db", label: "Backup database" },
     ],
-    "app",
+    "App",
     "Database Settings",
   );
 }

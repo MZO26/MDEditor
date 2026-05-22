@@ -43,7 +43,8 @@ function compressImageInWorker(
   });
 }
 
-async function processAndInsertImage(file: File, editor: Editor) {
+async function processAndInsertImage(file: File, editor: Editor | null) {
+  if (!editor) return;
   if (!ALLOWED_TYPES.includes(file.type)) {
     showToast("Error: Only JPG, PNG, GIF, and WebP are allowed.");
     return;
@@ -64,7 +65,7 @@ async function processAndInsertImage(file: File, editor: Editor) {
       showToast(saved.message);
       return;
     }
-    const currentPos = editor.state.selection.to;
+    const currentPos = editor?.state.selection.to;
     editor
       .chain()
       .focus()
@@ -79,7 +80,7 @@ async function processAndInsertImage(file: File, editor: Editor) {
   }
 }
 
-async function promptImageUpload(editor: Editor) {
+async function promptImageUpload(editor: Editor | null) {
   if (!editor) return;
   const input = document.createElement("input");
   input.type = "file";

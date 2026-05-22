@@ -25,11 +25,11 @@ async function batchExport(
       if (isOutside) {
         return null;
       }
-      const rawContent = item.content;
+      const content = item.content;
       const userDataPath = app.getPath("userData");
       const imagesFolder = path.join(userDataPath, "editor-images");
       const portableContent = sanitizeExportString(
-        rawContent,
+        content,
         absoluteTargetFolder,
         imagesFolder,
       );

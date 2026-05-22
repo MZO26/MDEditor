@@ -1,32 +1,25 @@
-import { createTooltipContent } from "@/utils/ui";
 import type { Action, ActionMap } from "@shared/types";
-import tippy from "tippy.js";
 
-function createButton<T>(key: string, item: Action<T>): HTMLButtonElement {
+function createButton(key: string, item: Action): HTMLButtonElement {
   const btn = document.createElement("button");
   btn.classList.add(`${key}-btn`);
   btn.dataset["action"] = key;
   const i = document.createElement("i");
   i.dataset["lucide"] = item.icon;
   btn.appendChild(i);
-  const tooltipContent = createTooltipContent(key, item.shortcut);
-  tippy(btn, {
-    content: tooltipContent,
-    placement: "top",
-    arrow: true,
-    theme: "app-theme",
-  });
+  btn.setAttribute("data-tippy-content", key);
+  btn.setAttribute("data-shortcut", item.shortcut);
   return btn;
 }
 
 function createDivider(): HTMLDivElement {
-  const el = document.createElement("div");
-  el.className = "divider";
-  return el;
+  const element = document.createElement("div");
+  element.className = "divider";
+  return element;
 }
 
-function createToolbarFragment<T>(
-  actions: ActionMap<T>,
+function createToolbarFragment(
+  actions: ActionMap,
   buttonMap: Map<string, HTMLButtonElement>,
 ): DocumentFragment {
   const fragment = document.createDocumentFragment();

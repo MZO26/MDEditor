@@ -31,7 +31,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     editorWrapper: requireElement<HTMLDivElement>("#editor"),
   });
   setupEditorListeners(getAppItem("editorWrapper"), getAppItem("editor"));
-
   initGlobalShortcuts();
   initAppSettings(settings);
   initListeners();

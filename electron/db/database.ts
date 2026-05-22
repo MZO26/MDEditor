@@ -5,7 +5,6 @@ import { validation } from "@shared/ipc-helpers";
 import {
   CreateTransactionSchema,
   NoteFromDB,
-  NoteRowSchema,
   ToggleBookmarkSchema,
   TogglePinSchema,
   UpdateTransactionSchema,
@@ -155,7 +154,7 @@ class NoteDB {
     const stringifiedContent = JSON.stringify(content);
     const uniqueTags = [...new Set(tags)].slice(0, 3);
     const uniqueLinks = [...new Set(links)];
-    const rawContent = {
+    const dbPayload = {
       id,
       ...rest,
       content: stringifiedContent,
@@ -164,7 +163,7 @@ class NoteDB {
       created_at: now,
       updated_at: now,
     };
-    const dbContent = validation(CreateTransactionSchema, rawContent);
+    const dbContent = validation(CreateTransactionSchema, dbPayload);
     return this.transactions.safeCreate(dbContent);
   }
 
@@ -177,7 +176,7 @@ class NoteDB {
       const stringifiedContent = JSON.stringify(content);
       const uniqueTags = [...new Set(tags)].slice(0, 3);
       const uniqueLinks = [...new Set(links)];
-      const rawContent = {
+      const dbPayload = {
         id,
         ...rest,
         content: stringifiedContent,
@@ -186,7 +185,7 @@ class NoteDB {
         created_at: now,
         updated_at: now,
       };
-      const dbContent = validation(CreateTransactionSchema, rawContent);
+      const dbContent = validation(CreateTransactionSchema, dbPayload);
       dbContents.push(dbContent);
     }
     return this.transactions.safeCreateMany(dbContents);
@@ -198,14 +197,14 @@ class NoteDB {
     const now = new Date().toISOString();
     const uniqueTags = [...new Set(tags)].slice(0, 3);
     const uniqueLinks = [...new Set(links)];
-    const rawContent = {
+    const dbPayload = {
       ...rest,
       content: stringifiedContent,
       tags: uniqueTags,
       links: uniqueLinks,
       updated_at: now,
     };
-    const dbContent = validation(UpdateTransactionSchema, rawContent);
+    const dbContent = validation(UpdateTransactionSchema, dbPayload);
     return this.transactions.safeUpdate(dbContent);
   }
 
@@ -272,31 +271,31 @@ class NoteDB {
 
   public toggleBookmark(id: string): boolean {
     const now = new Date().toISOString();
-    const rawResult = this.toggleBookmarkStmt.get({ updated_at: now, id });
-    if (!rawResult) {
+    const result = this.toggleBookmarkStmt.get({ updated_at: now, id });
+    if (!result) {
       throw new Error("NOT_FOUND");
     }
-    return validation(ToggleBookmarkSchema, rawResult).bookmarked;
+    return validation(ToggleBookmarkSchema, result).bookmarked;
   }
 
   public togglePin(id: string): boolean {
     const now = new Date().toISOString();
-    const rawResult = this.togglePinStmt.get({ updated_at: now, id });
-    if (!rawResult) {
+    const result = this.togglePinStmt.get({ updated_at: now, id });
+    if (!result) {
       throw new Error("NOT_FOUND");
     }
-    return validation(TogglePinSchema, rawResult).pinned;
+    return validation(TogglePinSchema, result).pinned;
   }
 
   public getTagsById(id: string): Tag[] {
-    const rawResult = this.getTagsByIdStmt.all({ id }) as TagName[];
-    const tagArr = rawResult.map((row) => row.tag_name);
+    const result = this.getTagsByIdStmt.all({ id }) as TagName[];
+    const tagArr = result.map((row) => row.tag_name);
     return tagArr;
   }
 
   public getLinksById(id: string): Link[] {
-    const rawResult = this.getLinksByIdStmt.all({ id }) as Link[];
-    return rawResult;
+    const result = this.getLinksByIdStmt.all({ id }) as Link[];
+    return result;
   }
 
   public searchByTag(tagName: string): Note[] {
@@ -357,11 +356,10 @@ class NoteDB {
   public searchNotes(searchTerm: string, limit?: number): Note[] {
     const result = this.search.query(searchTerm, limit) as NoteRow[];
     return result.map((note) => {
-      const validatedRow = validation(NoteRowSchema, note);
       return validation(NoteFromDB, {
-        ...validatedRow,
-        tags: this.getTagsById(validatedRow.id),
-        links: this.getLinksById(validatedRow.id),
+        ...note,
+        tags: this.getTagsById(note.id) ?? [],
+        links: this.getLinksById(note.id) ?? [],
       });
     });
   }
