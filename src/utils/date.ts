@@ -38,4 +38,12 @@ function startAppClock() {
   }, msUntilNextMinute);
 }
 
-export { startAppClock, updateDateTime };
+function formatNoteDate(isoString: string) {
+  const date = new Date(isoString);
+  return new Intl.DateTimeFormat("de-DE", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
+export { formatNoteDate, startAppClock, updateDateTime };

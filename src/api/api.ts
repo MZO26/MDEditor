@@ -1,7 +1,7 @@
 import { settingsStore } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
-import { safeInvoke } from "@/utils/ipc";
 import { showToast } from "@/utils/toast";
+import { safeInvoke } from "@shared/ipc-helpers";
 import type {
   ExportRequest,
   ImportRequest,

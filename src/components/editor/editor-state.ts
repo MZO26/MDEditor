@@ -6,7 +6,7 @@ import { renderIcons } from "@/utils/icons";
 import { getAppItem } from "@/utils/registry";
 
 function handleEditorEmptyState() {
-  const editorContainer = getAppItem("editorContainer") as HTMLDivElement;
+  const editorContainer = getAppItem("editorContainer");
   const editorView = requireElement<HTMLDivElement>(".editor-view");
   let emptyState = editorContainer.querySelector<HTMLDivElement>(
     ".editor-empty-state",

@@ -1,4 +1,5 @@
 import { THEME_DATA } from "@shared/constants";
+import { validation } from "@shared/ipc-helpers";
 import type { AppSettings, Theme } from "@shared/schemas/store-schema";
 import { StoreSchema } from "@shared/schemas/store-schema";
 import type { NativeWindowColors } from "@shared/types";
@@ -22,28 +23,23 @@ function getTitleBarOverlay(
 
 // tells electron if theme is dark or light
 function initTheme(savedTheme: unknown): Exclude<Theme, "system"> {
-  const validTheme = StoreSchema.shape.theme.safeParse(savedTheme);
-  const theme = validTheme.success ? validTheme.data : "system";
-  if (theme === "system") {
+  const validTheme = validation(StoreSchema.shape.theme, savedTheme);
+  if (validTheme === "system") {
     nativeTheme.themeSource = "system";
     return nativeTheme.shouldUseDarkColors ? "dark" : "light";
   }
-  nativeTheme.themeSource = THEME_DATA[theme].isDark ? "dark" : "light";
-  return theme;
+  nativeTheme.themeSource = THEME_DATA[validTheme]?.isDark ? "dark" : "light";
+  return validTheme;
 }
 
 function onOSThemeChange(win: BrowserWindow, store: AppSettings["theme"]) {
-  const savedTheme = store;
-  if (savedTheme === "system") {
-    const newActiveTheme = initTheme("system");
-    const newWindowTheme = getTitleBarOverlay(newActiveTheme);
-
-    if (win && !win.isDestroyed()) {
-      win.setBackgroundColor(newWindowTheme.backgroundColor);
-      win.setTitleBarOverlay(newWindowTheme.overlayOptions);
-      const resolvedTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
-      win.webContents.send("theme-changed", resolvedTheme);
-    }
+  if (!win || win.isDestroyed() || store !== "system") return; // only update theme if user has selected system theme
+  const resolvedTheme = nativeTheme.shouldUseDarkColors ? "dark" : "light";
+  const newWindowTheme = getTitleBarOverlay(resolvedTheme);
+  for (const window of BrowserWindow.getAllWindows()) {
+    window.setBackgroundColor(newWindowTheme.backgroundColor);
+    window.setTitleBarOverlay(newWindowTheme.overlayOptions);
+    window.webContents.send("theme-changed", resolvedTheme);
   }
 }
 

@@ -32,7 +32,9 @@ declare global {
       saveImage: (
         payload: ImagePayload,
       ) => Promise<Result<{ imageSrc: string }>>;
-      onThemeChanged: (callback: (theme: Theme) => void) => () => void;
+      onThemeChanged: (
+        callback: (resolvedTheme: Extract<Theme, "dark" | "light">) => void,
+      ) => () => void;
       showContextMenu: (menuType: MenuType, payload?: NoteMenuPayload) => void;
       onTriggerTableAction: (callback: (action: string) => void) => void;
       onTriggerNoteAction: (

@@ -31,20 +31,18 @@ function registerElectronIpc(win: BrowserWindow) {
       });
     },
   );
-
   ipcMain.handle("set:theme", (e, theme: Theme, focus?: boolean) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("set:theme", LIMITS.WRITE_LIGHT))
         throw new Error("RATE_LIMIT");
-      const validatedData = validation(StoreSchema.shape.theme, theme);
-      const activeTheme = initTheme(validatedData);
-      const windowTheme = focus
-        ? getTitleBarOverlay(activeTheme, true)
-        : getTitleBarOverlay(activeTheme, false);
-      BrowserWindow.getAllWindows().forEach((win) => {
-        win.setTitleBarOverlay?.(windowTheme.overlayOptions);
-      });
-      return theme;
+      const validatedTheme = validation(StoreSchema.shape.theme, theme);
+      const resolvedTheme = initTheme(validatedTheme);
+      const windowTheme = getTitleBarOverlay(resolvedTheme, focus ?? false);
+      for (const window of BrowserWindow.getAllWindows()) {
+        window.setBackgroundColor(windowTheme.backgroundColor);
+        window.setTitleBarOverlay?.(windowTheme.overlayOptions);
+      }
+      return resolvedTheme;
     });
   });
 

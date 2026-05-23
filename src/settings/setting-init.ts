@@ -23,7 +23,7 @@ async function initAppSettings(settings: AppSettings) {
   );
   initTippyDelegate(modal, modal);
   if (firstActiveBtn) setActiveItem(firstActiveBtn, buttonsContainer);
-  await applyAppTheme(settings["theme"], false, settings["theme"]);
+  await applyAppTheme(settings["theme"]);
   applyModalListeners(openModalBtn, buttonsContainer, settingsContainer, modal);
   registerAppEvents(document, {
     "app:open-settings": () => modal.showModal(),

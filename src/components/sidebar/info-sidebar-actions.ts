@@ -1,17 +1,18 @@
 import { getManyById } from "@/api/api";
 import { debounce } from "@/utils/async";
+import { formatNoteDate } from "@/utils/date";
 import { findElement, requireElement } from "@/utils/dom";
-import { formatNoteDate } from "@/utils/format";
 import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
 import { getTodoStats } from "@shared/generators/generators";
 import type { Note } from "@shared/schemas/note-schema";
 import type { JSONContent } from "@tiptap/core";
+import { setSidebarState } from "./sidebar-state";
 
 function updateInfoHeader(date: Note["created_at"], title: Note["title"]) {
-  const container = findElement(".info-sidebar-header");
+  const container = findElement<HTMLDivElement>(".info-sidebar-header");
   if (!container) return;
-  container.innerHTML = "";
+  container.replaceChildren();
   if (!date || !title) return;
   const formattedDate = formatNoteDate(date);
   const span = document.createElement("span");
@@ -25,24 +26,24 @@ function updateInfoHeader(date: Note["created_at"], title: Note["title"]) {
 }
 
 function updateNoteTags(tags: Note["tags"]) {
-  const container = findElement(".tag-container");
+  const container = findElement<HTMLDivElement>(".tag-container");
   if (!container) return;
-  container.innerHTML = "";
+  container.replaceChildren();
   if (!tags || tags.length === 0) return;
   for (const tag of tags) {
     const span = document.createElement("span");
     span.classList.add("tag", "searchTag");
     span.setAttribute("data-tippy-content", `Filter notes with: ${tag}`);
-    span.dataset["tag"] = String(tag);
+    span.setAttribute("data-tag", String(tag));
     span.textContent = `#${tag}`;
     container.append(span);
   }
 }
 
 async function updateNoteLinks(links: Note["links"]) {
-  const container = findElement(".link-container");
+  const container = findElement<HTMLDivElement>(".link-container");
   if (!container) return;
-  container.innerHTML = "";
+  container.replaceChildren();
   if (!links || links.length === 0) return;
   const ids: string[] = links.map((link) => link.id);
   const relatedNotes = await getManyById(ids);
@@ -57,7 +58,7 @@ async function updateNoteLinks(links: Note["links"]) {
   for (const link of links) {
     const span = document.createElement("span");
     span.classList.add("link");
-    span.dataset["link"] = link.id;
+    span.setAttribute("data-link", link.id);
     span.textContent = `${link.dir}: ${linkMap.get(link.id) ?? link.id}`;
     container.append(span);
   }
@@ -71,7 +72,6 @@ async function updateStats(note: Note) {
   const readingTimeEl = findElement<HTMLSpanElement>("#reading-time");
   const charCount = editor.storage.characterCount.characters();
   const wordCount = editor.storage.characterCount.words();
-
   if (!infoSidebar || !wordCountEl || !charCountEl || !readingTimeEl) return;
   charCountEl.textContent = charCount.toString();
   wordCountEl.textContent = wordCount === 1 ? "1 word" : `${wordCount} words`;
@@ -84,7 +84,7 @@ async function updateStats(note: Note) {
 
 const debouncedUpdateStats = debounce(updateStats, 1000);
 
-function estimateReadingTime(wordCount: number, wpm = 238): string {
+function estimateReadingTime(wordCount: number, wpm = 238) {
   const s = Math.round((wordCount / wpm) * 60);
   const m = Math.floor(s / 60);
   return s < 30 ? "< 1 min read" : s < 60 ? "1 min read" : `${m} min read`;
@@ -109,4 +109,9 @@ function showTodoProgress(content: JSONContent) {
   }
 }
 
-export { debouncedUpdateStats };
+const collapseInfoSidebar = (infoSidebar: HTMLDivElement) => {
+  const collapsed = infoSidebar.classList.contains("collapsed");
+  setSidebarState(infoSidebar, !collapsed);
+};
+
+export { collapseInfoSidebar, debouncedUpdateStats };

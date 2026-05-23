@@ -128,6 +128,7 @@ app.whenReady().then(async () => {
 nativeTheme.on("updated", () => {
   if (win) onOSThemeChange(win, store.get("theme"));
 });
+
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();

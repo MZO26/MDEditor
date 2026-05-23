@@ -130,7 +130,12 @@
     <div class="spinner" popover="manual"></div>
     <dialog id="delete-dialog" class="delete-dialog">
       <form method="dialog" class="delete-dialog-form">
-        <button class="delete-close-btn" data-tippy-content="Close">
+        <button
+          class="delete-close-btn"
+          data-tippy-content="Close"
+          data-shortcut="Escape"
+          value="cancel"
+        >
           <i data-lucide="x" class="delete-close-icon"></i>
         </button>
         <div class="delete-dialog-header">
@@ -152,8 +157,13 @@
     </dialog>
     <dialog class="merge-modal">
       <form method="dialog" novalidate>
-        <button class="close-btn" value="cancel">
-          <i data-lucide="x" data-tippy-content="Close"></i>
+        <button
+          class="close-btn"
+          value="cancel"
+          data-tippy-content="Close"
+          data-shortcut="Escape"
+        >
+          <i data-lucide="x"></i>
         </button>
         <div class="merge-modal-selection">
           <div class="merge-title">Merge Note</div>
@@ -189,6 +199,7 @@
           class="close-setting-modal-btn"
           value="cancel"
           data-tippy-content="Close"
+          data-shortcut="Escape"
         >
           <i data-lucide="x"></i>
         </button>

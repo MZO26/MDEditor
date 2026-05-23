@@ -1,3 +1,4 @@
+import type { Result } from "@shared/types";
 import z from "zod";
 
 function validation<T extends z.ZodType>(
@@ -16,6 +17,22 @@ function validation<T extends z.ZodType>(
   return validation.data;
 }
 
+async function safeInvoke<T>(
+  ipcPromise: Promise<Result<T>>,
+): Promise<Result<T>> {
+  try {
+    return await ipcPromise;
+  } catch (err: unknown) {
+    console.error("IPC error: ", err);
+    const msg =
+      err instanceof Error
+        ? err.message
+        : "An unknown communication error occurred";
+
+    return { success: false, message: msg };
+  }
+}
+
 function measure<T>(fn: () => T): number {
   const start = performance.now();
   fn();
@@ -24,4 +41,4 @@ function measure<T>(fn: () => T): number {
   return Math.round((end - start) * 100) / 100;
 }
 
-export { measure, validation };
+export { measure, safeInvoke, validation };

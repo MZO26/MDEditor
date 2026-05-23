@@ -20,8 +20,7 @@ import { startAppClock } from "@/utils/date";
 import { requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
 import { getAppItem, setAppItems } from "@/utils/registry";
-import "tippy.js/dist/tippy.css";
-import { initTippyDelegate } from "./utils/ui";
+import { initTippyDelegate } from "@/utils/ui";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const settings = await loadSettings();
@@ -45,10 +44,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const hoverbar = requireElement<HTMLDivElement>(".top-toolbar");
   buildMenu(hoverbar, topToolbarActions);
   setupToolbarListeners(hoverbar, topToolbarActions);
-  initTippyDelegate(getAppItem("editorContainer"));
   initHoverbar();
   renderIcons();
   startAppClock();
+  initTippyDelegate(hoverbar);
+  initTippyDelegate(getAppItem("editorContainer"));
   requestAnimationFrame(() => {
     window.electronAPI.startupReady();
   });

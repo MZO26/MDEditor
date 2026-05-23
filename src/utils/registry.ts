@@ -28,7 +28,9 @@ function registerAppEvents(
   target: EventTarget,
   events: Record<string, EventListener>,
 ) {
-  for (const [eventName, handler] of Object.entries(events)) {
+  for (const eventName in events) {
+    const handler = events[eventName];
+    if (!handler) continue;
     target.addEventListener(eventName, handler);
   }
 }

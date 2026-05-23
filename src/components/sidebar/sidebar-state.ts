@@ -13,8 +13,10 @@ async function setSidebarState(
 
 function handleSidebarEmptyState(searchInput?: string) {
   const sidebar = getAppItem("sidebar");
-  const existing = sidebar.querySelector(".sidebar-empty-state");
-  const hasNotes = sidebar.childElementCount > (existing ? 1 : 0);
+  const existing = sidebar.querySelector<HTMLDivElement>(
+    ".sidebar-empty-state",
+  );
+  const hasNotes = sidebar.getElementsByClassName("note-item").length > 0;
   if (hasNotes) {
     if (existing) existing.remove();
   } else {

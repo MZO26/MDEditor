@@ -1,18 +1,17 @@
-import { createViews, views } from "@/components/sidebar/sidebar-filter";
-import { applyFilterListeners } from "@/components/sidebar/sidebar-filter-init";
-import { setSidebarState } from "@/components/sidebar/sidebar-state";
+import {
+  createViews,
+  debouncedSearch,
+  handleViews,
+  toggleSidebar,
+} from "@/components/sidebar/sidebar-actions";
 import { handleSelectNote } from "@/features/note-actions";
 import { createNoteButton, importNoteButton } from "@/features/note-buttons";
 import { createAsyncHandler } from "@/utils/async";
 import { requireElement } from "@/utils/dom";
 import { getAppItem, registerAppEvents } from "@/utils/registry";
 import { initTippyDelegate } from "@/utils/ui";
-import "tippy.js/dist/tippy.css";
-
-const toggleSidebar = (appContainer: HTMLDivElement) => {
-  const collapsed = appContainer.classList.contains("collapsed");
-  setSidebarState(appContainer, !collapsed);
-};
+import { VIEWS } from "@shared/constants";
+import type { View } from "@shared/types";
 
 async function initNotesSidebar() {
   const appContainer = getAppItem("appContainer");
@@ -22,9 +21,14 @@ async function initNotesSidebar() {
   const importBtn = requireElement<HTMLButtonElement>(".import-btn");
   const searchInput = requireElement<HTMLInputElement>(".search-input");
   initTippyDelegate(sidebarContainer);
-  const viewSelect = createViews(views);
-  applyFilterListeners(searchInput, viewSelect);
-  applySidebarListeners(sidebar, addNoteBtn, importBtn);
+  const viewSelect = createViews(VIEWS);
+  applySidebarListeners(
+    sidebar,
+    addNoteBtn,
+    importBtn,
+    searchInput,
+    viewSelect,
+  );
   registerAppEvents(document, {
     "app:toggle-sidebar": () => toggleSidebar(appContainer),
     "app:create-new-note": () => createNoteButton(),
@@ -35,9 +39,20 @@ function applySidebarListeners(
   sidebar: HTMLDivElement,
   addNoteBtn: HTMLButtonElement,
   importBtn: HTMLButtonElement,
+  searchInput: HTMLInputElement,
+  viewSelect: HTMLSelectElement,
 ) {
   addNoteBtn.addEventListener("click", createAsyncHandler(createNoteButton));
   importBtn.addEventListener("click", createAsyncHandler(importNoteButton));
+  searchInput.addEventListener("input", debouncedSearch);
+  viewSelect.addEventListener(
+    "change",
+    createAsyncHandler(async (e) => {
+      const target = e.target as HTMLSelectElement;
+      const view = target.value as View;
+      handleViews(view);
+    }),
+  );
   sidebar.addEventListener(
     "click",
     createAsyncHandler(async (e) => {
@@ -50,10 +65,10 @@ function applySidebarListeners(
         const target = e.target as HTMLElement;
         const item = target.closest<HTMLElement>(".note-item");
         if (!item) return;
-        const id = item.dataset["id"];
+        const id = item.getAttribute("data-id");
         if (!id) return;
-        const isPinned = item.dataset["pinned"] === "true";
-        const isBookmarked = item.dataset["bookmarked"] === "true";
+        const isPinned = item.getAttribute("data-pinned") === "true";
+        const isBookmarked = item.getAttribute("data-bookmarked") === "true";
         window.electronAPI.showContextMenu("note", {
           id: id,
           pinned: isPinned,

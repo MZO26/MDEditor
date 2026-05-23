@@ -41,10 +41,10 @@ function createSettingsMenu(): HTMLDivElement {
     const icon = document.createElement("i");
     icon.setAttribute("data-lucide", lucideIcon);
     const btn = document.createElement("button");
+    btn.type = "button";
     btn.className = "selection-btn";
     btn.appendChild(icon);
     btn.setAttribute("data-category", category);
-    btn.type = "button";
     btn.setAttribute("data-tippy-content", category);
     return btn;
   };

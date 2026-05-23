@@ -112,17 +112,17 @@ function buildSelects() {
       ],
       "App",
       "Backup Format",
+    ),
+    selectBuilder(
+      "db-optimization",
+      [
+        { value: "optimize-db", label: "Optimize database" },
+        { value: "vacuum-db", label: "Free up disk space" },
+        { value: "backup-db", label: "Backup database" },
+      ],
+      "App",
+      "Database Settings",
     ));
-  selectBuilder(
-    "db-optimization",
-    [
-      { value: "optimize-db", label: "Optimize database" },
-      { value: "vacuum-db", label: "Free up disk space" },
-      { value: "backup-db", label: "Backup database" },
-    ],
-    "App",
-    "Database Settings",
-  );
 }
 
 export { buildSelects };

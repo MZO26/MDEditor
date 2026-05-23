@@ -23,10 +23,12 @@ function createToolbarFragment(
   buttonMap: Map<string, HTMLButtonElement>,
 ): DocumentFragment {
   const fragment = document.createDocumentFragment();
-  for (const [key, item] of Object.entries(actions)) {
-    if (item.type === "divider") {
+  for (const key in actions) {
+    const item = actions[key];
+    if (item?.type === "divider") {
       fragment.appendChild(createDivider());
     } else {
+      if (!item) continue;
       const actionBtn = createButton(key, item);
       fragment.appendChild(actionBtn);
       buttonMap.set(key, actionBtn);

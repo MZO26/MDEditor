@@ -1,12 +1,73 @@
-import { getAll } from "@/api/api";
+import { getAll, getByTag, getViews, searchNotes } from "@/api/api";
 import { handleEditorEmptyState } from "@/components/editor/editor-state";
 import { createNoteItem } from "@/components/sidebar/sidebar-items";
-import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
+import {
+  handleSidebarEmptyState,
+  setSidebarState,
+} from "@/components/sidebar/sidebar-state";
 import { noteStore, stateStore } from "@/settings/app-state";
-import { findElement, setActiveItem } from "@/utils/dom";
+import { debounce } from "@/utils/async";
+import { findElement, requireElement, setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
 import type { Note } from "@shared/schemas/note-schema";
+import type { ViewItem } from "@shared/types";
+
+async function handleSearchInput(searchInput: string) {
+  const sidebar = getAppItem("sidebar");
+  sidebar.replaceChildren();
+  if (searchInput === "") {
+    await reloadNoteList();
+    return;
+  }
+  const response = await searchNotes(searchInput, 50);
+  if (!response.success) {
+    showToast(response.message);
+    return;
+  }
+  addManyNotesToList(response.data);
+  handleSidebarEmptyState(searchInput);
+}
+
+const debouncedSearch = debounce((e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const value = target.value.trim();
+  void handleSearchInput(value);
+}, 500);
+
+function createViews(views: ViewItem[]) {
+  const select = requireElement<HTMLSelectElement>(".view-select");
+  for (const view of views) {
+    const option = document.createElement("option");
+    option.textContent = view["label"];
+    option.value = view["id"];
+    select.append(option);
+  }
+  return select;
+}
+
+async function handleViews(view: string) {
+  const response = await getViews(view);
+  if (!response.success) {
+    showToast(response.message);
+    return;
+  }
+  await reloadNoteList(response.data);
+}
+
+async function searchByTag(tag: string) {
+  const response = await getByTag(tag);
+  if (!response.success) {
+    showToast(response.message);
+    return;
+  }
+  await reloadNoteList(response.data);
+}
+
+function toggleSidebar(appContainer: HTMLDivElement) {
+  const collapsed = appContainer.classList.contains("collapsed");
+  setSidebarState(appContainer, !collapsed);
+}
 
 function updateNoteCount(notes: Note[]) {
   const noteCount = findElement<HTMLSpanElement>(".note-count");
@@ -15,7 +76,7 @@ function updateNoteCount(notes: Note[]) {
   noteCount.textContent = `${count} ${count === 1 ? "note" : "notes"}`;
 }
 
-function getNotePriority(note: Note): number {
+function getNotePriority(note: Note) {
   if (note.pinned && note.bookmarked) return 0;
   if (note.pinned) return 1; // highest priority
   if (note.bookmarked) return 2; // middle
@@ -23,7 +84,7 @@ function getNotePriority(note: Note): number {
 }
 
 // this function returns a number by which note items are being displayed in the sidebar. If it returns a negative number, a comes first, then b
-function compareNotes(a: Note, b: Note): number {
+function compareNotes(a: Note, b: Note) {
   const priorityDiff = getNotePriority(a) - getNotePriority(b); // example: pinned note a (1) - regular note b(3) = -2, which means a comes before b
   if (priorityDiff !== 0) return priorityDiff;
   // if priorities are equal, they get sorted by updated_at
@@ -78,9 +139,9 @@ function addManyNotesToList(notes: Note[]) {
   });
 }
 
-async function reloadNoteList(notes?: Note[]): Promise<void> {
+async function reloadNoteList(notes?: Note[]) {
   const sidebar = getAppItem("sidebar");
-  sidebar.innerHTML = "";
+  sidebar.replaceChildren();
   if (notes) {
     addManyNotesToList(notes.sort(compareNotes));
     noteStore.setState({ notes });
@@ -117,7 +178,13 @@ async function updateNoteInList(note: Note) {
 export {
   addManyNotesToList,
   addOneNoteToList,
+  createViews,
+  debouncedSearch,
+  handleSearchInput,
+  handleViews,
   reloadNoteList,
+  searchByTag,
+  toggleSidebar,
   updateNoteCount,
   updateNoteInList,
 };

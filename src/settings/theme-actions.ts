@@ -1,4 +1,4 @@
-import { updateSettings, setTheme } from "@/api/api";
+import { setTheme, updateSettings } from "@/api/api";
 import { getSettingsItem } from "@/utils/registry";
 import { CODE_THEME_MAP, THEME_MAP } from "@shared/constants";
 import type { CodeTheme, Theme } from "@shared/schemas/store-schema";
@@ -13,24 +13,18 @@ function resolveTheme(theme: Theme): ResolvedTheme {
   return THEME_MAP[theme];
 }
 
-async function applyAppTheme(
-  themeOverride?: Theme,
-  onOSchange = false,
-  themeRes?: Theme,
-) {
-  let themePreference: Theme = themeOverride || "system";
-  if (!themeOverride) {
-    // no override means only on startup
-    if (themeRes) themePreference = themeRes;
+async function applyAppTheme(preference: Theme, saveToSettings = true) {
+  const result = await setTheme(preference);
+  if (!result.success) {
+    console.error("Failed to apply theme:", result.message);
+    return;
   }
-  const baseTheme = resolveTheme(themePreference);
-  const domTheme = themePreference === "system" ? baseTheme : themePreference;
-  document.documentElement.dataset["theme"] = domTheme;
-  const codePreference = setCodeTheme(baseTheme);
-  if (!onOSchange) {
-    updateSettings({ theme: themePreference, "code-theme": codePreference });
+  const validatedTheme = result.data;
+  document.documentElement.dataset["theme"] = validatedTheme;
+  const codePreference = setCodeTheme(resolveTheme(validatedTheme));
+  if (saveToSettings) {
+    updateSettings({ theme: preference, "code-theme": codePreference });
   }
-  await setTheme(domTheme);
 }
 
 function setCodeTheme(resolvedTheme: ResolvedTheme): CodeTheme {

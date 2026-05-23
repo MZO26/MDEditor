@@ -21,7 +21,6 @@ import {
 } from "@/features/note-actions";
 import { stopAutoSave } from "@/features/note-auto-save";
 import { noteStore, settingsStore, stateStore } from "@/settings/app-state";
-import { applyAppTheme } from "@/settings/theme-actions";
 import { findElement, setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
 import { sanitize, validateUUID } from "@/utils/sanitize";
@@ -30,6 +29,18 @@ import { initTippyDelegate, useDelayedSpinner } from "@/utils/ui";
 import { titleGenerator } from "@shared/generators/generators";
 import type { ExportRequest } from "@shared/schemas/export-schema";
 import type { CreateNotePayload } from "@shared/schemas/note-schema";
+
+const mergeDialog = findElement<HTMLDialogElement>(".merge-modal");
+const mergeInput = findElement<HTMLInputElement>("#noteId");
+if (mergeDialog) {
+  initTippyDelegate(mergeDialog, mergeDialog);
+}
+
+const deleteDialog = findElement<HTMLDialogElement>("#delete-dialog");
+const confirmBtn = findElement<HTMLButtonElement>("#confirm-delete-btn");
+if (deleteDialog) {
+  initTippyDelegate(deleteDialog, deleteDialog);
+}
 
 function initListeners() {
   window.storeAPI.onSettingsChanged((settings) => {
@@ -151,12 +162,6 @@ function initListeners() {
     }
   });
 
-  const deleteDialog = findElement("#delete-dialog") as HTMLDialogElement;
-  const confirmBtn = findElement("#confirm-delete-btn") as HTMLButtonElement;
-  if (deleteDialog) {
-    initTippyDelegate(deleteDialog, deleteDialog);
-  }
-
   window.noteAPI.onTriggerDelete(async (id: string) => {
     if (!deleteDialog || !confirmBtn) return;
     const handleClose = async () => {
@@ -182,12 +187,6 @@ function initListeners() {
       console.error("Failed to copy text: ", err);
     }
   });
-
-  const mergeDialog = findElement<HTMLDialogElement>(".merge-modal");
-  const mergeInput = findElement<HTMLInputElement>("#noteId");
-  if (mergeDialog) {
-    initTippyDelegate(mergeDialog, mergeDialog);
-  }
 
   window.noteAPI.onTriggerMerge((id: string) => {
     if (!mergeDialog || !mergeInput) return;
@@ -304,8 +303,9 @@ function initListeners() {
     addOneNoteToList(result.data);
   });
 
-  window.electronAPI.onThemeChanged(async (newTheme) => {
-    await applyAppTheme(newTheme, true);
+  window.electronAPI.onThemeChanged(async (resolvedTheme) => {
+    console.log("FRONTEND RECEIVED THEME:", resolvedTheme);
+    document.documentElement.dataset["theme"] = resolvedTheme;
   });
 
   window.electronAPI.onRequestFlush(async () => {

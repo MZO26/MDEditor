@@ -1,5 +1,4 @@
 import { findElement } from "@/utils/dom";
-import { formatShortcut } from "@/utils/format";
 import { delegate } from "tippy.js";
 
 function createTooltipContent(
@@ -18,6 +17,18 @@ function createTooltipContent(
     tooltipContent.appendChild(kbdElement);
   }
   return tooltipContent;
+}
+
+function formatShortcut(shortcut?: string): string {
+  if (!shortcut) return "";
+
+  const isMac = typeof process !== "undefined" && process.platform === "darwin";
+
+  return shortcut
+    .replace(/mod[-+]?/gi, isMac ? "⌘" : "Ctrl+")
+    .replace(/shift[-+]?/gi, isMac ? "⇧" : "Shift+")
+    .replace(/alt[-+]?/gi, isMac ? "⌥" : "Alt+")
+    .replace(/meta[-+]?/gi, isMac ? "⌘" : "Meta+");
 }
 
 function useDelayedSpinner(delay = 300) {

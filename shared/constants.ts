@@ -1,5 +1,5 @@
 import type { CodeTheme, Theme } from "@shared/schemas/store-schema";
-import type { Code, ResolvedTheme } from "@shared/types";
+import type { Code, ResolvedTheme, ViewItem } from "@shared/types";
 
 const LIMITS = {
   WRITE_HEAVY: 500, // saveImage
@@ -9,6 +9,14 @@ const LIMITS = {
   READ_LIGHT: 100, // getById, store:get
   WRITE_FLUSH: 5, // update with flush arg
 };
+
+const VIEWS: ViewItem[] = [
+  { id: "all", label: "All Notes" },
+  { id: "bookmarked", label: "Bookmarked" },
+  { id: "pinned", label: "Pinned" },
+  { id: "todos", label: "Pending Todos" },
+  { id: "untagged", label: "Untagged Notes" },
+];
 
 const THEME_MAP = {
   system: "system",
@@ -64,4 +72,4 @@ const THEME_DATA: Record<
   },
 } as const;
 
-export { CODE_THEME_MAP, LIMITS, THEME_DATA, THEME_MAP };
+export { CODE_THEME_MAP, LIMITS, THEME_DATA, THEME_MAP, VIEWS };

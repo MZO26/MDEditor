@@ -1,5 +1,5 @@
+import { formatNoteDate } from "@/utils/date";
 import { requireElement } from "@/utils/dom";
-import { formatNoteDate } from "@/utils/format";
 import { renderIcons } from "@/utils/icons";
 import type { Note } from "@shared/schemas/note-schema";
 
@@ -11,9 +11,9 @@ function createNoteItem(note: Note): HTMLDivElement {
   // Deep clone with true
   const item = baseNoteItem.cloneNode(true) as HTMLDivElement;
   const tagsContainer = item.querySelector(".note-tags");
-  item.dataset["id"] = note.id;
-  item.dataset["pinned"] = String(note.pinned === true);
-  item.dataset["bookmarked"] = String(note.bookmarked === true);
+  item.setAttribute("data-id", note.id);
+  item.setAttribute("data-pinned", String(note.pinned === true));
+  item.setAttribute("data-bookmarked", String(note.bookmarked === true));
   if (note.pinned || note.bookmarked) {
     renderIcons(item);
   }
@@ -24,7 +24,7 @@ function createNoteItem(note: Note): HTMLDivElement {
   );
   item.querySelector(".note-content")!.textContent = note.snippet;
   if (tagsContainer && note.tags && note.tags.length > 0) {
-    tagsContainer.innerHTML = "";
+    tagsContainer.replaceChildren();
     for (const tag of note.tags) {
       const span = document.createElement("span");
       span.classList.add("tag");

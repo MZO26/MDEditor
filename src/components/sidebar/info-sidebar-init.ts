@@ -1,14 +1,10 @@
-import { searchByTag } from "@/components/sidebar/sidebar-filter";
+import { collapseInfoSidebar } from "@/components/sidebar/info-sidebar-actions";
+import { searchByTag } from "@/components/sidebar/sidebar-actions";
 import { setSidebarState } from "@/components/sidebar/sidebar-state";
 import { handleSelectNote } from "@/features/note-actions";
 import { createAsyncHandler } from "@/utils/async";
 import { findElement, requireElement } from "@/utils/dom";
 import { registerAppEvents } from "@/utils/registry";
-
-const collapseInfoSidebar = (infoSidebar: HTMLDivElement) => {
-  const collapsed = infoSidebar.classList.contains("collapsed");
-  setSidebarState(infoSidebar, !collapsed);
-};
 
 async function initInfoSidebar() {
   const toggleBtn = findElement<HTMLButtonElement>(".info-sidebar-toggle");
@@ -42,7 +38,7 @@ function applyInfoSidebarListeners(
       if (target === tagContainer) return;
       const spanEl = target.closest(".tag") as HTMLSpanElement | null;
       if (!spanEl) return;
-      const tag = spanEl.dataset["tag"];
+      const tag = spanEl.getAttribute("data-tag");
       if (!tag) return;
       await searchByTag(tag);
       searchInput.focus();
@@ -56,7 +52,7 @@ function applyInfoSidebarListeners(
       if (target === linkContainer) return;
       const spanEl = target.closest(".link") as HTMLSpanElement | null;
       if (!spanEl) return;
-      const link = spanEl.dataset["link"];
+      const link = spanEl.getAttribute("data-link");
       const noteElement = findElement<HTMLDivElement>(`div[data-id="${link}"]`);
       if (!link || !noteElement) return;
       await handleSelectNote(noteElement);
