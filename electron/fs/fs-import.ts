@@ -10,7 +10,7 @@ import fs from "fs/promises";
 import path from "path";
 
 async function batchImport(filePaths: string[]): Promise<ImportRequest[]> {
-  const imported = await processWithLimit(filePaths, 100, async (file) => {
+  const imported = await processWithLimit(filePaths, 50, async (file) => {
     try {
       const content = await fs.readFile(file, "utf8");
       const extension = path.extname(file).slice(1).toLowerCase();

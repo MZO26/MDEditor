@@ -1,10 +1,10 @@
 import { win } from "@electron/main";
 import { store } from "@electron/store";
+import { ZOOMS } from "@shared/constants";
+import { validation } from "@shared/ipc-helpers";
 import { StoreSchema } from "@shared/schemas/store-schema";
 import type { ZoomAction } from "@shared/types";
 import { BrowserWindow } from "electron";
-
-const ZOOMS = [1, 1.1, 1.25] as const;
 
 function nextZoom(current: number, action: ZoomAction): number {
   if (action === "get") return current;
@@ -22,16 +22,9 @@ function nextZoom(current: number, action: ZoomAction): number {
 }
 
 function saveWindowBounds() {
-  if (
-    !win ||
-    win.isDestroyed() ||
-    win.isMaximized() ||
-    win.isMinimized() ||
-    win.isFullScreen()
-  ) {
+  if (!win || win.isDestroyed() || win.isMinimized()) {
     return;
   }
-
   try {
     const bounds =
       typeof win.getNormalBounds === "function"
@@ -43,12 +36,11 @@ function saveWindowBounds() {
       width: Math.max(1100, bounds.width),
       height: Math.max(600, bounds.height),
     };
-    const result = StoreSchema.shape["window-bounds"].safeParse(preparedBounds);
-    if (!result.success) {
-      console.error("Failed to validate window bounds:", result.error);
-      return;
-    }
-    store.set("window-bounds", result.data);
+    const result = validation(
+      StoreSchema.shape["window-bounds"],
+      preparedBounds,
+    );
+    store.set("window-bounds", result);
   } catch (error) {
     console.error("Failed to save window bounds:", error);
   }

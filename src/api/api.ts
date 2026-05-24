@@ -1,6 +1,7 @@
 import { settingsStore } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
 import { showToast } from "@/utils/toast";
+import { DEBOUNCE_MS } from "@shared/constants";
 import { safeInvoke } from "@shared/ipc-helpers";
 import type {
   ExportRequest,
@@ -106,7 +107,7 @@ const debouncedSetSettings = debounce(
       console.error(err);
     }
   },
-  1000,
+  DEBOUNCE_MS.slow,
 );
 
 const updateSettings = (settings: Partial<AppSettings>) => {

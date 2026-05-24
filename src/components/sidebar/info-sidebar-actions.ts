@@ -4,6 +4,7 @@ import { formatNoteDate } from "@/utils/date";
 import { findElement, requireElement } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
+import { DEBOUNCE_MS } from "@shared/constants";
 import { getTodoStats } from "@shared/generators/generators";
 import type { Note } from "@shared/schemas/note-schema";
 import type { JSONContent } from "@tiptap/core";
@@ -82,7 +83,7 @@ async function updateStats(note: Note) {
   updateInfoHeader(note.created_at, note.title);
 }
 
-const debouncedUpdateStats = debounce(updateStats, 1000);
+const debouncedUpdateStats = debounce(updateStats, DEBOUNCE_MS.slow);
 
 function estimateReadingTime(wordCount: number, wpm = 238) {
   const s = Math.round((wordCount / wpm) * 60);
@@ -92,14 +93,14 @@ function estimateReadingTime(wordCount: number, wpm = 238) {
 
 function showTodoProgress(content: JSONContent) {
   const stats = getTodoStats(content);
-  const container = requireElement(".todo-progress-container");
+  const container = requireElement<HTMLDivElement>(".todo-progress-container");
   if (stats.total === 0) {
     if (container.style.display !== "none") container.style.display = "none";
     return;
   }
   if (container.style.display !== "block") container.style.display = "block";
-  const countLabel = requireElement<HTMLElement>("#todo-count");
-  const progressBar = requireElement<HTMLElement>("#todo-progress");
+  const countLabel = requireElement<HTMLSpanElement>("#todo-count");
+  const progressBar = requireElement<HTMLDivElement>("#todo-progress");
   if (countLabel) countLabel.innerText = `${stats.completed}/${stats.total}`;
   if (progressBar) {
     const percentage = (stats.completed / stats.total) * 100;

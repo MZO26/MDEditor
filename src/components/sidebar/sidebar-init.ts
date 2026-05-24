@@ -17,18 +17,11 @@ async function initNotesSidebar() {
   const appContainer = getAppItem("appContainer");
   const sidebar = getAppItem("sidebar");
   const sidebarContainer = requireElement<HTMLDivElement>(".sidebar-container");
-  const addNoteBtn = requireElement<HTMLButtonElement>(".add-note-btn");
-  const importBtn = requireElement<HTMLButtonElement>(".import-btn");
+  const sidebarHeader = requireElement<HTMLDivElement>(".sidebar-header");
   const searchInput = requireElement<HTMLInputElement>(".search-input");
   initTippyDelegate(sidebarContainer);
   const viewSelect = createViews(VIEWS);
-  applySidebarListeners(
-    sidebar,
-    addNoteBtn,
-    importBtn,
-    searchInput,
-    viewSelect,
-  );
+  applySidebarListeners(sidebar, sidebarHeader, searchInput, viewSelect);
   registerAppEvents(document, {
     "app:toggle-sidebar": () => toggleSidebar(appContainer),
     "app:create-new-note": () => createNoteButton(),
@@ -37,13 +30,27 @@ async function initNotesSidebar() {
 
 function applySidebarListeners(
   sidebar: HTMLDivElement,
-  addNoteBtn: HTMLButtonElement,
-  importBtn: HTMLButtonElement,
+  sidebarHeader: HTMLDivElement,
   searchInput: HTMLInputElement,
   viewSelect: HTMLSelectElement,
 ) {
-  addNoteBtn.addEventListener("click", createAsyncHandler(createNoteButton));
-  importBtn.addEventListener("click", createAsyncHandler(importNoteButton));
+  sidebarHeader.addEventListener(
+    "click",
+    createAsyncHandler(async (e) => {
+      const target = e.target as HTMLElement;
+      if (target === sidebarHeader) return;
+      const addNoteBtn = target.closest<HTMLButtonElement>(".add-note-btn");
+      if (addNoteBtn) {
+        await createNoteButton();
+        return;
+      }
+      const importBtn = target.closest<HTMLButtonElement>(".import-btn");
+      if (importBtn) {
+        await importNoteButton();
+        return;
+      }
+    }),
+  );
   searchInput.addEventListener("input", debouncedSearch);
   viewSelect.addEventListener(
     "change",
@@ -62,13 +69,10 @@ function applySidebarListeners(
       if (actionBtn) {
         e.preventDefault();
         e.stopPropagation();
-        const target = e.target as HTMLElement;
         const item = target.closest<HTMLElement>(".note-item");
-        if (!item) return;
-        const id = item.getAttribute("data-id");
-        if (!id) return;
-        const isPinned = item.getAttribute("data-pinned") === "true";
-        const isBookmarked = item.getAttribute("data-bookmarked") === "true";
+        const id = item?.getAttribute("data-id");
+        const isPinned = item?.getAttribute("data-pinned") === "true";
+        const isBookmarked = item?.getAttribute("data-bookmarked") === "true";
         window.electronAPI.showContextMenu("note", {
           id: id,
           pinned: isPinned,
@@ -79,8 +83,8 @@ function applySidebarListeners(
       const noteItem = target.closest<HTMLDivElement>(".note-item");
       if (noteItem) {
         await handleSelectNote(noteItem);
-        return;
       }
+      return;
     }),
   );
 }

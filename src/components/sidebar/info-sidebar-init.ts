@@ -9,53 +9,43 @@ import { registerAppEvents } from "@/utils/registry";
 async function initInfoSidebar() {
   const toggleBtn = findElement<HTMLButtonElement>(".info-sidebar-toggle");
   const infoSidebar = findElement<HTMLDivElement>(".info-sidebar");
-  const tagContainer = findElement<HTMLDivElement>(".tag-container");
-  const linkContainer = findElement<HTMLDivElement>(".link-container");
-  if (!toggleBtn || !infoSidebar || !tagContainer || !linkContainer) return;
+  if (!toggleBtn || !infoSidebar) return;
   setSidebarState(infoSidebar, true);
-  applyInfoSidebarListeners(
-    tagContainer,
-    linkContainer,
-    toggleBtn,
-    infoSidebar,
-  );
+  applyInfoSidebarListeners(toggleBtn, infoSidebar);
   registerAppEvents(document, {
     "app:toggle-info-sidebar": () => collapseInfoSidebar(infoSidebar),
   });
 }
 
 function applyInfoSidebarListeners(
-  tagContainer: HTMLDivElement,
-  linkContainer: HTMLDivElement,
   toggleBtn: HTMLButtonElement,
   infoSidebar: HTMLDivElement,
 ) {
-  tagContainer.addEventListener(
-    "click",
-    createAsyncHandler(async (e: Event) => {
-      const searchInput = requireElement<HTMLInputElement>(".search-input");
-      const target = e.target as HTMLElement;
-      if (target === tagContainer) return;
-      const spanEl = target.closest(".tag") as HTMLSpanElement | null;
-      if (!spanEl) return;
-      const tag = spanEl.getAttribute("data-tag");
-      if (!tag) return;
-      await searchByTag(tag);
-      searchInput.focus();
-      searchInput.value = `#${tag}`;
-    }),
-  );
-  linkContainer.addEventListener(
+  const searchInput = requireElement<HTMLInputElement>(".search-input");
+  infoSidebar.addEventListener(
     "click",
     createAsyncHandler(async (e: Event) => {
       const target = e.target as HTMLElement;
-      if (target === linkContainer) return;
-      const spanEl = target.closest(".link") as HTMLSpanElement | null;
-      if (!spanEl) return;
-      const link = spanEl.getAttribute("data-link");
-      const noteElement = findElement<HTMLDivElement>(`div[data-id="${link}"]`);
-      if (!link || !noteElement) return;
-      await handleSelectNote(noteElement);
+      if (target === infoSidebar) return;
+      const tagEl = target.closest<HTMLSpanElement>(".tag");
+      if (tagEl) {
+        const tag = tagEl.getAttribute("data-tag");
+        if (!tag) return;
+        await searchByTag(tag);
+        searchInput.focus();
+        searchInput.value = `#${tag}`;
+        return;
+      }
+      const linkEl = target.closest<HTMLSpanElement>(".link");
+      if (linkEl) {
+        const link = linkEl?.getAttribute("data-link");
+        const noteElement = findElement<HTMLDivElement>(
+          `div[data-id="${link}"]`,
+        );
+        if (!link || !noteElement) return;
+        await handleSelectNote(noteElement);
+        return;
+      }
     }),
   );
   toggleBtn.addEventListener("click", () => collapseInfoSidebar(infoSidebar));

@@ -1,6 +1,8 @@
 import type { CodeTheme, Theme } from "@shared/schemas/store-schema";
 import type { Code, ResolvedTheme, ViewItem } from "@shared/types";
 
+const ZOOMS = [1, 1.1, 1.25] as const;
+
 const LIMITS = {
   WRITE_HEAVY: 500, // saveImage
   WRITE_STANDARD: 500, // create, delete, store:set
@@ -9,6 +11,22 @@ const LIMITS = {
   READ_LIGHT: 100, // getById, store:get
   WRITE_FLUSH: 5, // update with flush arg
 };
+
+const DEBOUNCE_MS = {
+  fast: 300,
+  slow: 1000,
+} as const;
+
+const mimeToExt = {
+  "image/jpeg": "jpeg",
+  "image/png": "png",
+  "image/gif": "gif",
+  "image/webp": "webp",
+} as const;
+
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+
+const MAX_SIZE = 25 * 1024 * 1024; // 25MB -> 25MB * 1024 = 25,600KB -> *1024 = 26,214,400B. file.size from JS is always in bytes
 
 const VIEWS: ViewItem[] = [
   { id: "all", label: "All Notes" },
@@ -72,4 +90,15 @@ const THEME_DATA: Record<
   },
 } as const;
 
-export { CODE_THEME_MAP, LIMITS, THEME_DATA, THEME_MAP, VIEWS };
+export {
+  ALLOWED_TYPES,
+  CODE_THEME_MAP,
+  DEBOUNCE_MS,
+  LIMITS,
+  MAX_SIZE,
+  mimeToExt,
+  THEME_DATA,
+  THEME_MAP,
+  VIEWS,
+  ZOOMS,
+};

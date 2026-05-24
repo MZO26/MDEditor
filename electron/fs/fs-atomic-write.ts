@@ -3,7 +3,7 @@ import { open, rename, unlink, type FileHandle } from "node:fs/promises";
 async function writeAtomic(
   targetPath: string,
   content: string | Buffer | Uint8Array,
-): Promise<void> {
+) {
   const tempPath = `${targetPath}.tmp`;
   let fileHandle: FileHandle | undefined;
 

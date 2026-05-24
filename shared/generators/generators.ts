@@ -6,7 +6,7 @@ function getMetadata(
     type: "doc";
     content: JSONContent[];
   },
-  plainText: unknown,
+  plainText: string,
 ): Metadata {
   const { left } = getTodoStats(content);
   return {
@@ -28,9 +28,8 @@ function* iterateLines(text: string): IterableIterator<string> {
   }
 }
 
-function titleGenerator(text: unknown): string {
+function titleGenerator(text: string): string {
   if (typeof text !== "string") return "New Note";
-
   for (let line of iterateLines(text)) {
     line = line.replace(/#[\p{L}\p{N}_]+/gu, "").trim();
     if (line) return line.length > 50 ? line.slice(0, 47) + "..." : line;
@@ -38,7 +37,7 @@ function titleGenerator(text: unknown): string {
   return "New Note";
 }
 
-function snippetGenerator(text: unknown) {
+function snippetGenerator(text: string) {
   if (typeof text !== "string") return "";
   let snippet = "";
   let validLineCount = 0;
@@ -56,7 +55,7 @@ function snippetGenerator(text: unknown) {
     .trim();
 }
 
-function ftsQueryGenerator(searchTerm: unknown): string {
+function ftsQueryGenerator(searchTerm: string) {
   if (typeof searchTerm !== "string") return "";
   const shortened = searchTerm.substring(0, 100).trim();
   if (!shortened) return "";
@@ -98,7 +97,7 @@ function getTodoStats(content: JSONContent) {
   };
 }
 
-function getLinks(jsonDoc: JSONContent): string[] {
+function getLinks(jsonDoc: JSONContent) {
   if (!jsonDoc) return [];
   const seen = new Set<string>();
   const stack: JSONContent[] = [jsonDoc];
@@ -117,7 +116,7 @@ function getLinks(jsonDoc: JSONContent): string[] {
   return Array.from(seen);
 }
 
-function getTags(jsonDoc: JSONContent): string[] {
+function getTags(jsonDoc: JSONContent) {
   if (!jsonDoc) return [];
   const seen = new Set<string>();
   const stack: JSONContent[] = [jsonDoc];

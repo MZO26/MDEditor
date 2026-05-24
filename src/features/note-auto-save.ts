@@ -4,6 +4,7 @@ import {
   pendingDeletions,
 } from "@/features/note-actions";
 import { debounce } from "@/utils/async";
+import { DEBOUNCE_MS } from "@shared/constants";
 import type { Editor } from "@tiptap/core";
 import { Node } from "@tiptap/pm/model";
 
@@ -24,7 +25,7 @@ function setupAutoSave(editor: Editor, id: string) {
     } finally {
       pendingSave = null;
     }
-  }, 1000);
+  }, DEBOUNCE_MS.slow);
   const updateHandler = () => debouncedSave();
   editor.on("update", updateHandler);
   return {

@@ -16,7 +16,7 @@ async function batchExport(
   const absoluteTargetFolder = path.resolve(folder);
   const exported = await processWithLimit(
     payload,
-    100,
+    50,
     async (item: ExportedContent) => {
       const fileName = `${validation(FileNameSchema, item.fileName)}_${item.id.slice(0, 6)}.${item.extension}`;
       const absoluteFilePath = path.resolve(absoluteTargetFolder, fileName);

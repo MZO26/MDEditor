@@ -42,7 +42,7 @@ function applyModalListeners(
   buttonsContainer.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
     if (target === buttonsContainer) return;
-    const btn = target.closest(".selection-btn") as HTMLButtonElement | null;
+    const btn = target.closest<HTMLButtonElement>(".selection-btn");
     if (!btn) return;
     const targetTab = btn.dataset["category"];
     if (!targetTab) return;

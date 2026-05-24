@@ -36,7 +36,7 @@ function selectBuilder(
 }
 
 // builds the button palette and wraps it into the button container
-function createSettingsMenu(): HTMLDivElement {
+function createSettingsMenu() {
   const createSettingsButton = (category: string, lucideIcon: string) => {
     const icon = document.createElement("i");
     icon.setAttribute("data-lucide", lucideIcon);
@@ -55,7 +55,6 @@ function createSettingsMenu(): HTMLDivElement {
     createSettingsButton("Editor", "pen-line"),
     createSettingsButton("App", "app-window"),
   );
-
   return container;
 }
 

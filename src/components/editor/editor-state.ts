@@ -33,7 +33,10 @@ function createEditorEmptyState() {
   renderIcons(emptyState);
   const handleClick = createAsyncHandler(async (e: Event) => {
     const target = e.target as HTMLElement;
-    if (target.closest(".empty-state-add-note-btn")) {
+    const addNoteBtn = target.closest<HTMLButtonElement>(
+      ".empty-state-add-note-btn",
+    );
+    if (addNoteBtn) {
       await createNoteButton();
     }
   });

@@ -33,11 +33,10 @@ async function safeInvoke<T>(
   }
 }
 
-function measure<T>(fn: () => T): number {
+function measure<T>(fn: () => T) {
   const start = performance.now();
   fn();
   const end = performance.now();
-
   return Math.round((end - start) * 100) / 100;
 }
 

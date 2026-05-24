@@ -1,18 +1,9 @@
 import { saveImage } from "@/api/api";
 import { showToast } from "@/utils/toast";
 import { useDelayedSpinner } from "@/utils/ui";
+import { ALLOWED_TYPES, MAX_SIZE, mimeToExt } from "@shared/constants";
 import type { Result } from "@shared/types";
 import type { Editor } from "@tiptap/core";
-
-const mimeToExt = {
-  "image/jpeg": "jpeg",
-  "image/png": "png",
-  "image/gif": "gif",
-  "image/webp": "webp",
-} as const;
-
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-const MAX_SIZE = 25 * 1024 * 1024; // 25MB -> 25MB * 1024 = 25,600KB -> *1024 = 26,214,400B. file.size from JS is always in bytes
 
 const worker = new Worker(new URL("./image-worker.ts", import.meta.url), {
   type: "module",

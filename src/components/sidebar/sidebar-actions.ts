@@ -10,6 +10,7 @@ import { debounce } from "@/utils/async";
 import { findElement, requireElement, setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
 import { showToast } from "@/utils/toast";
+import { DEBOUNCE_MS } from "@shared/constants";
 import type { Note } from "@shared/schemas/note-schema";
 import type { ViewItem } from "@shared/types";
 
@@ -33,7 +34,7 @@ const debouncedSearch = debounce((e: Event) => {
   const target = e.target as HTMLInputElement;
   const value = target.value.trim();
   void handleSearchInput(value);
-}, 500);
+}, DEBOUNCE_MS.fast);
 
 function createViews(views: ViewItem[]) {
   const select = requireElement<HTMLSelectElement>(".view-select");
