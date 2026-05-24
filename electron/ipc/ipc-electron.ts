@@ -1,13 +1,14 @@
 import { setUpNoteMenu, setUpTableMenu } from "@electron/context-menu";
+import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import { checkRateLimit, safeResponse } from "@electron/ipc/ipc-validation";
 import { getTitleBarOverlay, initTheme } from "@electron/titlebar";
-import { LIMITS } from "@shared/constants";
+import { AppErrorCode, LIMITS } from "@shared/constants";
 import { validation } from "@shared/ipc-helpers";
 import { ImagePayloadSchema } from "@shared/schemas/image-schema";
 import { StoreSchema, type Theme } from "@shared/schemas/store-schema";
 import type { MenuType, NoteMenuPayload } from "@shared/types";
 import { createHash } from "crypto";
-import { app, BrowserWindow, ipcMain, Menu } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, Notification } from "electron";
 import fs from "node:fs";
 import path from "path";
 
@@ -17,7 +18,7 @@ function registerElectronIpc(win: BrowserWindow) {
     (e, menuType: MenuType, payload: NoteMenuPayload) => {
       return safeResponse(e, async () => {
         if (!checkRateLimit("show-context-menu", LIMITS.READ_LIGHT))
-          throw new Error("RATE_LIMIT");
+          throw new AppBackendError(AppErrorCode.RateLimitError);
         if (!win) return;
         let menu: Menu;
         if (menuType === "table") {
@@ -34,7 +35,7 @@ function registerElectronIpc(win: BrowserWindow) {
   ipcMain.handle("set:theme", (e, theme: Theme, focus?: boolean) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("set:theme", LIMITS.WRITE_LIGHT))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedTheme = validation(StoreSchema.shape.theme, theme);
       const resolvedTheme = initTheme(validatedTheme);
       const windowTheme = getTitleBarOverlay(resolvedTheme, focus ?? false);
@@ -46,10 +47,24 @@ function registerElectronIpc(win: BrowserWindow) {
     });
   });
 
+  ipcMain.handle("show-notification", (e, title: string, body: string) => {
+    return safeResponse(e, async () => {
+      if (!checkRateLimit("show-notification", LIMITS.WRITE_LIGHT))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      if (Notification.isSupported()) {
+        const notif = new Notification({
+          title,
+          body,
+        });
+        notif.show();
+      }
+    });
+  });
+
   ipcMain.handle("save:image", (e, payload: unknown) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("save:image", LIMITS.WRITE_HEAVY))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(ImagePayloadSchema, payload);
       const userDataPath = app.getPath("userData");
       const imagesFolder = path.join(userDataPath, "editor-images");
@@ -76,7 +91,7 @@ function registerElectronIpc(win: BrowserWindow) {
             imageSrc: `appimg:///${fileName}`,
           };
         } else {
-          throw error;
+          throw new AppBackendError(AppErrorCode.FILE_WRITE_ERROR);
         }
       }
       return { imageSrc: `appimg:///${fileName}` };

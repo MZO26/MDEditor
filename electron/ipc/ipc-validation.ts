@@ -1,8 +1,12 @@
 import { registerElectronIpc } from "@electron/ipc/ipc-electron";
-import { handleIpcError } from "@electron/ipc/ipc-error-handler";
+import {
+  AppBackendError,
+  handleFatalIpcError,
+} from "@electron/ipc/ipc-error-handler";
 import { registerFileIpc } from "@electron/ipc/ipc-fs";
 import { registerNoteIpc } from "@electron/ipc/ipc-note";
 import { registerSettingsIpc } from "@electron/ipc/ipc-settings";
+import { AppErrorCode } from "@shared/constants";
 import type { Result } from "@shared/types";
 import { app, BrowserWindow, type IpcMainInvokeEvent } from "electron";
 
@@ -18,18 +22,18 @@ async function safeResponse<T>(
     const data = await action();
     return { success: true, data };
   } catch (err: unknown) {
-    return handleIpcError(err);
+    return handleFatalIpcError(err);
   }
 }
 
 function validateSender(event: IpcMainInvokeEvent) {
   if (!event.senderFrame) {
     console.error("Blocked: IPC Without valid senderFrame");
-    throw new Error("UNAUTHORIZED_SENDER");
+    throw new AppBackendError(AppErrorCode.SenderError);
   }
   const mainWindow = BrowserWindow.fromWebContents(event.sender);
   if (!mainWindow) {
-    throw new Error("UNAUTHORIZED_SENDER");
+    throw new AppBackendError(AppErrorCode.SenderError);
   }
   const senderUrl = new URL(event.senderFrame.url);
   if (!app.isPackaged) {
@@ -43,25 +47,18 @@ function validateSender(event: IpcMainInvokeEvent) {
     return true;
   }
   console.error(`Blocked senderFrame: ${senderUrl.href}`);
-  throw new Error("UNAUTHORIZED_SENDER");
+  throw new AppBackendError(AppErrorCode.SenderError);
 }
 
-function checkRateLimit(channel: string, cooldownMs: number): boolean {
+function checkRateLimit(channel: string, cooldownMs: number) {
   const now = Date.now();
-
   if (now - APP_START_TIME < 5000) {
     return true;
   }
   const lastCall = ipcTimers.get(channel) || 0;
-
   if (now - lastCall < cooldownMs) {
-    console.warn(
-      `[RATE LIMIT BLOCKED] Channel: "${channel}" | ` +
-        `Required: ${cooldownMs}ms`,
-    );
-    return false;
+    throw new AppBackendError(AppErrorCode.RateLimitError);
   }
-
   ipcTimers.set(channel, now);
   return true;
 }

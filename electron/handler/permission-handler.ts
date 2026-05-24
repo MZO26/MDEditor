@@ -4,6 +4,7 @@ const allowedPermissions = [
   "clipboard-read",
   "clipboard-sanitized-write",
   "fullscreen",
+  "notifications",
 ];
 
 function setPermissions() {

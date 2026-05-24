@@ -1,5 +1,6 @@
 import type { Content, Editor } from "@tiptap/core";
 import type { Code } from "lucide";
+import type { AppErrorCode, WorkerErrorCode } from "./constants";
 
 type NativeWindowColors = {
   backgroundColor: string;
@@ -23,15 +24,19 @@ type Code =
   | "solarized-dark"
   | "solarized-light";
 
-type Result<T, E = string> =
+type Result<T, E = AppErrorCode> =
   | { success: true; data: T }
   | {
       success: false;
-      message: E;
+      error: E;
     };
 
 type Success<T> = Extract<Result<T>, { success: true }>;
-type Failure<E = string> = Extract<Result<never, E>, { success: false }>;
+type Failure<E = AppErrorCode> = Extract<Result<never, E>, { success: false }>;
+
+type WorkerResult<T = void> =
+  | { success: true; data: T }
+  | { success: false; error: WorkerErrorCode };
 
 type Action = {
   type?: "action";
@@ -153,5 +158,6 @@ export type {
   TitleBarOverlayOptions,
   View,
   ViewItem,
+  WorkerResult,
   ZoomAction,
 };

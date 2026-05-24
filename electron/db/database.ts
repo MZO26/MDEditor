@@ -1,6 +1,8 @@
 import { FTS5 } from "@electron/db/fts";
 import { Transactions } from "@electron/db/transactions";
 import { Views } from "@electron/db/views";
+import { AppBackendError } from "@electron/ipc/ipc-error-handler";
+import { AppErrorCode } from "@shared/constants";
 import { validation } from "@shared/ipc-helpers";
 import {
   CreateTransactionSchema,
@@ -208,9 +210,9 @@ class NoteDB {
     return this.transactions.safeUpdate(dbContent);
   }
 
-  public delete(id: string): void {
+  public delete(id: string) {
     const result = this.transactions.safeDelete(id);
-    if (!result) throw new Error("NOT_FOUND");
+    if (!result) throw new AppBackendError(AppErrorCode.DBError);
   }
 
   public getAll(): Note[] {
@@ -247,7 +249,7 @@ class NoteDB {
   public getById(id: string): Note {
     const dbRow = this.getNoteByIdStmt.get({ id }) as NoteRow;
     if (!dbRow) {
-      throw new Error("NOT_FOUND");
+      throw new AppBackendError(AppErrorCode.DBError);
     }
     return validation(NoteFromDB, {
       ...dbRow,
@@ -273,7 +275,7 @@ class NoteDB {
     const now = new Date().toISOString();
     const result = this.toggleBookmarkStmt.get({ updated_at: now, id });
     if (!result) {
-      throw new Error("NOT_FOUND");
+      throw new AppBackendError(AppErrorCode.DBError);
     }
     return validation(ToggleBookmarkSchema, result).bookmarked;
   }
@@ -282,7 +284,7 @@ class NoteDB {
     const now = new Date().toISOString();
     const result = this.togglePinStmt.get({ updated_at: now, id });
     if (!result) {
-      throw new Error("NOT_FOUND");
+      throw new AppBackendError(AppErrorCode.DBError);
     }
     return validation(TogglePinSchema, result).pinned;
   }

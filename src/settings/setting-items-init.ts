@@ -1,4 +1,9 @@
-import { dbMaintenance, exportManyNotes, updateSettings } from "@/api/api";
+import {
+  dbMaintenance,
+  exportManyNotes,
+  showNotification,
+  updateSettings,
+} from "@/api/api";
 import { reloadNoteList } from "@/components/sidebar/sidebar-actions";
 import { getExportContent } from "@/features/export-actions";
 import {
@@ -9,7 +14,6 @@ import {
 import { createAsyncHandler } from "@/utils/async";
 import { findElement } from "@/utils/dom";
 import { getAppItem, setSettingsItems } from "@/utils/registry";
-import { showToast } from "@/utils/toast";
 import { THEME_MAP } from "@shared/constants";
 import type {
   AppSettings,
@@ -187,16 +191,19 @@ function initAppSettings(settings: AppSettings) {
       const selectedExtension = target.value as ExportFormat;
       const exportContent = await getExportContent(selectedExtension);
       if (!exportContent.success) {
-        showToast(exportContent.message);
+        console.error("Failed to get export content:", exportContent.error);
         return;
       }
       const result = await exportManyNotes(exportContent.data);
       target.value = "";
       if (!result.success) {
-        showToast(result.message);
+        console.error("Export failed:", result.error);
         return;
       }
-      showToast(`Successfully exported all files to ${selectedExtension}`);
+      await showNotification(
+        "Export Successful",
+        `Successfully exported all files to ${selectedExtension}`,
+      );
     }),
   );
 
@@ -209,14 +216,14 @@ function initAppSettings(settings: AppSettings) {
       const result = await dbMaintenance(selectedOpt);
       target.value = "";
       if (!result.success) {
-        showToast(result.message);
+        console.error("Database maintenance failed:", result.error);
         return;
       }
       if (selectedOpt === "backup-db" && result.success) {
-        showToast("Backup saved.");
+        await showNotification("Backup saved.", "");
         return;
       }
-      showToast(`Optimized db in ${result.data} ms.`);
+      await showNotification(`Optimized db in ${result.data} ms.`, "");
     }),
   );
 

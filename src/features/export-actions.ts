@@ -1,5 +1,6 @@
 import { getAll } from "@/api/api";
 import { getNoteEditorExtensions } from "@/components/editor/editor-init";
+import { AppErrorCode } from "@shared/constants";
 import type { ExportedContent, ExportFormat, Result } from "@shared/types";
 import { Editor } from "@tiptap/core";
 
@@ -9,7 +10,7 @@ async function getExportContent(
   try {
     const result = await getAll();
     if (!result.success) {
-      return { success: false, message: result.message };
+      return { success: false, error: result.error };
     }
     const notes = result.data;
     const data: ExportedContent[] = [];
@@ -50,7 +51,7 @@ async function getExportContent(
   } catch (error) {
     return {
       success: false,
-      message: "One or more files couldn't be exported.",
+      error: AppErrorCode.UnknownError,
     };
   }
 }

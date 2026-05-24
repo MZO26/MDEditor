@@ -1,4 +1,4 @@
-import { createNote, deleteNote, updateNote, getNoteById } from "@/api/api";
+import { createNote, deleteNote, getNoteById, updateNote } from "@/api/api";
 import { editor } from "@/components/editor/editor-init";
 import { handleEditorEmptyState } from "@/components/editor/editor-state";
 import { debouncedUpdateStats } from "@/components/sidebar/info-sidebar-actions";
@@ -8,7 +8,6 @@ import { setupAutoSave, stopAutoSave } from "@/features/note-auto-save";
 import { noteStore, stateStore } from "@/settings/app-state";
 import { setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
-import { showToast } from "@/utils/toast";
 import { getMetadata } from "@shared/generators/generators";
 import type {
   CreateNotePayload,
@@ -17,8 +16,6 @@ import type {
 } from "@shared/schemas/note-schema";
 import { Editor } from "@tiptap/core";
 import { EditorState } from "@tiptap/pm/state";
-
-export const pendingDeletions = new Set<string>();
 
 function getContent() {
   const editor = getAppItem("editor");
@@ -63,23 +60,19 @@ async function handleDeleteNote(id: string, noteElement: HTMLDivElement) {
   const editor = getAppItem("editor");
   debouncedUpdateStats.cancel();
   stopAutoSave(editor, "cancel");
-  pendingDeletions.add(id);
   const response = await deleteNote(id);
   if (!response.success) {
-    pendingDeletions.delete(id);
-    showToast(response.message);
+    console.error("Failed to delete:", response.error);
     return;
   }
-  showToast("Note deleted");
   cleanupDeletedNoteUI(id, noteElement);
-  setTimeout(() => pendingDeletions.delete(id), 1000);
 }
 
 async function handleSaveNote(
   id: string,
   flush: boolean = false,
 ): Promise<void> {
-  if (!editor || !id || pendingDeletions.has(id)) return;
+  if (!editor || !id) return;
   const editorContent = getContent();
   const metaData = getMetadata(editorContent.content, editorContent.plainText);
   const payload: UpdateNotePayload = {
@@ -89,8 +82,7 @@ async function handleSaveNote(
   };
   const response = await updateNote(payload, flush);
   if (!response.success) {
-    console.error("save failed for id", id);
-    showToast(response.message);
+    console.error("save failed", response.error);
     return;
   }
   debouncedUpdateStats(response.data);
@@ -102,7 +94,7 @@ async function handleSelectNote(noteItem: HTMLDivElement) {
   if (!noteID) return;
   const response = await getNoteById(noteID);
   if (!response.success) {
-    showToast(response.message);
+    console.error("Failed to fetch note:", response.error);
     return;
   }
   stateStore.setState({ activeId: noteID });

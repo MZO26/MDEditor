@@ -1,5 +1,4 @@
 import { saveImage } from "@/api/api";
-import { showToast } from "@/utils/toast";
 import { useDelayedSpinner } from "@/utils/ui";
 import { ALLOWED_TYPES, MAX_SIZE, mimeToExt } from "@shared/constants";
 import type { Result } from "@shared/types";
@@ -25,7 +24,7 @@ function compressImageInWorker(
           // if compression worked, event.data.data returns the compressed Uint8Array ready for IPC bridge.
           resolve({ success: true, data: event.data.data });
         } else {
-          resolve({ success: false, message: event.data.message });
+          resolve({ success: false, error: event.data.message });
         }
       }
     };
@@ -37,23 +36,23 @@ function compressImageInWorker(
 async function processAndInsertImage(file: File, editor: Editor | null) {
   if (!editor) return;
   if (!ALLOWED_TYPES.includes(file.type)) {
-    showToast("Error: Only JPG, PNG, GIF, and WebP are allowed.");
+    console.error("Invalid file type.");
     return;
   }
   if (file.size > MAX_SIZE) {
-    showToast("Error: Image must be under 25MB.");
+    console.error("File size exceeds the limit.");
     return;
   }
   try {
     const response = await compressImageInWorker(file);
     if (!response.success) {
-      showToast(response.message);
+      console.error("Image compression failed:", response.error);
       return;
     }
     const extension = mimeToExt[file.type as keyof typeof mimeToExt] ?? "jpeg";
     const saved = await saveImage({ imageData: response.data, extension });
     if (!saved.success) {
-      showToast(saved.message);
+      console.error("Failed to save image:", saved.error);
       return;
     }
     const currentPos = editor?.state.selection.to;
@@ -67,7 +66,6 @@ async function processAndInsertImage(file: File, editor: Editor | null) {
       .run();
   } catch (error) {
     console.error("Failed to process and insert image:", error);
-    showToast("Error: Image compression failed.");
   }
 }
 

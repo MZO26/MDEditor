@@ -1,3 +1,6 @@
+import { WorkerErrorCode } from "@shared/constants";
+import { WorkerTaskError } from "./image-worker";
+
 function getScaledSize(
   width: number,
   height: number,
@@ -18,7 +21,7 @@ async function compressImage(
 ): Promise<Uint8Array> {
   // decodes the image file into a drawable ImageBitmap object, ready to be drawn onto a canvas
   const bitmap = await createImageBitmap(file).catch(() => {
-    throw new Error("INVALID_IMAGE_ERROR");
+    throw new WorkerTaskError(WorkerErrorCode.InvalidImageError);
   });
   // starts with original image dimensions. If image is wider than maxWidth it recalculates height so the aspect ratio stays the same, while width gets set to maxWidth
   let { width, height } = getScaledSize(bitmap.width, bitmap.height, maxWidth);
@@ -27,7 +30,7 @@ async function compressImage(
   const ctx = canvas.getContext("2d");
   if (!ctx) {
     bitmap.close();
-    throw new Error("COMPRESSION_ERROR");
+    throw new WorkerTaskError(WorkerErrorCode.CompressionError);
   }
   // resizing step and afterwards closing of bitmap to clean up. bitmap as image source, 0, 0 for x and y so it fills the entire canvas because it already was created with the exact width and height. The last to arguments tell the canvas how big to stretch or shrink it
   ctx.drawImage(bitmap, 0, 0, width, height); // ctx represents the drawing interface
@@ -36,7 +39,7 @@ async function compressImage(
   const blob = await canvas
     .convertToBlob({ type: "image/jpeg", quality })
     .catch(() => {
-      throw new Error("COMPRESSION_ERROR");
+      throw new WorkerTaskError(WorkerErrorCode.CompressionError);
     });
   // because you can't access bytes inside blob, it gets turned into an arrayBuffer. (blob contains metadata and acts as a reference, arrayBuffer is the actual memory)
   const buffer = await blob.arrayBuffer();

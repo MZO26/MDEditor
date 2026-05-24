@@ -10,12 +10,11 @@ import {
 } from "@/features/import-actions";
 import { handleCreateNote, viewNote } from "@/features/note-actions";
 import { noteStore, stateStore } from "@/settings/app-state";
-import { showToast } from "@/utils/toast";
 
 async function createNoteButton() {
   const response = await handleCreateNote();
   if (!response.success) {
-    showToast(response.message);
+    console.error("Failed to create note:", response.error);
     return;
   }
   const note = response.data;
@@ -23,7 +22,6 @@ async function createNoteButton() {
     notes: [...state.notes, note],
   }));
   stateStore.setState({ activeId: note.id });
-  showToast("New note created.");
   addOneNoteToList(note);
   handleEditorEmptyState();
   viewNote(note);
@@ -32,17 +30,17 @@ async function createNoteButton() {
 async function importNoteButton() {
   const imported = await handleImportFile();
   if (!imported.success) {
-    showToast(imported.message);
+    console.error("Import failed:", imported.error);
     return;
   }
   const content = await getImportedContent(imported.data);
   if (!content.success) {
-    showToast(content.message);
+    console.error("Failed to process imported content:", content.error);
     return;
   }
   const response = await createManyNotes(content.data);
   if (!response.success) {
-    showToast(response.message);
+    console.error("Failed to create imported notes:", response.error);
     return;
   }
   noteStore.setState((state) => ({

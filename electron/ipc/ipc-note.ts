@@ -1,6 +1,6 @@
 import db from "@electron/db/database";
 import { checkRateLimit, safeResponse } from "@electron/ipc/ipc-validation";
-import { LIMITS } from "@shared/constants";
+import { AppErrorCode, LIMITS } from "@shared/constants";
 import { measure, validation } from "@shared/ipc-helpers";
 import {
   CreateNotePayloadSchema,
@@ -14,12 +14,13 @@ import {
 } from "@shared/schemas/note-schema";
 import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import path from "path";
+import { AppBackendError } from "./ipc-error-handler";
 
 function registerNoteIpc(win: BrowserWindow) {
   ipcMain.handle("note:getAll", (e) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("note:getAll", LIMITS.READ_HEAVY))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const result = db.getAll();
       return result;
     });
@@ -28,7 +29,7 @@ function registerNoteIpc(win: BrowserWindow) {
   ipcMain.handle("note:create", (e, payload: unknown) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("note:create", LIMITS.WRITE_STANDARD))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(CreateNotePayloadSchema, payload);
       const result = db.create(validatedData);
       return result;
@@ -38,7 +39,7 @@ function registerNoteIpc(win: BrowserWindow) {
   ipcMain.handle("note:create-many", (e, payloads: unknown) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("note:create-many", LIMITS.WRITE_STANDARD))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(CreateNotesPayloadsSchema, payloads);
       const result = db.createMany(validatedData);
       return result;
@@ -48,7 +49,7 @@ function registerNoteIpc(win: BrowserWindow) {
   ipcMain.handle("note:merge", (e, idA: unknown, idB: unknown) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("note:merge", LIMITS.WRITE_STANDARD))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedIds = validation(MergeTransactionSchema, { idA, idB });
       return db.transactions.safeMerge(validatedIds);
     });
@@ -58,10 +59,10 @@ function registerNoteIpc(win: BrowserWindow) {
     return safeResponse(e, async () => {
       if (!flush) {
         if (!checkRateLimit("note:update", LIMITS.WRITE_LIGHT))
-          throw new Error("RATE_LIMIT");
+          throw new AppBackendError(AppErrorCode.RateLimitError);
       } else {
         if (!checkRateLimit("note:flush-override", LIMITS.WRITE_FLUSH)) {
-          throw new Error("RATE_LIMIT");
+          throw new AppBackendError(AppErrorCode.RateLimitError);
         }
       }
       const validatedData = validation(UpdateNotePayloadSchema, payload);
@@ -73,7 +74,7 @@ function registerNoteIpc(win: BrowserWindow) {
   ipcMain.handle("note:delete", (e, id: unknown) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("note:delete", LIMITS.WRITE_STANDARD))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(IdSchema, id);
       const result = db.delete(validatedData);
       return result;
@@ -83,7 +84,7 @@ function registerNoteIpc(win: BrowserWindow) {
   ipcMain.handle("note:getById", (e, id: unknown) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("note:getById", LIMITS.READ_LIGHT))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(IdSchema, id);
       const result = db.getById(validatedData);
       return result;
@@ -93,7 +94,7 @@ function registerNoteIpc(win: BrowserWindow) {
   ipcMain.handle("note:getManyById", (e, id: unknown) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("note:getManyById", LIMITS.READ_LIGHT))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(IdsSchema, id);
       const result = db.getManyById(validatedData);
       return result;
@@ -103,7 +104,7 @@ function registerNoteIpc(win: BrowserWindow) {
   ipcMain.handle("note:getByTag", (e, tag: unknown) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("note:getByTag", LIMITS.READ_LIGHT))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(TagSchema, tag);
       const result = db.searchByTag(validatedData);
       return result;
@@ -113,7 +114,7 @@ function registerNoteIpc(win: BrowserWindow) {
   ipcMain.handle("note:search", (e, searchTerm: unknown, limit: unknown) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("note:search", LIMITS.READ_HEAVY))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(SearchSchema, { searchTerm, limit });
       const { searchTerm: validSearchTerm, limit: validSearchLimit } =
         validatedData;
@@ -125,7 +126,7 @@ function registerNoteIpc(win: BrowserWindow) {
   ipcMain.handle("note:pin", (e, id: unknown) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("note:pin", LIMITS.READ_LIGHT))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(IdSchema, id);
       const result = db.togglePin(validatedData);
       return result;
@@ -135,7 +136,7 @@ function registerNoteIpc(win: BrowserWindow) {
   ipcMain.handle("note:bookmark", (e, id: unknown) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("note:bookmark", LIMITS.READ_LIGHT))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(IdSchema, id);
       const result = db.toggleBookmark(validatedData);
       return result;
@@ -146,7 +147,7 @@ function registerNoteIpc(win: BrowserWindow) {
     let result;
     return safeResponse(e, async () => {
       if (!checkRateLimit(`views:get:${view}`, LIMITS.READ_HEAVY))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       switch (view) {
         case "bookmarked":
           result = db.getBookMarkedNotes();
@@ -162,7 +163,7 @@ function registerNoteIpc(win: BrowserWindow) {
         case "untagged":
           return db.getUntaggedNotes();
         default:
-          throw new Error("INVALID_VIEW");
+          throw new AppBackendError(AppErrorCode.InvalidViewError);
       }
       return result;
     });
@@ -171,7 +172,7 @@ function registerNoteIpc(win: BrowserWindow) {
   ipcMain.handle("db-maintenance", (e, action: unknown) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("db-maintenance", LIMITS.WRITE_HEAVY))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       switch (action) {
         case "optimize-db":
           return measure(() => {
@@ -200,12 +201,12 @@ function registerNoteIpc(win: BrowserWindow) {
             properties: ["showOverwriteConfirmation"],
           });
           if (canceled || !filePath) {
-            throw new Error("CANCELLED_OPERATION");
+            throw new AppBackendError(AppErrorCode.CancelledOperation);
           }
           const result = await db.backupDb(filePath);
           return result.totalPages;
         default: {
-          throw new Error("INVALID_ACTION");
+          throw new AppBackendError(AppErrorCode.InvalidDbAction);
         }
       }
     });

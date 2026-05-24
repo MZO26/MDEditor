@@ -3,7 +3,6 @@ import { debounce } from "@/utils/async";
 import { formatNoteDate } from "@/utils/date";
 import { findElement, requireElement } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
-import { showToast } from "@/utils/toast";
 import { DEBOUNCE_MS } from "@shared/constants";
 import { getTodoStats } from "@shared/generators/generators";
 import type { Note } from "@shared/schemas/note-schema";
@@ -49,7 +48,7 @@ async function updateNoteLinks(links: Note["links"]) {
   const ids: string[] = links.map((link) => link.id);
   const relatedNotes = await getManyById(ids);
   if (!relatedNotes.success) {
-    showToast("Error updating note links.");
+    console.error("Failed to fetch linked notes:", relatedNotes.error);
     return;
   }
   const linkMap = new Map<string, string>();
@@ -110,9 +109,9 @@ function showTodoProgress(content: JSONContent) {
   }
 }
 
-const collapseInfoSidebar = (infoSidebar: HTMLDivElement) => {
+function collapseInfoSidebar(infoSidebar: HTMLDivElement) {
   const collapsed = infoSidebar.classList.contains("collapsed");
   setSidebarState(infoSidebar, !collapsed);
-};
+}
 
 export { collapseInfoSidebar, debouncedUpdateStats };

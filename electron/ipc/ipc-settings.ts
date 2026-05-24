@@ -1,17 +1,18 @@
 import { checkRateLimit, safeResponse } from "@electron/ipc/ipc-validation";
 import { store } from "@electron/store";
 import { nextZoom } from "@electron/win";
-import { LIMITS } from "@shared/constants";
+import { AppErrorCode, LIMITS } from "@shared/constants";
 import { validation } from "@shared/ipc-helpers";
 import { StoreSchema, type AppSettings } from "@shared/schemas/store-schema";
 import type { ZoomAction } from "@shared/types";
 import { BrowserWindow, ipcMain } from "electron";
+import { AppBackendError } from "./ipc-error-handler";
 
 function registerSettingsIpc(win: BrowserWindow) {
   ipcMain.handle("zoom", (e, action: ZoomAction) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("zoom", LIMITS.READ_LIGHT))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const current = win.webContents.getZoomFactor();
       const zoom = nextZoom(current, action);
       if (action !== "get") {
@@ -24,7 +25,7 @@ function registerSettingsIpc(win: BrowserWindow) {
   ipcMain.handle("electron-store:get", (e, key: string) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("electron-store:get", LIMITS.READ_LIGHT))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const keyValidation = StoreSchema.keyof().safeParse(key);
       if (!keyValidation.success) {
         console.error(`Invalid store key requested: ${key}`);
@@ -41,8 +42,7 @@ function registerSettingsIpc(win: BrowserWindow) {
   ipcMain.handle("electron-store:getAll", (e) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("electron-store:getAll", LIMITS.READ_LIGHT))
-        throw new Error("RATE_LIMIT");
-
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const result = StoreSchema.safeParse(store.store);
       if (!result.success) {
         console.error("Invalid store data:", result.error);
@@ -55,7 +55,7 @@ function registerSettingsIpc(win: BrowserWindow) {
   ipcMain.handle("electron-store:set", async (e, settings: AppSettings) => {
     return safeResponse(e, async () => {
       if (!checkRateLimit("electron-store:set", LIMITS.WRITE_LIGHT))
-        throw new Error("RATE_LIMIT");
+        throw new AppBackendError(AppErrorCode.RateLimitError);
       const validValue = validation(StoreSchema, settings);
       store.set(validValue);
     });

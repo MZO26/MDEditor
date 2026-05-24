@@ -9,7 +9,6 @@ import { noteStore, stateStore } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
 import { findElement, requireElement, setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
-import { showToast } from "@/utils/toast";
 import { DEBOUNCE_MS } from "@shared/constants";
 import type { Note } from "@shared/schemas/note-schema";
 import type { ViewItem } from "@shared/types";
@@ -23,7 +22,7 @@ async function handleSearchInput(searchInput: string) {
   }
   const response = await searchNotes(searchInput, 50);
   if (!response.success) {
-    showToast(response.message);
+    console.error("Search failed:", response.error);
     return;
   }
   addManyNotesToList(response.data);
@@ -50,7 +49,7 @@ function createViews(views: ViewItem[]) {
 async function handleViews(view: string) {
   const response = await getViews(view);
   if (!response.success) {
-    showToast(response.message);
+    console.error("Failed to fetch views:", response.error);
     return;
   }
   await reloadNoteList(response.data);
@@ -59,7 +58,7 @@ async function handleViews(view: string) {
 async function searchByTag(tag: string) {
   const response = await getByTag(tag);
   if (!response.success) {
-    showToast(response.message);
+    console.error("Failed to fetch notes by tag:", response.error);
     return;
   }
   await reloadNoteList(response.data);
@@ -150,7 +149,7 @@ async function reloadNoteList(notes?: Note[]) {
   }
   const response = await getAll();
   if (!response.success) {
-    showToast(response.message);
+    console.error("Failed to fetch all notes:", response.error);
     return;
   } else {
     const notes = response.data;

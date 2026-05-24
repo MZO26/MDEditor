@@ -1,3 +1,5 @@
+import { AppBackendError } from "@electron/ipc/ipc-error-handler";
+import { AppErrorCode } from "@shared/constants";
 import { open, rename, unlink, type FileHandle } from "node:fs/promises";
 
 async function writeAtomic(
@@ -25,7 +27,7 @@ async function writeAtomic(
   } catch (error) {
     // ignore errors while deleting temp file to throw more important error if save failed
     await unlink(tempPath).catch(() => {});
-    throw error;
+    throw new AppBackendError(AppErrorCode.FILE_WRITE_ERROR);
   }
 }
 

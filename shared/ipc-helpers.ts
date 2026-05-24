@@ -1,5 +1,6 @@
 import type { Result } from "@shared/types";
 import z from "zod";
+import { AppErrorCode } from "./constants";
 
 function validation<T extends z.ZodType>(
   schema: T,
@@ -23,13 +24,8 @@ async function safeInvoke<T>(
   try {
     return await ipcPromise;
   } catch (err: unknown) {
-    console.error("IPC error: ", err);
-    const msg =
-      err instanceof Error
-        ? err.message
-        : "An unknown communication error occurred";
-
-    return { success: false, message: msg };
+    console.error("[IPC Bridge Connection Error]: ", err);
+    return { success: false, error: AppErrorCode.UnknownError };
   }
 }
 

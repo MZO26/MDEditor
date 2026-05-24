@@ -1,7 +1,7 @@
-import { importNote } from "@/api/api";
+import { importNote, showNotification } from "@/api/api";
 import { getNoteEditorExtensions } from "@/components/editor/editor-init";
 import { sanitize } from "@/utils/sanitize";
-import { showToast } from "@/utils/toast";
+import { AppErrorCode, ERROR_MESSAGES } from "@shared/constants";
 import { getMetadata } from "@shared/generators/generators";
 import type { CreateNotePayload } from "@shared/schemas/note-schema";
 import type { ContentType, ImportedContent, Result } from "@shared/types";
@@ -10,9 +10,10 @@ import { Editor, type Content, type JSONContent } from "@tiptap/core";
 async function handleImportFile(): Promise<Result<ImportedContent[]>> {
   const response = await importNote();
   if (!response.success) {
-    showToast(response.message);
+    await showNotification("Import Failed", ERROR_MESSAGES[response.error]);
     return response;
   }
+  await showNotification("Import Successful", "Notes imported successfully.");
   const filesToProcess = response.data;
   const processedNotes = [];
   const failedFiles = [];
@@ -40,9 +41,15 @@ async function handleImportFile(): Promise<Result<ImportedContent[]>> {
     }
   }
   if (failedFiles.length > 0) {
-    showToast(`Error importing ${failedFiles.length} file(s)`);
+    await showNotification(
+      "Import Failed",
+      `Error importing ${failedFiles.length} file(s)`,
+    );
   } else if (processedNotes.length > 0) {
-    showToast(`Successfully imported ${processedNotes.length} note(s)`);
+    await showNotification(
+      "Import Successful",
+      `Successfully imported ${processedNotes.length} note(s)`,
+    );
   }
   return { success: true, data: processedNotes };
 }
@@ -56,7 +63,7 @@ const extensionToContentType = (ext: string): ContentType | undefined => {
   return map[ext];
 };
 
-function importTxtToJSON(txt: string): JSONContent[] | undefined {
+function importTxtToJSON(txt: string) {
   if (!txt) return undefined;
   const lines = txt.split(/\r?\n/);
   const content: JSONContent[] = [];
@@ -112,7 +119,7 @@ async function getImportedContent(
   } catch (error) {
     return {
       success: false,
-      message: "One or more files couldn't be imported.",
+      error: AppErrorCode.UnknownError,
     };
   } finally {
     headlessEditor.destroy();

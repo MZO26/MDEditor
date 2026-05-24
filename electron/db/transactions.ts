@@ -1,4 +1,6 @@
 import NoteDB from "@electron/db/database";
+import { AppBackendError } from "@electron/ipc/ipc-error-handler";
+import { AppErrorCode } from "@shared/constants";
 import { validation } from "@shared/ipc-helpers";
 import {
   NoteFromDB,
@@ -57,7 +59,7 @@ class Transactions {
       const { tags, links, ...noteParams } = params;
       const result = this.createNoteStmt.get(noteParams) as NoteRow;
       if (!result) {
-        throw new Error("NOT_FOUND");
+        throw new AppBackendError(AppErrorCode.DBError);
       }
       const noteId = result.id;
       if (links && links.length > 0) {
@@ -87,7 +89,7 @@ class Transactions {
     const { tags, links, ...noteParams } = params;
     const result = this.createNoteStmt.get(noteParams) as NoteRow;
     if (!result) {
-      throw new Error("NOT_FOUND");
+      throw new AppBackendError(AppErrorCode.DBError);
     }
     const noteId = result.id;
     if (links && links.length > 0) {
@@ -123,7 +125,7 @@ class Transactions {
     const { tags, links, ...noteParams } = params;
     const result = this.updateNoteStmt.get(noteParams) as NoteRow;
     if (!result) {
-      throw new Error("NOT_FOUND");
+      throw new AppBackendError(AppErrorCode.DBError);
     }
     const noteId = result.id;
     this.deleteLinksStmt.run({ source_id: noteId });
@@ -155,7 +157,7 @@ class Transactions {
     const resultA = recordsMap.get(idA);
     const resultB = recordsMap.get(idB);
     if (!resultA || !resultB) {
-      throw new Error("NOT_FOUND");
+      throw new AppBackendError(AppErrorCode.DBError);
     }
     const mergedJSON = {
       type: "doc" as const,

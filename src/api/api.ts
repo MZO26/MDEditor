@@ -1,6 +1,5 @@
 import { settingsStore } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
-import { showToast } from "@/utils/toast";
 import { DEBOUNCE_MS } from "@shared/constants";
 import { safeInvoke } from "@shared/ipc-helpers";
 import type {
@@ -101,7 +100,7 @@ const debouncedSetSettings = debounce(
     try {
       const response = await setSettings(settings);
       if (!response.success) {
-        showToast(response.message);
+        console.error("Failed to update settings:", response.error);
       }
     } catch (err) {
       console.error(err);
@@ -133,6 +132,13 @@ async function importNote(): Promise<Result<ImportRequest[]>> {
 
 async function setTheme(theme: Theme, focus?: boolean): Promise<Result<Theme>> {
   return safeInvoke(window.electronAPI.setTheme(theme, focus));
+}
+
+async function showNotification(
+  title: string,
+  body: string,
+): Promise<Result<void>> {
+  return safeInvoke(window.electronAPI.showNotification(title, body));
 }
 
 async function saveImage(
@@ -167,6 +173,7 @@ export {
   saveImage,
   searchNotes,
   setTheme,
+  showNotification,
   updateNote,
   updateSettings,
 };

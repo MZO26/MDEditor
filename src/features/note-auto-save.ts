@@ -1,8 +1,4 @@
-import {
-  cleanup,
-  handleSaveNote,
-  pendingDeletions,
-} from "@/features/note-actions";
+import { cleanup, handleSaveNote } from "@/features/note-actions";
 import { debounce } from "@/utils/async";
 import { DEBOUNCE_MS } from "@shared/constants";
 import type { Editor } from "@tiptap/core";
@@ -12,7 +8,7 @@ function setupAutoSave(editor: Editor, id: string) {
   let lastSavedDoc: Node = editor.state.doc;
   let pendingSave: Promise<void> | null = null;
   const debouncedSave = debounce(async () => {
-    if (!id || pendingDeletions.has(id) || pendingSave) return;
+    if (!id || pendingSave) return;
     const docToSave = editor.state.doc;
     if (docToSave.eq(lastSavedDoc)) return;
     const savePromise = handleSaveNote(id, false);
@@ -43,7 +39,6 @@ function setupAutoSave(editor: Editor, id: string) {
 
 function stopAutoSave(editor: Editor, action: "flush" | "cancel" = "flush") {
   const existingCleanup = cleanup.get(editor);
-
   if (existingCleanup) {
     existingCleanup[action]();
     cleanup.delete(editor);

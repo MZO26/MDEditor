@@ -36,6 +36,8 @@ contextBridge.exposeInMainWorld("fileAPI", {
 });
 contextBridge.exposeInMainWorld("electronAPI", {
   startupReady: () => ipcRenderer.send("app:start-ready"),
+  showNotification: (title: string, body: string) =>
+    ipcRenderer.invoke("show-notification", title, body),
   setTheme: (theme: Theme, focus?: boolean) =>
     ipcRenderer.invoke("set:theme", theme, focus),
   onThemeChanged: (

@@ -5,6 +5,7 @@ import {
   getNoteById,
   mergeNotes,
   pin,
+  showNotification,
 } from "@/api/api";
 import { editor } from "@/components/editor/editor-init";
 import { debouncedUpdateStats } from "@/components/sidebar/info-sidebar-actions";
@@ -16,7 +17,6 @@ import {
   cleanup,
   cleanupDeletedNoteUI,
   handleDeleteNote,
-  pendingDeletions,
   viewNote,
 } from "@/features/note-actions";
 import { stopAutoSave } from "@/features/note-auto-save";
@@ -24,7 +24,6 @@ import { noteStore, settingsStore, stateStore } from "@/settings/app-state";
 import { findElement, setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
 import { sanitize, validateUUID } from "@/utils/sanitize";
-import { showToast } from "@/utils/toast";
 import { initTippyDelegate, useDelayedSpinner } from "@/utils/ui";
 import { titleGenerator } from "@shared/generators/generators";
 import type { ExportRequest } from "@shared/schemas/export-schema";
@@ -144,20 +143,26 @@ function initListeners() {
           };
           break;
         default:
-          showToast(`Unsupported export format: ${extension}`);
+          console.error("Unsupported export format:", extension);
           return;
       }
       const response = await exportNote(payload);
       if (!response.success) {
-        showToast(response.message || "Failed to export note.");
+        console.error("Failed to export note:", response.error);
         return response;
       }
-      showToast(`Successfully exported ${extension.toUpperCase()} file`);
+      await showNotification(
+        "Export Successful",
+        `Successfully exported ${extension.toUpperCase()} file`,
+      );
       return response;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      showToast(`Export process failed: ${errorMessage}`);
+      await showNotification(
+        "Export Failed",
+        `Export process failed: ${errorMessage}`,
+      );
       return { success: false, message: errorMessage };
     }
   });
@@ -181,9 +186,9 @@ function initListeners() {
   window.noteAPI.onTriggerId(async (id: string) => {
     try {
       await navigator.clipboard.writeText(id);
-      showToast("ID copied to clipboard!");
+      await showNotification("ID copied to clipboard!", "");
     } catch (err) {
-      showToast("Failed to copy ID.");
+      await showNotification("Failed to copy ID.", "");
       console.error("Failed to copy text: ", err);
     }
   });
@@ -197,21 +202,19 @@ function initListeners() {
       const value = mergeInput.value.trim();
       const validatedId = validateUUID(value);
       if (!validatedId) {
-        showToast("Invalid Note ID format.");
+        console.error("Invalid Note ID format.");
         return;
       }
       if (id === validatedId) {
-        showToast("You cannot merge a note with itself.");
+        console.error("You cannot merge a note with itself.");
         return;
       }
       stopAutoSave(getAppItem("editor"), "cancel");
-      pendingDeletions.add(id);
-      pendingDeletions.add(validatedId);
       const stopSpinner = useDelayedSpinner(100);
       try {
         const result = await mergeNotes(id, validatedId);
         if (!result.success) {
-          showToast(result.message);
+          console.error("Failed to merge notes:", result.error);
           return;
         }
         const noteBItem = findElement<HTMLDivElement>(
@@ -225,13 +228,9 @@ function initListeners() {
           `.note-item[data-id="${result.data.id}"]`,
         );
         if (noteItem) setActiveItem(noteItem, getAppItem("sidebar"));
-        showToast("Notes merged successfully.");
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Merge failed:", error);
-        showToast("Failed to merge notes.");
       } finally {
-        pendingDeletions.delete(id);
-        setTimeout(() => pendingDeletions.delete(validatedId), 1000);
         if (stopSpinner) stopSpinner();
       }
     };
@@ -243,7 +242,7 @@ function initListeners() {
   window.noteAPI.onTriggerPin(async (id: string) => {
     const response = await pin(id);
     if (!response.success) {
-      showToast(response.message);
+      console.error("Failed to toggle pin:", response.error);
       return;
     }
     noteStore.setState((state) => ({
@@ -257,7 +256,7 @@ function initListeners() {
   window.noteAPI.onTriggerBookmark(async (id: string) => {
     const response = await bookmark(id);
     if (!response.success) {
-      showToast(response.message);
+      console.error("Failed to toggle bookmark:", response.error);
       return;
     }
     noteStore.setState((state) => ({
@@ -271,7 +270,7 @@ function initListeners() {
   window.noteAPI.onTriggerDuplicate(async (id: string) => {
     const response = await getNoteById(id);
     if (!response.success) {
-      showToast(response.message);
+      console.error("Failed to fetch note for duplication:", response.error);
       return;
     }
     const {
@@ -297,7 +296,7 @@ function initListeners() {
     };
     const result = await createNote(data);
     if (!result.success) {
-      showToast(result.message);
+      console.error("Failed to create duplicate note:", result.error);
       return;
     }
     addOneNoteToList(result.data);

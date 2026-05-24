@@ -16,7 +16,7 @@ function resolveTheme(theme: Theme): ResolvedTheme {
 async function applyAppTheme(preference: Theme, saveToSettings = true) {
   const result = await setTheme(preference);
   if (!result.success) {
-    console.error("Failed to apply theme:", result.message);
+    console.error("Failed to apply theme:", result.error);
     return;
   }
   const validatedTheme = result.data;

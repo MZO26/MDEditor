@@ -7,6 +7,7 @@ import { exportPdfNote } from "@electron/fs/fs-pdf";
 import { loadPDFAssets } from "@electron/handler/pdf-handler";
 import { safeResponse } from "@electron/ipc/ipc-validation";
 import { createHiddenPdfWindow } from "@electron/win";
+import { AppErrorCode } from "@shared/constants";
 import { validation } from "@shared/ipc-helpers";
 import {
   ExportManyRequestSchema,
@@ -15,6 +16,7 @@ import {
 } from "@shared/schemas/export-schema";
 import { app, dialog, ipcMain, type BrowserWindow } from "electron";
 import path from "path";
+import { AppBackendError } from "./ipc-error-handler";
 
 function registerFileIpc(win: BrowserWindow) {
   ipcMain.handle("note:import", (e) => {
@@ -35,7 +37,7 @@ function registerFileIpc(win: BrowserWindow) {
       });
       const hasFiles = filePaths?.length > 0;
       if (canceled || !hasFiles) {
-        throw new Error("CANCELLED_OPERATION");
+        throw new AppBackendError(AppErrorCode.CancelledOperation);
       }
       const result = await batchImport(filePaths);
       return result;
@@ -46,7 +48,7 @@ function registerFileIpc(win: BrowserWindow) {
     return safeResponse(e, async () => {
       const validatedData = validation(ExportManyRequestSchema, payload);
       if (!validatedData) {
-        throw new Error("CANCELLED_OPERATION");
+        throw new AppBackendError(AppErrorCode.InvalidData);
       }
       const { canceled, filePaths } = await dialog.showOpenDialog({
         title: "Select Folder for Export",
@@ -55,7 +57,7 @@ function registerFileIpc(win: BrowserWindow) {
       });
       const selectedFolder = filePaths[0];
       if (canceled || !selectedFolder) {
-        throw new Error("CANCELLED_OPERATION");
+        throw new AppBackendError(AppErrorCode.CancelledOperation);
       }
       const hasPdf = validatedData.some(
         (item) => "extension" in item && item.extension === "pdf",
@@ -73,7 +75,7 @@ function registerFileIpc(win: BrowserWindow) {
     return safeResponse(e, async () => {
       const validatedData = validation(ExportRequestSchema, payload);
       if (!validatedData) {
-        throw new Error("CANCELLED_OPERATION");
+        throw new AppBackendError(AppErrorCode.InvalidData);
       }
       const { id, content, extension, fileName } = validatedData;
       const { canceled, filePath } = await dialog.showSaveDialog(win, {
@@ -82,7 +84,7 @@ function registerFileIpc(win: BrowserWindow) {
         filters: [{ name: extension.toUpperCase(), extensions: [extension] }],
       });
       if (canceled || !filePath) {
-        throw new Error("CANCELLED_OPERATION");
+        throw new AppBackendError(AppErrorCode.CancelledOperation);
       }
       const absoluteTargetFolder = path.dirname(filePath);
       const data =

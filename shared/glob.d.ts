@@ -29,6 +29,7 @@ declare global {
     electronAPI: {
       startupReady: () => void;
       setTheme: (theme: Theme, focus?: boolean) => Promise<Result<Theme>>;
+      showNotification: (title: string, body: string) => Promise<Result<void>>;
       saveImage: (
         payload: ImagePayload,
       ) => Promise<Result<{ imageSrc: string }>>;
