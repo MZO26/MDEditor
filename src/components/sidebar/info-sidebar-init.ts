@@ -4,12 +4,18 @@ import { setSidebarState } from "@/components/sidebar/sidebar-state";
 import { handleSelectNote } from "@/features/note-actions";
 import { createAsyncHandler } from "@/utils/async";
 import { findElement, requireElement } from "@/utils/dom";
-import { registerAppEvents } from "@/utils/registry";
+import {
+  getInfobarItems,
+  initializeInfobarRegistry,
+  registerAppEvents,
+} from "@/utils/registry";
 
 async function initInfoSidebar() {
-  const toggleBtn = findElement<HTMLButtonElement>(".info-sidebar-toggle");
-  const infoSidebar = findElement<HTMLDivElement>(".info-sidebar");
-  if (!toggleBtn || !infoSidebar) return;
+  initializeInfobarRegistry();
+  const { toggleBtn, infoSidebar } = getInfobarItems([
+    "toggleBtn",
+    "infoSidebar",
+  ]);
   setSidebarState(infoSidebar, true);
   applyInfoSidebarListeners(toggleBtn, infoSidebar);
   registerAppEvents(document, {

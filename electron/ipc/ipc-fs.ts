@@ -66,8 +66,7 @@ function registerFileIpc(win: BrowserWindow) {
       if (!checkRateLimit("image:write", LIMITS.WRITE_HEAVY))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(ImagePayloadSchema, payload);
-      const result = await handleImageWrite(validatedData);
-      return result;
+      return await handleImageWrite(validatedData);
     });
   });
 }

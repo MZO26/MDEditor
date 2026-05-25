@@ -59,8 +59,7 @@ function applySidebarListeners(
     "change",
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLSelectElement;
-      const view = target.value as View;
-      handleViews(view);
+      handleViews(target.value as View);
     }),
   );
   sidebar.addEventListener(

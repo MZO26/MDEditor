@@ -26,7 +26,8 @@
     "files": [
       "dist-electron/**/*",
       "dist/**/*",
-      "package.json"
+      "package.json",
+      "shared/pdf/**/*"
     ],
     "mac": {
       "target": [

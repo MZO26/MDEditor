@@ -1,11 +1,8 @@
 import { findElement } from "@/utils/dom";
-import { delegate } from "tippy.js";
+import { delegate, hideAll } from "tippy.js";
 import "tippy.js/dist/tippy.css";
 
-function createTooltipContent(
-  baseText: string,
-  shortcut?: string,
-): HTMLSpanElement {
+function createTooltipContent(baseText: string, shortcut?: string) {
   const tooltipContent = document.createElement("span");
   tooltipContent.textContent = baseText
     .replace(/([a-z])([A-Z])/g, "$1 $2")
@@ -20,7 +17,7 @@ function createTooltipContent(
   return tooltipContent;
 }
 
-function formatShortcut(shortcut?: string): string {
+function formatShortcut(shortcut?: string) {
   if (!shortcut) return "";
 
   const isMac = typeof process !== "undefined" && process.platform === "darwin";
@@ -55,6 +52,9 @@ function initTippyDelegate(container: HTMLElement, appendTo?: HTMLElement) {
     theme: "app-theme",
     trigger: "mouseenter focus",
     appendTo: appendTo || container,
+    onShow(instance) {
+      hideAll({ exclude: instance });
+    },
     onCreate: (instance) => {
       const reference = instance.reference;
       const baseText = reference.getAttribute("data-tippy-content") || "";

@@ -1,8 +1,5 @@
 import { initListeners } from "@/api/callbacks";
-import {
-  initEditor,
-  setupEditorListeners,
-} from "@/components/editor/editor-init";
+import { setupEditorListeners } from "@/components/editor/editor-init";
 import { initInfoSidebar } from "@/components/sidebar/info-sidebar-init";
 import { reloadNoteList } from "@/components/sidebar/sidebar-actions";
 import { initNotesSidebar } from "@/components/sidebar/sidebar-init";
@@ -19,18 +16,12 @@ import { initGlobalShortcuts } from "@/settings/shortcuts";
 import { startAppClock } from "@/utils/date";
 import { requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
-import { getAppItem, setAppItems } from "@/utils/registry";
+import { getAppItem, initializeCoreRegistry } from "@/utils/registry";
 import { initTippyDelegate } from "@/utils/ui";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const settings = await loadSettings();
-  setAppItems({
-    appContainer: requireElement<HTMLDivElement>(".app-container"),
-    sidebar: requireElement<HTMLDivElement>(".notes-container"),
-    editor: initEditor(settings["spellcheck"]),
-    editorWrapper: requireElement<HTMLDivElement>("#editor"),
-    editorContainer: requireElement<HTMLDivElement>(".editor-container"),
-  });
+  initializeCoreRegistry(settings);
   setupEditorListeners(getAppItem("editorWrapper"), getAppItem("editor"));
   initGlobalShortcuts();
   initAppSettings(settings);

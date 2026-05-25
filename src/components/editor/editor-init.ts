@@ -98,11 +98,11 @@ function getNoteEditorExtensions() {
     Typography,
     WikiLink.configure({
       onClick: async (id) => {
-        const noteItem = findElement<HTMLDivElement>(
+        const noteElement = findElement<HTMLDivElement>(
           `.note-item[data-id="${id}"]`,
         );
-        if (!noteItem) return;
-        handleSelectNote(noteItem);
+        if (!noteElement) return;
+        handleSelectNote(noteElement);
       },
     }),
     Focus.configure({

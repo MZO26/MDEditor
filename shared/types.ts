@@ -13,6 +13,10 @@ type TitleBarOverlayOptions = {
   focus?: boolean;
 };
 
+interface ErrorHandlerOptions {
+  ignore?: string[];
+}
+
 type ResolvedTheme = "light" | "dark";
 
 type SelectOption = { value: string; label: string };
@@ -83,6 +87,8 @@ type ExportResult = {
   filePath: string;
 };
 
+type PDFAssets = { template: string; css: string };
+
 type View = "all" | "bookmarked" | "pinned" | "todos" | "untagged";
 
 type ContentType = "markdown" | "html" | "json";
@@ -110,7 +116,11 @@ type ViewItem = {
 };
 
 interface AppRegistry {
-  settings: Partial<SettingsRegistry>;
+  infoSidebar: Partial<InfobarRegistry>;
+  core: Partial<CoreRegistry>;
+}
+
+interface CoreRegistry {
   editor: Editor;
   appContainer: HTMLDivElement;
   sidebar: HTMLDivElement;
@@ -118,20 +128,19 @@ interface AppRegistry {
   editorContainer: HTMLDivElement;
 }
 
-type SettingsKeys =
-  | "themeSelect"
-  | "codeThemeSelect"
-  | "highlightSelect"
-  | "fontFamilySelect"
-  | "fontSizeSelect"
-  | "lineHeightSelect"
-  | "focusSelect"
-  | "spellcheckSelect"
-  | "batchExportSelect"
-  | "noteItemSelect"
-  | "dbOptimizeSelect";
-
-interface SettingsRegistry extends Record<SettingsKeys, HTMLSelectElement> {}
+interface InfobarRegistry {
+  infoSidebar: HTMLDivElement;
+  wordCountEl: HTMLSpanElement;
+  charCountEl: HTMLSpanElement;
+  readingTime: HTMLSpanElement;
+  linkContainer: HTMLDivElement;
+  tagContainer: HTMLDivElement;
+  headerContainer: HTMLDivElement;
+  todoContainer: HTMLDivElement;
+  todoCount: HTMLSpanElement;
+  todoProgress: HTMLDivElement;
+  toggleBtn: HTMLButtonElement;
+}
 
 type ImageSrc = {
   imageSrc: string;
@@ -153,25 +162,27 @@ export type {
   AppRegistry,
   Code,
   ContentType,
+  CoreRegistry,
   DBBackupResult,
   DbOptimization,
+  ErrorHandlerOptions,
   ExportedContent,
   ExportFormat,
   ExportResult,
   Failure,
   ImageSrc,
   ImportedContent,
+  InfobarRegistry,
   MenuType,
   Metadata,
   NativeWindowColors,
   NoteMenuPayload,
   OpenDialog,
+  PDFAssets,
   ResolvedTheme,
   Result,
   SaveDialog,
   SelectOption,
-  SettingsKeys,
-  SettingsRegistry,
   Success,
   TitleBarOverlayOptions,
   View,

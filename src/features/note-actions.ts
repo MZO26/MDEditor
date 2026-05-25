@@ -8,7 +8,7 @@ import {
   updateNote,
 } from "@/api/api";
 import {
-  getContent,
+  getEditorContent,
   resetEditorHistory,
 } from "@/components/editor/editor-actions";
 import { editor } from "@/components/editor/editor-init";
@@ -113,7 +113,7 @@ async function handleDeleteNote(id: string, noteElement: HTMLDivElement) {
 
 async function handleSaveNote(id: string, flush: boolean = false) {
   if (!editor || !id) return;
-  const editorContent = getContent();
+  const editorContent = getEditorContent();
   const metaData = getMetadata(editorContent.content, editorContent.plainText);
   const payload: UpdateNotePayload = {
     id,

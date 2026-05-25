@@ -1,6 +1,4 @@
-interface ErrorHandlerOptions {
-  ignore?: string[];
-}
+import type { ErrorHandlerOptions } from "@shared/types";
 
 function setupGlobalErrorHandling({ ignore = [] }: ErrorHandlerOptions = {}) {
   process.on("unhandledRejection", (reason) => {

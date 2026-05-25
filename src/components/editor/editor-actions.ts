@@ -2,7 +2,7 @@ import { getAppItem } from "@/utils/registry";
 import { Editor } from "@tiptap/core";
 import { EditorState } from "@tiptap/pm/state";
 
-function getContent() {
+function getEditorContent() {
   const editor = getAppItem("editor");
   const plainText = editor.getText();
   const content = editor.getJSON();
@@ -18,4 +18,4 @@ function resetEditorHistory(editor: Editor) {
   editor.view.updateState(newState);
 }
 
-export { getContent, resetEditorHistory };
+export { getEditorContent, resetEditorHistory };

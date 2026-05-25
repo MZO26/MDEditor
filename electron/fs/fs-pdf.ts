@@ -7,7 +7,7 @@ async function exportPdfNote(params: {
   filePath: string;
   html: string;
   assets: ReturnType<typeof loadPDFAssets>;
-}): Promise<string> {
+}) {
   const { win, filePath, html, assets } = params;
   const pdfOptions: PrintToPDFOptions = {
     pageSize: "A4",

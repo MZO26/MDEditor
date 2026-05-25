@@ -82,12 +82,13 @@ function initListeners() {
         "[exportTrigger]: Failed to fetch note data:",
         result.error,
       );
-      await showNotification("Export Failed", ERROR_MESSAGES["INVALID_DATA"]);
+      await showNotification("Export Failed", ERROR_MESSAGES.EXPORT_ERROR);
       return;
     }
     const exported = await exportNote(result.data);
     if (!exported.success) {
       console.error("[exportTrigger]: Failed to write file:", exported.error);
+      await showNotification("Export Failed", ERROR_MESSAGES.EXPORT_ERROR);
       return;
     }
     await showNotification(
@@ -115,9 +116,9 @@ function initListeners() {
   window.noteAPI.onTriggerId(async (id: string) => {
     try {
       await navigator.clipboard.writeText(id);
-      await showNotification("ID copied to clipboard!", "");
+      await showNotification("Copied to clipboard!", "");
     } catch (error) {
-      await showNotification("Failed to copy ID.", "");
+      await showNotification("Failed to copy to clipboard.", "");
       console.error("[idTrigger]: Failed to copy text: ", error);
     }
   });

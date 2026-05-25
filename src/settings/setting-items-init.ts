@@ -13,7 +13,7 @@ import {
 } from "@/settings/theme-actions";
 import { createAsyncHandler } from "@/utils/async";
 import { findElement } from "@/utils/dom";
-import { getAppItem, setSettingsItems } from "@/utils/registry";
+import { getAppItem } from "@/utils/registry";
 import type {
   AppSettings,
   EditorFocus,
@@ -79,13 +79,6 @@ function initAppearanceSettings(settings: AppSettings) {
       await reloadNoteList();
     }),
   );
-
-  setSettingsItems({
-    codeThemeSelect,
-    themeSelect,
-    highlightSelect,
-    noteItemSelect,
-  });
 }
 
 function initEditorSettings(settings: AppSettings) {
@@ -163,13 +156,6 @@ function initEditorSettings(settings: AppSettings) {
       "editor-focus": target.value as EditorFocus,
     });
   });
-
-  setSettingsItems({
-    fontFamilySelect,
-    fontSizeSelect,
-    lineHeightSelect,
-    focusSelect,
-  });
 }
 
 function initAppSettings(settings: AppSettings) {
@@ -239,12 +225,6 @@ function initAppSettings(settings: AppSettings) {
     editor.view.dom.spellcheck = enabled;
     editor.commands.focus();
     updateSettings({ spellcheck: enabled as Spellcheck });
-  });
-
-  setSettingsItems({
-    spellcheckSelect,
-    batchExportSelect,
-    dbOptimizeSelect,
   });
 }
 

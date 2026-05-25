@@ -1,7 +1,3 @@
-import { findElement } from "@/utils/dom";
-
-let displayElement: HTMLDivElement | null = null;
-
 const dateFormatter = new Intl.DateTimeFormat("de-DE", {
   year: "numeric",
   month: "2-digit",
@@ -13,19 +9,18 @@ const timeFormatter = new Intl.DateTimeFormat("de-DE", {
   minute: "2-digit",
 });
 
-function updateDateTime() {
-  if (!displayElement) {
-    displayElement = findElement<HTMLDivElement>("#datetime-display");
-  }
-  if (!displayElement) {
-    console.warn("Datetime display not found.");
-    return;
-  }
-  const now = new Date();
-  const dateString = dateFormatter.format(now);
-  const timeString = timeFormatter.format(now);
-  displayElement.textContent = `${dateString} - ${timeString}`;
+function createDateTimeUpdater() {
+  let displayElement: HTMLDivElement | null = null;
+  return function updateDateTime() {
+    displayElement ??=
+      document.querySelector<HTMLDivElement>("#datetime-display");
+    if (!displayElement) return;
+    const now = new Date();
+    displayElement.textContent = `${dateFormatter.format(now)} - ${timeFormatter.format(now)}`;
+  };
 }
+
+const updateDateTime = createDateTimeUpdater();
 
 function startAppClock() {
   updateDateTime();

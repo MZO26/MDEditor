@@ -1,5 +1,5 @@
 import { setTheme, updateSettings } from "@/api/api";
-import { getSettingsItem } from "@/utils/registry";
+import { findElement } from "@/utils/dom";
 import { CODE_THEME_MAP, THEME_MAP } from "@shared/constants";
 import type { CodeTheme, Theme } from "@shared/schemas/store-schema";
 import type { ResolvedTheme } from "@shared/types";
@@ -25,8 +25,16 @@ async function applyAppTheme(preference: Theme) {
 }
 
 function setCodeTheme(resolvedTheme: ResolvedTheme): CodeTheme {
-  const codeThemeSelect = getSettingsItem("codeThemeSelect");
-  const preference = codeThemeSelect?.value as CodeTheme;
+  const codeThemeSelect = findElement<HTMLSelectElement>("#code-theme");
+  if (!codeThemeSelect) {
+    console.warn(
+      "Code theme select element not found, defaulting to balanced.",
+    );
+    document.documentElement.dataset["codetheme"] =
+      CODE_THEME_MAP["balanced"]?.[resolvedTheme];
+    return "balanced";
+  }
+  const preference = codeThemeSelect.value as CodeTheme;
   const codeTheme =
     CODE_THEME_MAP[preference]?.[resolvedTheme] ??
     CODE_THEME_MAP["balanced"]?.[resolvedTheme];

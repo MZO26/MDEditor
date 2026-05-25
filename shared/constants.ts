@@ -73,7 +73,7 @@ const LIMITS = {
 };
 
 const DEBOUNCE_MS = {
-  fast: 300,
+  fast: 500,
   slow: 1000,
 } as const;
 

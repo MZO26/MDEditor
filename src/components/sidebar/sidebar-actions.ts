@@ -69,12 +69,17 @@ function toggleSidebar(appContainer: HTMLDivElement) {
   setSidebarState(appContainer, !collapsed);
 }
 
-function updateNoteCount(notes: Note[]) {
-  const noteCount = findElement<HTMLSpanElement>(".note-count");
-  if (!noteCount) return;
-  const count = notes.length;
-  noteCount.textContent = `${count} ${count === 1 ? "note" : "notes"}`;
+function createNoteUpdater() {
+  let element: HTMLDivElement | null = null;
+  return function updateNoteCount(notes: Note[]) {
+    element ??= findElement<HTMLDivElement>(".note-count");
+    if (!element) return;
+    const count = notes.length;
+    element.textContent = `${count} ${count === 1 ? "note" : "notes"}`;
+  };
 }
+
+const updateNoteCount = createNoteUpdater();
 
 function getNotePriority(note: Note) {
   if (note.pinned && note.bookmarked) return 0;
@@ -152,9 +157,8 @@ async function reloadNoteList(notes?: Note[]) {
     console.error("[getAll]: Failed to fetch all notes:", result.error);
     return;
   } else {
-    const notes = result.data;
-    addManyNotesToList(notes.sort(compareNotes));
-    noteStore.setState({ notes });
+    addManyNotesToList(result.data.sort(compareNotes));
+    noteStore.setState({ notes: result.data });
   }
 }
 

@@ -23,17 +23,17 @@ async function handleMergeNotes(idA: string, idB: string) {
     console.error("[handleMergeNotes]: Failed to merge notes:", result.error);
     return;
   }
-  const noteBItem = findElement<HTMLDivElement>(
+  const noteBElement = findElement<HTMLDivElement>(
     `div[data-id="${validatedId}"]`,
   );
-  if (noteBItem) cleanupDeletedNoteUI(validatedId, noteBItem);
+  if (noteBElement) cleanupDeletedNoteUI(validatedId, noteBElement);
   stateStore.setState({ activeId: result.data.id });
   viewNote(result.data);
   debouncedUpdateStats(result.data);
-  const noteItem = findElement<HTMLDivElement>(
+  const noteElement = findElement<HTMLDivElement>(
     `.note-item[data-id="${result.data.id}"]`,
   );
-  if (noteItem) setActiveItem(noteItem, getAppItem("sidebar"));
+  if (noteElement) setActiveItem(noteElement, getAppItem("sidebar"));
 }
 
 export { handleMergeNotes };
