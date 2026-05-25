@@ -5,16 +5,14 @@ const StoreSchema = z.object({
     .enum(["system", "light", "dark", "light-warm", "dark-warm"])
     .default("system"),
   "font-family": z
-    .enum(["system", "arial", "verdana", "georgia", "garamond", "tahoma"])
+    .enum(["system", "arial", "georgia", "garamond"])
     .default("system"),
-  "font-size": z.enum(["12", "14", "16", "18", "20", "24"]).default("16"),
-  "line-height": z
-    .enum(["1.2", "1.3", "1.4", "1.5", "1.6", "1.7"])
-    .default("1.5"),
+  "font-size": z.enum(["16", "18", "20"]).default("18"),
+  "line-height": z.enum(["1.4", "1.5", "1.6"]).default("1.5"),
   "editor-focus": z.enum(["on", "off"]).default("off"),
   spellcheck: z.boolean().default(false),
   "code-theme": z.enum(["focus", "balanced", "colorless"]).default("balanced"),
-  highlight: z.enum(["done", "info", "idea", "focus"]).default("done"),
+  highlight: z.enum(["info", "idea", "focus"]).default("info"),
   "note-item-display": z.enum(["tags", "snippet", "minimal"]).default("tags"),
   "window-bounds": z
     .object({

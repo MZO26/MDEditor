@@ -103,27 +103,26 @@ function initEditorSettings(settings: AppSettings) {
     editorWrapper.style.setProperty("--editor-font-family", current);
     updateSettings({ "font-family": current as FontFamily });
     if (fontFamilySelect.querySelector(`option[value="${current}"]`)) {
-      fontFamilySelect.value = current;
-      document.documentElement.setAttribute("data-font-family", current);
+      editorWrapper.setAttribute("data-font-family", current);
     }
   };
-
   applyFont(settings["font-family"]);
   fontFamilySelect.addEventListener("change", () =>
     applyFont(fontFamilySelect.value),
   );
 
   const applySize = (val: string | number) => {
-    let current = Number(val) || 16;
-    current = Math.max(12, Math.min(current, 24));
+    let current = Number(val) || 18;
+    current = Math.max(16, Math.min(current, 20));
     const strCurrent = String(current);
-
-    editorWrapper.style.setProperty("--editor-font-size", `${strCurrent}px`);
+    editorWrapper.style.setProperty(
+      "--editor-font-size",
+      `${String(current)}px`,
+    );
     updateSettings({ "font-size": strCurrent as FontSize });
 
     if (fontSizeSelect.querySelector(`option[value="${strCurrent}"]`)) {
-      fontSizeSelect.value = strCurrent;
-      document.documentElement.setAttribute("data-font-size", strCurrent);
+      editorWrapper.setAttribute("data-font-size", strCurrent);
     }
   };
 
@@ -134,15 +133,14 @@ function initEditorSettings(settings: AppSettings) {
 
   const applyLineHeight = (val: string | number) => {
     let current = Number(val) || 1.5;
-    current = Math.max(1.2, Math.min(current, 2.5));
+    current = Math.max(1.4, Math.min(current, 1.6));
     const strCurrent = String(current);
 
     editorWrapper.style.setProperty("--editor-line-height", strCurrent);
     updateSettings({ "line-height": strCurrent as LineHeight });
 
     if (lineHeightSelect.querySelector(`option[value="${strCurrent}"]`)) {
-      lineHeightSelect.value = strCurrent;
-      document.documentElement.setAttribute("data-line-height", strCurrent);
+      editorWrapper.setAttribute("data-line-height", strCurrent);
     }
   };
 

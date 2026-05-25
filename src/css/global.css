@@ -12,16 +12,8 @@
     system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantall, "Open Sans", "Helvetica Neue", sans-serif;
   --font-arial: Arial, Helvetica, sans-serif;
-  --font-verdana: Verdana, Geneva, sans-serif;
-  --font-trebuchet: "Trebuchet MS", sans-serif;
   --font-georgia: Georgia, serif;
-  --font-courier: "Courier New", Courier, monospace;
-  --font-times: "Times New Roman", Times, serif;
-  --font-palatino: "Palatino Linotype", "Book Antiqua", Palatino, serif;
   --font-garamond: Garamond, serif;
-  --font-tahoma: Tahoma, Geneva, sans-serif;
-  --font-century: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
-  --font-consolas: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
   --current-font: var(--font-system);
 }
 
@@ -42,7 +34,6 @@
   --scrollbar-thumb: #c4c4c8;
   --tooltip-bg: #2c2c2f;
   --tooltip-text: #f4f4f5;
-  --highlight-done: rgba(74, 222, 128, 0.35);
   --highlight-info: rgba(96, 165, 250, 0.35);
   --highlight-idea: rgba(253, 224, 71, 0.45);
   --highlight-focus: rgba(248, 113, 113, 0.25);
@@ -65,7 +56,6 @@
   --scrollbar-thumb: #6a6a6e;
   --tooltip-bg: #e8e8eb;
   --tooltip-text: #18181b;
-  --highlight-done: rgba(52, 211, 153, 0.2);
   --highlight-info: rgba(56, 189, 248, 0.2);
   --highlight-idea: rgba(250, 204, 21, 0.2);
   --highlight-focus: rgba(251, 113, 133, 0.2);
@@ -88,7 +78,6 @@
   --scrollbar-thumb: #c0beb6;
   --tooltip-bg: #2c2925;
   --tooltip-text: #f5f3ef;
-  --highlight-done: rgba(132, 165, 157, 0.35);
   --highlight-info: rgba(99, 102, 241, 0.2);
   --highlight-idea: rgba(217, 119, 6, 0.2);
   --highlight-focus: rgba(168, 85, 247, 0.2);
@@ -111,7 +100,6 @@
   --scrollbar-thumb: #6a645b;
   --tooltip-bg: #e4e2da;
   --tooltip-text: #1c1917;
-  --highlight-done: rgba(132, 204, 22, 0.2);
   --highlight-info: rgba(45, 212, 191, 0.2);
   --highlight-idea: rgba(245, 158, 11, 0.25);
   --highlight-focus: rgba(192, 132, 252, 0.2);
@@ -123,21 +111,11 @@
 [data-font="arial"] {
   --current-font: var(--font-arial);
 }
-[data-font="verdana"] {
-  --current-font: var(--font-verdana);
-}
 [data-font="georgia"] {
   --current-font: var(--font-georgia);
 }
 [data-font="garamond"] {
   --current-font: var(--font-garamond);
-}
-[data-font="tahoma"] {
-  --current-font: var(--font-tahoma);
-}
-
-[data-highlight="done"] {
-  --editor-highlight: var(--highlight-done);
 }
 
 [data-highlight="info"] {

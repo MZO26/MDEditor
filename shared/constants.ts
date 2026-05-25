@@ -109,30 +109,30 @@ const THEME_DATA: Record<
   }
 > = {
   light: {
-    color: "#f8f8f8", // --bg-sidebar
+    color: "#f2f2f4", // --bg-sidebar
     symbolColor: "#18181b", // --text-main
-    background: "#fcfcfc", // --bg-editor
+    background: "#f2f2f4", // --bg-sidebar
     isDark: false,
     focus: "#fcfcfc", // --bg-editor
   },
   dark: {
     color: "#111115",
-    symbolColor: "#a1a1aa",
-    background: "#1e1e21",
+    symbolColor: "#a1a1aa", // --text-muted
+    background: "#111115",
     isDark: true,
     focus: "#1e1e21",
   },
   "light-warm": {
-    color: "#f8f7f3",
+    color: "#eceae3",
     symbolColor: "#1c1917",
-    background: "#f8f7f3",
+    background: "#eceae3",
     isDark: false,
     focus: "#f8f7f3",
   },
   "dark-warm": {
     color: "#110f0b",
     symbolColor: "#d4cfc5",
-    background: "#1e1b17",
+    background: "#110f0b",
     isDark: true,
     focus: "#1e1b17",
   },

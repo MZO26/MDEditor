@@ -6,11 +6,11 @@ import type { AppSettings } from "@shared/schemas/store-schema";
 const DEFAULT_STORE: AppSettings = {
   theme: "system",
   "font-family": "system",
-  "font-size": "16",
+  "font-size": "18",
   "line-height": "1.5",
   "editor-focus": "off",
   "code-theme": "balanced",
-  highlight: "done",
+  highlight: "info",
   spellcheck: false,
   "note-item-display": "tags",
   "window-bounds": { width: 1100, height: 600 },
