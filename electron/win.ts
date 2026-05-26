@@ -1,7 +1,7 @@
+import { validation } from "@electron/ipc/ipc-validation";
 import { win } from "@electron/main";
 import { store } from "@electron/store";
 import { ZOOMS } from "@shared/constants";
-import { validation } from "@shared/ipc-helpers";
 import { StoreSchema } from "@shared/schemas/store-schema";
 import type { ZoomAction } from "@shared/types";
 import { BrowserWindow } from "electron";

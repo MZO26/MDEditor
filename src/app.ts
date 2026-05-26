@@ -29,7 +29,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   initNotesSidebar();
   initInfoSidebar();
   await reloadNoteList();
-  const toolbarContainer = requireElement<HTMLDivElement>("#toolbar");
+  const toolbarContainer = requireElement<HTMLDivElement>(
+    "#toolbar",
+    getAppItem("editorContainer"),
+  );
   buildMenu(toolbarContainer, ToolbarActions);
   setupToolbarListeners(toolbarContainer, ToolbarActions);
   const hoverbar = requireElement<HTMLDivElement>(".top-toolbar");

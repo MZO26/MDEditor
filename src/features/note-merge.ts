@@ -25,6 +25,7 @@ async function handleMergeNotes(idA: string, idB: string) {
   }
   const noteBElement = findElement<HTMLDivElement>(
     `div[data-id="${validatedId}"]`,
+    getAppItem("sidebar"),
   );
   if (noteBElement) cleanupDeletedNoteUI(validatedId, noteBElement);
   stateStore.setState({ activeId: result.data.id });
@@ -32,6 +33,7 @@ async function handleMergeNotes(idA: string, idB: string) {
   debouncedUpdateStats(result.data);
   const noteElement = findElement<HTMLDivElement>(
     `.note-item[data-id="${result.data.id}"]`,
+    getAppItem("sidebar"),
   );
   if (noteElement) setActiveItem(noteElement, getAppItem("sidebar"));
 }

@@ -594,13 +594,28 @@ label {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 150px;
-  height: 60px;
   transform: translate(-50%, -50%);
   -webkit-app-region: no-drag;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.top-toolbar-dots {
+  position: absolute;
+  top: 10px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--text-muted);
+  box-shadow:
+    -10px 0 0 0 var(--text-muted),
+    10px 0 0 0 var(--text-muted);
+  transition: opacity 0.2s ease;
+}
+
+.toolbar-hover-zone:hover .top-toolbar-dots {
+  opacity: 0;
 }
 
 .top-toolbar {

@@ -2,8 +2,8 @@ import { FTS5 } from "@electron/db/fts";
 import { Transactions } from "@electron/db/transactions";
 import { Views } from "@electron/db/views";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
+import { validation } from "@electron/ipc/ipc-validation";
 import { AppErrorCode } from "@shared/constants";
-import { validation } from "@shared/ipc-helpers";
 import {
   CreateTransactionSchema,
   NoteFromDB,
@@ -149,7 +149,7 @@ class NoteDB {
       `);
   }
 
-  private getTagMap(): Map<string, Tag[]> {
+  public getTagMap(): Map<string, Tag[]> {
     const allTags = this.getAllTagsStmt.all() as TagRow[];
     const tagMap = new Map<string, Tag[]>();
     for (const { note_id, tag_name } of allTags) {
@@ -160,7 +160,7 @@ class NoteDB {
     return tagMap;
   }
 
-  private getLinkMap(): Map<string, Link[]> {
+  public getLinkMap(): Map<string, Link[]> {
     const allLinks = this.getAllLinksStmt.all() as LinkRow[];
     const linkMap = new Map<string, Link[]>();
     for (const { source_id, target_id } of allLinks) {

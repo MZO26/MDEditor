@@ -11,7 +11,7 @@ import { getExportContent } from "@/features/export-actions";
 import { handleDeleteNote } from "@/features/note-actions";
 import { handleDuplicateNote } from "@/features/note-duplicate";
 import { handleMergeNotes } from "@/features/note-merge";
-import { noteStore, settingsStore } from "@/settings/app-state";
+import { settingsStore } from "@/settings/app-state";
 import { initDeleteDialog, initMergeDialog } from "@/settings/dialogs";
 import { createAsyncHandler } from "@/utils/async";
 import { findElement } from "@/utils/dom";
@@ -19,7 +19,7 @@ import { getAppItem } from "@/utils/registry";
 import { CLEANUP, ERROR_MESSAGES } from "@shared/constants";
 
 const { mergeDialog, mergeInput } = initMergeDialog();
-const { deleteDialog, confirmBtn } = initDeleteDialog();
+const { deleteDialog } = initDeleteDialog();
 
 function initListeners() {
   window.storeAPI.onSettingsChanged((settings) => {
@@ -57,6 +57,7 @@ function initListeners() {
   window.electronAPI.onTriggerNoteAction((payload) => {
     const noteElement = findElement<HTMLDivElement>(
       `.note-item[data-id="${payload.id}"]`,
+      getAppItem("sidebar"),
     );
     if (!noteElement) return;
     switch (payload.action) {
@@ -98,15 +99,23 @@ function initListeners() {
   });
 
   window.noteAPI.onTriggerDelete(async (id: string) => {
-    if (!deleteDialog || !confirmBtn) return;
-    const handleClose = async () => {
-      if (deleteDialog.returnValue !== "confirm") return;
+    const confirmationEnabled =
+      settingsStore.get("delete-confirmation") === true;
+    const executeDelete = async () => {
       const noteElement = findElement<HTMLDivElement>(
         `.note-item[data-id="${id}"]`,
+        getAppItem("sidebar"),
       );
       if (!noteElement) return;
       await handleDeleteNote(id, noteElement);
-      deleteDialog.close();
+    };
+    if (!confirmationEnabled) {
+      await executeDelete();
+      return;
+    }
+    const handleClose = async () => {
+      if (deleteDialog.returnValue !== "confirm") return;
+      await executeDelete();
     };
     deleteDialog.addEventListener("close", handleClose, { once: true });
     deleteDialog.returnValue = "";
@@ -142,11 +151,6 @@ function initListeners() {
       console.error("[pinTrigger]: Failed to toggle pin:", result.error);
       return;
     }
-    noteStore.setState((state) => ({
-      notes: state.notes.map((note) =>
-        note.id === id ? { ...note, pinned: result.data } : note,
-      ),
-    }));
     await reloadNoteList();
   });
 
@@ -159,11 +163,6 @@ function initListeners() {
       );
       return;
     }
-    noteStore.setState((state) => ({
-      notes: state.notes.map((note) =>
-        note.id === id ? { ...note, bookmarked: result.data } : note,
-      ),
-    }));
     await reloadNoteList();
   });
 

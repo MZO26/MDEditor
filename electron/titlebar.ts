@@ -1,5 +1,5 @@
+import { validation } from "@electron/ipc/ipc-validation";
 import { THEME_DATA } from "@shared/constants";
-import { validation } from "@shared/ipc-helpers";
 import type { AppSettings, Theme } from "@shared/schemas/store-schema";
 import { StoreSchema } from "@shared/schemas/store-schema";
 import type { NativeWindowColors } from "@shared/types";

@@ -8,7 +8,7 @@ import {
   DOMPURIFY_CONFIG,
   YIELD_INTERVAL,
 } from "@shared/constants";
-import { titleGenerator } from "@shared/generators/generators";
+import { titleGenerator } from "@shared/generators";
 import type { ExportRequest } from "@shared/schemas/export-schema";
 import type { ExportedContent, ExportFormat, Result } from "@shared/types";
 import { Editor } from "@tiptap/core";
@@ -42,7 +42,7 @@ async function getBatchExportContent(
         "[getBatchExportContent]: Failed converting data for batch export (JSON / TXT): ",
         error,
       );
-      return { success: false, error: AppErrorCode["InvalidData"] };
+      return { success: false, error: AppErrorCode.InvalidData };
     }
   }
   const headlessEditor = new Editor({
@@ -73,7 +73,7 @@ async function getBatchExportContent(
       "[getBatchExportContent]: Failed converting data for batch export (MD / HTML):",
       error,
     );
-    return { success: false, error: AppErrorCode["InvalidData"] };
+    return { success: false, error: AppErrorCode.InvalidData };
   } finally {
     headlessEditor.destroy();
   }

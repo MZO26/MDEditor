@@ -1,5 +1,5 @@
 import { formatNoteDate } from "@/utils/date";
-import { requireElement } from "@/utils/dom";
+import { findElement, requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
 import type { Note } from "@shared/schemas/note-schema";
 
@@ -17,13 +17,13 @@ function createNoteItem(note: Note): HTMLDivElement {
   if (note.pinned || note.bookmarked) {
     renderIcons(item);
   }
-  const titleEl = item.querySelector<HTMLSpanElement>(".note-title");
+  const titleEl = findElement<HTMLSpanElement>(".note-title", item);
   if (titleEl) titleEl.textContent = note.title;
-  const dateEl = item.querySelector<HTMLDivElement>(".note-date");
+  const dateEl = findElement<HTMLDivElement>(".note-date", item);
   if (dateEl) dateEl.textContent = formatNoteDate(note.updated_at);
-  const contentEl = item.querySelector<HTMLDivElement>(".note-content");
+  const contentEl = findElement<HTMLDivElement>(".note-content", item);
   if (contentEl) contentEl.textContent = note.snippet;
-  const tagsContainer = item.querySelector<HTMLDivElement>(".note-tags");
+  const tagsContainer = findElement<HTMLDivElement>(".note-tags", item);
   if (tagsContainer && note.tags?.length > 0) {
     tagsContainer.replaceChildren();
     for (const tag of note.tags) {

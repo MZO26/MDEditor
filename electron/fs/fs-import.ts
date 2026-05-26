@@ -1,5 +1,5 @@
 import { sanitizeImportString } from "@electron/fs/fs-assets";
-import { validation } from "@shared/ipc-helpers";
+import { validation } from "@electron/ipc/ipc-validation";
 import { processWithLimit } from "@shared/limiter";
 import {
   ImportRequestSchema,

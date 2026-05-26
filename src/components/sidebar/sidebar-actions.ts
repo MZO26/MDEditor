@@ -25,6 +25,7 @@ async function handleSearchInput(searchInput: string) {
     console.error("[searchNotes]: Search failed:", result.error);
     return;
   }
+  // no reload note list because search input gets handled differently in empty state
   addManyNotesToList(result.data);
   handleSidebarEmptyState(searchInput);
 }
@@ -33,7 +34,7 @@ const debouncedSearch = debounce((e: Event) => {
   const target = e.target as HTMLInputElement;
   const value = target.value.trim();
   void handleSearchInput(value);
-}, DEBOUNCE_MS.fast);
+}, DEBOUNCE_MS.normal);
 
 function createViews(views: ViewItem[]) {
   const select = requireElement<HTMLSelectElement>(".view-select");
@@ -71,10 +72,9 @@ function toggleSidebar(appContainer: HTMLDivElement) {
 
 function createNoteUpdater() {
   let element: HTMLDivElement | null = null;
-  return function updateNoteCount(notes: Note[]) {
+  return function updateNoteCount(count: number) {
     element ??= findElement<HTMLDivElement>(".note-count");
     if (!element) return;
-    const count = notes.length;
     element.textContent = `${count} ${count === 1 ? "note" : "notes"}`;
   };
 }
@@ -139,6 +139,7 @@ function addManyNotesToList(notes: Note[]) {
     if (!activeId) return;
     const noteElement = findElement<HTMLDivElement>(
       `.note-item[data-id="${activeId}"]`,
+      getAppItem("sidebar"),
     );
     if (noteElement) setActiveItem(noteElement, sidebar);
   });
@@ -148,8 +149,11 @@ async function reloadNoteList(notes?: Note[]) {
   const sidebar = getAppItem("sidebar");
   sidebar.replaceChildren();
   if (notes) {
-    addManyNotesToList(notes.sort(compareNotes));
-    noteStore.setState({ notes });
+    const sortedNotes = notes.sort(compareNotes);
+    addManyNotesToList(sortedNotes);
+    noteStore.setState({
+      noteIds: sortedNotes.map((note) => note.id),
+    });
     return;
   }
   const result = await getAll();
@@ -157,14 +161,18 @@ async function reloadNoteList(notes?: Note[]) {
     console.error("[getAll]: Failed to fetch all notes:", result.error);
     return;
   } else {
-    addManyNotesToList(result.data.sort(compareNotes));
-    noteStore.setState({ notes: result.data });
+    const sortedNotes = result.data.sort(compareNotes);
+    addManyNotesToList(sortedNotes);
+    noteStore.setState({
+      noteIds: sortedNotes.map((note) => note.id),
+    });
   }
 }
 
 async function updateNoteInList(note: Note) {
   const noteElement = findElement<HTMLDivElement>(
     `.note-item[data-id="${note.id}"]`,
+    getAppItem("sidebar"),
   );
   if (!noteElement) {
     console.warn("Note Element not found.");

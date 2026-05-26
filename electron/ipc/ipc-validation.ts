@@ -2,7 +2,7 @@ import {
   AppBackendError,
   handleIpcError,
 } from "@electron/ipc/ipc-error-handler";
-import { APP_START_TIME, AppErrorCode, ipcTimers } from "@shared/constants";
+import { APP_START_TIME, AppErrorCode, IPC_TIMERS } from "@shared/constants";
 import type { Result } from "@shared/types";
 import { BrowserWindow, app, type IpcMainInvokeEvent } from "electron";
 import type z from "zod";
@@ -45,7 +45,7 @@ function validateSender(event: IpcMainInvokeEvent) {
   console.error(
     `[IPC Sender Validation]: Blocked senderFrame: ${senderUrl.href}`,
   );
-  throw new AppBackendError(AppErrorCode["SenderError"]);
+  throw new AppBackendError(AppErrorCode.SenderError);
 }
 
 function checkRateLimit(channel: string, cooldownMs: number) {
@@ -53,9 +53,9 @@ function checkRateLimit(channel: string, cooldownMs: number) {
   if (now - APP_START_TIME < 5000) {
     return true;
   }
-  const lastCall = ipcTimers.get(channel) || 0;
+  const lastCall = IPC_TIMERS.get(channel) || 0;
   if (now - lastCall < cooldownMs) return false;
-  ipcTimers.set(channel, now);
+  IPC_TIMERS.set(channel, now);
   return true;
 }
 

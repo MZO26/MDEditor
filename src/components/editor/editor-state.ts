@@ -1,15 +1,19 @@
 import { handleCreateNote } from "@/features/note-actions";
 import { stateStore } from "@/settings/app-state";
 import { createAsyncHandler } from "@/utils/async";
-import { requireElement } from "@/utils/dom";
+import { findElement, requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
 import { getAppItem } from "@/utils/registry";
 
 function handleEditorEmptyState() {
   const editorContainer = getAppItem("editorContainer");
-  const editorView = requireElement<HTMLDivElement>(".editor-view");
-  let emptyState = editorContainer.querySelector<HTMLDivElement>(
+  const editorView = requireElement<HTMLDivElement>(
+    ".editor-view",
+    editorContainer,
+  );
+  let emptyState = findElement<HTMLDivElement>(
     ".editor-empty-state",
+    editorContainer,
   );
   if (!emptyState) {
     emptyState = createEditorEmptyState();

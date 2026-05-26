@@ -23,6 +23,7 @@ async function handleDuplicateNote(note: Note) {
     pinned: false,
     bookmarked: false,
   };
+  // not handleCreateNote because content is already there
   const result = await createNote(data);
   if (!result.success) {
     console.error(

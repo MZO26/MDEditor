@@ -1,6 +1,5 @@
 import { getAllSettings } from "@/api/api";
 import { updateNoteCount } from "@/components/sidebar/sidebar-actions";
-import type { Note } from "@shared/schemas/note-schema";
 import type { AppSettings } from "@shared/schemas/store-schema";
 
 const DEFAULT_STORE: AppSettings = {
@@ -12,6 +11,7 @@ const DEFAULT_STORE: AppSettings = {
   "code-theme": "balanced",
   highlight: "info",
   spellcheck: false,
+  "delete-confirmation": true,
   "note-item-display": "tags",
   "window-bounds": { width: 1100, height: 600 },
 };
@@ -32,11 +32,11 @@ const stateStore = createStore<AppState>(STATE_STORE);
 const settingsStore = createStore<AppSettings>(DEFAULT_STORE);
 
 interface NoteStore {
-  notes: Note[];
+  noteIds: string[];
 }
 
 const NOTE_STORE: NoteStore = {
-  notes: [],
+  noteIds: [],
 };
 
 const noteStore = createStore<NoteStore>(NOTE_STORE);
@@ -70,9 +70,11 @@ function createStore<T>(initialState: T) {
 
 async function loadSettings(): Promise<AppSettings> {
   const result = await getAllSettings();
-  if (result.success) {
-    settingsStore.setState(result.data);
+  if (!result.success) {
+    console.error("Failed to load settings. Using defaults.");
+    return settingsStore.getState();
   }
+  settingsStore.setState(result.data);
   return settingsStore.getState();
 }
 
@@ -84,9 +86,9 @@ stateStore.subscribe((state) => {
 });
 
 noteStore.subscribe((state) => {
-  if (state.notes.length !== previousNotesLength) {
-    previousNotesLength = state.notes.length;
-    updateNoteCount(state.notes);
+  if (state.noteIds.length !== previousNotesLength) {
+    previousNotesLength = state.noteIds.length;
+    updateNoteCount(state.noteIds.length);
   }
 });
 

@@ -4,7 +4,7 @@ import { debounce } from "@/utils/async";
 import { formatNoteDate } from "@/utils/date";
 import { getAppItem, getInfobarItem, getInfobarItems } from "@/utils/registry";
 import { DEBOUNCE_MS } from "@shared/constants";
-import { getTodoStats } from "@shared/generators/generators";
+import { getTodoStats } from "@shared/generators";
 import type { Note } from "@shared/schemas/note-schema";
 import type { JSONContent } from "@tiptap/core";
 

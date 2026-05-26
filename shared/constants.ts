@@ -44,7 +44,7 @@ const ERROR_MESSAGES: Record<AppErrorCode, string> = {
 
 const APP_START_TIME = Date.now();
 
-const ipcTimers = new Map<string, number>();
+const IPC_TIMERS = new Map<string, number>();
 
 const YIELD_INTERVAL = 0;
 
@@ -73,11 +73,12 @@ const LIMITS = {
 };
 
 const DEBOUNCE_MS = {
-  fast: 500,
+  fast: 300,
+  normal: 500,
   slow: 1000,
 } as const;
 
-const mimeToExt = {
+const MIME_TO_EXT = {
   "image/jpeg": "jpeg",
   "image/png": "png",
   "image/gif": "gif",
@@ -211,10 +212,10 @@ export {
   DEBOUNCE_MS,
   DOMPURIFY_CONFIG,
   ERROR_MESSAGES,
-  ipcTimers,
+  IPC_TIMERS,
   LIMITS,
   MAX_SIZE,
-  mimeToExt,
+  MIME_TO_EXT,
   THEME_DATA,
   THEME_MAP,
   VIEWS,

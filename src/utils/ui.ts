@@ -29,7 +29,7 @@ function formatShortcut(shortcut?: string) {
     .replace(/meta[-+]?/gi, isMac ? "⌘" : "Meta+");
 }
 
-function useDelayedSpinner(delay = 300) {
+function useDelayedSpinner(delay = 100) {
   const spinner = findElement<HTMLDivElement>(".spinner");
   if (!spinner) return () => {};
   const wasAlreadyOpen = spinner.matches(":popover-open");

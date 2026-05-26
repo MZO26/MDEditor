@@ -9,8 +9,11 @@ function requireElement<T extends HTMLElement>(
   return element;
 }
 
-function findElement<T extends HTMLElement>(selector: string): T | null {
-  return document.querySelector<T>(selector);
+function findElement<T extends HTMLElement>(
+  selector: string,
+  parent: Document | HTMLElement = document,
+): T | null {
+  return parent.querySelector<T>(selector);
 }
 
 function setActiveItem(element: HTMLElement, parent: HTMLElement) {

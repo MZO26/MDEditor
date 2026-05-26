@@ -1,5 +1,4 @@
 import { createToolbarFragment } from "@/components/toolbar/creation-helpers";
-import { renderIcons } from "@/utils/icons";
 import { getAppItem } from "@/utils/registry";
 import type { ActionMap } from "@shared/types";
 import type { Editor } from "@tiptap/core";
@@ -31,7 +30,6 @@ function buildMenu(container: HTMLDivElement, actions: ActionMap) {
   const buttonMap = new Map<string, HTMLButtonElement>();
   const fragment = createToolbarFragment(actions, buttonMap);
   container.appendChild(fragment);
-  renderIcons(container);
   updateActiveStates(buttonMap, actions, editor);
   editor.on("transaction", ({ transaction }) => {
     if (!transaction.docChanged && !transaction.selectionSet) {

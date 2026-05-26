@@ -3,9 +3,8 @@ import { initTippyDelegate } from "@/utils/ui";
 
 function initDeleteDialog() {
   const deleteDialog = requireElement<HTMLDialogElement>("#delete-dialog");
-  const confirmBtn = requireElement<HTMLButtonElement>("#confirm-delete-btn");
   initTippyDelegate(deleteDialog, deleteDialog);
-  return { deleteDialog, confirmBtn };
+  return { deleteDialog };
 }
 
 function initMergeDialog() {

@@ -5,6 +5,7 @@ import { handleSelectNote } from "@/features/note-actions";
 import { createAsyncHandler } from "@/utils/async";
 import { findElement, requireElement } from "@/utils/dom";
 import {
+  getAppItem,
   getInfobarItems,
   initializeInfobarRegistry,
   registerAppEvents,
@@ -47,6 +48,7 @@ function applyInfoSidebarListeners(
         const link = linkEl.getAttribute("data-link");
         const noteElement = findElement<HTMLDivElement>(
           `div[data-id="${link}"]`,
+          getAppItem("sidebar"),
         );
         if (!link || !noteElement) return;
         await handleSelectNote(noteElement);

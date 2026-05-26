@@ -1,7 +1,7 @@
 import NoteDB from "@electron/db/database";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
+import { validation } from "@electron/ipc/ipc-validation";
 import { AppErrorCode } from "@shared/constants";
-import { validation } from "@shared/ipc-helpers";
 import {
   NoteFromDB,
   UpdateNotePayloadSchema,
@@ -57,28 +57,26 @@ class Transactions {
     const rows: Note[] = [];
     for (const params of paramsArr) {
       const { tags, links, ...noteParams } = params;
+      const safeTags = tags ?? [];
+      const safeLinks = links ?? [];
       const result = this.createNoteStmt.get(noteParams) as NoteRow;
       if (!result) {
         throw new AppBackendError(AppErrorCode.DBError);
       }
       const noteId = result.id;
-      if (links && links.length > 0) {
-        for (const link of links) {
-          const exists = this.checkNoteStmt.get({ id: link });
-          if (exists) {
-            this.insertLinksStmt.run({ source_id: noteId, target_id: link });
-          }
+      for (const link of safeLinks) {
+        const exists = this.checkNoteStmt.get({ id: link });
+        if (exists) {
+          this.insertLinksStmt.run({ source_id: noteId, target_id: link });
         }
       }
-      if (tags && tags.length > 0) {
-        for (const tag of tags) {
-          this.insertTagsStmt.run({ note_id: noteId, tag_name: tag });
-        }
+      for (const tag of safeTags) {
+        this.insertTagsStmt.run({ note_id: noteId, tag_name: tag });
       }
       const createdNote = validation(NoteFromDB, {
         ...result,
-        tags: NoteDB.getTagsById(noteId),
-        links: NoteDB.getLinksById(noteId),
+        tags: safeTags,
+        links: safeLinks,
       });
       rows.push(createdNote);
     }
@@ -88,22 +86,20 @@ class Transactions {
   safeCreate(params: CreateTransaction): Note {
     const { tags, links, ...noteParams } = params;
     const result = this.createNoteStmt.get(noteParams) as NoteRow;
+    const safeTags = tags ?? [];
+    const safeLinks = links ?? [];
     if (!result) {
       throw new AppBackendError(AppErrorCode.DBError);
     }
     const noteId = result.id;
-    if (links && links.length > 0) {
-      for (const link of links) {
-        const exists = this.checkNoteStmt.get({ id: link });
-        if (exists) {
-          this.insertLinksStmt.run({ source_id: noteId, target_id: link });
-        }
+    for (const link of safeLinks) {
+      const exists = this.checkNoteStmt.get({ id: link });
+      if (exists) {
+        this.insertLinksStmt.run({ source_id: noteId, target_id: link });
       }
     }
-    if (tags && tags.length > 0) {
-      for (const tag of tags) {
-        this.insertTagsStmt.run({ note_id: noteId, tag_name: tag });
-      }
+    for (const tag of safeTags) {
+      this.insertTagsStmt.run({ note_id: noteId, tag_name: tag });
     }
     return validation(NoteFromDB, {
       ...result,

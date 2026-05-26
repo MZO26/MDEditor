@@ -16,7 +16,7 @@ import { findElement } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
 import type {
   AppSettings,
-  EditorFocus,
+  DeleteConfirmation,
   FontFamily,
   FontSize,
   HighlightTheme,
@@ -27,15 +27,28 @@ import type {
 } from "@shared/schemas/store-schema";
 import type { DbOptimization, ExportFormat } from "@shared/types";
 
-function initAppearanceSettings(settings: AppSettings) {
-  const themeSelect = findElement<HTMLSelectElement>("#theme");
-  const codeThemeSelect = findElement<HTMLSelectElement>("#code-theme");
-  const highlightSelect = findElement<HTMLSelectElement>("#highlight-theme");
-  const noteItemSelect = findElement<HTMLSelectElement>("#note-item-display");
+function initAppearanceSettings(
+  settings: AppSettings,
+  container: HTMLDivElement,
+) {
+  const themeSelect = findElement<HTMLSelectElement>("#theme", container);
+  const codeThemeSelect = findElement<HTMLSelectElement>(
+    "#code-theme",
+    container,
+  );
+  const highlightSelect = findElement<HTMLSelectElement>(
+    "#highlight-theme",
+    container,
+  );
+  const noteItemSelect = findElement<HTMLSelectElement>(
+    "#note-item-display",
+    container,
+  );
   const sidebar = getAppItem("sidebar");
   if (!codeThemeSelect || !themeSelect || !highlightSelect || !noteItemSelect) {
     return;
   }
+
   document.documentElement.setAttribute(
     "data-code-theme",
     settings["code-theme"],
@@ -46,14 +59,24 @@ function initAppearanceSettings(settings: AppSettings) {
     const codePref = setCodeTheme(baseTheme);
     updateSettings({ "code-theme": codePref });
   });
+
   themeSelect.value = settings["theme"];
   themeSelect.addEventListener(
     "change",
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLSelectElement;
-      await applyAppTheme(target.value as Theme);
+      const result = await applyAppTheme(target.value as Theme);
+      if (!result.success) {
+        console.error("[applyAppTheme]: Failed to apply theme", result.error);
+        return;
+      }
+      updateSettings({
+        theme: result.data.theme,
+        "code-theme": result.data.codeTheme,
+      });
     }),
   );
+
   document.documentElement.setAttribute(
     "data-highlight",
     settings["highlight"],
@@ -66,6 +89,7 @@ function initAppearanceSettings(settings: AppSettings) {
       highlight: target.value as HighlightTheme,
     });
   });
+
   sidebar.setAttribute("data-noteItem", settings["note-item-display"]);
   noteItemSelect.value = settings["note-item-display"];
   noteItemSelect.addEventListener(
@@ -81,88 +105,107 @@ function initAppearanceSettings(settings: AppSettings) {
   );
 }
 
-function initEditorSettings(settings: AppSettings) {
+function initEditorSettings(settings: AppSettings, container: HTMLDivElement) {
   const editorWrapper = getAppItem("editorWrapper");
-  const fontFamilySelect = findElement<HTMLSelectElement>("#font-family");
-  const fontSizeSelect = findElement<HTMLSelectElement>("#font-size");
-  const lineHeightSelect = findElement<HTMLSelectElement>("#line-height");
-  const focusSelect = findElement<HTMLSelectElement>("#editor-focus");
+  const fontFamilySelect = findElement<HTMLSelectElement>(
+    "#font-family",
+    container,
+  );
+  const fontSizeSelect = findElement<HTMLSelectElement>(
+    "#font-size",
+    container,
+  );
+  const lineHeightSelect = findElement<HTMLSelectElement>(
+    "#line-height",
+    container,
+  );
+  const focusSelect = findElement<HTMLSelectElement>(
+    "#editor-focus",
+    container,
+  );
   if (!fontFamilySelect || !fontSizeSelect || !lineHeightSelect || !focusSelect)
     return;
 
   const applyFont = (val: string) => {
     const current = val || "system";
-
     editorWrapper.style.setProperty("--editor-font-family", current);
-    updateSettings({ "font-family": current as FontFamily });
-    if (fontFamilySelect.querySelector(`option[value="${current}"]`)) {
+    if (findElement(`option[value="${current}"]`, fontFamilySelect)) {
       editorWrapper.setAttribute("data-font-family", current);
+      fontFamilySelect.value = current;
     }
   };
+
   applyFont(settings["font-family"]);
-  fontFamilySelect.addEventListener("change", () =>
-    applyFont(fontFamilySelect.value),
-  );
+  fontFamilySelect.addEventListener("change", (e) => {
+    const target = e.target as HTMLSelectElement;
+    const newFont = target.value;
+    applyFont(newFont);
+    updateSettings({ "font-family": newFont as FontFamily });
+  });
 
   const applySize = (val: string | number) => {
     let current = Number(val) || 18;
     current = Math.max(16, Math.min(current, 20));
     const strCurrent = String(current);
-    editorWrapper.style.setProperty(
-      "--editor-font-size",
-      `${String(current)}px`,
-    );
-    updateSettings({ "font-size": strCurrent as FontSize });
-
-    if (fontSizeSelect.querySelector(`option[value="${strCurrent}"]`)) {
+    editorWrapper.style.setProperty("--editor-font-size", `${strCurrent}px`);
+    if (findElement(`option[value="${strCurrent}"]`, fontSizeSelect)) {
       editorWrapper.setAttribute("data-font-size", strCurrent);
+      fontSizeSelect.value = strCurrent;
     }
   };
 
   applySize(settings["font-size"]);
-  fontSizeSelect.addEventListener("change", () =>
-    applySize(fontSizeSelect.value),
-  );
+  fontSizeSelect.addEventListener("change", (e) => {
+    const target = e.target as HTMLSelectElement;
+    const newSize = target.value;
+    applySize(newSize);
+    updateSettings({ "font-size": String(newSize) as FontSize });
+  });
 
   const applyLineHeight = (val: string | number) => {
     let current = Number(val) || 1.5;
     current = Math.max(1.4, Math.min(current, 1.6));
     const strCurrent = String(current);
-
     editorWrapper.style.setProperty("--editor-line-height", strCurrent);
-    updateSettings({ "line-height": strCurrent as LineHeight });
-
-    if (lineHeightSelect.querySelector(`option[value="${strCurrent}"]`)) {
+    if (findElement(`option[value="${strCurrent}"]`, lineHeightSelect)) {
       editorWrapper.setAttribute("data-line-height", strCurrent);
+      lineHeightSelect.value = strCurrent;
     }
   };
 
   applyLineHeight(settings["line-height"]);
-  lineHeightSelect.addEventListener("change", () =>
-    applyLineHeight(lineHeightSelect.value),
-  );
-
-  focusSelect.value = settings["editor-focus"];
-  focusSelect.addEventListener("change", (e) => {
+  lineHeightSelect.addEventListener("change", (e) => {
     const target = e.target as HTMLSelectElement;
-    const editor = getAppItem("editor");
-    const editorDom = editor.view.dom;
-    if (target.value === "on") {
-      editorDom.classList.add("focus-mode-active");
-    } else {
-      editorDom.classList.remove("focus-mode-active");
-    }
-    updateSettings({
-      "editor-focus": target.value as EditorFocus,
-    });
+    const newHeight = target.value;
+    applyLineHeight(newHeight);
+    updateSettings({ "line-height": String(newHeight) as LineHeight });
   });
 }
 
-function initAppSettings(settings: AppSettings) {
-  const batchExportSelect = findElement<HTMLSelectElement>("#file-backup");
-  const dbOptimizeSelect = findElement<HTMLSelectElement>("#db-optimization");
-  const spellcheckSelect = findElement<HTMLSelectElement>("#spellcheck");
-  if (!batchExportSelect || !dbOptimizeSelect || !spellcheckSelect) return;
+function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
+  const batchExportSelect = findElement<HTMLSelectElement>(
+    "#file-backup",
+    container,
+  );
+  const dbOptimizeSelect = findElement<HTMLSelectElement>(
+    "#db-optimization",
+    container,
+  );
+  const spellcheckSelect = findElement<HTMLSelectElement>(
+    "#spellcheck",
+    container,
+  );
+  const deleteConfirmSelect = findElement<HTMLSelectElement>(
+    "#delete-confirmation",
+    container,
+  );
+  if (
+    !batchExportSelect ||
+    !dbOptimizeSelect ||
+    !spellcheckSelect ||
+    !deleteConfirmSelect
+  )
+    return;
 
   batchExportSelect.value = "";
   batchExportSelect.addEventListener(
@@ -218,7 +261,7 @@ function initAppSettings(settings: AppSettings) {
   );
 
   spellcheckSelect.value = settings["spellcheck"] ? "true" : "false";
-  spellcheckSelect.addEventListener("change", (e: Event) => {
+  spellcheckSelect.addEventListener("change", (e) => {
     const editor = getAppItem("editor");
     const target = e.target as HTMLSelectElement;
     const enabled = target.value === "true";
@@ -226,12 +269,21 @@ function initAppSettings(settings: AppSettings) {
     editor.commands.focus();
     updateSettings({ spellcheck: enabled as Spellcheck });
   });
+
+  deleteConfirmSelect.value = settings["delete-confirmation"]
+    ? "true"
+    : "false";
+  deleteConfirmSelect.addEventListener("change", (e) => {
+    const target = e.target as HTMLSelectElement;
+    const enabled = target.value === "true";
+    updateSettings({ "delete-confirmation": enabled as DeleteConfirmation });
+  });
 }
 
-function setSelectListeners(settings: AppSettings) {
-  initAppearanceSettings(settings);
-  initEditorSettings(settings);
-  initAppSettings(settings);
+function setSelectListeners(settings: AppSettings, container: HTMLDivElement) {
+  initAppearanceSettings(settings, container);
+  initEditorSettings(settings, container);
+  initAppSettings(settings, container);
 }
 
 export { setSelectListeners };

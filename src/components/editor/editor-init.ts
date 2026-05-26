@@ -7,6 +7,7 @@ import { WikiLink } from "@/extensions/wikilinks";
 import { handleSelectNote } from "@/features/note-actions";
 import { sleep } from "@/utils/async";
 import { findElement, requireElement } from "@/utils/dom";
+import { getAppItem } from "@/utils/registry";
 import { useDelayedSpinner } from "@/utils/ui";
 import { processWithLimit } from "@shared/limiter";
 import type { AppSettings } from "@shared/schemas/store-schema";
@@ -55,7 +56,7 @@ function initEditor(settings: AppSettings["spellcheck"]): Editor {
         if (coordinates) {
           editor.commands.setTextSelection(coordinates.pos);
         }
-        const stopSpinner = useDelayedSpinner(100);
+        const stopSpinner = useDelayedSpinner();
         void processWithLimit(images, 1, async (file) => {
           await sleep(1000);
           await processAndInsertImage(file, editor!);
@@ -72,7 +73,7 @@ function initEditor(settings: AppSettings["spellcheck"]): Editor {
         );
         if (images.length === 0) return false;
         event.preventDefault();
-        const stopSpinner = useDelayedSpinner(100);
+        const stopSpinner = useDelayedSpinner();
         void processWithLimit(images, 1, async (file) => {
           await sleep(1000);
           await processAndInsertImage(file, editor!);
@@ -100,6 +101,7 @@ function getNoteEditorExtensions() {
       onClick: async (id) => {
         const noteElement = findElement<HTMLDivElement>(
           `.note-item[data-id="${id}"]`,
+          getAppItem("sidebar"),
         );
         if (!noteElement) return;
         handleSelectNote(noteElement);

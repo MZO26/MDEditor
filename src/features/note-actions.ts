@@ -25,7 +25,7 @@ import { noteStore, stateStore } from "@/settings/app-state";
 import { setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
 import { CLEANUP } from "@shared/constants";
-import { getMetadata } from "@shared/generators/generators";
+import { getMetadata } from "@shared/generators";
 import type {
   CreateNotePayload,
   Note,
@@ -51,7 +51,7 @@ async function handleCreateNote() {
     return;
   }
   noteStore.setState((state) => ({
-    notes: [...state.notes, result.data],
+    noteIds: [...state.noteIds, result.data.id],
   }));
   stateStore.setState({ activeId: result.data.id });
   addOneNoteToList(result.data);
@@ -78,7 +78,7 @@ async function handleImportNote() {
     `Successfully imported ${count} file${count === 1 ? "" : "s"}.`,
   );
   noteStore.setState((state) => ({
-    notes: [...state.notes, ...result.data],
+    noteIds: [...state.noteIds, ...result.data.map((note) => note.id)],
   }));
   addManyNotesToList(result.data);
   handleEditorEmptyState();
@@ -87,7 +87,7 @@ async function handleImportNote() {
 function cleanupDeletedNoteUI(id: string, noteElement?: HTMLDivElement) {
   if (noteElement) noteElement.remove();
   noteStore.setState((state) => ({
-    notes: state.notes.filter((n) => n.id !== id),
+    noteIds: state.noteIds.filter((existingId) => existingId !== id),
   }));
   handleSidebarEmptyState();
   const { activeId } = stateStore.getState();

@@ -7,7 +7,7 @@ import {
   DOMPURIFY_CONFIG,
   YIELD_INTERVAL,
 } from "@shared/constants";
-import { getMetadata } from "@shared/generators/generators";
+import { getMetadata } from "@shared/generators";
 import type { CreateNotePayload } from "@shared/schemas/note-schema";
 import type { ImportedContent, Result } from "@shared/types";
 import { Editor, type JSONContent } from "@tiptap/core";

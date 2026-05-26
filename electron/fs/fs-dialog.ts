@@ -1,6 +1,6 @@
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
+import { validation } from "@electron/ipc/ipc-validation";
 import { AppErrorCode } from "@shared/constants";
-import { validation } from "@shared/ipc-helpers";
 import {
   type ExportRequest,
   FileNameSchema,

@@ -1,6 +1,6 @@
 import { imageWrite } from "@/api/api";
 import { useDelayedSpinner } from "@/utils/ui";
-import { ALLOWED_TYPES, MAX_SIZE, mimeToExt } from "@shared/constants";
+import { ALLOWED_TYPES, MAX_SIZE, MIME_TO_EXT } from "@shared/constants";
 import type { Result } from "@shared/types";
 import type { Editor } from "@tiptap/core";
 
@@ -52,7 +52,8 @@ async function processAndInsertImage(file: File, editor: Editor | null) {
       );
       return;
     }
-    const extension = mimeToExt[file.type as keyof typeof mimeToExt] ?? "jpeg";
+    const extension =
+      MIME_TO_EXT[file.type as keyof typeof MIME_TO_EXT] ?? "jpeg";
     const saved = await imageWrite({ imageData: result.data, extension });
     if (!saved.success) {
       console.error("[imageWrite]: Failed to save image:", saved.error);
@@ -81,10 +82,10 @@ async function promptImageUpload(editor: Editor | null) {
   input.type = "file";
   input.accept = "image/jpeg,image/png,image/gif,image/webp";
   input.onchange = async (event: Event) => {
-    input.remove();
-    const file = (event.target as HTMLInputElement).files?.[0];
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
     if (!file) return;
-    const stopSpinner = useDelayedSpinner(100);
+    const stopSpinner = useDelayedSpinner();
     await processAndInsertImage(file, editor).finally(() => {
       if (stopSpinner) stopSpinner();
     });

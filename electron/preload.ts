@@ -103,7 +103,7 @@ contextBridge.exposeInMainWorld("noteAPI", {
 });
 contextBridge.exposeInMainWorld("storeAPI", {
   onSettingsChanged: (callback: (settings: Partial<AppSettings>) => void) => {
-    subscribe("settings-change", callback);
+    subscribe("settings-changed", callback);
   },
   getSettings: (key: string) => ipcRenderer.invoke("electron-store:get", key),
   getAllSettings: () => ipcRenderer.invoke("electron-store:getAll"),

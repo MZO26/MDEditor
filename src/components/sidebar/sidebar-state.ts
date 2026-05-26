@@ -1,4 +1,4 @@
-import { requireElement } from "@/utils/dom";
+import { findElement, requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
 import { getAppItem } from "@/utils/registry";
 
@@ -13,9 +13,7 @@ async function setSidebarState(
 
 function handleSidebarEmptyState(searchInput?: string) {
   const sidebar = getAppItem("sidebar");
-  const existing = sidebar.querySelector<HTMLDivElement>(
-    ".sidebar-empty-state",
-  );
+  const existing = findElement<HTMLDivElement>(".sidebar-empty-state", sidebar);
   const hasNotes = sidebar.getElementsByClassName("note-item").length > 0;
   if (hasNotes) {
     if (existing) existing.remove();
@@ -38,11 +36,14 @@ const sidebarEmptyState = template.content.firstElementChild as HTMLDivElement;
 function showSidebarEmptyState(searchInput?: string) {
   const isSearch = Boolean(searchInput?.trim());
   const emptyState = sidebarEmptyState.cloneNode(true) as HTMLDivElement;
-  const iconEl = emptyState.querySelector<HTMLElement>("#sidebar-empty-icon");
-  const titleEl =
-    emptyState.querySelector<HTMLHeadingElement>(".empty-state-title");
-  const descEl = emptyState.querySelector<HTMLParagraphElement>(
+  const iconEl = findElement<HTMLElement>("#sidebar-empty-icon", emptyState);
+  const titleEl = findElement<HTMLHeadingElement>(
+    ".empty-state-title",
+    emptyState,
+  );
+  const descEl = findElement<HTMLParagraphElement>(
     ".empty-state-description",
+    emptyState,
   );
   if (isSearch) {
     iconEl!.setAttribute("data-lucide", "search-x");
@@ -56,7 +57,6 @@ function showSidebarEmptyState(searchInput?: string) {
     descEl!.textContent = "Create a note to get started.";
   }
   renderIcons(emptyState);
-
   return emptyState;
 }
 

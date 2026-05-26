@@ -1,9 +1,12 @@
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
-import { checkRateLimit, result } from "@electron/ipc/ipc-validation";
+import {
+  checkRateLimit,
+  result,
+  validation,
+} from "@electron/ipc/ipc-validation";
 import { store } from "@electron/store";
 import { nextZoom } from "@electron/win";
 import { AppErrorCode, LIMITS } from "@shared/constants";
-import { validation } from "@shared/ipc-helpers";
 import { StoreSchema, type AppSettings } from "@shared/schemas/store-schema";
 import type { ZoomAction } from "@shared/types";
 import { BrowserWindow, ipcMain } from "electron";
@@ -41,14 +44,24 @@ function registerSettingsIpc(win: BrowserWindow) {
     });
   });
 
-  ipcMain.handle("electron-store:set", async (e, settings: AppSettings) => {
-    return result(e, async () => {
-      if (!checkRateLimit("electron-store:set", LIMITS.WRITE_LIGHT))
-        throw new AppBackendError(AppErrorCode.RateLimitError);
-      const validValue = validation(StoreSchema, settings);
-      store.set(validValue);
-    });
-  });
+  ipcMain.handle(
+    "electron-store:set",
+    async (e, settings: Partial<AppSettings>) => {
+      return result(e, async () => {
+        if (!checkRateLimit("electron-store:set", LIMITS.WRITE_LIGHT))
+          throw new AppBackendError(AppErrorCode.RateLimitError);
+        const currentSettings = store.store;
+        const mergedSettings = {
+          ...currentSettings,
+          ...settings,
+        };
+        const validValue = validation(StoreSchema, mergedSettings);
+        store.set(validValue);
+        win.webContents.send("settings-changed", validValue);
+        return validValue;
+      });
+    },
+  );
 }
 
 export { registerSettingsIpc };

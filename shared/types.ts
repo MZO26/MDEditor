@@ -1,5 +1,6 @@
 import type { AppErrorCode, WorkerErrorCode } from "@shared/constants";
 import type { Content, Editor } from "@tiptap/core";
+import type { CodeTheme, Theme } from "./schemas/store-schema";
 
 type NativeWindowColors = {
   backgroundColor: string;
@@ -156,6 +157,8 @@ type OpenDialog = {
   filePaths: string[] | null;
 };
 
+type ThemeResult = { theme: Theme; codeTheme: CodeTheme };
+
 export type {
   Action,
   ActionMap,
@@ -184,6 +187,7 @@ export type {
   SaveDialog,
   SelectOption,
   Success,
+  ThemeResult,
   TitleBarOverlayOptions,
   View,
   ViewItem,

@@ -19,9 +19,18 @@ import type { View } from "@shared/types";
 async function initNotesSidebar() {
   const appContainer = getAppItem("appContainer");
   const sidebar = getAppItem("sidebar");
-  const sidebarContainer = requireElement<HTMLDivElement>(".sidebar-container");
-  const sidebarHeader = requireElement<HTMLDivElement>(".sidebar-header");
-  const searchInput = requireElement<HTMLInputElement>(".search-input");
+  const sidebarContainer = requireElement<HTMLDivElement>(
+    ".sidebar-container",
+    appContainer,
+  );
+  const sidebarHeader = requireElement<HTMLDivElement>(
+    ".sidebar-header",
+    sidebarContainer,
+  );
+  const searchInput = requireElement<HTMLInputElement>(
+    ".search-input",
+    sidebarContainer,
+  );
   initTippyDelegate(sidebarContainer);
   const viewSelect = createViews(VIEWS);
   applySidebarListeners(sidebar, sidebarHeader, searchInput, viewSelect);

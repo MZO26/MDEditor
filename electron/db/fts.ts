@@ -1,4 +1,4 @@
-import { ftsQueryGenerator } from "@shared/generators/generators";
+import { ftsQueryGenerator } from "@shared/generators";
 import { type NoteRow } from "@shared/schemas/note-schema";
 import type BetterSqlite from "better-sqlite3";
 import type { Database as DatabaseType } from "better-sqlite3";

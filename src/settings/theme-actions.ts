@@ -1,8 +1,8 @@
-import { setTheme, updateSettings } from "@/api/api";
+import { setTheme } from "@/api/api";
 import { findElement } from "@/utils/dom";
 import { CODE_THEME_MAP, THEME_MAP } from "@shared/constants";
 import type { CodeTheme, Theme } from "@shared/schemas/store-schema";
-import type { ResolvedTheme } from "@shared/types";
+import type { ResolvedTheme, Result, ThemeResult } from "@shared/types";
 
 function resolveTheme(theme: Theme): ResolvedTheme {
   if (theme === "system") {
@@ -13,18 +13,22 @@ function resolveTheme(theme: Theme): ResolvedTheme {
   return THEME_MAP[theme];
 }
 
-async function applyAppTheme(preference: Theme) {
+async function applyAppTheme(preference: Theme): Promise<Result<ThemeResult>> {
   const codePreference = setCodeTheme(resolveTheme(preference));
   const result = await setTheme(preference);
   if (!result.success) {
     console.error("[applyAppTheme]: Failed to apply theme:", result.error);
-    return;
+    return { success: false, error: result.error };
   }
   document.documentElement.dataset["theme"] = result.data;
-  updateSettings({ theme: preference, "code-theme": codePreference });
+  return {
+    success: true,
+    data: { theme: preference, codeTheme: codePreference },
+  };
 }
 
 function setCodeTheme(resolvedTheme: ResolvedTheme): CodeTheme {
+  // needs its own lookup for dom element because its coupled to applyAppTheme
   const codeThemeSelect = findElement<HTMLSelectElement>("#code-theme");
   if (!codeThemeSelect) {
     console.warn(

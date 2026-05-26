@@ -1,6 +1,6 @@
 import { sanitizeExportString } from "@electron/fs/fs-assets";
 import { writeAtomic } from "@electron/fs/fs-atomic-write";
-import { validation } from "@shared/ipc-helpers";
+import { validation } from "@electron/ipc/ipc-validation";
 import { processWithLimit } from "@shared/limiter";
 import { FileNameSchema } from "@shared/schemas/export-schema";
 import type { ExportedContent, ExportResult } from "@shared/types";

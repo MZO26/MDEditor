@@ -117,12 +117,13 @@ const debouncedSetSettings = debounce(
           "[setSettings]: Failed to update settings:",
           result.error,
         );
+        return;
       }
     } catch (err) {
       console.error("[setSettings]: Unknown error", err);
     }
   },
-  DEBOUNCE_MS.slow,
+  DEBOUNCE_MS.fast,
 );
 
 const updateSettings = (settings: Partial<AppSettings>) => {

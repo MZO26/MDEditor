@@ -3,17 +3,16 @@ import { createSettingsMenu } from "@/settings/setting-builder";
 import { buildSelects } from "@/settings/setting-items";
 import { setSelectListeners } from "@/settings/setting-items-init";
 import { applyAppTheme } from "@/settings/theme-actions";
-import { findElement, requireElement, setActiveItem } from "@/utils/dom";
+import { requireElement, setActiveItem } from "@/utils/dom";
 import { registerAppEvents } from "@/utils/registry";
 import type { AppSettings } from "@shared/schemas/store-schema";
 
 async function initAppSettings(settings: AppSettings) {
   const { settingsDialog, settingsContainer } = initSettingsDialog();
-  settingsContainer.appendChild(createSettingsMenu());
+  const buttonsContainer = createSettingsMenu();
+  settingsContainer.appendChild(buttonsContainer);
   buildSelects();
-  setSelectListeners(settings);
-  const buttonsContainer = findElement<HTMLDivElement>(".settings-buttons");
-  if (!buttonsContainer) return;
+  setSelectListeners(settings, settingsContainer);
   const openModalBtn = requireElement<HTMLButtonElement>(".settings-btn");
   const firstActiveBtn = requireElement<HTMLButtonElement>(
     "button:first-child",

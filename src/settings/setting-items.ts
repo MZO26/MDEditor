@@ -114,6 +114,14 @@ function buildSelects() {
       "App",
       "Database Settings",
     ));
+  selectBuilder(
+    "delete-confirmation",
+    [
+      { value: "true", label: "Enable delete confirmation" },
+      { value: "false", label: "Disable delete confirmation" },
+    ],
+    "App",
+  );
 }
 
 export { buildSelects };
