@@ -9,7 +9,7 @@ const StoreSchema = z.object({
     .catch("system"),
   "font-size": z.enum(["16", "18", "20"]).catch("18"),
   "line-height": z.enum(["1.4", "1.5", "1.6"]).catch("1.5"),
-  "editor-focus": z.enum(["on", "off"]).catch("off"),
+  "editor-focus": z.boolean().catch(false),
   spellcheck: z.boolean().catch(false),
   "delete-confirmation": z.boolean().catch(false),
   "code-theme": z.enum(["focus", "balanced", "colorless"]).catch("balanced"),

@@ -7,7 +7,7 @@ const DEFAULT_STORE: AppSettings = {
   "font-family": "system",
   "font-size": "18",
   "line-height": "1.5",
-  "editor-focus": "off",
+  "editor-focus": false,
   "code-theme": "balanced",
   highlight: "info",
   spellcheck: false,

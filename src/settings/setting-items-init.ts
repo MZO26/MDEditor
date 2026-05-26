@@ -17,6 +17,7 @@ import { getAppItem } from "@/utils/registry";
 import type {
   AppSettings,
   DeleteConfirmation,
+  EditorFocus,
   FontFamily,
   FontSize,
   HighlightTheme,
@@ -180,6 +181,25 @@ function initEditorSettings(settings: AppSettings, container: HTMLDivElement) {
     applyLineHeight(newHeight);
     updateSettings({ "line-height": String(newHeight) as LineHeight });
   });
+
+  const enabled = settings["editor-focus"] === true;
+  const editor = getAppItem("editor");
+  if (enabled) {
+    editor.view.dom.classList.add("focus-mode-active");
+  }
+  focusSelect.value = enabled ? "true" : "false";
+  focusSelect.addEventListener("change", (e) => {
+    const target = e.target as HTMLSelectElement;
+    const editor = getAppItem("editor");
+    const editorDom = editor.view.dom;
+    const enabled = target.value === "true";
+    if (enabled) {
+      editorDom.classList.add("focus-mode-active");
+    } else {
+      editorDom.classList.remove("focus-mode-active");
+    }
+    updateSettings({ "editor-focus": enabled as EditorFocus });
+  });
 }
 
 function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
@@ -260,7 +280,10 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     }),
   );
 
-  spellcheckSelect.value = settings["spellcheck"] ? "true" : "false";
+  const enabled = settings["spellcheck"] === true;
+  const editor = getAppItem("editor");
+  editor.view.dom.spellcheck = enabled;
+  spellcheckSelect.value = enabled ? "true" : "false";
   spellcheckSelect.addEventListener("change", (e) => {
     const editor = getAppItem("editor");
     const target = e.target as HTMLSelectElement;

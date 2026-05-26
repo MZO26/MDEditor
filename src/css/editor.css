@@ -1,5 +1,5 @@
 .ProseMirror {
-  font-size: var(--editor-font-size, 16px);
+  font-size: var(--editor-font-size, 18px);
   line-height: var(--editor-line-height, 1.5);
   font-family: var(--editor-font-family, var(--font-system));
   color: var(--text-main);
@@ -379,26 +379,62 @@
   pointer-events: auto;
 }
 
+.ProseMirror ul:not([data-type="taskList"]),
+.ProseMirror ol {
+  padding-left: 1.75rem;
+  margin: 0.75rem 0;
+}
+
+.ProseMirror ul:not([data-type="taskList"]) {
+  list-style-type: disc;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+  margin-left: 0;
+}
+
+.ProseMirror li {
+  color: var(--text-main);
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  line-height: 1.6;
+}
+
+.ProseMirror li::marker {
+  color: var(--text-muted);
+}
+
+.ProseMirror li > p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.ProseMirror li > ul:not([data-type="taskList"]),
+.ProseMirror li > ol {
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+}
+
 .ProseMirror ul[data-type="taskList"] {
   list-style: none;
-  padding: 0.4em 0;
-  margin: 0.4em 0;
+  padding: 0;
+  margin: 0.75rem 0;
 }
 
 .ProseMirror ul[data-type="taskList"] li {
   display: flex;
-  align-items: flex-start;
-  gap: 0.4rem;
-  margin-bottom: 0.2rem;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .ProseMirror ul[data-type="taskList"] li > label {
   flex: 0 0 auto;
-  display: inline-flex;
-  align-items: baseline;
-  align-self: flex-start;
+  display: inline-block;
   user-select: none;
   cursor: pointer;
+  align-items: center;
 }
 
 .ProseMirror ul[data-type="taskList"] li > div {
@@ -406,10 +442,7 @@
   min-width: 0;
 }
 
-.ProseMirror ul[data-type="taskList"] li > div > p,
-.ProseMirror ul[data-type="taskList"] li p {
-  margin: 0;
-  display: inline;
+.ProseMirror ul[data-type="taskList"] li > div > p {
   transition:
     color 0.2s ease,
     text-decoration-color 0.2s ease;
@@ -418,13 +451,14 @@
 .ProseMirror ul[data-type="taskList"] li input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
-  width: 1.1em;
-  height: 1.1em;
-  margin-top: clamp(0.3em, 1.5lh, 0.5em);
+  margin: 0;
+  transform: translateY(0.1em);
+  width: 1.15em;
+  height: 1.15em;
   flex-shrink: 0;
   border: 1.5px solid var(--accent-primary);
-  border-radius: 3px;
-  background-color: transparent;
+  border-radius: 4px;
+  background-color: var(--bg-editor);
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -439,6 +473,7 @@
   li
   input[type="checkbox"]:not(:checked):hover {
   border-color: var(--tag-color);
+  background-color: var(--tag-bg);
 }
 
 .ProseMirror ul[data-type="taskList"] li input[type="checkbox"]:focus-visible {
@@ -455,19 +490,15 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-color: var(--bg-button);
+  background-color: var(--bg-editor);
   clip-path: polygon(14% 44%, 0% 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
   transform: scale(0.55);
 }
 
 .ProseMirror ul[data-type="taskList"] li[data-checked="true"] > div > p {
   text-decoration: line-through;
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1.5px;
   color: var(--text-muted);
-}
-
-.ProseMirror li {
-  list-style-position: inside;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {

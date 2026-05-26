@@ -9,6 +9,7 @@ import { sleep } from "@/utils/async";
 import { findElement, requireElement } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
 import { useDelayedSpinner } from "@/utils/ui";
+import { DOMPURIFY_CONFIG } from "@shared/constants";
 import { processWithLimit } from "@shared/limiter";
 import type { AppSettings } from "@shared/schemas/store-schema";
 import { Editor } from "@tiptap/core";
@@ -26,10 +27,11 @@ import {
 } from "@tiptap/extensions";
 import { Markdown } from "@tiptap/markdown";
 import StarterKit from "@tiptap/starter-kit";
+import DOMPurify from "dompurify";
 
 let editor: Editor | null = null;
 
-function initEditor(settings: AppSettings["spellcheck"]): Editor {
+function initEditor(settings: Partial<AppSettings>): Editor {
   const editorWrapper = requireElement<HTMLDivElement>("#editor");
   if (editor) {
     return editor;
@@ -39,7 +41,10 @@ function initEditor(settings: AppSettings["spellcheck"]): Editor {
     extensions: getNoteEditorExtensions(),
     editorProps: {
       attributes: {
-        spellcheck: settings ? "true" : "false",
+        spellcheck: settings.spellcheck ? "true" : "false",
+      },
+      transformPastedHTML(html) {
+        return DOMPurify.sanitize(html, DOMPURIFY_CONFIG);
       },
       handleDrop(view, event, _slice, moved) {
         if (!editor || !event.dataTransfer?.files?.length || moved)

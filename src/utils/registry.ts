@@ -63,7 +63,7 @@ function initializeCoreRegistry(settings: AppSettings) {
   setAppItems({
     appContainer: requireElement<HTMLDivElement>(".app-container"),
     sidebar: requireElement<HTMLDivElement>(".notes-container"),
-    editor: initEditor(settings["spellcheck"]),
+    editor: initEditor(settings),
     editorWrapper: requireElement<HTMLDivElement>("#editor"),
     editorContainer: requireElement<HTMLDivElement>(".editor-container"),
   });

@@ -61,26 +61,26 @@ function buildSelects() {
   selectBuilder(
     "font-size",
     [
-      { value: "16", label: "16" },
-      { value: "18", label: "18" },
-      { value: "20", label: "20" },
+      { value: "16", label: "Small" },
+      { value: "18", label: "Medium" },
+      { value: "20", label: "Large" },
     ],
     "Editor",
   );
   selectBuilder(
     "line-height",
     [
-      { value: "1.4", label: "1.4" },
-      { value: "1.5", label: "1.5" },
-      { value: "1.6", label: "1.6" },
+      { value: "1.4", label: "Small" },
+      { value: "1.5", label: "Medium" },
+      { value: "1.6", label: "Large" },
     ],
     "Editor",
   );
   selectBuilder(
     "editor-focus",
     [
-      { value: "on", label: "Activate Editor Focus" },
-      { value: "off", label: "Deactivate Editor Focus" },
+      { value: "true", label: "Enable Editor Focus" },
+      { value: "false", label: "Disable Editor Focus" },
     ],
     "Editor",
   );
