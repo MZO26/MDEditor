@@ -1,5 +1,8 @@
 import { getAllSettings } from "@/api/api";
+import { handleEditorEmptyState } from "@/components/editor/editor-state";
 import { updateNoteCount } from "@/components/sidebar/sidebar-actions";
+import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
+import { NoteSearch } from "@/features/search";
 import type { Note } from "@shared/schemas/note-schema";
 import type { AppSettings } from "@shared/schemas/store-schema";
 
@@ -19,13 +22,17 @@ const DEFAULT_STORE: AppSettings = {
 
 interface AppState {
   activeId: string | null;
+  searchQuery: string;
 }
 
 const STATE_STORE: AppState = {
   activeId: null,
+  searchQuery: "",
 };
 
 let previousId: string | null = null;
+let previousSearchQuery: string = "";
+let previousNotesRef: Note[] = [];
 let previousNotesLength: number | null = null;
 
 const stateStore = createStore<AppState>(STATE_STORE);
@@ -83,14 +90,26 @@ stateStore.subscribe((state) => {
   if (state.activeId !== previousId) {
     previousId = state.activeId;
     window.noteAPI.setActiveNote(state.activeId);
+    handleEditorEmptyState();
+  }
+  if (state.searchQuery !== previousSearchQuery) {
+    previousSearchQuery = state.searchQuery;
+    handleSidebarEmptyState();
   }
 });
 
+const searchEngine = new NoteSearch(noteStore.getState().notes);
+
 noteStore.subscribe((state) => {
+  if (state.notes !== previousNotesRef) {
+    previousNotesRef = state.notes;
+    searchEngine.updateNotes(state.notes);
+    handleSidebarEmptyState();
+  }
   if (state.notes.length !== previousNotesLength) {
     previousNotesLength = state.notes.length;
     updateNoteCount(state.notes);
   }
 });
 
-export { loadSettings, noteStore, settingsStore, stateStore };
+export { loadSettings, noteStore, searchEngine, settingsStore, stateStore };

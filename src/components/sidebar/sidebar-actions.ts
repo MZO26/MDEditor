@@ -1,11 +1,7 @@
-import { getAll, getByTag, getViews, searchNotes } from "@/api/api";
-import { handleEditorEmptyState } from "@/components/editor/editor-state";
+import { getAll, getByTag, getViews } from "@/api/api";
 import { createNoteItem } from "@/components/sidebar/sidebar-items";
-import {
-  handleSidebarEmptyState,
-  setSidebarState,
-} from "@/components/sidebar/sidebar-state";
-import { noteStore, stateStore } from "@/settings/app-state";
+import { setSidebarState } from "@/components/sidebar/sidebar-state";
+import { noteStore, searchEngine, stateStore } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
 import { findElement, requireElement, setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
@@ -14,20 +10,27 @@ import type { Note } from "@shared/schemas/note-schema";
 import type { ViewItem } from "@shared/types";
 
 async function handleSearchInput(searchInput: string) {
+  const editor = getAppItem("editor");
   const sidebar = getAppItem("sidebar");
-  sidebar.replaceChildren();
+  stateStore.setState({ searchQuery: searchInput });
+  const noteElements = Array.from(
+    sidebar.getElementsByClassName("note-item"),
+  ) as HTMLDivElement[];
+  editor.commands.setSearchTerm(searchInput);
   if (searchInput === "") {
-    await reloadNoteList();
+    for (const element of noteElements) {
+      element.classList.remove("hidden");
+    }
     return;
   }
-  const result = await searchNotes(searchInput, 50);
-  if (!result.success) {
-    console.error("[searchNotes]: Search failed:", result.error);
-    return;
+  const results = searchEngine.search(searchInput);
+  const limitedResults = results.slice(0, 50);
+  const matchingIds = new Set(limitedResults.map((note) => note.id));
+  for (const element of noteElements) {
+    const noteId = element.getAttribute("data-id");
+    const isMatch = noteId ? matchingIds.has(noteId) : false;
+    element.classList.toggle("hidden", !isMatch);
   }
-  // no reload note list because search input gets handled differently in empty state
-  addManyNotesToList(result.data);
-  handleSidebarEmptyState(searchInput);
 }
 
 const debouncedSearch = debounce((e: Event) => {
@@ -48,6 +51,9 @@ function createViews(views: ViewItem[]) {
 }
 
 async function handleViews(view: string) {
+  const editor = getAppItem("editor");
+  stateStore.setState({ activeView: view, searchQuery: "" });
+  editor.commands.setSearchTerm("");
   const result = await getViews(view);
   if (!result.success) {
     console.error("[handleViews]: Failed to fetch views:", result.error);
@@ -57,12 +63,21 @@ async function handleViews(view: string) {
 }
 
 async function searchByTag(tag: string) {
+  const sidebar = getAppItem("sidebar");
   const result = await getByTag(tag);
   if (!result.success) {
     console.error("[searchByTag]: Failed to fetch notes by tag:", result.error);
     return;
   }
-  await reloadNoteList(result.data);
+  const noteElements = Array.from(
+    sidebar.getElementsByClassName("note-item"),
+  ) as HTMLDivElement[];
+  const matchingIds = new Set(result.data.map((note) => note.id));
+  for (const element of noteElements) {
+    const noteId = element.getAttribute("data-id");
+    const isMatch = noteId ? matchingIds.has(noteId) : false;
+    element.classList.toggle("hidden", !isMatch);
+  }
 }
 
 function toggleSidebar(appContainer: HTMLDivElement) {
@@ -117,7 +132,6 @@ function addOneNoteToList(note: Note) {
     } else {
       sidebar.appendChild(noteElement);
     }
-    handleSidebarEmptyState();
   });
   setActiveItem(noteElement, sidebar);
 }
@@ -133,8 +147,6 @@ function addManyNotesToList(notes: Note[]) {
   }
   requestAnimationFrame(() => {
     sidebar.appendChild(fragment);
-    handleEditorEmptyState();
-    handleSidebarEmptyState();
     const { activeId } = stateStore.getState();
     if (!activeId) return;
     const noteElement = findElement<HTMLDivElement>(
@@ -150,10 +162,8 @@ async function reloadNoteList(notes?: Note[]) {
   sidebar.replaceChildren();
   if (notes) {
     const sortedNotes = notes.sort(compareNotes);
+    noteStore.setState({ notes: sortedNotes });
     addManyNotesToList(sortedNotes);
-    noteStore.setState({
-      notes: sortedNotes,
-    });
     return;
   }
   const result = await getAll();
@@ -162,10 +172,8 @@ async function reloadNoteList(notes?: Note[]) {
     return;
   } else {
     const sortedNotes = result.data.sort(compareNotes);
+    noteStore.setState({ notes: sortedNotes });
     addManyNotesToList(sortedNotes);
-    noteStore.setState({
-      notes: sortedNotes,
-    });
   }
 }
 

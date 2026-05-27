@@ -119,6 +119,7 @@ type ViewItem = {
 interface AppRegistry {
   infoSidebar: Partial<InfobarRegistry>;
   core: Partial<CoreRegistry>;
+  template: Partial<TemplateRegistry>;
 }
 
 interface CoreRegistry {
@@ -143,18 +144,18 @@ interface InfobarRegistry {
   toggleBtn: HTMLButtonElement;
 }
 
+interface TemplateRegistry {
+  // editor empty state template and view
+  editorEmptyStateTemplate: HTMLTemplateElement;
+  editorView: HTMLDivElement;
+  // sidebar empty state template
+  sidebarEmptyStateTemplate: HTMLTemplateElement;
+  // note item template
+  noteItemTemplate: HTMLTemplateElement;
+}
+
 type ImageSrc = {
   imageSrc: string;
-};
-
-type SaveDialog = {
-  canceled: boolean;
-  filePath: string | null;
-};
-
-type OpenDialog = {
-  canceled: boolean;
-  filePaths: string[] | null;
 };
 
 type ThemeResult = { theme: Theme; codeTheme: CodeTheme };
@@ -180,13 +181,12 @@ export type {
   Metadata,
   NativeWindowColors,
   NoteMenuPayload,
-  OpenDialog,
   PDFAssets,
   ResolvedTheme,
   Result,
-  SaveDialog,
   SelectOption,
   Success,
+  TemplateRegistry,
   ThemeResult,
   TitleBarOverlayOptions,
   View,

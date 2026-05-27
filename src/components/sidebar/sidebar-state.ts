@@ -1,63 +1,73 @@
+import { noteStore, searchEngine, stateStore } from "@/settings/app-state";
 import { findElement, requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
-import { getAppItem } from "@/utils/registry";
+import { getAppItem, getTemplateItem } from "@/utils/registry";
 
-async function setSidebarState(
-  element: HTMLDivElement,
-  collapsed: boolean,
-): Promise<void> {
+function setSidebarState(element: HTMLDivElement, collapsed: boolean) {
   const isCollapsed = element.classList.contains("collapsed");
   if (isCollapsed === collapsed) return;
   element.classList.toggle("collapsed", collapsed);
 }
 
-function handleSidebarEmptyState(searchInput?: string) {
+function handleSidebarEmptyState() {
   const sidebar = getAppItem("sidebar");
-  const existing = findElement<HTMLDivElement>(".sidebar-empty-state", sidebar);
-  const hasNotes = sidebar.getElementsByClassName("note-item").length > 0;
-  if (hasNotes) {
-    if (existing) existing.remove();
+  const { notes } = noteStore.getState();
+  const { searchQuery } = stateStore.getState();
+  let shouldShowEmptyState = false;
+  if (searchQuery.trim() !== "") {
+    const results = searchEngine.search(searchQuery);
+    shouldShowEmptyState = results.length === 0;
   } else {
-    const newEmptyState = showSidebarEmptyState(searchInput);
-    if (existing) {
-      existing.replaceWith(newEmptyState);
-    } else {
+    shouldShowEmptyState = notes.length === 0;
+  }
+  const existingEmptyState = findElement<HTMLDivElement>(
+    ".sidebar-empty-state",
+    sidebar,
+  );
+  if (shouldShowEmptyState) {
+    if (!existingEmptyState) {
+      const template = getTemplateItem("sidebarEmptyStateTemplate");
+      const newEmptyState = template.content.firstElementChild?.cloneNode(
+        true,
+      ) as HTMLDivElement;
+      updateSidebarEmptyState(newEmptyState);
       sidebar.appendChild(newEmptyState);
+    } else {
+      updateSidebarEmptyState(existingEmptyState);
+    }
+  } else {
+    if (existingEmptyState) {
+      existingEmptyState.remove();
     }
   }
 }
 
-const template = requireElement<HTMLTemplateElement>(
-  "#sidebar-empty-state-template",
-);
-
-const sidebarEmptyState = template.content.firstElementChild as HTMLDivElement;
-
-function showSidebarEmptyState(searchInput?: string) {
-  const isSearch = Boolean(searchInput?.trim());
-  const emptyState = sidebarEmptyState.cloneNode(true) as HTMLDivElement;
-  const iconEl = findElement<HTMLElement>("#sidebar-empty-icon", emptyState);
-  const titleEl = findElement<HTMLHeadingElement>(
+function updateSidebarEmptyState(emptyState: HTMLDivElement) {
+  const { searchQuery } = stateStore.getState();
+  const isSearch = Boolean(searchQuery?.trim());
+  const titleEl = requireElement<HTMLHeadingElement>(
     ".empty-state-title",
     emptyState,
   );
-  const descEl = findElement<HTMLParagraphElement>(
+  const descEl = requireElement<HTMLParagraphElement>(
     ".empty-state-description",
     emptyState,
   );
+  const iconEl = requireElement<HTMLElement>("#sidebar-empty-icon", emptyState);
+  const newIcon = document.createElement("i");
   if (isSearch) {
-    iconEl!.setAttribute("data-lucide", "search-x");
-    titleEl!.textContent = "No results found";
+    newIcon.setAttribute("data-lucide", "search-x");
+    titleEl.textContent = "No results found";
     const strongEl = document.createElement("strong");
-    strongEl.textContent = `"${searchInput}"`;
-    descEl!.replaceChildren("No notes matching ", strongEl);
+    strongEl.textContent = `"${searchQuery}"`;
+    descEl.replaceChildren("No notes matching ", strongEl);
   } else {
-    iconEl!.setAttribute("data-lucide", "library");
-    titleEl!.textContent = "No notes here";
-    descEl!.textContent = "Create a note to get started.";
+    newIcon.setAttribute("data-lucide", "library");
+    titleEl.textContent = "No notes here";
+    descEl.textContent = "Create a note to get started.";
   }
+  iconEl.replaceChildren(newIcon);
   renderIcons(emptyState);
-  return emptyState;
 }
 
 export { handleSidebarEmptyState, setSidebarState };

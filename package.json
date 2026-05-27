@@ -98,6 +98,7 @@
     "dompurify": "^3.4.2",
     "electron-context-menu": "^4.1.2",
     "electron-store": "^8.1.0",
+    "fuse.js": "^7.3.0",
     "highlight.js": "^11.11.1",
     "lowlight": "^3.3.0",
     "lucide": "^0.577.0",

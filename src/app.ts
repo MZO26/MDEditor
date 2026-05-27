@@ -16,12 +16,19 @@ import { initGlobalShortcuts } from "@/settings/shortcuts";
 import { startAppClock } from "@/utils/date";
 import { requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
-import { getAppItem, initializeCoreRegistry } from "@/utils/registry";
+import {
+  getAppItem,
+  initializeCoreRegistry,
+  initializeTemplateRegistry,
+} from "@/utils/registry";
 import { initTippyDelegate } from "@/utils/ui";
+import { handleEditorEmptyState } from "./components/editor/editor-state";
+import { handleSidebarEmptyState } from "./components/sidebar/sidebar-state";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const settings = await loadSettings();
   initializeCoreRegistry(settings);
+  initializeTemplateRegistry();
   setupEditorListeners(getAppItem("editorWrapper"), getAppItem("editor"));
   initGlobalShortcuts();
   initAppSettings(settings);
@@ -29,6 +36,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   initNotesSidebar();
   initInfoSidebar();
   await reloadNoteList();
+  handleSidebarEmptyState();
+  handleEditorEmptyState();
   const toolbarContainer = requireElement<HTMLDivElement>(
     "#toolbar",
     getAppItem("editorContainer"),

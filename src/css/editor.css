@@ -549,6 +549,14 @@
   border-radius: 999px;
 }
 
+.ProseMirror .search-highlight {
+  background-color: var(--editor-highlight);
+  color: var(--text-main);
+  box-shadow: var(--shadow);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
 .ProseMirror:focus {
   outline: none;
 }

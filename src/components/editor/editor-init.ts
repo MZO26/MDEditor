@@ -1,6 +1,7 @@
 import { MasterShortcuts } from "@/extensions/editor-shortcuts";
 import { processAndInsertImage } from "@/extensions/image/image";
 import { lowlight } from "@/extensions/lowlight";
+import { CustomSearchHighlight } from "@/extensions/searchHighlight";
 import { NoteTag } from "@/extensions/tag";
 import { Typography } from "@/extensions/typography";
 import { WikiLink } from "@/extensions/wikilinks";
@@ -99,6 +100,7 @@ function initEditor(settings: Partial<AppSettings>): Editor {
 
 function getNoteEditorExtensions() {
   return [
+    CustomSearchHighlight,
     Markdown,
     MasterShortcuts,
     Typography,

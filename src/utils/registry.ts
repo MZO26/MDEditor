@@ -1,10 +1,19 @@
 import { initEditor } from "@/components/editor/editor-init";
 import { requireElement } from "@/utils/dom";
 import type { AppSettings } from "@shared/schemas/store-schema";
-import type { AppRegistry, CoreRegistry, InfobarRegistry } from "@shared/types";
+import type {
+  AppRegistry,
+  CoreRegistry,
+  InfobarRegistry,
+  TemplateRegistry,
+} from "@shared/types";
 
 // set settings to empty object to avoid undefined errors, will be populated in app.ts on startup
-const registry = { core: {}, infoSidebar: {} } as AppRegistry;
+const registry = {
+  core: {},
+  infoSidebar: {},
+  template: {},
+} as AppRegistry;
 
 const setAppItems = (obj: Partial<CoreRegistry>) => {
   if (!registry.core) registry.core = {};
@@ -22,6 +31,35 @@ const getAppItem = <K extends keyof CoreRegistry>(key: K): CoreRegistry[K] => {
 const setInfobarItems = (obj: Partial<InfobarRegistry>) => {
   if (!registry.infoSidebar) registry.infoSidebar = {};
   Object.assign(registry.infoSidebar, obj);
+};
+
+const setTemplateItems = (obj: Partial<TemplateRegistry>) => {
+  if (!registry.template) registry.template = {};
+  Object.assign(registry.template, obj);
+};
+
+const getTemplateItems = <K extends keyof TemplateRegistry>(
+  keys: K[],
+): Pick<TemplateRegistry, K> => {
+  const result = {} as Pick<TemplateRegistry, K>;
+  for (const key of keys) {
+    const item = registry.template[key];
+    if (!item) {
+      throw new Error(`Element "${key}" is missing from the registry.`);
+    }
+    result[key] = item;
+  }
+  return result;
+};
+
+const getTemplateItem = <K extends keyof TemplateRegistry>(
+  key: K,
+): TemplateRegistry[K] => {
+  const item = registry.template[key];
+  if (!item) {
+    throw new Error(`Element "${key}" is missing from the registry.`);
+  }
+  return item;
 };
 
 const getInfobarItem = <K extends keyof InfobarRegistry>(
@@ -85,12 +123,30 @@ function initializeInfobarRegistry() {
   });
 }
 
+function initializeTemplateRegistry() {
+  setTemplateItems({
+    editorEmptyStateTemplate: requireElement<HTMLTemplateElement>(
+      "#editor-empty-state-template",
+    ),
+    editorView: requireElement<HTMLDivElement>(".editor-view"),
+    sidebarEmptyStateTemplate: requireElement<HTMLTemplateElement>(
+      "#sidebar-empty-state-template",
+    ),
+    noteItemTemplate: requireElement<HTMLTemplateElement>(
+      "#note-item-template",
+    ),
+  });
+}
+
 export {
   getAppItem,
   getInfobarItem,
   getInfobarItems,
+  getTemplateItem,
+  getTemplateItems,
   initializeCoreRegistry,
   initializeInfobarRegistry,
+  initializeTemplateRegistry,
   registerAppEvents,
   setAppItems,
   setInfobarItems,

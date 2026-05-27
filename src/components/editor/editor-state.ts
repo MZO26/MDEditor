@@ -1,39 +1,37 @@
 import { handleCreateNote } from "@/features/note-actions";
 import { stateStore } from "@/settings/app-state";
 import { createAsyncHandler } from "@/utils/async";
-import { findElement, requireElement } from "@/utils/dom";
+import { findElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
-import { getAppItem } from "@/utils/registry";
+import { getAppItem, getTemplateItem } from "@/utils/registry";
 
 function handleEditorEmptyState() {
   const editorContainer = getAppItem("editorContainer");
-  const editorView = requireElement<HTMLDivElement>(
-    ".editor-view",
-    editorContainer,
-  );
-  let emptyState = findElement<HTMLDivElement>(
-    ".editor-empty-state",
-    editorContainer,
-  );
-  if (!emptyState) {
-    emptyState = createEditorEmptyState();
-    editorContainer.appendChild(emptyState);
-  }
+  const editorView = getTemplateItem("editorView");
   const { activeId } = stateStore.getState();
   const showEmptyState = !activeId;
   editorView.classList.toggle("hidden", showEmptyState);
-  emptyState.classList.toggle("hidden", !showEmptyState);
-  emptyState.inert = !showEmptyState;
+  const existingEmptyState = findElement<HTMLDivElement>(
+    ".editor-empty-state",
+    editorContainer,
+  );
+  if (showEmptyState) {
+    if (!existingEmptyState) {
+      const newEmptyState = createEditorEmptyState();
+      editorContainer.appendChild(newEmptyState);
+    }
+  } else {
+    if (existingEmptyState) {
+      existingEmptyState.remove();
+    }
+  }
 }
 
-const template = requireElement<HTMLTemplateElement>(
-  "#editor-empty-state-template",
-);
-
-const editorEmptyState = template.content.firstElementChild as HTMLDivElement;
-
 function createEditorEmptyState() {
-  const emptyState = editorEmptyState.cloneNode(true) as HTMLDivElement;
+  const template = getTemplateItem("editorEmptyStateTemplate");
+  const emptyState = template.content.firstElementChild?.cloneNode(
+    true,
+  ) as HTMLDivElement;
   renderIcons(emptyState);
   const handleClick = createAsyncHandler(async (e: Event) => {
     const target = e.target as HTMLElement;
