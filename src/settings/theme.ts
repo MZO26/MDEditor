@@ -30,15 +30,7 @@ async function applyAppTheme(preference: Theme): Promise<Result<ThemeResult>> {
 function setCodeTheme(resolvedTheme: ResolvedTheme): CodeTheme {
   // needs its own lookup for dom element because its coupled to applyAppTheme
   const codeThemeSelect = findElement<HTMLSelectElement>("#code-theme");
-  if (!codeThemeSelect) {
-    console.warn(
-      "Code theme select element not found, defaulting to balanced.",
-    );
-    document.documentElement.dataset["codetheme"] =
-      CODE_THEME_MAP["balanced"]?.[resolvedTheme];
-    return "balanced";
-  }
-  const preference = codeThemeSelect.value as CodeTheme;
+  const preference = codeThemeSelect?.value as CodeTheme;
   const codeTheme =
     CODE_THEME_MAP[preference]?.[resolvedTheme] ??
     CODE_THEME_MAP["balanced"]?.[resolvedTheme];

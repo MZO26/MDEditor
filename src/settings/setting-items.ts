@@ -1,4 +1,4 @@
-import { selectBuilder } from "@/settings/setting-builder";
+import { selectBuilder } from "@/settings/setting-factory";
 
 function buildSelects() {
   selectBuilder(

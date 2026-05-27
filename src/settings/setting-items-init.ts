@@ -6,11 +6,7 @@ import {
 } from "@/api/api";
 import { reloadNoteList } from "@/components/sidebar/sidebar-ui";
 import { getBatchExportContent } from "@/notes/export-actions";
-import {
-  applyAppTheme,
-  resolveTheme,
-  setCodeTheme,
-} from "@/settings/theme-actions";
+import { applyAppTheme, resolveTheme, setCodeTheme } from "@/settings/theme";
 import { createAsyncHandler } from "@/utils/async";
 import { findElement } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
@@ -251,7 +247,7 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
         return;
       }
       await showNotification(
-        "Export Successful",
+        "Export Successful.",
         `${result.data.length} files exported to .${selectedExtension}`,
       );
     }),

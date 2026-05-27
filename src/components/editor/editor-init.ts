@@ -6,6 +6,7 @@ import { NoteTag } from "@/extensions/tag";
 import { Typography } from "@/extensions/typography";
 import { WikiLink } from "@/extensions/wikilinks";
 import { handleSelectNote } from "@/notes/note-actions";
+import { noteStore } from "@/settings/app-state";
 import { sleep } from "@/utils/async";
 import { requireElement } from "@/utils/dom";
 import { useDelayedSpinner } from "@/utils/ui";
@@ -104,7 +105,18 @@ function getNoteEditorExtensions() {
     MasterShortcuts,
     Typography,
     WikiLink.configure({
-      onClick: async (id) => handleSelectNote(id),
+      onClick: async (id) => {
+        const noteExists = noteStore.get("notes").some((n) => n.id === id);
+        if (!noteExists) {
+          console.warn("Note not found!");
+          return;
+        }
+        handleSelectNote(id);
+      },
+      getLabel: (id) => {
+        const note = noteStore.get("notes").find((n) => n.id === id);
+        return note?.title ?? id;
+      },
     }),
     Focus.configure({
       className: "has-focus",

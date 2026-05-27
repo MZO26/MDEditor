@@ -12,7 +12,7 @@ import { handleDeleteNote } from "@/notes/note-actions";
 import { handleDuplicateNote } from "@/notes/note-duplicate";
 import { handleMergeNotes } from "@/notes/note-merge";
 import { noteStore, settingsStore } from "@/settings/app-state";
-import { initDeleteDialog, initMergeDialog } from "@/settings/dialogs";
+import { initDeleteDialog, initMergeDialog } from "@/settings/dialog-init";
 import { createAsyncHandler } from "@/utils/async";
 import { findElement } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";

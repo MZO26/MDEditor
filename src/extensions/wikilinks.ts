@@ -6,43 +6,44 @@ import {
 } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 
-const UUID_REGEX =
-  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-
-function normalizeWikiId(value: unknown): string {
-  if (typeof value !== "string") return "";
-  return value.replace(/[\[\]]/g, "").trim();
-}
+const UUID_PATTERN = "([a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12})";
+const INPUT_REGEX = new RegExp(`\\[\\[\\s*${UUID_PATTERN}\\s*\\]\\]$`, "i");
+const PASTE_REGEX = new RegExp(
+  `(?:\\[\\[)?\\s*${UUID_PATTERN}\\s*(?:\\]\\])?`,
+  "gi",
+);
 
 export interface WikiLinkOptions {
   onClick: (id: string) => void | Promise<void>;
+  getLabel: (id: string) => string;
 }
 
-export const WikiLink = Node.create<WikiLinkOptions>({
+const WikiLink = Node.create<WikiLinkOptions>({
   name: "wikilink",
   group: "inline",
   inline: true,
   atom: true,
   selectable: false,
-  addOptions() {
-    return {
-      onClick: () => {},
-    };
-  },
-  addAttributes() {
-    return {
-      id: {
-        default: null,
-        parseHTML: (element: HTMLElement) =>
-          normalizeWikiId(element.getAttribute("data-id")),
-      },
-    };
-  },
-  parseHTML() {
-    return [{ tag: "span[data-wikilink]" }];
-  },
+
+  addOptions: () => ({
+    onClick: () => {},
+    getLabel: (id) => id, // Fallback to id if no name is provided
+  }),
+
+  addAttributes: () => ({
+    id: {
+      default: null,
+      parseHTML: (el) =>
+        el
+          .getAttribute("data-id")
+          ?.replace(/[\[\]]/g, "")
+          .trim() || "",
+    },
+  }),
+  parseHTML: () => [{ tag: "span[data-wikilink]" }],
   renderHTML({ node, HTMLAttributes }) {
-    const id = normalizeWikiId(node.attrs["id"]);
+    const id = node.attrs["id"];
+    const label = this.options.getLabel(id); // Note title
     return [
       "span",
       mergeAttributes(HTMLAttributes, {
@@ -50,33 +51,27 @@ export const WikiLink = Node.create<WikiLinkOptions>({
         "data-id": id,
         class: "wikilink",
       }),
-      id,
+      label, // Renders the title
     ];
   },
   renderText({ node }) {
-    return `[[${normalizeWikiId(node.attrs["id"])}]]`;
+    return `[[${this.options.getLabel(node.attrs["id"])}]]`;
   },
   addInputRules() {
     return [
       nodeInputRule({
-        find: /\[{2,}([^[\]]+)\]{2,}$/,
+        find: INPUT_REGEX,
         type: this.type,
-        getAttributes: (match) => {
-          const id = normalizeWikiId(match[1]);
-          return UUID_REGEX.test(id) ? { id } : null;
-        },
+        getAttributes: (match) => ({ id: match[1] }),
       }),
     ];
   },
   addPasteRules() {
     return [
       nodePasteRule({
-        find: /\[{2,}([^[\]]+)\]{2,}/g,
+        find: PASTE_REGEX,
         type: this.type,
-        getAttributes: (match) => {
-          const id = normalizeWikiId(match[1]);
-          return UUID_REGEX.test(id) ? { id } : null;
-        },
+        getAttributes: (match) => ({ id: match[1] }),
       }),
     ];
   },
@@ -86,12 +81,10 @@ export const WikiLink = Node.create<WikiLinkOptions>({
         key: new PluginKey("wikilinkClickHandler"),
         props: {
           handleClickOn: (_view, _pos, node, _nodePos, event) => {
-            if (node.type.name !== this.name) return false;
-            const id = normalizeWikiId(node.attrs["id"]);
-            if (!id) return false;
+            if (node.type.name !== this.name || !node.attrs["id"]) return false;
             event.preventDefault();
             event.stopPropagation();
-            void this.options.onClick(id);
+            void this.options.onClick(node.attrs["id"]);
             return true;
           },
         },
@@ -99,3 +92,5 @@ export const WikiLink = Node.create<WikiLinkOptions>({
     ];
   },
 });
+
+export { WikiLink };

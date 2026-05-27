@@ -1,8 +1,8 @@
-import { initSettingsDialog } from "@/settings/dialogs";
-import { createSettingsMenu } from "@/settings/setting-builder";
+import { initSettingsDialog } from "@/settings/dialog-init";
+import { createSettingsMenu } from "@/settings/setting-factory";
 import { buildSelects } from "@/settings/setting-items";
 import { setSelectListeners } from "@/settings/setting-items-init";
-import { applyAppTheme } from "@/settings/theme-actions";
+import { applyAppTheme } from "@/settings/theme";
 import { requireElement, setActiveItem } from "@/utils/dom";
 import { registerAppEvents } from "@/utils/registry";
 import type { AppSettings } from "@shared/schemas/store-schema";
