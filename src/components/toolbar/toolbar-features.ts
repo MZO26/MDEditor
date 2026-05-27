@@ -1,7 +1,84 @@
+import { setTheme } from "@/api/api";
 import { promptImageUpload } from "@/extensions/image/image";
+import { getAppItem, registerAppEvents } from "@/utils/registry";
+import type { Theme } from "@shared/schemas/store-schema";
 import type { ActionMap } from "@shared/types";
 
-const ToolbarActions: ActionMap = {
+// top-toolbar for quick actions
+
+function initTopToolbar() {
+  const appContainer = getAppItem("appContainer");
+  const editor = getAppItem("editor");
+  registerAppEvents(document, {
+    "app:set-editor-width": () => setEditorWidth(appContainer),
+    "app:toggle-read-only": () => editor?.setEditable(!editor.isEditable),
+    "app:toggle-focus-mode": () => initFocusMode(),
+    "app:escape": () => {
+      if (appContainer.classList.contains("focus")) {
+        initFocusMode();
+      }
+    },
+  });
+}
+
+function setEditorWidth(container: HTMLDivElement) {
+  const widths = ["comfortable", "normal", "wide"];
+  const current = container.getAttribute("data-width") || "normal";
+  const index = widths.indexOf(current as (typeof widths)[number]);
+  const next = widths[(index + 1) % widths.length];
+  if (!next) return;
+  container.setAttribute("data-width", next);
+}
+
+function initFocusMode() {
+  const appContainer = getAppItem("appContainer");
+  const newState = !appContainer.classList.contains("focus");
+  requestAnimationFrame(() => {
+    appContainer.classList.toggle("focus", newState);
+    setTheme(
+      document.documentElement.getAttribute("data-theme") as Exclude<
+        Theme,
+        "system"
+      >,
+      newState,
+    ).catch((err) => {
+      console.error(
+        "[initFocusMode -> setTheme]: Failed to sync theme with main process.",
+        err,
+      );
+    });
+  });
+}
+
+const TOP_TOOLBAR_ACTIONS: ActionMap = {
+  readOnly: {
+    type: "action",
+    run: (editor) => editor?.setEditable(!editor.isEditable),
+    icon: "glasses",
+    shortcut: "MOD+Shift+R",
+  },
+  focus: {
+    type: "action",
+    run: () => initFocusMode(),
+    icon: "focus",
+    shortcut: "F11",
+  },
+  editorWidth: {
+    type: "action",
+    run: () => {
+      const appContainer = getAppItem("appContainer");
+      setEditorWidth(appContainer);
+    },
+    icon: "ruler-dimension-line",
+    shortcut: "MOD+Shift+W",
+  },
+};
+
+//-------------------------------------------------------------
+
+// editor toolbar
+
+const TOOLBAR_ACTIONS: ActionMap = {
   toggleSidebar: {
     run: () => document.dispatchEvent(new CustomEvent("app:toggle-sidebar")),
     icon: "arrow-left-from-line",
@@ -128,4 +205,4 @@ const ToolbarActions: ActionMap = {
   },
 };
 
-export { ToolbarActions };
+export { initTopToolbar, TOOLBAR_ACTIONS, TOP_TOOLBAR_ACTIONS };

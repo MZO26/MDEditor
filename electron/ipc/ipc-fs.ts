@@ -13,7 +13,8 @@ import {
   result,
   validation,
 } from "@electron/ipc/ipc-validation";
-import { AppErrorCode, LIMITS } from "@shared/constants";
+import { LIMITS } from "@shared/constants";
+import { AppErrorCode } from "@shared/errors";
 import {
   ExportManyRequestSchema,
   ExportRequestSchema,

@@ -1,5 +1,5 @@
 import { WorkerTaskError } from "@/extensions/image/image-worker";
-import { WorkerErrorCode } from "@shared/constants";
+import { WorkerErrorCode } from "@shared/errors";
 
 function getScaledSize(
   width: number,

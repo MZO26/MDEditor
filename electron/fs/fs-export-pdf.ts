@@ -3,7 +3,7 @@ import { loadPDFAssets } from "@electron/handler/pdf-handler";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import { validation } from "@electron/ipc/ipc-validation";
 import { createHiddenPdfWindow } from "@electron/win";
-import { AppErrorCode } from "@shared/constants";
+import { AppErrorCode } from "@shared/errors";
 import { processWithLimit } from "@shared/limiter";
 import { FileNameSchema } from "@shared/schemas/export-schema";
 import type { ExportedContent, ExportResult } from "@shared/types";

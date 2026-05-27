@@ -1,16 +1,6 @@
+import { FUSE_OPTIONS } from "@shared/constants";
 import type { Note } from "@shared/schemas/note-schema";
-import Fuse, { type IFuseOptions } from "fuse.js";
-
-const FUSE_OPTIONS: IFuseOptions<Note> = {
-  useExtendedSearch: true,
-  ignoreLocation: true,
-  keys: [
-    { name: "title", weight: 2.0 },
-    { name: "plainText", weight: 1.0 },
-    { name: "tags", weight: 1.5 },
-  ],
-  threshold: 0.3,
-};
+import Fuse from "fuse.js";
 
 class NoteSearch {
   private fuse: Fuse<Note>;
@@ -30,6 +20,7 @@ class NoteSearch {
     if (!trimmedQuery) {
       return this.allNotes;
     }
+    // avoid new search if it is same query and return cached results from cached query
     if (trimmedQuery === this.lastQuery) {
       return this.lastResults;
     }

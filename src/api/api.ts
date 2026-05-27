@@ -1,6 +1,7 @@
 import { settingsStore } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
-import { AppErrorCode, DEBOUNCE_MS } from "@shared/constants";
+import { DEBOUNCE_MS } from "@shared/constants";
+import { AppErrorCode } from "@shared/errors";
 import type {
   ExportRequest,
   ImportRequest,
@@ -16,8 +17,11 @@ import type {
   ExportedContent,
   ImageSrc,
   Result,
+  View,
   ZoomAction,
 } from "@shared/types";
+
+// only really needed for extra error catching if something goes through IPC Bridge which shouldn't happen
 
 async function invoke<T>(ipcPromise: Promise<Result<T>>): Promise<Result<T>> {
   try {
@@ -65,10 +69,6 @@ async function getManyById(ids: string[]): Promise<Result<Note[]>> {
   return invoke(window.noteAPI.getManyById(ids));
 }
 
-async function getByTag(tag: string): Promise<Result<Note[]>> {
-  return invoke(window.noteAPI.getByTag(tag));
-}
-
 async function pin(id: string): Promise<Result<boolean>> {
   return invoke(window.noteAPI.pin(id));
 }
@@ -77,7 +77,7 @@ async function bookmark(id: string): Promise<Result<boolean>> {
   return invoke(window.noteAPI.bookmark(id));
 }
 
-async function getViews(view: string): Promise<Result<Note[]>> {
+async function getViews(view: View): Promise<Result<Note[]>> {
   return invoke(window.noteAPI.getViews(view));
 }
 
@@ -172,7 +172,6 @@ export {
   exportNote,
   getAll,
   getAllSettings,
-  getByTag,
   getManyById,
   getNoteById,
   getSettings,

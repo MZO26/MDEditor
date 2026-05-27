@@ -2,7 +2,7 @@ import { Transactions } from "@electron/db/transactions";
 import { Views } from "@electron/db/views";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import { validation } from "@electron/ipc/ipc-validation";
-import { AppErrorCode } from "@shared/constants";
+import { AppErrorCode } from "@shared/errors";
 import {
   CreateTransactionSchema,
   NoteFromDB,

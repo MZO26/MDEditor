@@ -7,10 +7,10 @@ import type { Note } from "@shared/schemas/note-schema";
 let cachedNoteItem: HTMLDivElement | null = null;
 
 function createNoteItem(note: Note) {
-  // Deep clone with true
   cachedNoteItem ??= getTemplateItem("noteItemTemplate").content
     .firstElementChild as HTMLDivElement; // if left side has a value it doesn't run right side. -> getTemplateItem only runs once
   const item = cachedNoteItem.cloneNode(true) as HTMLDivElement;
+  // Deep clone with true
   item.setAttribute("data-id", note.id);
   item.setAttribute("data-pinned", String(!!note.pinned));
   item.setAttribute("data-bookmarked", String(!!note.bookmarked));

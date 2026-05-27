@@ -7,14 +7,14 @@ import {
   result,
   validation,
 } from "@electron/ipc/ipc-validation";
-import { AppErrorCode, LIMITS } from "@shared/constants";
+import { LIMITS } from "@shared/constants";
+import { AppErrorCode } from "@shared/errors";
 import {
   CreateNotePayloadSchema,
   CreateNotesPayloadsSchema,
   IdSchema,
   IdsSchema,
   MergeTransactionSchema,
-  TagSchema,
   UpdateNotePayloadSchema,
 } from "@shared/schemas/note-schema";
 import { BrowserWindow, ipcMain } from "electron";
@@ -94,15 +94,6 @@ function registerNoteIpc(win: BrowserWindow) {
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(IdsSchema, id);
       return db.getManyById(validatedData);
-    });
-  });
-
-  ipcMain.handle("note:getByTag", (e, tag: unknown) => {
-    return result(e, async () => {
-      if (!checkRateLimit("note:getByTag", LIMITS.READ_LIGHT))
-        throw new AppBackendError(AppErrorCode.RateLimitError);
-      const validatedData = validation(TagSchema, tag);
-      return db.searchByTag(validatedData);
     });
   });
 

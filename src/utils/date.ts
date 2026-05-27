@@ -1,4 +1,4 @@
-import { findElement } from "./dom";
+import { findElement } from "@/utils/dom";
 
 const dateFormatter = new Intl.DateTimeFormat("de-DE", {
   year: "numeric",

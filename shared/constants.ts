@@ -1,46 +1,8 @@
+import type { Note } from "@shared/schemas/note-schema";
 import type { CodeTheme, Theme } from "@shared/schemas/store-schema";
 import type { Code, ContentType, ResolvedTheme, ViewItem } from "@shared/types";
 import type { Editor } from "@tiptap/core";
-
-enum WorkerErrorCode {
-  CompressionError = "COMPRESSION_FAILED",
-  InvalidImageError = "INVALID_IMAGE",
-  UnknownError = "UNKNOWN_ERROR",
-}
-
-enum AppErrorCode {
-  DBError = "DB_ERROR",
-  InvalidData = "INVALID_DATA",
-  FileWriteError = "FILE_WRITE_ERROR",
-  RateLimitError = "RATE_LIMIT",
-  SenderError = "UNAUTHORIZED_SENDER",
-  UnknownError = "UNKNOWN_ERROR",
-  InvalidViewError = "INVALID_VIEW",
-  CancelledOperation = "CANCELLED_OPERATION",
-  CompressionError = "COMPRESSION_ERROR",
-  InvalidImageError = "INVALID_IMAGE_ERROR",
-  InvalidDbAction = "INVALID_ACTION",
-  ExportError = "EXPORT_ERROR",
-  AutoSaveError = "AUTOSAVE_ERROR",
-  InvalidDialog = "INVALID_DIALOG",
-}
-
-const ERROR_MESSAGES: Record<AppErrorCode, string> = {
-  [AppErrorCode.DBError]: "Failed to access database.",
-  [AppErrorCode.InvalidData]: "Couldn't read the notes' data.",
-  [AppErrorCode.FileWriteError]: "Failed to write file.",
-  [AppErrorCode.RateLimitError]: "Too many attempts. Please wait.",
-  [AppErrorCode.SenderError]: "Action blocked for security.",
-  [AppErrorCode.UnknownError]: "An unexpected error occurred.",
-  [AppErrorCode.InvalidViewError]: "Cannot open this view.",
-  [AppErrorCode.CancelledOperation]: "Operation cancelled.",
-  [AppErrorCode.CompressionError]: "Failed to compress file.",
-  [AppErrorCode.InvalidImageError]: "Unsupported image format.",
-  [AppErrorCode.InvalidDbAction]: "This action is not allowed.",
-  [AppErrorCode.ExportError]: "Export failed.",
-  [AppErrorCode.AutoSaveError]: "Autosave failed.",
-  [AppErrorCode.InvalidDialog]: "Unsupported Operation.",
-};
+import type { IFuseOptions } from "fuse.js";
 
 const APP_START_TIME = Date.now();
 
@@ -201,17 +163,27 @@ const DOMPURIFY_CONFIG = {
   FORCE_BODY: true, // prevents mXSS via fragment parsing edge cases
 };
 
+const FUSE_OPTIONS: IFuseOptions<Note> = {
+  useExtendedSearch: true,
+  ignoreLocation: true,
+  keys: [
+    { name: "title", weight: 2.0 },
+    { name: "plainText", weight: 1.0 },
+    { name: "tags", weight: 1.5 },
+  ],
+  threshold: 0.3,
+};
+
 export {
   ALLOWED_TYPES,
   APP_START_TIME,
-  AppErrorCode,
   BATCH_SIZE,
   CLEANUP,
   CODE_THEME_MAP,
   CONTENT_TYPE_MAP,
   DEBOUNCE_MS,
   DOMPURIFY_CONFIG,
-  ERROR_MESSAGES,
+  FUSE_OPTIONS,
   IPC_TIMERS,
   LIMITS,
   MAX_SIZE,
@@ -219,7 +191,6 @@ export {
   THEME_DATA,
   THEME_MAP,
   VIEWS,
-  WorkerErrorCode,
   YIELD_INTERVAL,
   ZOOMS,
 };

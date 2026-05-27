@@ -1,4 +1,4 @@
-import { AppErrorCode } from "@shared/constants";
+import { AppErrorCode } from "@shared/errors";
 import type { Failure } from "@shared/types";
 import z, { ZodError } from "zod";
 

@@ -7,7 +7,7 @@ Built with Electron, TypeScript, Better SQLite3, and TipTap.
 ## Features
 
 - Local-first note storage with SQLite
-- Fast full-text search with FTS5
+- Fast in-memory fuzzy search with fuse.js
 - Markdown-focused editing with TipTap
 - Export notes to Markdown, Plain Text, HTML, JSON and PDF
 - Import notes from Markdown, Plain Text, HTML and JSON
@@ -24,6 +24,7 @@ Built with Electron, TypeScript, Better SQLite3, and TipTap.
 - TypeScript
 - Better SQLite 3
 - TipTap
+- fuse.js
 - electron-vite
 - Vite
 - DOMPurify
@@ -61,6 +62,8 @@ npm run dev
 ## Keyboard Shortcuts
 
 Shortcuts use `$mod` which maps to `Ctrl` on Windows/Linux and `Cmd` on macOS.
+
+## App Shortcuts
 
 | Shortcut              | Action                |
 | --------------------- | --------------------- |
@@ -109,22 +112,21 @@ Shortcuts use `$mod` which maps to `Ctrl` on Windows/Linux and `Cmd` on macOS.
 
 ## Architecture
 
+### Directory Structure
+
 ```text
-electron/      # Main process
-renderer/      # UI, editor, styles, state
-shared/        # Shared types, schemas
+.
+├── electron/       # Main process
+├── shared/         # Shared types, constants, schemas
+└── src/            # UI, editor, styles, state
 ```
 
-Data flow:
+### Data Flow
 
-```text
-Renderer UI
-  ↓
-IPC via preload
-  ↓
-Main process
-  ↓
-SQLite database
+```mermaid
+flowchart TD
+    A[src UI] -- IPC via preload --> B[Main Process]
+    B --> C[(SQLite Database)]
 ```
 
 ## Security
@@ -155,15 +157,10 @@ TipTap powers the editor with support for:
 - Type-safe development with TypeScript
 - Secure IPC boundaries
 - Local-first application design
-- SQLite schema design and search with FTS5
+- SQLite schema design
 - Rich editor integration without a frontend framework
 - Native module handling with `electron-rebuild`
-- Separation between main / renderer / shared
-
-## Known issues
-
-- On some systems, theme switching can flicker due to Electron rendering timing.
-- The app still functions normally; this is a visual issue only.
+- Separation between main / renderer (src) / shared
 
 ## Bug reports
 

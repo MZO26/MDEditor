@@ -4,8 +4,8 @@ import {
   showNotification,
   updateSettings,
 } from "@/api/api";
-import { reloadNoteList } from "@/components/sidebar/sidebar-actions";
-import { getBatchExportContent } from "@/features/export-actions";
+import { reloadNoteList } from "@/components/sidebar/sidebar-ui";
+import { getBatchExportContent } from "@/notes/export-actions";
 import {
   applyAppTheme,
   resolveTheme,

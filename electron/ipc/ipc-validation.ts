@@ -2,7 +2,8 @@ import {
   AppBackendError,
   handleIpcError,
 } from "@electron/ipc/ipc-error-handler";
-import { APP_START_TIME, AppErrorCode, IPC_TIMERS } from "@shared/constants";
+import { APP_START_TIME, IPC_TIMERS } from "@shared/constants";
+import { AppErrorCode } from "@shared/errors";
 import type { Result } from "@shared/types";
 import { BrowserWindow, app, type IpcMainInvokeEvent } from "electron";
 import type z from "zod";

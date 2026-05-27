@@ -1,5 +1,5 @@
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
-import { AppErrorCode } from "@shared/constants";
+import { AppErrorCode } from "@shared/errors";
 import type { ImagePayload } from "@shared/schemas/image-schema";
 import { createHash } from "crypto";
 import { app } from "electron";

@@ -6,21 +6,25 @@ import {
   showNotification,
 } from "@/api/api";
 import { editor } from "@/components/editor/editor-init";
-import { reloadNoteList } from "@/components/sidebar/sidebar-actions";
-import { getExportContent } from "@/features/export-actions";
-import { handleDeleteNote } from "@/features/note-actions";
-import { handleDuplicateNote } from "@/features/note-duplicate";
-import { handleMergeNotes } from "@/features/note-merge";
+import { reloadNoteList } from "@/components/sidebar/sidebar-ui";
+import { getExportContent } from "@/notes/export-actions";
+import { handleDeleteNote } from "@/notes/note-actions";
+import { handleDuplicateNote } from "@/notes/note-duplicate";
+import { handleMergeNotes } from "@/notes/note-merge";
 import { noteStore, settingsStore } from "@/settings/app-state";
 import { initDeleteDialog, initMergeDialog } from "@/settings/dialogs";
 import { createAsyncHandler } from "@/utils/async";
 import { findElement } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
-import { CLEANUP, ERROR_MESSAGES } from "@shared/constants";
+import { CLEANUP } from "@shared/constants";
+import { ERROR_MESSAGES } from "@shared/errors";
+import type { NoteMenuPayload } from "@shared/types";
 
+// needed for merge and delete triggers
 const { mergeDialog, mergeInput } = initMergeDialog();
 const { deleteDialog } = initDeleteDialog();
 
+// electron callbacks that only get registered once at startup. Thus no need for assignment of cleanups
 function initListeners() {
   window.storeAPI.onSettingsChanged((settings) => {
     settingsStore.setState(settings);
@@ -54,25 +58,17 @@ function initListeners() {
     }
   });
 
-  window.electronAPI.onTriggerNoteAction((payload) => {
+  window.electronAPI.onTriggerNoteAction((payload: NoteMenuPayload) => {
     const noteElement = findElement<HTMLDivElement>(
       `.note-item[data-id="${payload.id}"]`,
       getAppItem("sidebar"),
     );
     if (!noteElement) return;
-    switch (payload.action) {
-      case "pin":
-        noteElement.dataset["pinned"] = "true";
-        break;
-      case "unpin":
-        noteElement.dataset["pinned"] = "false";
-        break;
-      case "bookmark":
-        noteElement.dataset["bookmarked"] = "true";
-        break;
-      case "unbookmark":
-        noteElement.dataset["bookmarked"] = "false";
-        break;
+    if (payload.pinned !== undefined) {
+      noteElement.dataset["pinned"] = String(payload.pinned);
+    }
+    if (payload.bookmarked !== undefined) {
+      noteElement.dataset["bookmarked"] = String(payload.bookmarked);
     }
   });
 
@@ -83,17 +79,17 @@ function initListeners() {
         "[exportTrigger]: Failed to fetch note data:",
         result.error,
       );
-      await showNotification("Export Failed", ERROR_MESSAGES.EXPORT_ERROR);
+      await showNotification("Export Failed.", ERROR_MESSAGES.EXPORT_ERROR);
       return;
     }
     const exported = await exportNote(result.data);
     if (!exported.success) {
       console.error("[exportTrigger]: Failed to write file:", exported.error);
-      await showNotification("Export Failed", ERROR_MESSAGES.EXPORT_ERROR);
+      await showNotification("Export Failed.", ERROR_MESSAGES.EXPORT_ERROR);
       return;
     }
     await showNotification(
-      "Export Successful",
+      "Export Successful.",
       `Successfully exported as .${extension.toUpperCase()}`,
     );
   });
@@ -125,7 +121,7 @@ function initListeners() {
   window.noteAPI.onTriggerId(async (id: string) => {
     try {
       await navigator.clipboard.writeText(id);
-      await showNotification("Copied to clipboard!", "");
+      await showNotification("Copied to clipboard.", "");
     } catch (error) {
       await showNotification("Failed to copy to clipboard.", "");
       console.error("[idTrigger]: Failed to copy text: ", error);

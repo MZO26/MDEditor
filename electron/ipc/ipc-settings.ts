@@ -6,7 +6,8 @@ import {
 } from "@electron/ipc/ipc-validation";
 import { store } from "@electron/store";
 import { nextZoom } from "@electron/win";
-import { AppErrorCode, LIMITS } from "@shared/constants";
+import { LIMITS } from "@shared/constants";
+import { AppErrorCode } from "@shared/errors";
 import { StoreSchema, type AppSettings } from "@shared/schemas/store-schema";
 import type { ZoomAction } from "@shared/types";
 import { BrowserWindow, ipcMain } from "electron";

@@ -1,22 +1,28 @@
 import {
-  createViews,
   debouncedSearch,
   handleViews,
-  toggleSidebar,
-} from "@/components/sidebar/sidebar-actions";
+} from "@/components/sidebar/sidebar-features";
+import { createViews, setSidebarState } from "@/components/sidebar/sidebar-ui";
 import {
   handleCreateNote,
   handleImportNote,
   handleSelectNote,
-} from "@/features/note-actions";
+} from "@/notes/note-actions";
 import { createAsyncHandler } from "@/utils/async";
 import { requireElement } from "@/utils/dom";
-import { getAppItem, registerAppEvents } from "@/utils/registry";
+import {
+  getAppItem,
+  getInfobarItems,
+  initializeInfobarRegistry,
+  registerAppEvents,
+} from "@/utils/registry";
 import { initTippyDelegate } from "@/utils/ui";
 import { VIEWS } from "@shared/constants";
 import type { View } from "@shared/types";
 
-async function initNotesSidebar() {
+// sidebar
+
+function initNotesSidebar() {
   const appContainer = getAppItem("appContainer");
   const sidebar = getAppItem("sidebar");
   const sidebarContainer = requireElement<HTMLDivElement>(
@@ -31,11 +37,14 @@ async function initNotesSidebar() {
     ".search-input",
     sidebarContainer,
   );
-  initTippyDelegate(sidebarContainer);
   const viewSelect = createViews(VIEWS);
+  initTippyDelegate(sidebarContainer);
   applySidebarListeners(sidebar, sidebarHeader, searchInput, viewSelect);
   registerAppEvents(document, {
-    "app:toggle-sidebar": () => toggleSidebar(appContainer),
+    "app:toggle-sidebar": () => {
+      const collapsed = appContainer.classList.contains("collapsed");
+      setSidebarState(appContainer, !collapsed);
+    },
     "app:create-new-note": () => handleCreateNote(),
     "app:open-global-search": () => searchInput.focus(),
     "app:toggle-view-filter": () => viewSelect.showPicker(),
@@ -70,7 +79,7 @@ function applySidebarListeners(
     "change",
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLSelectElement;
-      handleViews(target.value as View);
+      await handleViews(target.value as View);
     }),
   );
   sidebar.addEventListener(
@@ -78,7 +87,7 @@ function applySidebarListeners(
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLElement;
       if (target === sidebar) return;
-      const actionBtn = target.closest<HTMLButtonElement>("button");
+      const actionBtn = target.closest<HTMLButtonElement>(".menu-btn");
       if (actionBtn) {
         e.preventDefault();
         e.stopPropagation();
@@ -94,12 +103,57 @@ function applySidebarListeners(
         return;
       }
       const noteItem = target.closest<HTMLDivElement>(".note-item");
-      if (noteItem) {
-        await handleSelectNote(noteItem);
+      const id = noteItem?.getAttribute("data-id");
+      if (id) {
+        await handleSelectNote(id);
       }
       return;
     }),
   );
 }
 
-export { initNotesSidebar };
+//------------------------------------------------------------
+
+// info-sidebar
+
+function initInfoSidebar() {
+  initializeInfobarRegistry();
+  const { toggleBtn, infoSidebar } = getInfobarItems([
+    "toggleBtn",
+    "infoSidebar",
+  ]);
+  setSidebarState(infoSidebar, true);
+  applyInfoSidebarListeners(toggleBtn, infoSidebar);
+  registerAppEvents(document, {
+    "app:toggle-info-sidebar": () => {
+      const collapsed = infoSidebar.classList.contains("collapsed");
+      setSidebarState(infoSidebar, !collapsed);
+    },
+  });
+}
+
+function applyInfoSidebarListeners(
+  toggleBtn: HTMLButtonElement,
+  infoSidebar: HTMLDivElement,
+) {
+  infoSidebar.addEventListener(
+    "click",
+    createAsyncHandler(async (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target === infoSidebar) return;
+      const linkEl = target.closest<HTMLSpanElement>(".link");
+      if (linkEl) {
+        const link = linkEl.getAttribute("data-link");
+        if (!link) return;
+        await handleSelectNote(link);
+        return;
+      }
+    }),
+  );
+  toggleBtn.addEventListener("click", () => {
+    const collapsed = infoSidebar.classList.contains("collapsed");
+    setSidebarState(infoSidebar, !collapsed);
+  });
+}
+
+export { initInfoSidebar, initNotesSidebar };

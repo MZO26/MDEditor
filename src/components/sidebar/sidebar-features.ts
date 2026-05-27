@@ -1,12 +1,58 @@
-import { getManyById } from "@/api/api";
-import { setSidebarState } from "@/components/sidebar/sidebar-state";
+import { getManyById, getViews } from "@/api/api";
+import {
+  reloadNoteList,
+  showTodoProgress,
+} from "@/components/sidebar/sidebar-ui";
+import { searchEngine, stateStore } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
 import { formatNoteDate } from "@/utils/date";
+import { estimateReadingTime } from "@/utils/note";
 import { getAppItem, getInfobarItem, getInfobarItems } from "@/utils/registry";
 import { DEBOUNCE_MS } from "@shared/constants";
-import { getTodoStats } from "@shared/generators";
 import type { Note } from "@shared/schemas/note-schema";
-import type { JSONContent } from "@tiptap/core";
+import type { View } from "@shared/types";
+
+// sidebar
+
+function handleSearchInput(searchInput: string) {
+  const editor = getAppItem("editor");
+  const sidebar = getAppItem("sidebar");
+  stateStore.setState({ searchQuery: searchInput });
+  const noteElements = Array.from(
+    sidebar.getElementsByClassName("note-item"),
+  ) as HTMLDivElement[];
+  editor.commands.setSearchTerm(searchInput);
+  if (searchInput === "") {
+    for (const element of noteElements) {
+      element.classList.remove("hidden");
+    }
+    return;
+  }
+  const results = searchEngine.search(searchInput);
+  const limitedResults = results.slice(0, 50);
+  const matchingIds = new Set(limitedResults.map((note: Note) => note.id));
+  for (const element of noteElements) {
+    const noteId = element.getAttribute("data-id");
+    const isMatch = noteId ? matchingIds.has(noteId) : false;
+    element.classList.toggle("hidden", !isMatch);
+  }
+}
+
+async function handleViews(view: View) {
+  const editor = getAppItem("editor");
+  stateStore.setState({ searchQuery: "" });
+  editor.commands.setSearchTerm("");
+  const result = await getViews(view);
+  if (!result.success) {
+    console.error("[handleViews]: Failed to fetch views:", result.error);
+    return;
+  }
+  await reloadNoteList(result.data);
+}
+
+//------------------------------------------------------------
+
+// info-sidebar
 
 function updateInfoHeader(date: Note["created_at"], title: Note["title"]) {
   const container = getInfobarItem("headerContainer");
@@ -31,7 +77,6 @@ function updateNoteTags(tags: Note["tags"]) {
   for (const tag of tags) {
     const span = document.createElement("span");
     span.classList.add("tag", "searchTag");
-    span.setAttribute("data-tippy-content", `Filter notes with: ${tag}`);
     span.setAttribute("data-tag", String(tag));
     span.textContent = `#${tag}`;
     container.append(span);
@@ -79,43 +124,20 @@ async function updateStats(note: Note) {
   readingTime.textContent = estimateReadingTime(wordCount);
   showTodoProgress(note.content);
   updateNoteTags(note.tags);
-  await updateNoteLinks(note.links);
   updateInfoHeader(note.created_at, note.title);
+  await updateNoteLinks(note.links);
 }
 
-const debouncedUpdateStats = debounce(updateStats, DEBOUNCE_MS.slow);
+//------------------------------------------------------------
 
-function estimateReadingTime(wordCount: number, wpm = 238) {
-  const s = Math.round((wordCount / wpm) * 60);
-  const m = Math.floor(s / 60);
-  return s < 30 ? "< 1 min read" : s < 60 ? "1 min read" : `${m} min read`;
-}
+// debounced functions
 
-function showTodoProgress(content: JSONContent) {
-  const stats = getTodoStats(content);
-  const { todoContainer, todoCount, todoProgress } = getInfobarItems([
-    "todoContainer",
-    "todoCount",
-    "todoProgress",
-  ]);
-  if (stats.total === 0) {
-    if (todoContainer.style.display !== "none")
-      todoContainer.style.display = "none";
-    return;
-  }
-  if (todoContainer.style.display !== "block")
-    todoContainer.style.display = "block";
+const debouncedUpdateStats = debounce(updateStats, DEBOUNCE_MS.normal);
 
-  todoCount.textContent = `${stats.completed}/${stats.total}`;
-  const percentage = (stats.completed / stats.total) * 100;
-  todoProgress.style.width = `${percentage}%`;
-  todoProgress.style.backgroundColor =
-    percentage === 100 ? "var(--tag-color)" : "var(--text-muted)";
-}
+const debouncedSearch = debounce((e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const value = target.value.trim();
+  handleSearchInput(value);
+}, DEBOUNCE_MS.normal);
 
-function collapseInfoSidebar(infoSidebar: HTMLDivElement) {
-  const collapsed = infoSidebar.classList.contains("collapsed");
-  setSidebarState(infoSidebar, !collapsed);
-}
-
-export { collapseInfoSidebar, debouncedUpdateStats };
+export { debouncedSearch, debouncedUpdateStats, handleViews };

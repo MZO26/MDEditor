@@ -1,7 +1,6 @@
 import { mergeNotes } from "@/api/api";
-import { debouncedUpdateStats } from "@/components/sidebar/info-sidebar-actions";
-import { cleanupDeletedNoteUI, handleViewNote } from "@/features/note-actions";
-import { stopAutoSave } from "@/features/note-auto-save";
+import { handleViewNote } from "@/notes/note-actions";
+import { stopAutoSave } from "@/notes/note-auto-save";
 import { noteStore, stateStore } from "@/settings/app-state";
 import { findElement, setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
@@ -32,24 +31,24 @@ async function handleMergeNotes(idA: string, idB: string) {
     console.error("[handleMergeNotes]: Failed to merge notes:", result.error);
     return;
   }
+  const sidebar = getAppItem("sidebar");
   noteStore.setState((state) => ({
     notes: state.notes
       .filter((note) => note.id !== idA)
       .map((note) => (note.id === idB ? result.data : note)),
   }));
-  stateStore.setState({ activeId: result.data.id });
   const noteBElement = findElement<HTMLDivElement>(
     `div[data-id="${validatedId}"]`,
-    getAppItem("sidebar"),
+    sidebar,
   );
-  if (noteBElement) cleanupDeletedNoteUI(validatedId, noteBElement);
-  handleViewNote(result.data);
-  debouncedUpdateStats(result.data);
+  if (noteBElement) noteBElement.remove();
   const noteElement = findElement<HTMLDivElement>(
     `.note-item[data-id="${result.data.id}"]`,
-    getAppItem("sidebar"),
+    sidebar,
   );
-  if (noteElement) setActiveItem(noteElement, getAppItem("sidebar"));
+  if (noteElement) setActiveItem(noteElement, sidebar);
+  stateStore.setState({ activeId: result.data.id });
+  handleViewNote(result.data);
 }
 
 export { handleMergeNotes };

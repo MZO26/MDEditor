@@ -3,16 +3,20 @@ import { getNoteEditorExtensions } from "@/components/editor/editor-init";
 import { sleep } from "@/utils/async";
 import { getAppItem } from "@/utils/registry";
 import {
-  AppErrorCode,
   BATCH_SIZE,
   DOMPURIFY_CONFIG,
   YIELD_INTERVAL,
 } from "@shared/constants";
+import { AppErrorCode } from "@shared/errors";
 import { titleGenerator } from "@shared/generators";
 import type { ExportRequest } from "@shared/schemas/export-schema";
 import type { ExportedContent, ExportFormat, Result } from "@shared/types";
 import { Editor } from "@tiptap/core";
 import DOMPurify from "dompurify";
+
+// gets called in frontend because headless editor is needed to convert content to markdown or html
+
+// batch export function triggered by file backup setting
 
 async function getBatchExportContent(
   extension: ExportFormat,
@@ -78,6 +82,10 @@ async function getBatchExportContent(
     headlessEditor.destroy();
   }
 }
+
+//------------------------------------------------------------
+
+// single export content function triggered by callback on note menu interaction
 
 function getExportContent(
   id: string,

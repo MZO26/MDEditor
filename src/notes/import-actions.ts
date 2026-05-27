@@ -1,17 +1,19 @@
 import { getNoteEditorExtensions } from "@/components/editor/editor-init";
 import { sleep } from "@/utils/async";
 import {
-  AppErrorCode,
   BATCH_SIZE,
   CONTENT_TYPE_MAP,
   DOMPURIFY_CONFIG,
   YIELD_INTERVAL,
 } from "@shared/constants";
+import { AppErrorCode } from "@shared/errors";
 import { getMetadata } from "@shared/generators";
 import type { CreateNotePayload } from "@shared/schemas/note-schema";
 import type { ImportedContent, Result } from "@shared/types";
-import { Editor, type JSONContent } from "@tiptap/core";
+import { Editor, type Content, type JSONContent } from "@tiptap/core";
 import DOMPurify from "dompurify";
+
+// utility for clean txt content (avoiding too many whitespaces)
 
 function textConverter(txt: string) {
   if (!txt) return undefined;
@@ -29,7 +31,9 @@ function textConverter(txt: string) {
   return content;
 }
 
-function normalizeFileContent(file: ImportedContent) {
+// function to either sanitize content or format it to make import cleaner
+
+function normalizeFileContent(file: ImportedContent): Content | string | null {
   const { content, extension } = file;
   if (!content) return null;
   if (typeof content === "string") {
@@ -56,6 +60,8 @@ function normalizeFileContent(file: ImportedContent) {
   }
   return null;
 }
+
+// processes all files within limits and creates payloads that match the create note schema
 
 async function setImportedContent(
   files: ImportedContent[],

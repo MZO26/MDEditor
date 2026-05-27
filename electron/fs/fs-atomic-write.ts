@@ -1,5 +1,5 @@
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
-import { AppErrorCode } from "@shared/constants";
+import { AppErrorCode } from "@shared/errors";
 import { open, rename, unlink, type FileHandle } from "node:fs/promises";
 
 async function writeAtomic(

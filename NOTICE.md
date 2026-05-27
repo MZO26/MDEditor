@@ -10,6 +10,7 @@ The following components are provided under the MIT License:
 
 - **Electron** (Copyright (c) Electron contributors)
 - **better-sqlite3** (Copyright (c) Joshua Wise)
+- **fuse-js** (Copyright (c) Kirollos Risk)
 - **Tiptap** (Copyright (c) 2026, Tiptap GmbH)
 - **lowlight** (Copyright (c) Titus Wormer)
 - **tippy.js** (Copyright (c) atomiks)
@@ -36,6 +37,26 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 **Licensed under the Apache License, Version 2.0:**
 
 Copyright 2015 Mario Heiderich
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+---
+
+## fuse-js
+
+**Licensed under the Apache License, Version 2.0:**
+
+Copyright 2012 Kirollos Risk
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

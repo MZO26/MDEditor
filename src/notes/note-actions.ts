@@ -10,19 +10,17 @@ import {
 import {
   getEditorContent,
   resetEditorHistory,
-} from "@/components/editor/editor-actions";
-import { editor } from "@/components/editor/editor-init";
-import { handleEditorEmptyState } from "@/components/editor/editor-state";
-import { debouncedUpdateStats } from "@/components/sidebar/info-sidebar-actions";
+} from "@/components/editor/editor-features";
+import { debouncedUpdateStats } from "@/components/sidebar/sidebar-features";
 import {
   addManyNotesToList,
   addOneNoteToList,
   updateNoteInList,
-} from "@/components/sidebar/sidebar-actions";
-import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
-import { setupAutoSave, stopAutoSave } from "@/features/note-auto-save";
+} from "@/components/sidebar/sidebar-ui";
+import { setImportedContent } from "@/notes/import-actions";
+import { setupAutoSave, stopAutoSave } from "@/notes/note-auto-save";
 import { noteStore, stateStore } from "@/settings/app-state";
-import { setActiveItem } from "@/utils/dom";
+import { findElement, setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
 import { CLEANUP } from "@shared/constants";
 import { getMetadata } from "@shared/generators";
@@ -31,7 +29,12 @@ import {
   type Note,
   type UpdateNotePayload,
 } from "@shared/schemas/note-schema";
-import { setImportedContent } from "./import-actions";
+
+// note crud operations + import
+
+//------------------------------------------------------------
+
+// create
 
 async function handleCreateNote() {
   const editorContent = {
@@ -53,12 +56,14 @@ async function handleCreateNote() {
   noteStore.setState((state) => ({
     notes: [...state.notes, result.data],
   }));
-  console.log(noteStore.getState());
   stateStore.setState({ activeId: result.data.id });
   addOneNoteToList(result.data);
-  handleEditorEmptyState();
   handleViewNote(result.data);
 }
+
+//------------------------------------------------------------
+
+// import + create many
 
 async function handleImportNote() {
   const imported = await importNote();
@@ -75,27 +80,18 @@ async function handleImportNote() {
   }
   const count = imported.data.length;
   await showNotification(
-    "Import Successful",
-    `Successfully imported ${count} file${count === 1 ? "" : "s"}.`,
+    "Import Successful.",
+    `Successfully imported ${count} file${count === 1 ? "" : "s"}`,
   );
   noteStore.setState((state) => ({
     notes: [...state.notes, ...result.data],
   }));
   addManyNotesToList(result.data);
-  handleEditorEmptyState();
 }
 
-function cleanupDeletedNoteUI(id: string, noteElement?: HTMLDivElement) {
-  if (noteElement) noteElement.remove();
-  handleSidebarEmptyState();
-  const { activeId } = stateStore.getState();
-  if (activeId === id) {
-    stateStore.setState({ activeId: null });
-    const editor = getAppItem("editor");
-    editor?.commands.clearContent();
-    handleEditorEmptyState();
-  }
-}
+//------------------------------------------------------------
+
+// delete
 
 async function handleDeleteNote(id: string, noteElement: HTMLDivElement) {
   const editor = getAppItem("editor");
@@ -109,11 +105,20 @@ async function handleDeleteNote(id: string, noteElement: HTMLDivElement) {
   noteStore.setState((state) => ({
     notes: state.notes.filter((note) => note.id !== id),
   }));
-  cleanupDeletedNoteUI(id, noteElement);
+  noteElement?.remove();
+  const { activeId } = stateStore.getState();
+  if (activeId === id) {
+    stateStore.setState({ activeId: null });
+    const editor = getAppItem("editor");
+    editor?.commands.clearContent();
+  }
 }
 
+//------------------------------------------------------------
+
+// update
+
 async function handleSaveNote(id: string, flush: boolean = false) {
-  if (!editor || !id) return;
   const editorContent = getEditorContent();
   const metaData = getMetadata(editorContent.content, editorContent.plainText);
   const payload: UpdateNotePayload = {
@@ -130,27 +135,37 @@ async function handleSaveNote(id: string, flush: boolean = false) {
     notes: state.notes.map((n) => (n.id === result.data.id ? result.data : n)),
   }));
   debouncedUpdateStats(result.data);
-  await updateNoteInList(result.data);
+  updateNoteInList(result.data);
 }
 
-async function handleSelectNote(noteItem: HTMLDivElement) {
-  const noteID = noteItem.getAttribute("data-id");
-  if (!noteID) return;
-  const result = await getNoteById(noteID);
+//------------------------------------------------------------
+
+// read or getById
+
+async function handleSelectNote(id: string) {
+  const result = await getNoteById(id);
   if (!result.success) {
     console.error("[handleSelectNote]: Failed to fetch note:", result.error);
     return;
   }
-  stateStore.setState({ activeId: noteID });
+  const noteElement = findElement<HTMLDivElement>(
+    `.note-item[data-id="${id}"]`,
+    getAppItem("sidebar"),
+  );
+  if (!noteElement) return;
+  stateStore.setState({ activeId: id });
   handleViewNote(result.data);
-  setActiveItem(noteItem, getAppItem("sidebar"));
+  setActiveItem(noteElement, getAppItem("sidebar"));
 }
+
+//------------------------------------------------------------
+
+// view function for editor content. gets called in combination with handleSelect
 
 function handleViewNote(note: Note) {
   const editor = getAppItem("editor");
   debouncedUpdateStats.cancel();
   stopAutoSave(editor, "flush");
-  handleEditorEmptyState();
   editor.commands.setContent(note.content, {
     emitUpdate: false,
   });
@@ -165,7 +180,6 @@ function handleViewNote(note: Note) {
 }
 
 export {
-  cleanupDeletedNoteUI,
   handleCreateNote,
   handleDeleteNote,
   handleImportNote,

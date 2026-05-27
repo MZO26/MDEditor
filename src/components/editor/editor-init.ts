@@ -5,10 +5,9 @@ import { CustomSearchHighlight } from "@/extensions/searchHighlight";
 import { NoteTag } from "@/extensions/tag";
 import { Typography } from "@/extensions/typography";
 import { WikiLink } from "@/extensions/wikilinks";
-import { handleSelectNote } from "@/features/note-actions";
+import { handleSelectNote } from "@/notes/note-actions";
 import { sleep } from "@/utils/async";
-import { findElement, requireElement } from "@/utils/dom";
-import { getAppItem } from "@/utils/registry";
+import { requireElement } from "@/utils/dom";
 import { useDelayedSpinner } from "@/utils/ui";
 import { DOMPURIFY_CONFIG } from "@shared/constants";
 import { processWithLimit } from "@shared/limiter";
@@ -105,14 +104,7 @@ function getNoteEditorExtensions() {
     MasterShortcuts,
     Typography,
     WikiLink.configure({
-      onClick: async (id) => {
-        const noteElement = findElement<HTMLDivElement>(
-          `.note-item[data-id="${id}"]`,
-          getAppItem("sidebar"),
-        );
-        if (!noteElement) return;
-        handleSelectNote(noteElement);
-      },
+      onClick: async (id) => handleSelectNote(id),
     }),
     Focus.configure({
       className: "has-focus",

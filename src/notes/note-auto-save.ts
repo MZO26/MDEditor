@@ -1,8 +1,12 @@
-import { handleSaveNote } from "@/features/note-actions";
+import { handleSaveNote } from "@/notes/note-actions";
 import { debounce } from "@/utils/async";
 import { CLEANUP, DEBOUNCE_MS } from "@shared/constants";
 import type { Editor } from "@tiptap/core";
 import { Node } from "@tiptap/pm/model";
+
+// autosave
+
+// lastSavedDoc and pending save as closures to avoid autosaves overwriting each other and autosaving when nothing has changed (dirtyCheck). handleSaveNote gets assigned to savePromise variable and then to pending save. If savePromise succeeded, pending save gets freed and set to null again
 
 function setupAutoSave(editor: Editor, id: string) {
   let lastSavedDoc: Node = editor.state.doc;

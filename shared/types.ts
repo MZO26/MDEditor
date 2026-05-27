@@ -1,6 +1,6 @@
-import type { AppErrorCode, WorkerErrorCode } from "@shared/constants";
+import type { AppErrorCode, WorkerErrorCode } from "@shared/errors";
+import type { CodeTheme, Theme } from "@shared/schemas/store-schema";
 import type { Content, Editor } from "@tiptap/core";
-import type { CodeTheme, Theme } from "./schemas/store-schema";
 
 type NativeWindowColors = {
   backgroundColor: string;

@@ -1,18 +1,25 @@
 import { initListeners } from "@/api/callbacks";
 import { setupEditorListeners } from "@/components/editor/editor-init";
-import { initInfoSidebar } from "@/components/sidebar/info-sidebar-init";
-import { reloadNoteList } from "@/components/sidebar/sidebar-actions";
-import { initNotesSidebar } from "@/components/sidebar/sidebar-init";
-import { topToolbarActions } from "@/components/toolbar/hoverbar-actions";
-import { initHoverbar } from "@/components/toolbar/hoverbar-init";
+import { handleEditorEmptyState } from "@/components/editor/editor-ui";
+import {
+  initInfoSidebar,
+  initNotesSidebar,
+} from "@/components/sidebar/sidebar-init";
+import {
+  handleSidebarEmptyState,
+  reloadNoteList,
+} from "@/components/sidebar/sidebar-ui";
 import {
   buildMenu,
   setupToolbarListeners,
-} from "@/components/toolbar/menu-builder";
-import { ToolbarActions } from "@/components/toolbar/toolbar-actions";
+} from "@/components/toolbar/toolbar-factory";
+import {
+  initTopToolbar,
+  TOOLBAR_ACTIONS,
+  TOP_TOOLBAR_ACTIONS,
+} from "@/components/toolbar/toolbar-features";
 import { loadSettings } from "@/settings/app-state";
 import { initAppSettings } from "@/settings/setting-init";
-import { initGlobalShortcuts } from "@/settings/shortcuts";
 import { startAppClock } from "@/utils/date";
 import { requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
@@ -21,9 +28,8 @@ import {
   initializeCoreRegistry,
   initializeTemplateRegistry,
 } from "@/utils/registry";
+import { initGlobalShortcuts } from "@/utils/shortcuts";
 import { initTippyDelegate } from "@/utils/ui";
-import { handleEditorEmptyState } from "./components/editor/editor-state";
-import { handleSidebarEmptyState } from "./components/sidebar/sidebar-state";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const settings = await loadSettings();
@@ -31,7 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializeTemplateRegistry();
   setupEditorListeners(getAppItem("editorWrapper"), getAppItem("editor"));
   initGlobalShortcuts();
-  initAppSettings(settings);
+  await initAppSettings(settings);
   initListeners();
   initNotesSidebar();
   initInfoSidebar();
@@ -42,12 +48,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     "#toolbar",
     getAppItem("editorContainer"),
   );
-  buildMenu(toolbarContainer, ToolbarActions);
-  setupToolbarListeners(toolbarContainer, ToolbarActions);
+  buildMenu(toolbarContainer, TOOLBAR_ACTIONS);
+  setupToolbarListeners(toolbarContainer, TOOLBAR_ACTIONS);
   const hoverbar = requireElement<HTMLDivElement>(".top-toolbar");
-  buildMenu(hoverbar, topToolbarActions);
-  setupToolbarListeners(hoverbar, topToolbarActions);
-  initHoverbar();
+  buildMenu(hoverbar, TOP_TOOLBAR_ACTIONS);
+  setupToolbarListeners(hoverbar, TOP_TOOLBAR_ACTIONS);
+  initTopToolbar();
   renderIcons();
   startAppClock();
   initTippyDelegate(hoverbar);

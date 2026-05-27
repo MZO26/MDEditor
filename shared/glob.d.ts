@@ -55,7 +55,6 @@ declare global {
         flush: boolean,
       ) => Promise<Result<Note>>;
       delete: (id: string) => Promise<Result<void>>;
-      getByTag: (tag: string) => Promise<Result<Note[]>>;
       onTriggerDelete: (callback: (id: string) => void) => () => void;
       onTriggerId: (callback: (id: string) => void) => () => void;
       onTriggerMerge: (callback: (id: string) => void) => () => void;

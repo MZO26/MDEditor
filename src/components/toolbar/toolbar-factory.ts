@@ -1,16 +1,51 @@
-import { createToolbarFragment } from "@/components/toolbar/creation-helpers";
 import { getAppItem } from "@/utils/registry";
-import type { ActionMap } from "@shared/types";
+import type { Action, ActionMap } from "@shared/types";
 import type { Editor } from "@tiptap/core";
+
+function createButton(key: string, item: Action) {
+  const btn = document.createElement("button");
+  btn.classList.add(`${key}-btn`);
+  btn.dataset["action"] = key;
+  const i = document.createElement("i");
+  i.dataset["lucide"] = item.icon;
+  btn.appendChild(i);
+  btn.type = "button";
+  btn.setAttribute("data-tippy-content", key);
+  btn.setAttribute("data-shortcut", item.shortcut);
+  return btn;
+}
+
+function createDivider() {
+  const element = document.createElement("div");
+  element.className = "divider";
+  return element;
+}
+
+function createToolbarFragment(
+  actions: ActionMap,
+  buttonMap: Map<string, HTMLButtonElement>,
+) {
+  const fragment = document.createDocumentFragment();
+  for (const [key, item] of Object.entries(actions)) {
+    if (item.type === "divider") {
+      fragment.appendChild(createDivider());
+    } else {
+      if (!item) continue;
+      const actionBtn = createButton(key, item);
+      fragment.appendChild(actionBtn);
+      buttonMap.set(key, actionBtn);
+    }
+  }
+  return fragment;
+}
 
 function updateActiveStates(
   buttonElements: Map<string, HTMLButtonElement>,
   actions: ActionMap,
   editor: Editor,
 ): void {
-  for (const key in actions) {
-    const item = actions[key];
-    if (item?.type === "divider") continue;
+  for (const [key, item] of Object.entries(actions)) {
+    if (item.type === "divider") continue;
     const btn = buttonElements.get(key);
     if (!btn) continue;
     const isActive = item?.isActive?.(editor) ?? false;

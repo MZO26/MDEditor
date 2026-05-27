@@ -1,8 +1,10 @@
 import { getAllSettings } from "@/api/api";
-import { handleEditorEmptyState } from "@/components/editor/editor-state";
-import { updateNoteCount } from "@/components/sidebar/sidebar-actions";
-import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-state";
-import { NoteSearch } from "@/features/search";
+import { handleEditorEmptyState } from "@/components/editor/editor-ui";
+import {
+  handleSidebarEmptyState,
+  updateNoteCount,
+} from "@/components/sidebar/sidebar-ui";
+import { NoteSearch } from "@/notes/search";
 import type { Note } from "@shared/schemas/note-schema";
 import type { AppSettings } from "@shared/schemas/store-schema";
 
