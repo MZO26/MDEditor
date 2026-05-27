@@ -4,11 +4,6 @@ import {
 } from "@shared/schemas/editor-schema";
 import { z } from "zod";
 
-const SearchSchema = z.object({
-  searchTerm: z.string().trim().min(1).max(100),
-  limit: z.number().int().min(20).max(50).default(50),
-});
-
 const IdSchema = z.uuid();
 
 const IdsSchema = z.array(IdSchema);
@@ -183,7 +178,6 @@ export {
   NotesSchema,
   NoteToDBSchema,
   PlainTextSchema,
-  SearchSchema,
   SnippetSchema,
   TagRowsSchema,
   TagSchema,

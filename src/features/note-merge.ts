@@ -5,7 +5,16 @@ import { stopAutoSave } from "@/features/note-auto-save";
 import { noteStore, stateStore } from "@/settings/app-state";
 import { findElement, setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
-import { validateUUID } from "@/utils/validate";
+
+function validateUUID(value: string) {
+  const cleanedValue = value.replace(/[\[\]]/g, "").trim();
+  const UUID_REGEX =
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  if (UUID_REGEX.test(cleanedValue)) {
+    return cleanedValue;
+  }
+  return undefined;
+}
 
 async function handleMergeNotes(idA: string, idB: string) {
   const validatedId = validateUUID(idB);

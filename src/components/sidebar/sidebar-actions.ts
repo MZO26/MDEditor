@@ -52,7 +52,7 @@ function createViews(views: ViewItem[]) {
 
 async function handleViews(view: string) {
   const editor = getAppItem("editor");
-  stateStore.setState({ activeView: view, searchQuery: "" });
+  stateStore.setState({ searchQuery: "" });
   editor.commands.setSearchTerm("");
   const result = await getViews(view);
   if (!result.success) {

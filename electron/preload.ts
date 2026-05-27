@@ -92,8 +92,6 @@ contextBridge.exposeInMainWorld("noteAPI", {
   getById: (id: string) => ipcRenderer.invoke("note:getById", id),
   getManyById: (ids: string[]) => ipcRenderer.invoke("note:getManyById", ids),
   getByTag: (tag: string) => ipcRenderer.invoke("note:getByTag", tag),
-  searchNotes: (searchTerm: string) =>
-    ipcRenderer.invoke("note:search", searchTerm),
   pin: (id: string) => ipcRenderer.invoke("note:pin", id),
   bookmark: (id: string) => ipcRenderer.invoke("note:bookmark", id),
   getViews: (view: string) => ipcRenderer.invoke("views:get", view),

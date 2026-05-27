@@ -37,6 +37,8 @@ async function initNotesSidebar() {
   registerAppEvents(document, {
     "app:toggle-sidebar": () => toggleSidebar(appContainer),
     "app:create-new-note": () => handleCreateNote(),
+    "app:open-global-search": () => searchInput.focus(),
+    "app:toggle-view-filter": () => viewSelect.showPicker(),
   });
 }
 

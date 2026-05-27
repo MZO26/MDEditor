@@ -62,10 +62,6 @@ declare global {
       onTriggerDuplicate: (callback: (id: string) => void) => () => void;
       onTriggerPin: (callback: (id: string) => void) => () => void;
       onTriggerBookmark: (callback: (id: string) => void) => () => void;
-      searchNotes: (
-        searchTerm: string,
-        limit: number,
-      ) => Promise<Result<Note[]>>;
       pin: (id: string) => Promise<Result<boolean>>;
       bookmark: (id: string) => Promise<Result<boolean>>;
       getViews: (view) => Promise<Result<Note[]>>;

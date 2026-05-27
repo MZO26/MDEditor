@@ -1,6 +1,4 @@
-import { handleCreateNote } from "@/features/note-actions";
 import { stateStore } from "@/settings/app-state";
-import { createAsyncHandler } from "@/utils/async";
 import { findElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
 import { getAppItem, getTemplateItem } from "@/utils/registry";
@@ -33,16 +31,6 @@ function createEditorEmptyState() {
     true,
   ) as HTMLDivElement;
   renderIcons(emptyState);
-  const handleClick = createAsyncHandler(async (e: Event) => {
-    const target = e.target as HTMLElement;
-    const addNoteBtn = target.closest<HTMLButtonElement>(
-      ".empty-state-add-note-btn",
-    );
-    if (addNoteBtn) {
-      await handleCreateNote();
-    }
-  });
-  emptyState.addEventListener("click", handleClick);
   return emptyState;
 }
 

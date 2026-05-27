@@ -79,16 +79,16 @@ function buildSelects() {
   selectBuilder(
     "editor-focus",
     [
-      { value: "true", label: "Enable Editor Focus" },
-      { value: "false", label: "Disable Editor Focus" },
+      { value: "true", label: "Enable" },
+      { value: "false", label: "Disable" },
     ],
     "Editor",
   );
   (selectBuilder(
     "spellcheck",
     [
-      { value: "true", label: "Enable spellcheck" },
-      { value: "false", label: "Disable spellcheck" },
+      { value: "true", label: "Enable" },
+      { value: "false", label: "Disable" },
     ],
     "App",
   ),
@@ -117,8 +117,8 @@ function buildSelects() {
   selectBuilder(
     "delete-confirmation",
     [
-      { value: "true", label: "Enable delete confirmation" },
-      { value: "false", label: "Disable delete confirmation" },
+      { value: "true", label: "Enable" },
+      { value: "false", label: "Disable" },
     ],
     "App",
   );

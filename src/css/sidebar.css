@@ -351,14 +351,21 @@
 }
 
 .view-select {
-  width: fit-content;
+  display: flex;
+  width: 150px;
+  text-align: center;
   color: var(--text-muted);
   border: none;
   background: none;
+  text-align: center;
+  text-align-last: center;
   align-items: center;
   justify-content: center;
-  text-align: center;
   padding: 6px 0;
+}
+
+.view-select::picker-icon {
+  display: none;
 }
 
 .note-count {

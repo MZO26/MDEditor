@@ -77,13 +77,6 @@ async function bookmark(id: string): Promise<Result<boolean>> {
   return invoke(window.noteAPI.bookmark(id));
 }
 
-async function searchNotes(
-  searchInput: string,
-  limit: number,
-): Promise<Result<Note[]>> {
-  return invoke(window.noteAPI.searchNotes(searchInput, limit));
-}
-
 async function getViews(view: string): Promise<Result<Note[]>> {
   return invoke(window.noteAPI.getViews(view));
 }
@@ -189,7 +182,6 @@ export {
   importNote,
   mergeNotes,
   pin,
-  searchNotes,
   setTheme,
   showNotification,
   updateNote,

@@ -55,16 +55,6 @@ function snippetGenerator(text: string) {
     .trim();
 }
 
-function ftsQueryGenerator(searchTerm: string) {
-  if (typeof searchTerm !== "string") return "";
-  const shortened = searchTerm.substring(0, 100).trim();
-  if (!shortened) return "";
-  const cleanSearch = shortened
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
-    .replace(/\s+/g, " ");
-  return `"${cleanSearch}"*`;
-}
-
 function getTodoStats(content: JSONContent) {
   let total = 0;
   let completed = 0;
@@ -137,10 +127,4 @@ function getTags(jsonDoc: JSONContent) {
   return Array.from(seen);
 }
 
-export {
-  ftsQueryGenerator,
-  getMetadata,
-  getTodoStats,
-  snippetGenerator,
-  titleGenerator,
-};
+export { getMetadata, getTodoStats, snippetGenerator, titleGenerator };

@@ -197,18 +197,18 @@ button:disabled {
 }
 
 select {
+  appearance: base-select;
   width: 200px;
-  appearance: none;
   outline: none;
-  background-color: var(--bg-sidebar);
+  text-align: center;
   color: var(--text-main);
+  background-color: var(--bg-sidebar);
   font-size: 14px;
   padding: 8px 36px 8px 12px;
   border: 1px solid var(--border-color);
   box-shadow: none;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
-  min-width: 140px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -218,10 +218,21 @@ select {
     box-shadow 0.3s ease;
 }
 
+select::picker(select) {
+  appearance: base-select;
+  overflow: hidden;
+  color: var(--text-muted);
+  background-color: var(--bg-sidebar);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 4px;
+}
+
 select:hover,
 select:focus-within {
   background-color: var(--accent-hover);
-  border-color: var(--accent-primary);
+  border-color: var(--border-color);
+  color: var(--text-main);
   box-shadow: var(--shadow);
 }
 

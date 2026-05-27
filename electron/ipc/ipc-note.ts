@@ -14,7 +14,6 @@ import {
   IdSchema,
   IdsSchema,
   MergeTransactionSchema,
-  SearchSchema,
   TagSchema,
   UpdateNotePayloadSchema,
 } from "@shared/schemas/note-schema";
@@ -104,17 +103,6 @@ function registerNoteIpc(win: BrowserWindow) {
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(TagSchema, tag);
       return db.searchByTag(validatedData);
-    });
-  });
-
-  ipcMain.handle("note:search", (e, searchTerm: unknown, limit: unknown) => {
-    return result(e, async () => {
-      if (!checkRateLimit("note:search", LIMITS.READ_HEAVY))
-        throw new AppBackendError(AppErrorCode.RateLimitError);
-      const validatedData = validation(SearchSchema, { searchTerm, limit });
-      const { searchTerm: validSearchTerm, limit: validSearchLimit } =
-        validatedData;
-      return db.searchNotes(validSearchTerm, validSearchLimit);
     });
   });
 

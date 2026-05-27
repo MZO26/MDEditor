@@ -87,13 +87,10 @@ export const WikiLink = Node.create<WikiLinkOptions>({
         props: {
           handleClickOn: (_view, _pos, node, _nodePos, event) => {
             if (node.type.name !== this.name) return false;
-
             const id = normalizeWikiId(node.attrs["id"]);
             if (!id) return false;
-
             event.preventDefault();
             event.stopPropagation();
-
             void this.options.onClick(id);
             return true;
           },

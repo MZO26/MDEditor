@@ -1,4 +1,3 @@
-import { FTS5 } from "@electron/db/fts";
 import { Transactions } from "@electron/db/transactions";
 import { Views } from "@electron/db/views";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
@@ -30,7 +29,6 @@ const require = createRequire(import.meta.url);
 class NoteDB {
   private db: BetterSqlite.Database;
   public transactions: Transactions;
-  public search: FTS5;
   public views: Views;
   private getAllNotesStmt: BetterSqlite.Statement;
   private getNoteByIdStmt: BetterSqlite.Statement;
@@ -70,7 +68,6 @@ class NoteDB {
     this.db.pragma("journal_mode = WAL");
     this.db.pragma("foreign_keys = ON");
     this.createTables();
-    this.search = new FTS5(this.db);
     this.views = new Views(this.db);
     this.transactions = new Transactions(this.db);
     // predefined statements to prevent parsing them for every transaction
@@ -375,24 +372,8 @@ class NoteDB {
     });
   }
 
-  public searchNotes(searchTerm: string, limit?: number): Note[] {
-    const result = this.search.query(searchTerm, limit) as NoteRow[];
-    const tagMap = this.getTagMap() ?? [];
-    const linkMap = this.getLinkMap() ?? [];
-    return result.map((note) => {
-      return validation(NoteFromDB, {
-        ...note,
-        tags: tagMap.get(note.id) ?? [],
-        links: linkMap.get(note.id) ?? [],
-      });
-    });
-  }
-
   optimizeDb() {
-    this.db.exec(`
-    INSERT INTO notes_fts(notes_fts) VALUES('rebuild');
-    PRAGMA optimize;
-    `);
+    this.db.exec(`PRAGMA optimize`);
   }
 
   vacuumDb() {
