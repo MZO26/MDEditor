@@ -1,35 +1,39 @@
 import { FUSE_OPTIONS } from "@shared/constants";
 import type { Note } from "@shared/schemas/note-schema";
+import type { FuseResult } from "fuse.js";
 import Fuse from "fuse.js";
+
+export interface SearchMatchResult {
+  item: Note;
+  // readonly array matches the exact type Fuse.js outputs
+  readonly matches?: readonly any[];
+}
 
 class NoteSearch {
   private fuse: Fuse<Note>;
-  private allNotes: Note[] = [];
   private lastQuery: string = "";
-  private lastResults: Note[] = [];
+  private lastResults: FuseResult<Note>[] = [];
   constructor(initialNotes: Note[] = []) {
-    this.allNotes = initialNotes;
     this.fuse = new Fuse(initialNotes, FUSE_OPTIONS);
   }
   public updateNotes(newNotes: Note[]) {
-    this.allNotes = newNotes;
     this.fuse.setCollection(newNotes);
+    this.lastQuery = "";
+    this.lastResults = [];
   }
-  public search(query: string): Note[] {
+  public search(query: string): SearchMatchResult[] {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) {
-      return this.allNotes;
+      this.lastQuery = "";
+      this.lastResults = [];
+      return [];
     }
-    // avoid new search if it is same query and return cached results from cached query
     if (trimmedQuery === this.lastQuery) {
       return this.lastResults;
     }
-    const results = this.fuse
-      .search(trimmedQuery, { limit: 20 })
-      .map((result) => result.item);
-    this.lastQuery = query;
-    this.lastResults = results;
-    return results;
+    this.lastQuery = trimmedQuery;
+    this.lastResults = this.fuse.search(trimmedQuery, { limit: 50 });
+    return this.lastResults;
   }
 }
 

@@ -160,6 +160,11 @@ type ImageSrc = {
 
 type ThemeResult = { theme: Theme; codeTheme: CodeTheme };
 
+type SnippetCacheValue = {
+  snippet: string;
+  indices: [number, number][];
+};
+
 export type {
   Action,
   ActionMap,
@@ -185,6 +190,7 @@ export type {
   ResolvedTheme,
   Result,
   SelectOption,
+  SnippetCacheValue,
   Success,
   TemplateRegistry,
   ThemeResult,

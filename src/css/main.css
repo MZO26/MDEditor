@@ -648,19 +648,19 @@ label {
 .app-container[data-width="comfortable"] #editor,
 .app-container[data-width="comfortable"] #toolbar,
 .app-container[data-width="comfortable"].top-toolbar {
-  max-width: 80ch;
+  max-width: min(80ch, 100%);
 }
 
 .app-container[data-width="normal"] #editor,
 .app-container[data-width="normal"] #toolbar,
 .app-container[data-width="normal"] .top-toolbar {
-  max-width: 95ch;
+  max-width: min(95ch, 100%);
 }
 
 .app-container[data-width="wide"] #editor,
 .app-container[data-width="wide"] #toolbar,
 .app-container[data-width="wide"] .top-toolbar {
-  max-width: 110ch;
+  max-width: min(110ch, 100%);
 }
 
 .app-container[data-width="comfortable"] .drag-region,
@@ -674,12 +674,13 @@ label {
   width: 100%;
   height: 100%;
   grid-template-rows: 30px 1fr;
-  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   transition:
     grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   will-change: grid-template-columns, grid-template-rows;
+  contain: layout;
 }
 
 .app-container.focus {

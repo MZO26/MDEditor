@@ -37,4 +37,36 @@ function createNoteItem(note: Note) {
   return item;
 }
 
-export { createNoteItem };
+// snippet highlighter for note items
+
+function updateSnippetHighlight(
+  element: HTMLDivElement,
+  snippetText: string,
+  indices?: [number, number][],
+) {
+  element.replaceChildren();
+  if (!indices || indices.length === 0) {
+    element.textContent = snippetText;
+    return;
+  }
+  let lastIndex = 0;
+  const sortedIndices = [...indices].sort((a, b) => a[0] - b[0]);
+
+  for (const [start, end] of sortedIndices) {
+    if (start < lastIndex) continue;
+    if (start > lastIndex) {
+      element.append(
+        document.createTextNode(snippetText.slice(lastIndex, start)),
+      );
+    }
+    const mark = document.createElement("mark");
+    mark.textContent = snippetText.slice(start, end + 1);
+    element.append(mark);
+    lastIndex = end + 1;
+  }
+  if (lastIndex < snippetText.length) {
+    element.append(document.createTextNode(snippetText.slice(lastIndex)));
+  }
+}
+
+export { createNoteItem, updateSnippetHighlight };

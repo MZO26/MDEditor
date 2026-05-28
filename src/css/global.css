@@ -15,6 +15,7 @@
   --font-georgia: Georgia, serif;
   --font-garamond: Garamond, serif;
   --current-font: var(--font-system);
+  --sidebar-width: 280px;
 }
 
 :root[data-theme="light"] {
@@ -278,6 +279,9 @@ select:focus-within {
   color: var(--tooltip-text);
   border: 1px solid var(--border-color);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  user-select: none;
+  pointer-events: none;
+  -webkit-user-select: none;
 }
 
 .tippy-box[data-theme~="none"] {

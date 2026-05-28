@@ -5,9 +5,26 @@
   flex-direction: column;
   user-select: none;
   white-space: nowrap;
-  width: 280px;
   opacity: 1;
   transform: scale(1);
+}
+
+.resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 5px;
+  height: 100%;
+  cursor: ew-resize;
+  background-color: transparent;
+  z-index: 10;
+  transition: background-color 0.2s ease;
+}
+
+.resizer:hover,
+.resizer.is-resizing {
+  background-color: var(--tag-color);
 }
 
 .notes-container {
@@ -17,6 +34,14 @@
   overflow-x: hidden;
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
+  contain: content;
+}
+
+body.is-dragging,
+body.is-dragging * {
+  transition: none !important;
+  pointer-events: none;
+  user-select: none;
 }
 
 .notes-container::-webkit-scrollbar {
@@ -24,6 +49,7 @@
 }
 
 .sidebar-container {
+  position: relative;
   display: grid;
   grid-column: 1;
   grid-row: 2;
@@ -31,6 +57,8 @@
   overflow: hidden;
   border-right: 1px solid var(--border-color);
   box-shadow: none;
+  container-type: inline-size;
+  container-name: sidebar;
 }
 
 .select-wrapper {
@@ -117,6 +145,13 @@
   display: flex;
   height: 50px;
   overflow: hidden;
+}
+
+@container sidebar (min-width: 300px) {
+  .sidebar-header {
+    justify-content: center;
+    gap: 16px;
+  }
 }
 
 .sidebar-header button {
@@ -286,6 +321,7 @@
 .search-input {
   flex: 1;
   background: transparent;
+  text-overflow: ellipsis;
   border: none;
   color: var(--text-main);
   font-size: 14px;

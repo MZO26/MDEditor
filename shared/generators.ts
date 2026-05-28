@@ -49,10 +49,10 @@ function snippetGenerator(text: string) {
     snippet += (snippet.length > 0 ? " " : "") + line;
     if (snippet.length >= 50) break;
   }
-  return snippet
-    .replace(/\s{2,}/g, " ")
-    .substring(0, 50)
-    .trim();
+  const cleanedSnippet = snippet.replace(/\s{2,}/g, " ").trim();
+  return cleanedSnippet.length > 47
+    ? cleanedSnippet.slice(0, 47) + "..."
+    : cleanedSnippet;
 }
 
 function getTodoStats(content: JSONContent) {

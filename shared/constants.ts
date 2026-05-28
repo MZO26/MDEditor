@@ -165,14 +165,19 @@ const DOMPURIFY_CONFIG = {
 
 const FUSE_OPTIONS: IFuseOptions<Note> = {
   useExtendedSearch: true,
+  includeMatches: true,
   ignoreLocation: true,
+  distance: 100,
   keys: [
     { name: "title", weight: 2.0 },
     { name: "plainText", weight: 1.0 },
     { name: "tags", weight: 1.5 },
   ],
-  threshold: 0.3,
+  threshold: 0.2,
 };
+
+const MAX_CHARS = 47; // snippet max chars before appending ...
+const PADDING = 15; // padding for highlight snippet to show context
 
 export {
   ALLOWED_TYPES,
@@ -186,8 +191,10 @@ export {
   FUSE_OPTIONS,
   IPC_TIMERS,
   LIMITS,
+  MAX_CHARS,
   MAX_SIZE,
   MIME_TO_EXT,
+  PADDING,
   THEME_DATA,
   THEME_MAP,
   VIEWS,

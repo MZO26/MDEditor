@@ -20,6 +20,54 @@ import { initTippyDelegate } from "@/utils/ui";
 import { VIEWS } from "@shared/constants";
 import type { View } from "@shared/types";
 
+// resizing logic
+
+const resizer = requireElement<HTMLDivElement>(".resizer");
+const sidebar = requireElement<HTMLDivElement>(".sidebar-container");
+
+let isResizing = false;
+let ticking = false;
+let startX = 0;
+let startWidth = 0;
+
+resizer.addEventListener("mousedown", () => {
+  isResizing = true;
+  document.body.classList.add("is-dragging");
+});
+
+resizer.addEventListener("mousedown", (e: MouseEvent) => {
+  isResizing = true;
+  // exact mouse position at click
+  startX = e.clientX;
+  startWidth = sidebar.getBoundingClientRect().width;
+  document.body.classList.add("is-dragging");
+});
+
+document.addEventListener("mousemove", (e: MouseEvent) => {
+  if (!isResizing || ticking) return;
+  ticking = true;
+  requestAnimationFrame(() => {
+    // how far has mouse moved since start
+    const deltaX = e.clientX - startX;
+    const newWidth = startWidth + deltaX;
+    const width = Math.max(200, Math.min(newWidth, 600));
+    document.documentElement.style.setProperty("--sidebar-width", `${width}px`);
+    ticking = false;
+  });
+});
+
+document.addEventListener("mouseup", () => {
+  isResizing = false;
+  document.body.classList.remove("is-dragging");
+});
+
+document.addEventListener("mouseup", () => {
+  isResizing = false;
+  document.body.classList.remove("is-dragging");
+});
+
+//------------------------------------------------------------
+
 // sidebar
 
 function initNotesSidebar() {
