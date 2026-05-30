@@ -11,7 +11,6 @@ import {
   UpdateNotePayloadSchema,
   UpdateTransactionSchema,
   type CreateNotePayload,
-  type GetByIdRow,
   type Link,
   type LinkRow,
   type MergeTransaction,
@@ -78,7 +77,7 @@ class NoteDB {
       "SELECT * FROM notes ORDER BY created_at DESC",
     );
     this.getNoteByIdStmt = this.db.prepare(
-      "SELECT n.*, (SELECT json_group_array(tag_name) FROM note_tags WHERE note_id = n.id) AS tags_json, (SELECT json_group_array(target_id) FROM note_links WHERE source_id = n.id) AS links_json FROM notes n WHERE n.id = @id;",
+      "SELECT * FROM notes WHERE id = @id",
     );
     this.getManyNotesByIdStmt = this.db.prepare(`
       SELECT * FROM notes WHERE id IN (SELECT value FROM json_each(@idsList))
@@ -292,17 +291,14 @@ class NoteDB {
   }
 
   public getById(id: string): Note {
-    const rows = this.getNoteByIdStmt.get({ id }) as GetByIdRow;
-    if (!rows) {
+    const dbRow = this.getNoteByIdStmt.get({ id }) as NoteRow;
+    if (!dbRow) {
       throw new AppBackendError(AppErrorCode.DBError);
     }
-    const parsedTags = JSON.parse(rows.tags_json || "[]");
-    const parsedLinks = JSON.parse(rows.links_json || "[]");
-    const { tags_json, links_json, ...dbRow } = rows;
     return validation(NoteFromDB, {
       ...dbRow,
-      tags: parsedTags,
-      links: parsedLinks,
+      tags: this.getTagsById(id) ?? [],
+      links: this.getLinksById(id) ?? [],
     });
   }
 
@@ -346,8 +342,7 @@ class NoteDB {
   }
 
   public getLinksById(id: string): Link[] {
-    const result = this.getLinksByIdStmt.all({ id }) as Link[];
-    return result;
+    return this.getLinksByIdStmt.all({ id }) as Link[];
   }
 
   public searchByTag(tagName: string): Note[] {

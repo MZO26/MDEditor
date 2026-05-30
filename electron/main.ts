@@ -95,7 +95,15 @@ function createWindow() {
     win.loadFile(path.join(__dirname, "../../dist/index.html"));
   }
 
-  win?.on("close", (e) => {
+  win.on("focus", () => {
+    win?.webContents.send("window:focus");
+  });
+
+  win.on("restore", () => {
+    win?.webContents.send("window:focus");
+  });
+
+  win.on("close", (e) => {
     if (!isReadyToClose) {
       e.preventDefault();
       saveWindowBounds();
@@ -108,7 +116,7 @@ function createWindow() {
   });
 }
 
-// app start and tray
+// app start
 
 app.whenReady().then(async () => {
   Menu.setApplicationMenu(null);

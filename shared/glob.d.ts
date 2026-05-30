@@ -1,6 +1,9 @@
 import type {
+  DeleteSyncRequest,
   ExportRequest,
   ImportRequest,
+  SyncRequest,
+  WriteSyncRequest,
 } from "@shared/schemas/export-schema";
 import type { Note } from "@shared/schemas/note-schema";
 import type { AppSettings, Theme } from "@shared/schemas/store-schema";
@@ -17,6 +20,10 @@ declare module "*.css";
 declare global {
   interface Window {
     fileAPI: {
+      openSyncFolder: () => Promise<Result<string>>;
+      syncWrite: (payload: WriteSyncRequest) => Promise<Result<ExportRequest>>;
+      syncDelete: (payload: DeleteSyncRequest) => Promise<Result<void>>;
+      sync: (payload: SyncRequest) => Promise<Result<string | null>>;
       noteExport: (payload: ExportRequest) => Promise<Result<ExportRequest>>;
       onTriggerExport: (
         callback: (id: string, extension: string) => void,
@@ -41,6 +48,7 @@ declare global {
       ) => void;
       onRequestFlush: (callback: () => void) => () => void;
       confirmFlush: () => void;
+      onWindowFocus: (callback: () => void) => () => void;
       zoom: (action: string) => Promise<Result<number>>;
     };
     noteAPI: {

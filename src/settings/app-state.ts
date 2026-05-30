@@ -13,11 +13,12 @@ const DEFAULT_STORE: AppSettings = {
   "font-family": "system",
   "font-size": "18",
   "line-height": "1.5",
-  "editor-focus": false,
   "code-theme": "balanced",
   highlight: "info",
   spellcheck: false,
   "delete-confirmation": true,
+  "sync-mode": false,
+  "sync-path": null,
   "note-item-display": "tags",
   "window-bounds": { width: 1100, height: 600 },
 };
@@ -25,17 +26,20 @@ const DEFAULT_STORE: AppSettings = {
 interface AppState {
   activeId: string | null;
   searchQuery: string;
+  lastSyncedAt: number;
 }
 
 const STATE_STORE: AppState = {
   activeId: null,
   searchQuery: "",
+  lastSyncedAt: 0,
 };
 
 let previousId: string | null = null;
 let previousSearchQuery: string = "";
 let previousNotesRef: Note[] = [];
 let previousNotesLength: number | null = null;
+let previousSync: number = 0;
 
 const stateStore = createStore<AppState>(STATE_STORE);
 
@@ -97,6 +101,9 @@ stateStore.subscribe((state) => {
   if (state.searchQuery !== previousSearchQuery) {
     previousSearchQuery = state.searchQuery;
     handleSidebarEmptyState();
+  }
+  if (state.lastSyncedAt !== previousSync) {
+    previousSync = state.lastSyncedAt;
   }
 });
 

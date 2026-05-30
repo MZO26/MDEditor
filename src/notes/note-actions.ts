@@ -19,6 +19,12 @@ import {
 } from "@/components/sidebar/sidebar-ui";
 import { setImportedContent } from "@/notes/import-actions";
 import { setupAutoSave, stopAutoSave } from "@/notes/note-auto-save";
+import {
+  handleSync,
+  handleSyncDelete,
+  handleSyncWrite,
+  isSyncEnabled,
+} from "@/notes/note-sync";
 import { noteStore, stateStore } from "@/settings/app-state";
 import { findElement, setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
@@ -59,6 +65,7 @@ async function handleCreateNote() {
   stateStore.setState({ activeId: result.data.id });
   addOneNoteToList(result.data);
   handleViewNote(result.data);
+  if (isSyncEnabled()) handleSyncWrite(result.data.id);
 }
 
 //------------------------------------------------------------
@@ -89,7 +96,7 @@ async function handleImportNote() {
   addManyNotesToList(result.data);
 }
 
-//------------------------------------------------------------
+//----------------------------------------------------------
 
 // delete
 
@@ -97,6 +104,8 @@ async function handleDeleteNote(id: string, noteElement: HTMLDivElement) {
   const editor = getAppItem("editor");
   debouncedUpdateStats.cancel();
   stopAutoSave(editor, "cancel");
+  const { notes } = noteStore.getState();
+  const noteToDelete = notes.find((n) => n.id === id);
   const result = await deleteNote(id);
   if (!result.success) {
     console.error("[handleDeleteNote]: Failed to delete:", result.error);
@@ -109,8 +118,15 @@ async function handleDeleteNote(id: string, noteElement: HTMLDivElement) {
   const { activeId } = stateStore.getState();
   if (activeId === id) {
     stateStore.setState({ activeId: null });
-    const editor = getAppItem("editor");
     editor?.commands.clearContent();
+  }
+  if (isSyncEnabled() && noteToDelete) {
+    const deleteRequestPayload = {
+      id: noteToDelete?.id,
+      extension: "md" as const,
+      fileName: noteToDelete.title,
+    };
+    handleSyncDelete(deleteRequestPayload);
   }
 }
 
@@ -121,6 +137,7 @@ async function handleDeleteNote(id: string, noteElement: HTMLDivElement) {
 async function handleSaveNote(id: string, flush: boolean = false) {
   const editorContent = getEditorContent();
   const metaData = getMetadata(editorContent.content, editorContent.plainText);
+  const oldNote = noteStore.getState().notes.find((n) => n.id === id);
   const payload: UpdateNotePayload = {
     id,
     ...editorContent,
@@ -136,6 +153,7 @@ async function handleSaveNote(id: string, flush: boolean = false) {
   }));
   debouncedUpdateStats(result.data);
   updateNoteInList(result.data);
+  if (isSyncEnabled()) handleSyncWrite(result.data.id, oldNote?.title);
 }
 
 //------------------------------------------------------------
@@ -148,13 +166,19 @@ async function handleSelectNote(id: string) {
     console.error("[handleSelectNote]: Failed to fetch note:", result.error);
     return;
   }
+  const syncResult = isSyncEnabled()
+    ? await handleSync(id, result.data.updated_at)
+    : null;
+  const syncedContent = syncResult
+    ? { content: syncResult, extension: "markdown" as const }
+    : undefined;
   const noteElement = findElement<HTMLDivElement>(
     `.note-item[data-id="${id}"]`,
     getAppItem("sidebar"),
   );
   if (!noteElement) return;
   stateStore.setState({ activeId: id });
-  handleViewNote(result.data);
+  handleViewNote(result.data, syncedContent);
   setActiveItem(noteElement, getAppItem("sidebar"));
 }
 
@@ -162,13 +186,21 @@ async function handleSelectNote(id: string) {
 
 // view function for editor content. gets called in combination with handleSelect
 
-function handleViewNote(note: Note) {
+function handleViewNote(
+  note: Note,
+  syncedContent?: { content: string; extension: "markdown" },
+) {
   const editor = getAppItem("editor");
   debouncedUpdateStats.cancel();
   stopAutoSave(editor, "flush");
-  editor.commands.setContent(note.content, {
+  editor.commands.setContent(syncedContent?.content ?? note.content, {
     emitUpdate: false,
+    contentType: syncedContent ? syncedContent.extension : "json",
   });
+  if (syncedContent) {
+    const converted = editor.getJSON();
+    updateNote({ ...note, content: converted, links: [] }, false);
+  }
   resetEditorHistory(editor);
   const newCleanup = setupAutoSave(editor, note.id);
   debouncedUpdateStats(note);
@@ -185,5 +217,6 @@ export {
   handleImportNote,
   handleSaveNote,
   handleSelectNote,
+  handleSync,
   handleViewNote,
 };

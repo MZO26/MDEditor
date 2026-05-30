@@ -67,7 +67,7 @@ function buildSelects() {
     ],
     "Editor",
   );
-  selectBuilder(
+  (selectBuilder(
     "line-height",
     [
       { value: "1.4", label: "Small" },
@@ -75,23 +75,15 @@ function buildSelects() {
       { value: "1.6", label: "Large" },
     ],
     "Editor",
-  );
-  selectBuilder(
-    "editor-focus",
-    [
-      { value: "true", label: "Enable" },
-      { value: "false", label: "Disable" },
-    ],
-    "Editor",
-  );
-  (selectBuilder(
-    "spellcheck",
-    [
-      { value: "true", label: "Enable" },
-      { value: "false", label: "Disable" },
-    ],
-    "App",
   ),
+    selectBuilder(
+      "spellcheck",
+      [
+        { value: "true", label: "Enable" },
+        { value: "false", label: "Disable" },
+      ],
+      "Editor",
+    ),
     selectBuilder(
       "file-backup",
       [
@@ -113,9 +105,17 @@ function buildSelects() {
       ],
       "App",
       "Database Settings",
+    ),
+    selectBuilder(
+      "delete-confirmation",
+      [
+        { value: "true", label: "Enable" },
+        { value: "false", label: "Disable" },
+      ],
+      "App",
     ));
   selectBuilder(
-    "delete-confirmation",
+    "file-sync",
     [
       { value: "true", label: "Enable" },
       { value: "false", label: "Disable" },

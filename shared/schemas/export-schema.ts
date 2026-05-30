@@ -1,4 +1,5 @@
 import z from "zod";
+import { DateSchema } from "./note-schema";
 
 const normalizeFileName = (val: string): string => {
   if (!val) return "untitled";
@@ -67,6 +68,16 @@ const ExportRequestSchema = z.discriminatedUnion("extension", [
   PdfSchema,
 ]);
 
+const WriteSyncRequestSchema = MdSchema.extend({
+  previousTitle: FileNameSchema,
+});
+
+const DeleteSyncRequestSchema = MdSchema.omit({
+  content: true,
+});
+
+const SyncRequestSchema = MdSchema.extend({ updated_at: DateSchema });
+
 const ExportItemSchema = z.discriminatedUnion("extension", [
   HtmlSchema,
   MdSchema,
@@ -84,16 +95,25 @@ const ImportRequestSchema = z.discriminatedUnion("extension", [
   JsonSchema.omit({ id: true }),
 ]);
 
+type SyncRequest = z.infer<typeof SyncRequestSchema>;
+type WriteSyncRequest = z.infer<typeof WriteSyncRequestSchema>;
+type DeleteSyncRequest = z.infer<typeof DeleteSyncRequestSchema>;
 type ExportManyRequest = z.infer<typeof ExportManyRequestSchema>;
 type ImportRequest = z.infer<typeof ImportRequestSchema>;
 type ExportRequest = z.infer<typeof ExportRequestSchema>;
 
 export {
+  DeleteSyncRequestSchema,
   ExportManyRequestSchema,
   ExportRequestSchema,
   FileNameSchema,
   ImportRequestSchema,
+  SyncRequestSchema,
+  WriteSyncRequestSchema,
+  type DeleteSyncRequest,
   type ExportManyRequest,
   type ExportRequest,
   type ImportRequest,
+  type SyncRequest,
+  type WriteSyncRequest,
 };

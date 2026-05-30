@@ -7,22 +7,86 @@ import { batchExport, singleExport } from "@electron/fs/fs-export";
 import { batchPDFExport, singlePDFExport } from "@electron/fs/fs-export-pdf";
 import { handleImageWrite } from "@electron/fs/fs-image";
 import { batchImport } from "@electron/fs/fs-import";
+import {
+  deleteSyncedNote,
+  syncNote,
+  writeSyncedNote,
+} from "@electron/fs/fs-sync";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import {
   checkRateLimit,
   result,
   validation,
 } from "@electron/ipc/ipc-validation";
+import { store } from "@electron/store";
 import { LIMITS } from "@shared/constants";
 import { AppErrorCode } from "@shared/errors";
 import {
+  DeleteSyncRequestSchema,
   ExportManyRequestSchema,
   ExportRequestSchema,
+  SyncRequestSchema,
+  WriteSyncRequestSchema,
 } from "@shared/schemas/export-schema";
 import { ImagePayloadSchema } from "@shared/schemas/image-schema";
-import { ipcMain, type BrowserWindow } from "electron";
+import { dialog, ipcMain, type BrowserWindow } from "electron";
 
 function registerFileIpc(win: BrowserWindow) {
+  ipcMain.handle("sync-folder:open", (e) => {
+    return result(e, async () => {
+      if (!checkRateLimit("sync-folder:open", LIMITS.READ_LIGHT))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      const result = await dialog.showOpenDialog(win, {
+        title: "Select Sync Directory",
+        buttonLabel: "Choose Folder",
+        properties: ["openDirectory", "createDirectory"],
+      });
+      if (result.canceled || result.filePaths.length === 0) {
+        throw new AppBackendError(AppErrorCode.CancelledOperation);
+      }
+      return result.filePaths[0];
+    });
+  });
+
+  ipcMain.handle("note:sync-write", (e, payload: unknown) => {
+    return result(e, async () => {
+      if (!checkRateLimit("note:sync-write", LIMITS.WRITE_STANDARD))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      if (store.get("sync-mode") !== true) return false;
+      const targetDir = store.get("sync-path");
+      if (!targetDir) return false;
+      const validatedData = validation(WriteSyncRequestSchema, payload);
+      await writeSyncedNote(targetDir, validatedData);
+      return true;
+    });
+  });
+
+  ipcMain.handle("note:sync", (e, payload: unknown) => {
+    return result(e, async () => {
+      if (!checkRateLimit("note:sync", LIMITS.READ_LIGHT))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      if (store.get("sync-mode") !== true) return null;
+      const validatedData = validation(SyncRequestSchema, payload);
+      if (!validatedData.updated_at) return null;
+      const targetDir = store.get("sync-path");
+      if (!targetDir) return null;
+      return await syncNote(targetDir, validatedData);
+    });
+  });
+
+  ipcMain.handle("note:sync-delete", (e, payload: unknown) => {
+    return result(e, async () => {
+      if (!checkRateLimit("note:sync-delete", LIMITS.WRITE_STANDARD))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      if (store.get("sync-mode") !== true) return false;
+      const targetDir = store.get("sync-path");
+      if (!targetDir) return false;
+      const validatedData = validation(DeleteSyncRequestSchema, payload);
+      await deleteSyncedNote(targetDir, validatedData);
+      return true;
+    });
+  });
+
   ipcMain.handle("note:import", (e) => {
     return result(e, async () => {
       if (!checkRateLimit("note:import", LIMITS.WRITE_HEAVY))

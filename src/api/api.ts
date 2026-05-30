@@ -3,8 +3,11 @@ import { debounce } from "@/utils/async";
 import { DEBOUNCE_MS } from "@shared/constants";
 import { AppErrorCode } from "@shared/errors";
 import type {
+  DeleteSyncRequest,
   ExportRequest,
   ImportRequest,
+  SyncRequest,
+  WriteSyncRequest,
 } from "@shared/schemas/export-schema";
 import type { ImagePayload } from "@shared/schemas/image-schema";
 import type {
@@ -31,6 +34,8 @@ async function invoke<T>(ipcPromise: Promise<Result<T>>): Promise<Result<T>> {
     return { success: false, error: AppErrorCode.UnknownError };
   }
 }
+
+//----------------------------------------------------------
 
 async function createNote(payload: CreateNotePayload): Promise<Result<Note>> {
   return invoke(window.noteAPI.create(payload));
@@ -101,28 +106,19 @@ async function setSettings(
   return invoke(window.storeAPI.setSettings(settings));
 }
 
-const debouncedSetSettings = debounce(
-  async (settings: Partial<AppSettings>) => {
-    try {
-      const result = await setSettings(settings);
-      if (!result.success) {
-        console.error(
-          "[setSettings]: Failed to update settings:",
-          result.error,
-        );
-        return;
-      }
-    } catch (err) {
-      console.error("[setSettings]: Unknown error", err);
-    }
-  },
-  DEBOUNCE_MS.fast,
-);
+async function syncWrite(
+  payload: WriteSyncRequest,
+): Promise<Result<WriteSyncRequest>> {
+  return invoke(window.fileAPI.syncWrite(payload));
+}
 
-const updateSettings = (settings: Partial<AppSettings>) => {
-  settingsStore.setState(settings);
-  debouncedSetSettings(settings);
-};
+async function syncDelete(payload: DeleteSyncRequest): Promise<Result<void>> {
+  return invoke(window.fileAPI.syncDelete(payload));
+}
+
+async function sync(payload: SyncRequest): Promise<Result<string | boolean>> {
+  return invoke(window.fileAPI.sync(payload));
+}
 
 async function exportNote(
   payload: ExportRequest,
@@ -147,6 +143,10 @@ async function setTheme(
   return invoke(window.electronAPI.setTheme(theme, focus));
 }
 
+async function openSyncFolder(): Promise<Result<string>> {
+  return invoke(window.fileAPI.openSyncFolder());
+}
+
 async function showNotification(
   title: string,
   body: string,
@@ -161,6 +161,33 @@ async function imageWrite(payload: ImagePayload): Promise<Result<ImageSrc>> {
 async function handleZoom(action: ZoomAction): Promise<Result<ZoomAction>> {
   return invoke(window.electronAPI.zoom(action));
 }
+
+//----------------------------------------------------------
+
+// debounced calls
+
+const debouncedSetSettings = debounce(
+  async (settings: Partial<AppSettings>) => {
+    try {
+      const result = await setSettings(settings);
+      if (!result.success) {
+        console.error(
+          "[setSettings]: Failed to update settings:",
+          result.error,
+        );
+        return;
+      }
+    } catch (err) {
+      console.error("[setSettings]: Unknown error", err);
+    }
+  },
+  DEBOUNCE_MS.fast,
+);
+
+const updateSettings = (settings: Partial<AppSettings>) => {
+  settingsStore.setState(settings);
+  debouncedSetSettings(settings);
+};
 
 export {
   bookmark,
@@ -180,9 +207,13 @@ export {
   imageWrite,
   importNote,
   mergeNotes,
+  openSyncFolder,
   pin,
   setTheme,
   showNotification,
+  sync,
+  syncDelete,
+  syncWrite,
   updateNote,
   updateSettings,
 };

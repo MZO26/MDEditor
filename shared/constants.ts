@@ -179,6 +179,8 @@ const FUSE_OPTIONS: IFuseOptions<Note> = {
 const MAX_CHARS = 47; // snippet max chars before appending ...
 const PADDING = 15; // padding for highlight snippet to show context
 
+const SYNC_DRIFT_BUFFER_MS = 250; // for comparing mtimeMs vs updated_at as tolerance window. Helps with timestamp precision issues between different OS
+
 export {
   ALLOWED_TYPES,
   APP_START_TIME,
@@ -195,6 +197,7 @@ export {
   MAX_SIZE,
   MIME_TO_EXT,
   PADDING,
+  SYNC_DRIFT_BUFFER_MS,
   THEME_DATA,
   THEME_MAP,
   VIEWS,

@@ -1,3 +1,4 @@
+import NoteDB from "@electron/db/database";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import { validation } from "@electron/ipc/ipc-validation";
 import { AppErrorCode } from "@shared/errors";
@@ -10,12 +11,6 @@ import {
 } from "@shared/schemas/note-schema";
 import type BetterSqlite from "better-sqlite3";
 import type { Database as DatabaseType } from "better-sqlite3";
-
-type CreateManyWorkerResult = {
-  row: NoteRow;
-  safeTags: string[];
-  safeLinks: string[];
-};
 
 class Transactions {
   private db: DatabaseType;
@@ -50,9 +45,11 @@ class Transactions {
     );
   }
 
-  private runCreateManyLogic(
-    paramsArr: CreateTransaction[],
-  ): CreateManyWorkerResult[] {
+  private runCreateManyLogic(paramsArr: CreateTransaction[]): {
+    row: NoteRow;
+    safeTags: string[];
+    safeLinks: string[];
+  }[] {
     const results = new Array(paramsArr.length);
     let i = 0;
     for (const params of paramsArr) {
@@ -63,8 +60,11 @@ class Transactions {
       if (!result) {
         throw new AppBackendError(AppErrorCode.DBError);
       }
-      for (const link of safeLinks) {
-        this.insertLinksStmt.run({ source_id: result.id, target_id: link });
+      for (const targetId of safeLinks) {
+        this.insertLinksStmt.run({
+          source_id: result.id,
+          target_id: targetId,
+        });
       }
       for (const tag of safeTags) {
         this.insertTagsStmt.run({ note_id: result.id, tag_name: tag });
@@ -85,7 +85,7 @@ class Transactions {
       validation(NoteFromDB, {
         ...result.row,
         tags: result.safeTags,
-        links: result.safeLinks,
+        links: result.safeLinks.map((id) => ({ id, dir: "out" as const })),
       }),
     );
   }
@@ -116,10 +116,11 @@ class Transactions {
       this.runCreateLogic.bind(this),
     );
     const result = transactionRunner(noteParams, safeTags, safeLinks);
+    const allLinks = NoteDB.getLinksById(result.id) ?? [];
     return validation(NoteFromDB, {
       ...result,
       tags: safeTags,
-      links: safeLinks,
+      links: allLinks,
     });
   }
 
@@ -159,10 +160,11 @@ class Transactions {
     const safeLinks = links ?? [];
     const transactionRunner = this.db.transaction(this.updateLogic.bind(this));
     const result = transactionRunner(noteParams, safeTags, safeLinks);
+    const allLinks = NoteDB.getLinksById(result.id) ?? [];
     return validation(NoteFromDB, {
       ...result,
       tags: safeTags,
-      links: safeLinks,
+      links: allLinks,
     });
   }
 
@@ -179,11 +181,12 @@ class Transactions {
 
   public safeMerge(idToDelete: string, updateParams: UpdateTransaction): Note {
     const transactionRunner = this.db.transaction(this.mergeLogic.bind(this));
-    const rowResult = transactionRunner(idToDelete, updateParams);
+    const result = transactionRunner(idToDelete, updateParams);
+    const allLinks = NoteDB.getLinksById(result.id) ?? [];
     return validation(NoteFromDB, {
-      ...rowResult,
+      ...result,
       tags: updateParams.tags ?? [],
-      links: updateParams.links ?? [],
+      links: allLinks,
     });
   }
 }

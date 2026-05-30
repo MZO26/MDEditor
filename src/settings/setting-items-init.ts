@@ -1,6 +1,7 @@
 import {
   dbMaintenance,
   exportManyNotes,
+  openSyncFolder,
   showNotification,
   updateSettings,
 } from "@/api/api";
@@ -13,13 +14,13 @@ import { getAppItem } from "@/utils/registry";
 import type {
   AppSettings,
   DeleteConfirmation,
-  EditorFocus,
   FontFamily,
   FontSize,
   HighlightTheme,
   LineHeight,
   NoteItemDisplay,
   Spellcheck,
+  SyncPath,
   Theme,
 } from "@shared/schemas/store-schema";
 import type { DbOptimization, ExportFormat } from "@shared/types";
@@ -46,6 +47,8 @@ function initAppearanceSettings(
     return;
   }
 
+  // code theme
+
   document.documentElement.setAttribute(
     "data-code-theme",
     settings["code-theme"],
@@ -56,6 +59,8 @@ function initAppearanceSettings(
     const codePref = setCodeTheme(baseTheme);
     updateSettings({ "code-theme": codePref });
   });
+
+  // theme
 
   themeSelect.value = settings["theme"];
   themeSelect.addEventListener(
@@ -74,6 +79,8 @@ function initAppearanceSettings(
     }),
   );
 
+  // highlight
+
   document.documentElement.setAttribute(
     "data-highlight",
     settings["highlight"],
@@ -86,6 +93,8 @@ function initAppearanceSettings(
       highlight: target.value as HighlightTheme,
     });
   });
+
+  // note item display
 
   sidebar.setAttribute("data-noteItem", settings["note-item-display"]);
   noteItemSelect.value = settings["note-item-display"];
@@ -102,6 +111,8 @@ function initAppearanceSettings(
   );
 }
 
+//--------------------------------------------------------------
+
 function initEditorSettings(settings: AppSettings, container: HTMLDivElement) {
   const editorWrapper = getAppItem("editorWrapper");
   const fontFamilySelect = findElement<HTMLSelectElement>(
@@ -116,12 +127,19 @@ function initEditorSettings(settings: AppSettings, container: HTMLDivElement) {
     "#line-height",
     container,
   );
-  const focusSelect = findElement<HTMLSelectElement>(
-    "#editor-focus",
+  const spellcheckSelect = findElement<HTMLSelectElement>(
+    "#spellcheck",
     container,
   );
-  if (!fontFamilySelect || !fontSizeSelect || !lineHeightSelect || !focusSelect)
+  if (
+    !fontFamilySelect ||
+    !fontSizeSelect ||
+    !lineHeightSelect ||
+    !spellcheckSelect
+  )
     return;
+
+  // editor font family
 
   const applyFont = (val: string) => {
     const current = val || "system";
@@ -139,6 +157,8 @@ function initEditorSettings(settings: AppSettings, container: HTMLDivElement) {
     applyFont(newFont);
     updateSettings({ "font-family": newFont as FontFamily });
   });
+
+  // editor font size
 
   const applySize = (val: string | number) => {
     let current = Number(val) || 18;
@@ -159,6 +179,8 @@ function initEditorSettings(settings: AppSettings, container: HTMLDivElement) {
     updateSettings({ "font-size": String(newSize) as FontSize });
   });
 
+  // editor line height
+
   const applyLineHeight = (val: string | number) => {
     let current = Number(val) || 1.5;
     current = Math.max(1.4, Math.min(current, 1.6));
@@ -178,25 +200,23 @@ function initEditorSettings(settings: AppSettings, container: HTMLDivElement) {
     updateSettings({ "line-height": String(newHeight) as LineHeight });
   });
 
-  const enabled = settings["editor-focus"] === true;
+  // spellcheck
+
+  const enabled = settings["spellcheck"] === true;
   const editor = getAppItem("editor");
-  if (enabled) {
-    editor.view.dom.classList.add("focus-mode-active");
-  }
-  focusSelect.value = enabled ? "true" : "false";
-  focusSelect.addEventListener("change", (e) => {
-    const target = e.target as HTMLSelectElement;
+  editor.view.dom.spellcheck = enabled;
+  spellcheckSelect.value = enabled ? "true" : "false";
+  spellcheckSelect.addEventListener("change", (e) => {
     const editor = getAppItem("editor");
-    const editorDom = editor.view.dom;
+    const target = e.target as HTMLSelectElement;
     const enabled = target.value === "true";
-    if (enabled) {
-      editorDom.classList.add("focus-mode-active");
-    } else {
-      editorDom.classList.remove("focus-mode-active");
-    }
-    updateSettings({ "editor-focus": enabled as EditorFocus });
+    editor.view.dom.spellcheck = enabled;
+    editor.commands.focus();
+    updateSettings({ spellcheck: enabled as Spellcheck });
   });
 }
+
+//--------------------------------------------------------------
 
 function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
   const batchExportSelect = findElement<HTMLSelectElement>(
@@ -207,21 +227,23 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     "#db-optimization",
     container,
   );
-  const spellcheckSelect = findElement<HTMLSelectElement>(
-    "#spellcheck",
-    container,
-  );
   const deleteConfirmSelect = findElement<HTMLSelectElement>(
     "#delete-confirmation",
+    container,
+  );
+  const fileSyncSelect = findElement<HTMLSelectElement>(
+    "#file-sync",
     container,
   );
   if (
     !batchExportSelect ||
     !dbOptimizeSelect ||
-    !spellcheckSelect ||
-    !deleteConfirmSelect
+    !deleteConfirmSelect ||
+    !fileSyncSelect
   )
     return;
+
+  // file backup
 
   batchExportSelect.value = "";
   batchExportSelect.addEventListener(
@@ -253,6 +275,8 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     }),
   );
 
+  // db maintenance
+
   dbOptimizeSelect.value = "";
   dbOptimizeSelect.addEventListener(
     "change",
@@ -275,19 +299,7 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
       await showNotification(`Optimized db in ${result.data} ms.`, "");
     }),
   );
-
-  const enabled = settings["spellcheck"] === true;
-  const editor = getAppItem("editor");
-  editor.view.dom.spellcheck = enabled;
-  spellcheckSelect.value = enabled ? "true" : "false";
-  spellcheckSelect.addEventListener("change", (e) => {
-    const editor = getAppItem("editor");
-    const target = e.target as HTMLSelectElement;
-    const enabled = target.value === "true";
-    editor.view.dom.spellcheck = enabled;
-    editor.commands.focus();
-    updateSettings({ spellcheck: enabled as Spellcheck });
-  });
+  // delete confirmation
 
   deleteConfirmSelect.value = settings["delete-confirmation"]
     ? "true"
@@ -297,7 +309,34 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     const enabled = target.value === "true";
     updateSettings({ "delete-confirmation": enabled as DeleteConfirmation });
   });
+
+  // sync fs mode
+
+  fileSyncSelect.value = settings["sync-mode"] ? "true" : "false";
+  fileSyncSelect.addEventListener(
+    "change",
+    createAsyncHandler(async (e) => {
+      const target = e.target as HTMLSelectElement;
+      const enabled = target.value === "true";
+      console.log(enabled);
+      if (enabled) {
+        const result = await openSyncFolder();
+        if (!result.success) {
+          target.value = "false";
+          return;
+        }
+        updateSettings({
+          "sync-mode": true,
+          "sync-path": result.data as SyncPath,
+        });
+      } else updateSettings({ "sync-mode": false });
+    }),
+  );
 }
+
+//--------------------------------------------------------------
+
+// init function
 
 function setSelectListeners(settings: AppSettings, container: HTMLDivElement) {
   initAppearanceSettings(settings, container);

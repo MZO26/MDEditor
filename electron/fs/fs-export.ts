@@ -1,8 +1,7 @@
 import { sanitizeExportString } from "@electron/fs/fs-assets";
 import { writeAtomic } from "@electron/fs/fs-atomic-write";
-import { validation } from "@electron/ipc/ipc-validation";
+import { getPath } from "@electron/fs/fs-sync";
 import { processWithLimit } from "@shared/limiter";
-import { FileNameSchema } from "@shared/schemas/export-schema";
 import type { ExportedContent, ExportResult } from "@shared/types";
 import { app } from "electron";
 import fs from "fs/promises";
@@ -33,14 +32,7 @@ async function batchExport(
     50,
     async (item: ExportedContent) => {
       try {
-        const fileName = `${validation(FileNameSchema, item.fileName)}_${item.id.slice(0, 6)}.${item.extension}`;
-        const absoluteFilePath = path.resolve(absoluteTargetFolder, fileName);
-        const relative = path.relative(absoluteTargetFolder, absoluteFilePath);
-        const isOutside =
-          relative.startsWith("..") || path.isAbsolute(relative);
-        if (isOutside) {
-          return null;
-        }
+        const { absoluteFilePath } = getPath(absoluteTargetFolder, item);
         const portableContent = sanitizeExportString(
           item.content,
           absoluteTargetFolder,

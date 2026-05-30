@@ -1,11 +1,10 @@
 import { exportPdfNote } from "@electron/fs/fs-pdf";
+import { getPath } from "@electron/fs/fs-sync";
 import { loadPDFAssets } from "@electron/handler/pdf-handler";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
-import { validation } from "@electron/ipc/ipc-validation";
 import { createHiddenPdfWindow } from "@electron/win";
 import { AppErrorCode } from "@shared/errors";
 import { processWithLimit } from "@shared/limiter";
-import { FileNameSchema } from "@shared/schemas/export-schema";
 import type { ExportedContent, ExportResult } from "@shared/types";
 import fs from "fs/promises";
 import path from "path";
@@ -33,13 +32,7 @@ async function batchPDFExport(
   let hiddenWin = createHiddenPdfWindow();
   try {
     const exported = await processWithLimit(payload, 1, async (item) => {
-      const fileName = `${validation(FileNameSchema, item.fileName)}_${item.id.slice(0, 6)}.pdf`;
-      const absoluteFilePath = path.resolve(absoluteTargetFolder, fileName);
-      const relative = path.relative(absoluteTargetFolder, absoluteFilePath);
-      const isOutside = relative.startsWith("..") || path.isAbsolute(relative);
-      if (isOutside) {
-        return null;
-      }
+      const { absoluteFilePath } = getPath(absoluteTargetFolder, item);
       const filePath = await exportPdfNote({
         win: hiddenWin,
         filePath: absoluteFilePath,

@@ -1,6 +1,9 @@
 import type {
+  DeleteSyncRequest,
   ExportManyRequest,
   ExportRequest,
+  SyncRequest,
+  WriteSyncRequest,
 } from "@shared/schemas/export-schema";
 import type { ImagePayload } from "@shared/schemas/image-schema";
 import type {
@@ -25,6 +28,12 @@ function subscribe<T extends unknown[]>(
 }
 
 contextBridge.exposeInMainWorld("fileAPI", {
+  openSyncFolder: () => ipcRenderer.invoke("sync-folder:open"),
+  syncWrite: (payload: WriteSyncRequest) =>
+    ipcRenderer.invoke("note:sync-write", payload),
+  syncDelete: (payload: DeleteSyncRequest) =>
+    ipcRenderer.invoke("note:sync-delete", payload),
+  sync: (payload: SyncRequest) => ipcRenderer.invoke("note:sync", payload),
   noteExport: (payload: ExportRequest) =>
     ipcRenderer.invoke("note:export", payload),
   onTriggerExport: (callback: (id: string, extension: string) => void) => {
@@ -57,6 +66,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
   onRequestFlush: (callback: () => void) =>
     subscribe("request-flush", () => callback()),
+  onWindowFocus: (callback: () => void) =>
+    subscribe("window:focus", () => callback()),
   confirmFlush: () => ipcRenderer.send("flush-confirmed"),
   zoom: (action: ZoomAction) => ipcRenderer.invoke("zoom", action),
 });

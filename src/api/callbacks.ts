@@ -5,18 +5,22 @@ import {
   pin,
   showNotification,
 } from "@/api/api";
-import { editor } from "@/components/editor/editor-init";
 import { reloadNoteList } from "@/components/sidebar/sidebar-ui";
 import { getExportContent } from "@/notes/export-actions";
-import { handleDeleteNote } from "@/notes/note-actions";
+import {
+  handleDeleteNote,
+  handleSync,
+  handleViewNote,
+} from "@/notes/note-actions";
 import { handleDuplicateNote } from "@/notes/note-duplicate";
 import { handleMergeNotes } from "@/notes/note-merge";
-import { noteStore, settingsStore } from "@/settings/app-state";
+import { isSyncEnabled } from "@/notes/note-sync";
+import { noteStore, settingsStore, stateStore } from "@/settings/app-state";
 import { initDeleteDialog, initMergeDialog } from "@/settings/dialog-init";
 import { createAsyncHandler } from "@/utils/async";
 import { findElement } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
-import { CLEANUP } from "@shared/constants";
+import { CLEANUP, DEBOUNCE_MS } from "@shared/constants";
 import { ERROR_MESSAGES } from "@shared/errors";
 import type { NoteMenuPayload } from "@shared/types";
 
@@ -85,7 +89,12 @@ function initListeners() {
     const exported = await exportNote(result.data);
     if (!exported.success) {
       console.error("[exportTrigger]: Failed to write file:", exported.error);
-      await showNotification("Export Failed.", ERROR_MESSAGES.EXPORT_ERROR);
+      await showNotification(
+        exported.error === "CANCELLED_OPERATION"
+          ? "Cancelled Export"
+          : "Export Failed.",
+        "",
+      );
       return;
     }
     await showNotification(
@@ -189,13 +198,25 @@ function initListeners() {
   });
 
   window.electronAPI.onRequestFlush(async () => {
-    if (editor) {
-      const controller = CLEANUP.get(editor);
-      if (controller) {
-        await controller.flush();
-      }
+    const editor = getAppItem("editor");
+    const controller = CLEANUP.get(editor);
+    if (controller) {
+      await controller.flush();
     }
     window.electronAPI.confirmFlush();
+  });
+
+  window.electronAPI.onWindowFocus(async () => {
+    if (!isSyncEnabled()) return;
+    if (Date.now() - stateStore.get("lastSyncedAt") < DEBOUNCE_MS.slow) return;
+    const id = stateStore.get("activeId");
+    const note = noteStore.get("notes").find((n) => n.id === id);
+    if (!note) return;
+    const syncResult = await handleSync(note.id, note.updated_at);
+    const syncedContent = syncResult
+      ? { content: syncResult, extension: "markdown" as const }
+      : undefined;
+    handleViewNote(note, syncedContent);
   });
 }
 

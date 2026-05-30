@@ -83,6 +83,14 @@ type ExportedContent = {
   extension: ExportFormat;
 };
 
+type FileContent = {
+  id: string;
+  fileName: string;
+  previousTitle?: string;
+  content: string;
+  extension: "md";
+};
+
 type ExportResult = {
   id: string;
   filePath: string;
@@ -179,6 +187,7 @@ export type {
   ExportFormat,
   ExportResult,
   Failure,
+  FileContent,
   ImageSrc,
   ImportedContent,
   InfobarRegistry,
