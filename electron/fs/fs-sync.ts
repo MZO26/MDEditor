@@ -10,8 +10,9 @@ import {
   type WriteSyncRequest,
 } from "@shared/schemas/export-schema";
 import type { ExportedContent, FileContent } from "@shared/types";
+import { createHash } from "crypto";
 import { app } from "electron";
-import { mkdir, readFile, stat, unlink, writeFile } from "fs/promises";
+import { mkdir, readFile, rename, stat, unlink, writeFile } from "fs/promises";
 import path from "path";
 
 const activeSyncs = new Set<string>();
@@ -33,40 +34,87 @@ function getPath(
   return { absoluteFilePath, idSuffix };
 }
 
-async function syncNote(targetDir: string, payload: SyncRequest) {
+function resolveSyncPath(targetDir: string) {
+  const normalized = path.resolve(targetDir);
+  const baseName = path.basename(normalized).toLowerCase();
+
+  return baseName === "mzo notes"
+    ? normalized
+    : path.join(normalized, "MZO Notes");
+}
+
+async function syncNote(
+  targetDir: string,
+  payload: SyncRequest,
+): Promise<string | null> {
   if (activeSyncs.has(payload.id)) return null;
   activeSyncs.add(payload.id);
-  const syncPath = path.join(targetDir, "MZO Notes");
-  await mkdir(syncPath, { recursive: true }).catch(() => {});
-  const { absoluteFilePath } = getPath(syncPath, {
-    fileName: payload.fileName,
-    id: payload.id,
-    extension: "md",
-  });
-  const updatedAt = new Date(payload.updated_at).getTime();
-  let fsStat: Awaited<ReturnType<typeof stat>> | null = null;
   try {
-    fsStat = await stat(absoluteFilePath);
-    if (fsStat.mtimeMs > updatedAt + SYNC_DRIFT_BUFFER_MS) {
-      const externalContent = await readFile(absoluteFilePath, "utf-8");
-      if (externalContent === payload.content) return null;
-      return externalContent;
+    const syncPath = resolveSyncPath(targetDir);
+    await mkdir(syncPath, { recursive: true }).catch(() => {
+      throw new AppBackendError(AppErrorCode.FileWriteError);
+    });
+    const { absoluteFilePath } = getPath(syncPath, {
+      fileName: payload.fileName,
+      id: payload.id,
+      extension: "md",
+    });
+    const updatedAt = new Date(payload.updated_at).getTime();
+    if (isNaN(updatedAt))
+      throw new AppBackendError(AppErrorCode.FileWriteError);
+    let fsStat: Awaited<ReturnType<typeof stat>>;
+    let externalContent = "";
+    try {
+      fsStat = await stat(absoluteFilePath);
+      externalContent = await readFile(absoluteFilePath, "utf-8");
+    } catch (error: unknown) {
+      const nodeErr = error as NodeJS.ErrnoException;
+      if (nodeErr.code === "ENOENT") {
+        // file is missing
+        await writeFile(absoluteFilePath, payload.content, "utf-8");
+        return null;
+      }
+      throw error;
     }
-  } catch (err: unknown) {
-    const nodeErr = err as NodeJS.ErrnoException;
-    if (nodeErr.code !== "ENOENT") throw err;
+    const dbHash = createHash("sha256").update(payload.content).digest("hex");
+    const fsHash = createHash("sha256").update(externalContent).digest("hex");
+    if (fsHash === dbHash) return null;
+    if (fsStat.mtimeMs > updatedAt + SYNC_DRIFT_BUFFER_MS) {
+      return externalContent;
+    } else {
+      await writeFile(absoluteFilePath, payload.content, "utf-8");
+      return null;
+    }
   } finally {
     activeSyncs.delete(payload.id);
   }
-  return null;
 }
 
 async function writeSyncedNote(targetDir: string, payload: WriteSyncRequest) {
-  // new file path
-  const syncPath = path.join(targetDir, "MZO Notes");
-  await mkdir(syncPath, { recursive: true }).catch(() => {});
+  const syncPath = resolveSyncPath(targetDir);
+  await mkdir(syncPath, { recursive: true }).catch(() => {
+    throw new AppBackendError(AppErrorCode.FileWriteError);
+  });
   const { absoluteFilePath, idSuffix } = getPath(syncPath, payload);
-  // prepare content
+  if (payload.previousTitle && payload.previousTitle !== payload.fileName) {
+    const safeOldTitle = validation(FileNameSchema, payload.previousTitle);
+    const oldFileName = `${safeOldTitle}${idSuffix}`;
+    const absoluteOldPath = path.resolve(syncPath, oldFileName);
+    const relative = path.relative(syncPath, absoluteOldPath);
+    const isOutside = relative.startsWith("..") || path.isAbsolute(relative);
+    if (isOutside) {
+      throw new AppBackendError(AppErrorCode.FileWriteError);
+    }
+    if (absoluteOldPath !== absoluteFilePath) {
+      await rename(absoluteOldPath, absoluteFilePath).catch(
+        (error: unknown) => {
+          if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+            throw new AppBackendError(AppErrorCode.FileWriteError);
+          }
+        },
+      );
+    }
+  }
   const userDataPath = app.getPath("userData");
   const imagesFolder = path.join(userDataPath, "editor-images");
   const portableContent = sanitizeExportString(
@@ -74,34 +122,31 @@ async function writeSyncedNote(targetDir: string, payload: WriteSyncRequest) {
     syncPath,
     imagesFolder,
   );
-  // no write atomic for clean modify events for external editors and no delete event in between
   const existing = await readFile(absoluteFilePath, "utf8").catch(() => null);
   if (existing !== portableContent) {
-    await writeFile(absoluteFilePath, portableContent, "utf8");
-  }
-  // cleanup
-  if (payload.previousTitle && payload.previousTitle !== payload.fileName) {
-    const safeOldTitle = validation(FileNameSchema, payload.previousTitle);
-    const oldFileName = `${safeOldTitle}${idSuffix}`;
-    const absoluteOldPath = path.resolve(syncPath, oldFileName);
-    unlink(absoluteOldPath).catch(() => {});
+    await writeFile(absoluteFilePath, portableContent, "utf8").catch(
+      (error) => {
+        console.error("[writeSyncedNote]: Error writing to file:", error);
+        throw new AppBackendError(AppErrorCode.FileWriteError);
+      },
+    );
   }
   return payload.fileName;
 }
 
 async function deleteSyncedNote(targetDir: string, payload: DeleteSyncRequest) {
-  const syncPath = path.join(targetDir, "MZO Notes");
-  await mkdir(syncPath, { recursive: true }).catch(() => {});
+  const syncPath = resolveSyncPath(targetDir);
+  await mkdir(syncPath, { recursive: true }).catch(() => {
+    throw new AppBackendError(AppErrorCode.FileWriteError);
+  });
   const { absoluteFilePath } = getPath(syncPath, payload);
-  try {
-    await unlink(absoluteFilePath);
-  } catch (error) {
+  await unlink(absoluteFilePath).catch((error) => {
     console.error(
       "[deleteSyncedNote]: Error while deleting synced note:",
       error,
     );
     throw new AppBackendError(AppErrorCode.FileWriteError);
-  }
+  });
 }
 
 export { deleteSyncedNote, getPath, syncNote, writeSyncedNote };

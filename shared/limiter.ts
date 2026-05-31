@@ -8,15 +8,15 @@ async function processWithLimit<T, R>(
   const results: R[] = new Array(items.length);
   // see how many files are being read
   const executing = new Set<Promise<void>>();
-
   for (const [i, item] of items.entries()) {
     // .then to tell the promise what to do when it finishes
-    const promise = fn(item, i).then((result) => {
-      // result gets put at exact pre-allocated array slot
-      results[i] = result;
-      // gets removed out of the executing set
-      executing.delete(promise);
-    });
+    const promise = fn(item, i)
+      .then((result) => {
+        // result gets put at exact pre-allocated array slot
+        results[i] = result;
+      })
+      .finally(() => executing.delete(promise));
+    // gets removed out of the executing set
     // even though file isn't finished reading yet, the next promise gets added to the set
     executing.add(promise);
     // if set entries get bigger than limit, remaining ones have to wait until at least one promise resolves. loop stops here and waits

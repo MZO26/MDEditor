@@ -35,9 +35,9 @@ async function compressImage(
   // resizing step and afterwards closing of bitmap to clean up. bitmap as image source, 0, 0 for x and y so it fills the entire canvas because it already was created with the exact width and height. The last to arguments tell the canvas how big to stretch or shrink it
   ctx.drawImage(bitmap, 0, 0, width, height); // ctx represents the drawing interface
   bitmap.close();
-  // encode canvas pixels into compressed jpeg file. the blob holds the fully compressed file data, but hides the bytes behind an unreadable interface
+  // encode canvas pixels into compressed webp file. the blob holds the fully compressed file data, but hides the bytes behind an unreadable interface
   const blob = await canvas
-    .convertToBlob({ type: "image/jpeg", quality })
+    .convertToBlob({ type: "image/webp", quality })
     .catch(() => {
       throw new WorkerTaskError(WorkerErrorCode.CompressionError);
     });

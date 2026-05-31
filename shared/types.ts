@@ -61,7 +61,6 @@ type ToolbarItem = Action | Divider;
 type ActionMap = Record<string, ToolbarItem>;
 
 type Metadata = {
-  title: string;
   snippet: string;
   tags: string[];
   todos_left: number;

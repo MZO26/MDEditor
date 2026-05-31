@@ -1,8 +1,9 @@
+import { UNTITLED } from "@shared/constants";
+import { DateSchema } from "@shared/schemas/note-schema";
 import z from "zod";
-import { DateSchema } from "./note-schema";
 
 const normalizeFileName = (val: string): string => {
-  if (!val) return "untitled";
+  if (!val) return UNTITLED;
 
   return (
     val
@@ -13,7 +14,7 @@ const normalizeFileName = (val: string): string => {
       .replace(/\s+/g, "_")
       .replace(/^\.+|\.+$/g, "")
       .replace(/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\..+)?$/i, "_$1$2")
-      .slice(0, 200) || "untitled"
+      .slice(0, 200) || UNTITLED
   );
 };
 

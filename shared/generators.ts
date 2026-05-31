@@ -10,7 +10,6 @@ function getMetadata(
 ): Metadata {
   const { left } = getTodoStats(content);
   return {
-    title: titleGenerator(plainText),
     snippet: snippetGenerator(plainText),
     todos_left: left,
     links: getLinks(content),

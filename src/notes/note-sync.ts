@@ -1,10 +1,13 @@
 import { sync, syncDelete, syncWrite } from "@/api/api";
 import { getExportContent } from "@/notes/export-actions";
-import { settingsStore, stateStore } from "@/settings/app-state";
+import { noteStore, settingsStore, stateStore } from "@/settings/app-state";
+import { debounce } from "@/utils/async";
+import { DEBOUNCE_MS } from "@shared/constants";
 import type {
   DeleteSyncRequest,
   SyncRequest,
 } from "@shared/schemas/export-schema";
+import { handleViewNote } from "./note-actions";
 
 function isSyncEnabled() {
   return settingsStore.get("sync-mode") ?? false;
@@ -47,6 +50,17 @@ async function handleSync(
   }
 }
 
+const debouncedFocusSync = debounce(async () => {
+  if (!isSyncEnabled()) return;
+  const id = stateStore.get("activeId");
+  const note = noteStore.get("notes").find((n) => n.id === id);
+  if (!note) return;
+  const syncedContent = await handleSync(note.id, note.updated_at);
+  if (syncedContent) {
+    handleViewNote(note, { content: syncedContent, extension: "markdown" });
+  }
+}, DEBOUNCE_MS.fast);
+
 async function handleSyncWrite(id: string, oldTitle?: string) {
   try {
     const result = getExportContent(id, "md");
@@ -76,4 +90,10 @@ async function handleSyncDelete(request: DeleteSyncRequest) {
   }
 }
 
-export { handleSync, handleSyncDelete, handleSyncWrite, isSyncEnabled };
+export {
+  debouncedFocusSync,
+  handleSync,
+  handleSyncDelete,
+  handleSyncWrite,
+  isSyncEnabled,
+};

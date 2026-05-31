@@ -58,7 +58,7 @@ function createWindow() {
     minWidth: 1100,
     minHeight: 600,
     titleBarStyle: "hidden",
-    trafficLightPosition: { x: 15, y: 10 },
+    trafficLightPosition: { x: 15, y: 6 },
     titleBarOverlay: windowTheme.overlayOptions,
     autoHideMenuBar: true,
     transparent: false,

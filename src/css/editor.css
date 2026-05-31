@@ -3,10 +3,12 @@
   line-height: var(--editor-line-height, 1.5);
   font-family: var(--editor-font-family, var(--font-system));
   color: var(--text-main);
-  margin: 0;
   outline: none;
   position: relative;
   min-width: 0;
+  max-width: 80ch;
+  padding: 0 20px;
+  margin: 0 auto;
 }
 
 .ProseMirror * {

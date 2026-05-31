@@ -566,11 +566,11 @@ label {
   background-color: var(--bg-editor);
   color: var(--text-main);
   margin: 0 auto;
+  padding: 10px 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 10px 0;
   width: 100%;
-  max-width: 80ch;
+  height: 100%;
   scrollbar-gutter: stable both-edges;
 }
 
@@ -641,19 +641,19 @@ label {
   -webkit-app-region: no-drag;
 }
 
-.app-container[data-width="comfortable"] #editor,
+.app-container[data-width="comfortable"] .ProseMirror,
 .app-container[data-width="comfortable"] #toolbar,
 .app-container[data-width="comfortable"].top-toolbar {
   max-width: min(80ch, 100%);
 }
 
-.app-container[data-width="normal"] #editor,
+.app-container[data-width="normal"] .ProseMirror,
 .app-container[data-width="normal"] #toolbar,
 .app-container[data-width="normal"] .top-toolbar {
   max-width: min(95ch, 100%);
 }
 
-.app-container[data-width="wide"] #editor,
+.app-container[data-width="wide"] .ProseMirror,
 .app-container[data-width="wide"] #toolbar,
 .app-container[data-width="wide"] .top-toolbar {
   max-width: min(110ch, 100%);

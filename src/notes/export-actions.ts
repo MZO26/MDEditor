@@ -1,10 +1,12 @@
 import { getAll } from "@/api/api";
 import { getNoteEditorExtensions } from "@/components/editor/editor-init";
+import { noteStore } from "@/settings/app-state";
 import { sleep } from "@/utils/async";
 import { getAppItem } from "@/utils/registry";
 import {
   BATCH_SIZE,
   DOMPURIFY_CONFIG,
+  UNTITLED,
   YIELD_INTERVAL,
 } from "@shared/constants";
 import { AppErrorCode } from "@shared/errors";
@@ -121,7 +123,13 @@ function getExportContent(
     const payload: ExportRequest = {
       id,
       extension,
-      fileName: titleGenerator(editor.getText()),
+      fileName:
+        noteStore
+          .get("notes")
+          .find((n) => n.id === id)
+          ?.title.trim() ||
+        titleGenerator(editor.getText()) ||
+        UNTITLED,
       content,
     };
     return { success: true, data: payload };

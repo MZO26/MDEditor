@@ -1,3 +1,4 @@
+import { UNTITLED } from "@shared/constants";
 import {
   DbContentSchema,
   EditorDocSchema,
@@ -8,7 +9,7 @@ const IdSchema = z.uuid();
 
 const IdsSchema = z.array(IdSchema);
 
-const TitleSchema = z.string().min(1).max(50).default("New Note");
+const TitleSchema = z.string().min(1).max(50).default(UNTITLED);
 
 const SnippetSchema = z.string().max(50).default("");
 

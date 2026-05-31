@@ -1,4 +1,6 @@
 import { findElement } from "@/utils/dom";
+import { UNTITLED } from "@shared/constants";
+import { titleGenerator } from "@shared/generators";
 import type { Note } from "@shared/schemas/note-schema";
 
 function createNoteUpdater() {
@@ -34,4 +36,12 @@ function estimateReadingTime(wordCount: number, wpm = 238) {
   return s < 30 ? "< 1 min read" : s < 60 ? "1 min read" : `${m} min read`;
 }
 
-export { compareNotes, estimateReadingTime, updateNoteCount };
+function resolveTitle(existingTitle: string | undefined, plainText: string) {
+  const title = existingTitle?.trim() ?? "";
+  if (!title || title === UNTITLED) {
+    return titleGenerator(plainText) || UNTITLED;
+  }
+  return title;
+}
+
+export { compareNotes, estimateReadingTime, resolveTitle, updateNoteCount };

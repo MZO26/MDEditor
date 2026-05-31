@@ -1,3 +1,7 @@
+import {
+  CustomTableCell,
+  CustomTableHeader,
+} from "@/extensions/custom-overrides";
 import { MasterShortcuts } from "@/extensions/editor-shortcuts";
 import { processAndInsertImage } from "@/extensions/image/image";
 import { lowlight } from "@/extensions/lowlight";
@@ -18,7 +22,7 @@ import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import Highlight from "@tiptap/extension-highlight";
 import Image from "@tiptap/extension-image";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
-import { TableKit } from "@tiptap/extension-table";
+import { Table, TableRow } from "@tiptap/extension-table";
 import { TextStyleKit } from "@tiptap/extension-text-style";
 import {
   CharacterCount,
@@ -101,7 +105,7 @@ function initEditor(settings: Partial<AppSettings>): Editor {
 function getNoteEditorExtensions() {
   return [
     CustomSearchHighlight,
-    Markdown,
+    Markdown.configure({ markedOptions: { gfm: true } }),
     MasterShortcuts,
     Typography,
     WikiLink.configure({
@@ -164,20 +168,19 @@ function getNoteEditorExtensions() {
       },
       backgroundColor: false,
     }),
-    TableKit.configure({
-      table: {
-        resizable: true,
-        allowTableNodeSelection: true,
-        lastColumnResizable: true,
-        handleWidth: 5,
-        HTMLAttributes: { class: "table" },
-      },
-      tableHeader: {
-        HTMLAttributes: { class: "th" },
-      },
-      tableCell: {
-        HTMLAttributes: { class: "td" },
-      },
+    Table.configure({
+      resizable: true,
+      allowTableNodeSelection: true,
+      lastColumnResizable: true,
+      handleWidth: 5,
+      HTMLAttributes: { class: "table" },
+    }),
+    TableRow,
+    CustomTableHeader.configure({
+      HTMLAttributes: { class: "th" },
+    }),
+    CustomTableCell.configure({
+      HTMLAttributes: { class: "td" },
     }),
     Highlight.configure({ multicolor: true }),
     StarterKit.configure({

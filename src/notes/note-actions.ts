@@ -22,8 +22,9 @@ import {
 } from "@/notes/note-sync";
 import { noteStore, stateStore } from "@/settings/app-state";
 import { findElement, setActiveItem } from "@/utils/dom";
+import { resolveTitle } from "@/utils/note";
 import { getAppItem } from "@/utils/registry";
-import { CLEANUP } from "@shared/constants";
+import { CLEANUP, UNTITLED } from "@shared/constants";
 import { getMetadata } from "@shared/generators";
 import {
   type CreateNotePayload,
@@ -43,9 +44,11 @@ async function handleCreateNote() {
     plainText: "",
   };
   const metadata = getMetadata(editorContent.content, editorContent.plainText);
+  const title = UNTITLED;
   const payload: CreateNotePayload = {
     ...editorContent,
     ...metadata,
+    title,
     pinned: false,
     bookmarked: false,
   };
@@ -59,7 +62,6 @@ async function handleCreateNote() {
     sidebarChange: { type: "prepend", noteId: result.data.id },
   }));
   stateStore.setState({ activeId: result.data.id });
-  // addOneNoteToList(result.data);
   handleViewNote(result.data);
   if (isSyncEnabled()) handleSyncWrite(result.data.id);
 }
@@ -121,7 +123,7 @@ async function handleDeleteNote(id: string) {
   }
   if (isSyncEnabled() && noteToDelete) {
     const deleteRequestPayload = {
-      id: noteToDelete?.id,
+      id: noteToDelete.id,
       extension: "md" as const,
       fileName: noteToDelete.title,
     };
@@ -137,8 +139,10 @@ async function handleSaveNote(id: string, flush: boolean = false) {
   const editorContent = getEditorContent();
   const metaData = getMetadata(editorContent.content, editorContent.plainText);
   const oldNote = noteStore.getState().notes.find((n) => n.id === id);
+  const title = resolveTitle(oldNote?.plainText, editorContent.plainText);
   const payload: UpdateNotePayload = {
     id,
+    title,
     ...editorContent,
     ...metaData,
   };

@@ -9,6 +9,7 @@ import { formatNoteDate } from "@/utils/date";
 import { findElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
 import { getTemplateItem } from "@/utils/registry";
+import { UNTITLED } from "@shared/constants";
 import type { Note } from "@shared/schemas/note-schema";
 import type { SidebarChange } from "@shared/types";
 
@@ -27,7 +28,7 @@ function createNoteItem(note: Note) {
     renderIcons(item);
   }
   const titleEl = findElement<HTMLSpanElement>(".note-title", item);
-  if (titleEl) titleEl.textContent = note.title;
+  if (titleEl) titleEl.textContent = note.title.trim() || UNTITLED;
   const dateEl = findElement<HTMLDivElement>(".note-date", item);
   if (dateEl) dateEl.textContent = formatNoteDate(note.updated_at);
   const contentEl = findElement<HTMLDivElement>(".note-content", item);
