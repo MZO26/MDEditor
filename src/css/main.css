@@ -522,11 +522,7 @@ label {
   justify-content: flex-start;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.settings-row:last-child {
-  border-bottom: none;
+  border-top: 1px solid var(--border-color);
 }
 
 .settings-content[data-activetab="Appearance"]

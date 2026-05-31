@@ -109,6 +109,8 @@ body.is-dragging * {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
   padding: 2em;
   height: 100%;
   animation: fadeSlideIn 0.4s ease-out forwards;

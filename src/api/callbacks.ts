@@ -5,7 +5,6 @@ import {
   pin,
   showNotification,
 } from "@/api/api";
-import { reloadNoteList } from "@/components/sidebar/sidebar-ui";
 import { getExportContent } from "@/notes/export-actions";
 import {
   handleDeleteNote,
@@ -112,7 +111,7 @@ function initListeners() {
         getAppItem("sidebar"),
       );
       if (!noteElement) return;
-      await handleDeleteNote(id, noteElement);
+      await handleDeleteNote(id);
     };
     if (!confirmationEnabled) {
       await executeDelete();
@@ -160,8 +159,8 @@ function initListeners() {
       notes: state.notes.map((note) =>
         note.id === id ? { ...note, pinned: result.data } : note,
       ),
+      sidebarChange: { type: "reload" },
     }));
-    await reloadNoteList();
   });
 
   window.noteAPI.onTriggerBookmark(async (id: string) => {
@@ -177,8 +176,8 @@ function initListeners() {
       notes: state.notes.map((note) =>
         note.id === id ? { ...note, bookmarked: result.data } : note,
       ),
+      sidebarChange: { type: "reload" },
     }));
-    await reloadNoteList();
   });
 
   window.noteAPI.onTriggerDuplicate(async (id: string) => {

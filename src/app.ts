@@ -5,10 +5,7 @@ import {
   initInfoSidebar,
   initNotesSidebar,
 } from "@/components/sidebar/sidebar-init";
-import {
-  handleSidebarEmptyState,
-  reloadNoteList,
-} from "@/components/sidebar/sidebar-ui";
+import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-ui";
 import {
   buildMenu,
   setupToolbarListeners,
@@ -18,7 +15,7 @@ import {
   TOOLBAR_ACTIONS,
   TOP_TOOLBAR_ACTIONS,
 } from "@/components/toolbar/toolbar-features";
-import { loadSettings } from "@/settings/app-state";
+import { loadSettings, syncNoteStore } from "@/settings/app-state";
 import { initAppSettings } from "@/settings/setting-init";
 import { startAppClock } from "@/utils/date";
 import { requireElement } from "@/utils/dom";
@@ -41,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initListeners();
   initNotesSidebar();
   initInfoSidebar();
-  await reloadNoteList();
+  await syncNoteStore();
   handleSidebarEmptyState();
   handleEditorEmptyState();
   const toolbarContainer = requireElement<HTMLDivElement>(

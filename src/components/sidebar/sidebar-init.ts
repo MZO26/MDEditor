@@ -146,7 +146,13 @@ function applySidebarListeners(
   );
   sidebar.addEventListener("contextmenu", (e) => {
     const target = e.target as HTMLElement;
-    if (target === sidebar) return;
+    const isEmptySidebar =
+      sidebar.childElementCount === 1 &&
+      sidebar.firstElementChild?.classList.contains("sidebar-empty-state");
+    if (target === sidebar || isEmptySidebar) {
+      e.preventDefault();
+      return;
+    }
     e.preventDefault();
     const noteElement = target.closest<HTMLDivElement>(".note-item");
     const id = noteElement?.getAttribute("data-id");

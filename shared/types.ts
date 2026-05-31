@@ -173,6 +173,13 @@ type SnippetCacheValue = {
   indices: [number, number][];
 };
 
+type SidebarChange =
+  | { type: "reload" }
+  | { type: "update"; noteId: string }
+  | { type: "prepend"; noteId: string }
+  | { type: "remove"; noteId: string }
+  | null;
+
 export type {
   Action,
   ActionMap,
@@ -199,6 +206,7 @@ export type {
   ResolvedTheme,
   Result,
   SelectOption,
+  SidebarChange,
   SnippetCacheValue,
   Success,
   TemplateRegistry,

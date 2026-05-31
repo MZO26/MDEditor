@@ -1,5 +1,4 @@
 import { createNote } from "@/api/api";
-import { addOneNoteToList } from "@/components/sidebar/sidebar-ui";
 import { noteStore, stateStore } from "@/settings/app-state";
 import type { CreateNotePayload, Note } from "@shared/schemas/note-schema";
 import { handleViewNote } from "./note-actions";
@@ -35,10 +34,11 @@ async function handleDuplicateNote(note: Note) {
     return;
   }
   noteStore.setState((state) => ({
-    notes: [...state.notes, result.data],
+    notes: [result.data, ...state.notes],
+    sidebarChange: { type: "prepend", noteId: result.data.id },
   }));
   stateStore.setState({ activeId: result.data.id });
-  addOneNoteToList(result.data);
+  // addOneNoteToList(result.data);
   handleViewNote(result.data);
 }
 

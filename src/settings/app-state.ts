@@ -1,12 +1,15 @@
-import { getAllSettings } from "@/api/api";
+import { getAll, getAllSettings } from "@/api/api";
 import { handleEditorEmptyState } from "@/components/editor/editor-ui";
+import { handleSidebarChange } from "@/components/sidebar/sidebar-note-items";
 import {
   handleSidebarEmptyState,
   updateNoteCount,
 } from "@/components/sidebar/sidebar-ui";
 import { NoteSearch } from "@/notes/search";
+import { compareNotes } from "@/utils/note";
 import type { Note } from "@shared/schemas/note-schema";
 import type { AppSettings } from "@shared/schemas/store-schema";
+import type { SidebarChange } from "@shared/types";
 
 const DEFAULT_STORE: AppSettings = {
   theme: "system",
@@ -39,6 +42,7 @@ let previousId: string | null = null;
 let previousSearchQuery: string = "";
 let previousNotesRef: Note[] = [];
 let previousNotesLength: number | null = null;
+let previousSidebarChange: SidebarChange = null;
 let previousSync: number = 0;
 
 const stateStore = createStore<AppState>(STATE_STORE);
@@ -47,10 +51,12 @@ const settingsStore = createStore<AppSettings>(DEFAULT_STORE);
 
 interface NoteStore {
   notes: Note[];
+  sidebarChange: SidebarChange;
 }
 
 const NOTE_STORE: NoteStore = {
   notes: [],
+  sidebarChange: null,
 };
 
 const noteStore = createStore<NoteStore>(NOTE_STORE);
@@ -92,6 +98,20 @@ async function loadSettings(): Promise<AppSettings> {
   return settingsStore.getState();
 }
 
+async function syncNoteStore() {
+  const result = await getAll();
+  if (!result.success) {
+    console.error("[getAll]: Failed to fetch all notes:", result.error);
+    return;
+  } else {
+    const sortedNotes = result.data.sort(compareNotes);
+    noteStore.setState({
+      notes: sortedNotes,
+      sidebarChange: { type: "reload" },
+    });
+  }
+}
+
 stateStore.subscribe((state) => {
   if (state.activeId !== previousId) {
     previousId = state.activeId;
@@ -119,6 +139,21 @@ noteStore.subscribe((state) => {
     previousNotesLength = state.notes.length;
     updateNoteCount(state.notes);
   }
+  if (state.sidebarChange !== previousSidebarChange) {
+    const change = state.sidebarChange;
+    previousSidebarChange = change;
+    if (change) {
+      handleSidebarChange(change, state.notes);
+      noteStore.setState({ sidebarChange: null });
+    }
+  }
 });
 
-export { loadSettings, noteStore, searchEngine, settingsStore, stateStore };
+export {
+  loadSettings,
+  noteStore,
+  searchEngine,
+  settingsStore,
+  stateStore,
+  syncNoteStore,
+};

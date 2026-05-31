@@ -454,7 +454,7 @@
   appearance: none;
   -webkit-appearance: none;
   margin: 0;
-  transform: translateY(0.1em);
+  transform: translateY(0.25em);
   width: 1.15em;
   height: 1.15em;
   flex-shrink: 0;

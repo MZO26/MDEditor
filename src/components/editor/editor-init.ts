@@ -108,7 +108,7 @@ function getNoteEditorExtensions() {
       onClick: async (id) => {
         const noteExists = noteStore.get("notes").some((n) => n.id === id);
         if (!noteExists) {
-          console.warn("Note not found!");
+          console.error("[Wikilink configure]: Note not found.");
           return;
         }
         handleSelectNote(id);

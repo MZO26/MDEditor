@@ -36,6 +36,7 @@ async function handleMergeNotes(idA: string, idB: string) {
     notes: state.notes
       .filter((note) => note.id !== idA)
       .map((note) => (note.id === idB ? result.data : note)),
+    sidebarChange: { type: "reload" },
   }));
   const noteBElement = findElement<HTMLDivElement>(
     `div[data-id="${validatedId}"]`,

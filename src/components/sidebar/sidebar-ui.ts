@@ -1,6 +1,5 @@
-import { getAll } from "@/api/api";
 import { createNoteItem } from "@/components/sidebar/sidebar-note-items";
-import { noteStore, searchEngine, stateStore } from "@/settings/app-state";
+import { noteStore, stateStore } from "@/settings/app-state";
 import { findElement, requireElement, setActiveItem } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
 import { compareNotes, updateNoteCount } from "@/utils/note";
@@ -29,11 +28,13 @@ function handleSidebarEmptyState() {
   const { notes } = noteStore.getState();
   const { searchQuery } = stateStore.getState();
   let shouldShowEmptyState = false;
-  if (searchQuery.trim() !== "") {
-    const results = searchEngine.search(searchQuery);
-    shouldShowEmptyState = results.length === 0;
+  if (notes.length === 0) {
+    shouldShowEmptyState = true;
+  } else if (searchQuery.trim() !== "") {
+    const visibleItems = sidebar.querySelectorAll(".note-item:not(.hidden)");
+    shouldShowEmptyState = visibleItems.length === 0;
   } else {
-    shouldShowEmptyState = notes.length === 0;
+    shouldShowEmptyState = false;
   }
   const existingEmptyState = findElement<HTMLDivElement>(
     ".sidebar-empty-state",
@@ -85,6 +86,10 @@ function updateSidebarEmptyState(emptyState: HTMLDivElement) {
   renderIcons(emptyState);
 }
 
+//----------------------------------------------------------
+
+// create view options
+
 function createViews(views: ViewItem[]) {
   const select = requireElement<HTMLSelectElement>(".view-select");
   for (const view of views) {
@@ -98,75 +103,53 @@ function createViews(views: ViewItem[]) {
 
 //-----------------------------------------------------------
 
-// sidebar population with note items
+// render note list
 
-function addOneNoteToList(note: Note) {
-  const noteElement = createNoteItem(note);
-  let target: Element | null = null;
-  const sidebar = getAppItem("sidebar");
-  for (const child of sidebar.children) {
-    const element = child as HTMLElement;
-    if (
-      element.getAttribute("data-pinned") !== "true" &&
-      element.getAttribute("data-bookmarked") !== "true"
-    ) {
-      target = element;
-      break;
-    }
-  }
-  requestAnimationFrame(() => {
-    if (target && sidebar.contains(target)) {
-      sidebar.insertBefore(noteElement, target);
-    } else {
-      sidebar.appendChild(noteElement);
-    }
-    setActiveItem(noteElement, sidebar);
-  });
-}
-
-function addManyNotesToList(notes: Note[]) {
+function renderNoteList(notes: Note[]) {
   const sidebar = getAppItem("sidebar");
   const fragment = document.createDocumentFragment();
-  for (const note of notes) {
-    const noteElement = createNoteItem(note);
-    if (noteElement) {
-      fragment.appendChild(noteElement);
-    }
+  for (const note of [...notes].sort(compareNotes)) {
+    const element = createNoteItem(note);
+    fragment.appendChild(element);
   }
-  requestAnimationFrame(() => {
-    sidebar.appendChild(fragment);
-    const { activeId } = stateStore.getState();
-    if (!activeId) return;
-    const noteElement = findElement<HTMLDivElement>(
-      `.note-item[data-id="${activeId}"]`,
-      sidebar,
-    );
-    if (noteElement) setActiveItem(noteElement, sidebar);
-  });
+  sidebar.replaceChildren(fragment);
+  const { activeId } = stateStore.getState();
+  if (!activeId) return;
+  const activeElement = findElement<HTMLDivElement>(
+    `.note-item[data-id="${activeId}"]`,
+    sidebar,
+  );
+  if (activeElement) {
+    setActiveItem(activeElement, sidebar);
+  }
 }
 
-// notes? for views if they yield results
-async function reloadNoteList(notes?: Note[]) {
+// create note
+
+function prependNoteToList(note: Note) {
   const sidebar = getAppItem("sidebar");
-  sidebar.replaceChildren();
-  if (notes) {
-    const sortedNotes = notes.sort(compareNotes);
-    noteStore.setState({ notes: sortedNotes });
-    addManyNotesToList(sortedNotes);
-    return;
-  }
-  const result = await getAll();
-  if (!result.success) {
-    console.error("[getAll]: Failed to fetch all notes:", result.error);
-    return;
-  } else {
-    const sortedNotes = result.data.sort(compareNotes);
-    noteStore.setState({ notes: sortedNotes });
-    addManyNotesToList(sortedNotes);
-  }
+  const noteElement = createNoteItem(note);
+  sidebar.prepend(noteElement);
+  setActiveItem(noteElement, sidebar);
 }
 
-// updates one note
+// delete note
+
+function removeNoteFromList(noteId: string) {
+  const sidebar = getAppItem("sidebar");
+  const noteElement = findElement<HTMLDivElement>(
+    `.note-item[data-id="${noteId}"]`,
+    sidebar,
+  );
+  if (!noteElement) {
+    console.error("[removeNoteFromList]: Note Element not found.");
+    return;
+  }
+  noteElement.remove();
+}
+
+// update note
+
 function updateNoteInList(note: Note) {
   const sidebar = getAppItem("sidebar");
   const noteElement = findElement<HTMLDivElement>(
@@ -174,15 +157,15 @@ function updateNoteInList(note: Note) {
     sidebar,
   );
   if (!noteElement) {
-    console.warn("Note Element not found.");
+    console.error("[updateNoteInList]: Note Element not found.");
     return;
   }
   const wasActive = noteElement.classList.contains("is-active");
   const newElement = createNoteItem(note);
+  noteElement.replaceWith(newElement);
   if (wasActive) {
     setActiveItem(newElement, sidebar);
   }
-  noteElement.replaceWith(newElement);
 }
 
 //------------------------------------------------------------
@@ -212,11 +195,11 @@ function showTodoProgress(content: JSONContent) {
 }
 
 export {
-  addManyNotesToList,
-  addOneNoteToList,
   createViews,
   handleSidebarEmptyState,
-  reloadNoteList,
+  prependNoteToList,
+  removeNoteFromList,
+  renderNoteList,
   setSidebarState,
   showTodoProgress,
   updateNoteCount,

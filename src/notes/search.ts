@@ -1,12 +1,11 @@
 import { FUSE_OPTIONS } from "@shared/constants";
 import type { Note } from "@shared/schemas/note-schema";
-import type { FuseResult } from "fuse.js";
+import type { FuseResult, FuseResultMatch } from "fuse.js";
 import Fuse from "fuse.js";
 
 export interface SearchMatchResult {
   item: Note;
-  // readonly array matches the exact type Fuse.js outputs
-  readonly matches?: readonly any[];
+  matches?: readonly FuseResultMatch[];
 }
 
 class NoteSearch {

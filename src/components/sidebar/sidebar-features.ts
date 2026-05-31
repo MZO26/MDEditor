@@ -1,9 +1,6 @@
 import { getManyById, getViews } from "@/api/api";
 import { updateSnippetHighlight } from "@/components/sidebar/sidebar-note-items";
-import {
-  reloadNoteList,
-  showTodoProgress,
-} from "@/components/sidebar/sidebar-ui";
+import { showTodoProgress } from "@/components/sidebar/sidebar-ui";
 import { noteStore, searchEngine, stateStore } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
 import { formatNoteDate } from "@/utils/date";
@@ -120,7 +117,7 @@ async function handleViews(view: View) {
     console.error("[handleViews]: Failed to fetch views:", result.error);
     return;
   }
-  await reloadNoteList(result.data);
+  noteStore.setState({ notes: result.data, sidebarChange: { type: "reload" } });
 }
 
 //------------------------------------------------------------

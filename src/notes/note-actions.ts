@@ -12,11 +12,6 @@ import {
   resetEditorHistory,
 } from "@/components/editor/editor-features";
 import { debouncedUpdateStats } from "@/components/sidebar/sidebar-features";
-import {
-  addManyNotesToList,
-  addOneNoteToList,
-  updateNoteInList,
-} from "@/components/sidebar/sidebar-ui";
 import { setImportedContent } from "@/notes/import-actions";
 import { setupAutoSave, stopAutoSave } from "@/notes/note-auto-save";
 import {
@@ -60,10 +55,11 @@ async function handleCreateNote() {
     return;
   }
   noteStore.setState((state) => ({
-    notes: [...state.notes, result.data],
+    notes: [result.data, ...state.notes],
+    sidebarChange: { type: "prepend", noteId: result.data.id },
   }));
   stateStore.setState({ activeId: result.data.id });
-  addOneNoteToList(result.data);
+  // addOneNoteToList(result.data);
   handleViewNote(result.data);
   if (isSyncEnabled()) handleSyncWrite(result.data.id);
 }
@@ -92,20 +88,24 @@ async function handleImportNote() {
   );
   noteStore.setState((state) => ({
     notes: [...state.notes, ...result.data],
+    sidebarChange: { type: "reload" },
   }));
-  addManyNotesToList(result.data);
 }
 
 //----------------------------------------------------------
 
 // delete
 
-async function handleDeleteNote(id: string, noteElement: HTMLDivElement) {
+async function handleDeleteNote(id: string) {
   const editor = getAppItem("editor");
-  debouncedUpdateStats.cancel();
-  stopAutoSave(editor, "cancel");
   const { notes } = noteStore.getState();
   const noteToDelete = notes.find((n) => n.id === id);
+  const { activeId } = stateStore.getState();
+  const isActiveDeletedId = activeId === id;
+  if (isActiveDeletedId) {
+    debouncedUpdateStats.cancel();
+    stopAutoSave(editor, "cancel");
+  }
   const result = await deleteNote(id);
   if (!result.success) {
     console.error("[handleDeleteNote]: Failed to delete:", result.error);
@@ -113,12 +113,11 @@ async function handleDeleteNote(id: string, noteElement: HTMLDivElement) {
   }
   noteStore.setState((state) => ({
     notes: state.notes.filter((note) => note.id !== id),
+    sidebarChange: { type: "remove", noteId: id },
   }));
-  noteElement?.remove();
-  const { activeId } = stateStore.getState();
-  if (activeId === id) {
+  if (isActiveDeletedId) {
     stateStore.setState({ activeId: null });
-    editor?.commands.clearContent();
+    editor.commands.clearContent();
   }
   if (isSyncEnabled() && noteToDelete) {
     const deleteRequestPayload = {
@@ -150,9 +149,9 @@ async function handleSaveNote(id: string, flush: boolean = false) {
   }
   noteStore.setState((state) => ({
     notes: state.notes.map((n) => (n.id === result.data.id ? result.data : n)),
+    sidebarChange: { type: "update", noteId: result.data.id },
   }));
   debouncedUpdateStats(result.data);
-  updateNoteInList(result.data);
   if (isSyncEnabled()) handleSyncWrite(result.data.id, oldNote?.title);
 }
 

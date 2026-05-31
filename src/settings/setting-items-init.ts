@@ -5,8 +5,8 @@ import {
   showNotification,
   updateSettings,
 } from "@/api/api";
-import { reloadNoteList } from "@/components/sidebar/sidebar-ui";
 import { getBatchExportContent } from "@/notes/export-actions";
+import { syncNoteStore } from "@/settings/app-state";
 import { applyAppTheme, resolveTheme, setCodeTheme } from "@/settings/theme";
 import { createAsyncHandler } from "@/utils/async";
 import { findElement } from "@/utils/dom";
@@ -106,7 +106,7 @@ function initAppearanceSettings(
         "note-item-display": target.value as NoteItemDisplay,
       });
       sidebar.setAttribute("data-noteItem", target.value);
-      await reloadNoteList();
+      await syncNoteStore();
     }),
   );
 }
