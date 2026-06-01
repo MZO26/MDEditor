@@ -26,7 +26,9 @@ async function batchPDFExport(
   folder: string,
   payload: ExportedContent[],
 ): Promise<ExportResult[]> {
-  await fs.mkdir(folder, { recursive: true });
+  await fs.mkdir(folder, { recursive: true }).catch(() => {
+    throw new AppBackendError(AppErrorCode.FileWriteError);
+  });
   const absoluteTargetFolder = path.resolve(folder);
   const assets = loadPDFAssets();
   let hiddenWin = createHiddenPdfWindow();

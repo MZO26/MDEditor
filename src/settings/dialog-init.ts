@@ -7,11 +7,10 @@ function initDeleteDialog() {
   return { deleteDialog };
 }
 
-function initMergeDialog() {
-  const mergeDialog = requireElement<HTMLDialogElement>(".merge-modal");
-  const mergeInput = requireElement<HTMLInputElement>("#noteId");
-  initTippyDelegate(mergeDialog, mergeDialog);
-  return { mergeDialog, mergeInput };
+function initConflictDialog() {
+  const conflictDialog = requireElement<HTMLDialogElement>("#conflict-dialog");
+  initTippyDelegate(conflictDialog, conflictDialog);
+  return { conflictDialog };
 }
 
 function initSettingsDialog() {
@@ -21,4 +20,4 @@ function initSettingsDialog() {
   return { settingsDialog, settingsContainer };
 }
 
-export { initDeleteDialog, initMergeDialog, initSettingsDialog };
+export { initConflictDialog, initDeleteDialog, initSettingsDialog };

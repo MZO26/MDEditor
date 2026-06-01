@@ -64,10 +64,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onTriggerNoteAction: (callback: (payload: NoteMenuPayload) => void) => {
     subscribe("trigger:note-action", callback);
   },
-  onRequestFlush: (callback: () => void) =>
-    subscribe("request-flush", () => callback()),
+  onSystemResume: (callback: () => void) =>
+    subscribe("system-resumed", () => callback()),
   onWindowFocus: (callback: () => void) =>
     subscribe("window:focus", () => callback()),
+  onWindowBlur: (callback: () => void) =>
+    subscribe("window:blur", () => callback()),
+  onRequestFlush: (callback: () => void) =>
+    subscribe("request-flush", () => callback()),
   confirmFlush: () => ipcRenderer.send("flush-confirmed"),
   zoom: (action: ZoomAction) => ipcRenderer.invoke("zoom", action),
 });
@@ -77,8 +81,6 @@ contextBridge.exposeInMainWorld("noteAPI", {
     ipcRenderer.invoke("note:create", payload),
   createMany: (payload: CreateNotePayload[]) =>
     ipcRenderer.invoke("note:create-many", payload),
-  merge: (idA: string, idB: string) =>
-    ipcRenderer.invoke("note:merge", idA, idB),
   update: (payload: UpdateNotePayload, flush: boolean) =>
     ipcRenderer.invoke("note:update", payload, flush),
   delete: (id: string) => ipcRenderer.invoke("note:delete", id),
@@ -87,9 +89,6 @@ contextBridge.exposeInMainWorld("noteAPI", {
   },
   onTriggerId: (callback: (id: string) => void) => {
     subscribe("note:trigger-id", callback);
-  },
-  onTriggerMerge: (callback: (id: string) => void) => {
-    subscribe("note:trigger-merge", callback);
   },
   onTriggerDuplicate: (callback: (id: string) => void) => {
     subscribe("note:trigger-duplicate", callback);

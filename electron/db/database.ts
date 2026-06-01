@@ -8,12 +8,10 @@ import {
   NoteFromDB,
   ToggleBookmarkSchema,
   TogglePinSchema,
-  UpdateNotePayloadSchema,
   UpdateTransactionSchema,
   type CreateNotePayload,
   type Link,
   type LinkRow,
-  type MergeTransaction,
   type Note,
   type NoteRow,
   type Tag,
@@ -119,6 +117,7 @@ class NoteDB {
         title TEXT NOT NULL CHECK(length(title) > 0),
         content TEXT NOT NULL,
         plainText TEXT NOT NULL DEFAULT '',
+        markdown TEXT NOT NULL DEFAULT '',
         bookmarked INTEGER NOT NULL DEFAULT 0,
         pinned INTEGER NOT NULL DEFAULT 0,
         todos_left INTEGER NOT NULL DEFAULT 0,
@@ -216,42 +215,6 @@ class NoteDB {
       i++;
     }
     return this.transactions.safeCreateMany(dbContents);
-  }
-
-  public mergeNotes(params: MergeTransaction): Note {
-    const now = new Date().toISOString();
-    const { idA, idB } = params;
-    const results = this.getManyById([idA, idB]);
-    const recordsMap = new Map(results.map((row) => [row.id, row]));
-    const resultA = recordsMap.get(idA);
-    const resultB = recordsMap.get(idB);
-    if (!resultA || !resultB) {
-      throw new AppBackendError(AppErrorCode.DBError);
-    }
-    const mergedJSON = {
-      type: "doc" as const,
-      content: [resultA.content, { type: "horizontalRule" }, resultB.content],
-    };
-    const outgoingA = resultA.links
-      .filter((l) => l.dir === "out")
-      .map((l) => l.id);
-    const outgoingB = resultB.links
-      .filter((l) => l.dir === "out")
-      .map((l) => l.id);
-    const mergedOutgoingLinks = [...new Set([...outgoingA, ...outgoingB])];
-    const mergedTags = [...new Set([...resultA.tags, ...resultB.tags])];
-    const validatedData = validation(UpdateNotePayloadSchema, {
-      ...resultA,
-      content: mergedJSON,
-      links: mergedOutgoingLinks,
-      tags: mergedTags,
-    });
-    const dbContent = {
-      ...validatedData,
-      content: JSON.stringify(validatedData.content),
-      updated_at: now,
-    };
-    return this.transactions.safeMerge(resultB.id, dbContent);
   }
 
   public update(payload: UpdateNotePayload): Note {

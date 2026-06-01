@@ -14,7 +14,6 @@ import {
   CreateNotesPayloadsSchema,
   IdSchema,
   IdsSchema,
-  MergeTransactionSchema,
   UpdateNotePayloadSchema,
 } from "@shared/schemas/note-schema";
 import { BrowserWindow, ipcMain } from "electron";
@@ -43,15 +42,6 @@ function registerNoteIpc(win: BrowserWindow) {
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(CreateNotesPayloadsSchema, payloads);
       return db.createMany(validatedData);
-    });
-  });
-
-  ipcMain.handle("note:merge", (e, idA: unknown, idB: unknown) => {
-    return result(e, async () => {
-      if (!checkRateLimit("note:merge", LIMITS.WRITE_STANDARD))
-        throw new AppBackendError(AppErrorCode.RateLimitError);
-      const validatedIds = validation(MergeTransactionSchema, { idA, idB });
-      return db.mergeNotes(validatedIds);
     });
   });
 

@@ -8,8 +8,8 @@ import { batchPDFExport, singlePDFExport } from "@electron/fs/fs-export-pdf";
 import { handleImageWrite } from "@electron/fs/fs-image";
 import { batchImport } from "@electron/fs/fs-import";
 import {
+  checkSyncState,
   deleteSyncedNote,
-  syncNote,
   writeSyncedNote,
 } from "@electron/fs/fs-sync";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
@@ -61,19 +61,6 @@ function registerFileIpc(win: BrowserWindow) {
     });
   });
 
-  ipcMain.handle("note:sync", (e, payload: unknown) => {
-    return result(e, async () => {
-      if (!checkRateLimit("note:sync", LIMITS.READ_LIGHT))
-        throw new AppBackendError(AppErrorCode.RateLimitError);
-      if (store.get("sync-mode") !== true) return null;
-      const validatedData = validation(SyncRequestSchema, payload);
-      if (!validatedData.updated_at) return null;
-      const targetDir = store.get("sync-path");
-      if (!targetDir) return null;
-      return await syncNote(targetDir, validatedData);
-    });
-  });
-
   ipcMain.handle("note:sync-delete", (e, payload: unknown) => {
     return result(e, async () => {
       if (!checkRateLimit("note:sync-delete", LIMITS.WRITE_STANDARD))
@@ -84,6 +71,19 @@ function registerFileIpc(win: BrowserWindow) {
       const validatedData = validation(DeleteSyncRequestSchema, payload);
       await deleteSyncedNote(targetDir, validatedData);
       return true;
+    });
+  });
+
+  ipcMain.handle("note:sync", (e, payload: unknown) => {
+    return result(e, async () => {
+      if (!checkRateLimit("note:sync", LIMITS.READ_LIGHT))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      if (store.get("sync-mode") !== true) return null;
+      const validatedData = validation(SyncRequestSchema, payload);
+      if (!validatedData.updated_at) return null;
+      const targetDir = store.get("sync-path");
+      if (!targetDir) return null;
+      return await checkSyncState(targetDir, validatedData);
     });
   });
 

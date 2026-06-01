@@ -52,7 +52,7 @@ async function handleDBBackupDialog(win: BrowserWindow) {
 async function handleExportDialog(win: BrowserWindow, data: ExportRequest) {
   const { canceled, filePath } = await dialog.showSaveDialog(win, {
     title: "Export Note",
-    defaultPath: `${validation(FileNameSchema, data.fileName)}_${data.id.slice(0, 6)}.${data.extension}`,
+    defaultPath: `${validation(FileNameSchema, data.fileName)}_${data.id}.${data.extension}`,
     filters: [
       { name: data.extension.toUpperCase(), extensions: [data.extension] },
     ],

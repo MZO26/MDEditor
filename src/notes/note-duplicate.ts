@@ -38,8 +38,7 @@ async function handleDuplicateNote(note: Note) {
     sidebarChange: { type: "prepend", noteId: result.data.id },
   }));
   stateStore.setState({ activeId: result.data.id });
-  // addOneNoteToList(result.data);
-  handleViewNote(result.data);
+  await handleViewNote(result.data);
 }
 
 export { handleDuplicateNote };

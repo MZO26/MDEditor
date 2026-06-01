@@ -45,24 +45,21 @@ function registerSettingsIpc(win: BrowserWindow) {
     });
   });
 
-  ipcMain.handle(
-    "electron-store:set",
-    async (e, settings: Partial<AppSettings>) => {
-      return result(e, async () => {
-        if (!checkRateLimit("electron-store:set", LIMITS.WRITE_LIGHT))
-          throw new AppBackendError(AppErrorCode.RateLimitError);
-        const currentSettings = store.store;
-        const mergedSettings = {
-          ...currentSettings,
-          ...settings,
-        };
-        const validValue = validation(StoreSchema, mergedSettings);
-        store.set(validValue);
-        win.webContents.send("settings-changed", validValue);
-        return validValue;
-      });
-    },
-  );
+  ipcMain.handle("electron-store:set", (e, settings: Partial<AppSettings>) => {
+    return result(e, async () => {
+      if (!checkRateLimit("electron-store:set", LIMITS.WRITE_LIGHT))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      const currentSettings = store.store;
+      const mergedSettings = {
+        ...currentSettings,
+        ...settings,
+      };
+      const validValue = validation(StoreSchema, mergedSettings);
+      store.set(validValue);
+      win.webContents.send("settings-changed", validValue);
+      return validValue;
+    });
+  });
 }
 
 export { registerSettingsIpc };

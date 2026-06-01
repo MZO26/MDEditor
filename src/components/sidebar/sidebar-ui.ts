@@ -80,7 +80,6 @@ function updateSidebarEmptyState(emptyState: HTMLDivElement) {
   } else {
     newIcon.setAttribute("data-lucide", "library");
     titleEl.textContent = "No notes here";
-    descEl.textContent = "Create a note to get started.";
   }
   iconEl.replaceChildren(newIcon);
   renderIcons(emptyState);

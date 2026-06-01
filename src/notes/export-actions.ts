@@ -2,7 +2,6 @@ import { getAll } from "@/api/api";
 import { getNoteEditorExtensions } from "@/components/editor/editor-init";
 import { noteStore } from "@/settings/app-state";
 import { sleep } from "@/utils/async";
-import { getAppItem } from "@/utils/registry";
 import {
   BATCH_SIZE,
   DOMPURIFY_CONFIG,
@@ -93,22 +92,30 @@ function getExportContent(
   id: string,
   extension: string,
 ): Result<ExportRequest> {
-  const editor = getAppItem("editor");
+  const note = noteStore.get("notes").find((n) => n.id === id);
+  if (!note) return { success: false, error: AppErrorCode.InvalidData };
+  const headlessEditor = new Editor({
+    extensions: getNoteEditorExtensions(),
+    content: note.content,
+  });
   try {
     let content: string;
     switch (extension) {
       case "json":
-        content = JSON.stringify(editor.getJSON());
+        content = JSON.stringify(headlessEditor.getJSON());
         break;
       case "html":
       case "pdf":
-        content = DOMPurify.sanitize(editor.getHTML(), DOMPURIFY_CONFIG);
+        content = DOMPurify.sanitize(
+          headlessEditor.getHTML(),
+          DOMPURIFY_CONFIG,
+        );
         break;
       case "md":
-        content = editor.getMarkdown();
+        content = headlessEditor.getMarkdown();
         break;
       case "txt":
-        content = editor.getText();
+        content = headlessEditor.getText();
         break;
       default:
         console.error(
@@ -124,21 +131,20 @@ function getExportContent(
       id,
       extension,
       fileName:
-        noteStore
-          .get("notes")
-          .find((n) => n.id === id)
-          ?.title.trim() ||
-        titleGenerator(editor.getText()) ||
+        note.title.trim() ||
+        titleGenerator(headlessEditor.getText()) ||
         UNTITLED,
       content,
     };
     return { success: true, data: payload };
   } catch (error) {
     console.error(
-      "[getExportContent]: Failed converting data for single export:",
+      "[getExportContent]: Headless Editor failed converting data for single export:",
       error,
     );
     return { success: false, error: AppErrorCode.InvalidData };
+  } finally {
+    if (headlessEditor) headlessEditor.destroy();
   }
 }
 

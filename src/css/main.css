@@ -4,8 +4,8 @@
   grid-template-columns: subgrid;
   -webkit-app-region: drag;
   width: 100%;
+  overflow: visible;
   grid-row: 1;
-  z-index: 5;
   position: relative;
 }
 
@@ -14,10 +14,8 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  padding: 0 15px;
   background-color: var(--bg-sidebar-section);
   border-right: 1px solid var(--border-color);
-  overflow: clip;
   transition:
     background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -137,70 +135,6 @@
     visibility: hidden;
   }
 }
-.merge-modal {
-  width: 350px;
-  border: none;
-  user-select: none;
-  border-radius: 18px;
-  z-index: 4;
-  background-color: var(--bg-editor);
-  box-shadow: var(--shadow);
-  margin: auto;
-  padding: 0;
-  opacity: 0;
-  visibility: hidden;
-  transform: scale(0.95);
-  transition:
-    visibility 0.3s ease,
-    opacity 0.3s ease,
-    transform 0.3s ease,
-    display 0.3s allow-discrete,
-    overlay 0.3s allow-discrete;
-}
-
-.merge-modal[open] {
-  opacity: 1;
-  transform: scale(1);
-  visibility: visible;
-}
-
-@starting-style {
-  .merge-modal[open] {
-    opacity: 0;
-    transform: scale(0.95);
-    visibility: hidden;
-  }
-}
-
-.merge-modal::backdrop {
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(6px);
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.3s ease,
-    visibility 0.3s ease,
-    display 0.3s allow-discrete,
-    overlay 0.3s allow-discrete;
-}
-
-.merge-modal[open]::backdrop {
-  opacity: 1;
-  visibility: visible;
-}
-
-@starting-style {
-  .merge-modal[open]::backdrop {
-    opacity: 0;
-    visibility: hidden;
-  }
-}
-
-.merge-modal form {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
 
 .close-btn {
   position: absolute;
@@ -211,37 +145,6 @@
   border: none;
   cursor: pointer;
   color: var(--text-main);
-}
-
-.merge-modal-selection {
-  display: flex;
-  width: 100%;
-  height: 45px;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  background-color: var(--bg-sidebar-section);
-  padding: 14px;
-  border-bottom: 1px solid var(--border-color);
-  border-radius: 18px 18px 0 0;
-}
-
-.merge-title {
-  font-weight: 800;
-}
-
-.merge-modal-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 24px;
-  gap: 12px;
-}
-
-.merge-modal-content input,
-.merge-modal-content .confirm-btn {
-  width: 100%;
 }
 
 .info-note {
@@ -389,6 +292,157 @@
 .delete-confirm-btn:focus-within {
   color: #ffffff;
   background-color: #ef4444;
+}
+
+.conflict-dialog {
+  width: 350px;
+  border: none;
+  user-select: none;
+  border-radius: 18px;
+  z-index: 4;
+  background-color: var(--bg-editor);
+  box-shadow: var(--shadow);
+  margin: auto;
+  padding: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.95);
+  transition:
+    visibility 0.3s ease,
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    display 0.3s allow-discrete,
+    overlay 0.3s allow-discrete;
+}
+
+.conflict-dialog[open] {
+  opacity: 1;
+  transform: scale(1);
+  visibility: visible;
+}
+
+@starting-style {
+  .conflict-dialog[open] {
+    opacity: 0;
+    transform: scale(0.95);
+    visibility: hidden;
+  }
+}
+
+.conflict-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease,
+    display 0.3s allow-discrete,
+    overlay 0.3s allow-discrete;
+}
+
+.conflict-dialog[open]::backdrop {
+  opacity: 1;
+  visibility: visible;
+}
+
+@starting-style {
+  .conflict-dialog[open]::backdrop {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.conflict-dialog-form {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.conflict-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 14px;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-main);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.conflict-close-btn:hover {
+  background-color: var(--bg-sidebar-section);
+}
+
+.conflict-close-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.conflict-dialog-header {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background-color: var(--bg-sidebar-section);
+  padding: 14px;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 18px 18px 0 0;
+}
+
+.conflict-dialog-title {
+  font-weight: 700;
+}
+
+.conflict-dialog-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  gap: 16px;
+}
+
+.conflict-dialog-description {
+  text-align: center;
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.conflict-overwrite-btn,
+.conflict-accept-btn {
+  width: 100%;
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-button);
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.conflict-overwrite-btn:hover,
+.conflict-overwrite-btn:active,
+.conflict-overwrite-btn.is-active,
+.conflict-overwrite-btn:focus-within,
+.conflict-accept-btn:hover,
+.conflict-accept-btn:active,
+.conflict-accept-btn.is-active,
+.conflict-accept-btn:focus-within {
+  color: var(--bg-editor);
+  background-color: var(--text-main);
 }
 
 .close-setting-modal-btn {
@@ -579,6 +633,7 @@ label {
   display: flex;
   justify-content: safe center;
   gap: 5px;
+  padding-top: 2px;
   overflow: auto;
   flex-wrap: nowrap;
   flex-direction: row;
@@ -618,14 +673,15 @@ label {
   opacity: 0;
   visibility: hidden;
   display: flex;
+  align-items: center;
   gap: 5px;
+  padding: 5px 0;
   flex-wrap: nowrap;
   flex-direction: row;
   border-radius: 10px;
   cursor: pointer;
   justify-content: center;
   margin: 0 auto;
-  min-width: 100%;
   width: max-content;
   transition:
     opacity 0.3s ease-in-out,
@@ -637,7 +693,11 @@ label {
   visibility: visible;
 }
 
-.top-toolbar button {
+.top-toolbar > button {
+  width: 28px;
+  height: 28px;
+  min-width: 28px; /* ← override the global floor */
+  min-height: 28px;
   -webkit-app-region: no-drag;
 }
 
@@ -876,6 +936,7 @@ svg.empty-state-icon {
   font-size: 0.75rem;
   font-weight: 500;
   white-space: nowrap;
+  user-select: none;
   transition:
     transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);

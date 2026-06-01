@@ -20,6 +20,7 @@ import type {
   ExportedContent,
   ImageSrc,
   Result,
+  SyncResult,
   View,
   ZoomAction,
 } from "@shared/types";
@@ -45,10 +46,6 @@ async function createManyNotes(
   payload: CreateNotePayload[],
 ): Promise<Result<Note[]>> {
   return invoke(window.noteAPI.createMany(payload));
-}
-
-async function mergeNotes(idA: string, idB: string): Promise<Result<Note>> {
-  return invoke(window.noteAPI.merge(idA, idB));
 }
 
 async function updateNote(
@@ -116,7 +113,7 @@ async function syncDelete(payload: DeleteSyncRequest): Promise<Result<void>> {
   return invoke(window.fileAPI.syncDelete(payload));
 }
 
-async function sync(payload: SyncRequest): Promise<Result<string | boolean>> {
+async function sync(payload: SyncRequest): Promise<Result<SyncResult>> {
   return invoke(window.fileAPI.sync(payload));
 }
 
@@ -206,7 +203,6 @@ export {
   handleZoom,
   imageWrite,
   importNote,
-  mergeNotes,
   openSyncFolder,
   pin,
   setTheme,

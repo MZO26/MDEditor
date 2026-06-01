@@ -6,7 +6,8 @@ function getEditorContent() {
   const editor = getAppItem("editor");
   const plainText = editor.getText();
   const content = editor.getJSON();
-  return { content, plainText };
+  const markdown = editor.getMarkdown();
+  return { content, plainText, markdown };
 }
 
 function resetEditorHistory(editor: Editor) {

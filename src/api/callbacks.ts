@@ -7,20 +7,17 @@ import {
 } from "@/api/api";
 import { getExportContent } from "@/notes/export-actions";
 import { handleDeleteNote } from "@/notes/note-actions";
+import { setupAutoSave, stopAutoSave } from "@/notes/note-auto-save";
 import { handleDuplicateNote } from "@/notes/note-duplicate";
-import { handleMergeNotes } from "@/notes/note-merge";
-import { debouncedFocusSync } from "@/notes/note-sync";
-import { noteStore, settingsStore } from "@/settings/app-state";
-import { initDeleteDialog, initMergeDialog } from "@/settings/dialog-init";
-import { createAsyncHandler } from "@/utils/async";
+import { handleSync } from "@/notes/note-sync";
+import { noteStore, settingsStore, stateStore } from "@/settings/app-state";
+import { initDeleteDialog } from "@/settings/dialog-init";
 import { findElement } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
-import { CLEANUP } from "@shared/constants";
+import { CLEANUP, DEBOUNCE_MS } from "@shared/constants";
 import { ERROR_MESSAGES } from "@shared/errors";
 import type { NoteMenuPayload } from "@shared/types";
 
-// needed for merge and delete triggers
-const { mergeDialog, mergeInput } = initMergeDialog();
 const { deleteDialog } = initDeleteDialog();
 
 // electron callbacks that only get registered once at startup. Thus no need for assignment of cleanups
@@ -132,19 +129,6 @@ function initListeners() {
     }
   });
 
-  window.noteAPI.onTriggerMerge((idA: string) => {
-    if (!mergeDialog || !mergeInput) return;
-    const handleClose = createAsyncHandler(async () => {
-      if (mergeDialog.returnValue !== "confirm") return;
-      const idB = mergeInput.value.trim();
-      await handleMergeNotes(idA, idB);
-    });
-    mergeDialog.addEventListener("close", handleClose, { once: true });
-    mergeDialog.returnValue = "";
-    mergeInput.value = "";
-    mergeDialog.showModal();
-  });
-
   window.noteAPI.onTriggerPin(async (id: string) => {
     const result = await pin(id);
     if (!result.success) {
@@ -185,7 +169,12 @@ function initListeners() {
       );
       return;
     }
-    await handleDuplicateNote(result.data);
+    await handleDuplicateNote(result.data).catch((error) =>
+      console.error(
+        "[onTriggerDuplicate -> handleDuplicateNote]: Error duplicating Note",
+        error,
+      ),
+    );
   });
 
   window.electronAPI.onThemeChanged(async (resolvedTheme) => {
@@ -194,14 +183,66 @@ function initListeners() {
 
   window.electronAPI.onRequestFlush(async () => {
     const editor = getAppItem("editor");
-    const controller = CLEANUP.get(editor);
-    if (controller) {
-      await controller.flush();
+    const save = CLEANUP.get(editor);
+    if (save) {
+      await save.flush();
     }
     window.electronAPI.confirmFlush();
   });
 
-  window.electronAPI.onWindowFocus(debouncedFocusSync);
+  let focusDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+  let blurDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  window.electronAPI.onWindowFocus(() => {
+    // if pending blur: reset it
+    if (blurDebounceTimer) {
+      clearTimeout(blurDebounceTimer);
+      blurDebounceTimer = null;
+    }
+    // reset focus timer
+    if (focusDebounceTimer) clearTimeout(focusDebounceTimer);
+    focusDebounceTimer = setTimeout(() => {
+      const activeId = stateStore.get("activeId");
+      const note = noteStore.get("notes").find((n) => n.id === activeId);
+      stateStore.setState({ lastSyncedAt: 0 });
+      if (activeId && note) {
+        console.log("[Window-Focus-Event]: Forcing JIT Sync...");
+        handleSync(activeId, note.updated_at).catch((error) => {
+          console.error("[Window-Focus-Event]: Sync failed", error);
+        });
+      }
+    }, DEBOUNCE_MS.very_fast);
+  });
+
+  window.electronAPI.onWindowBlur(() => {
+    if (focusDebounceTimer) {
+      clearTimeout(focusDebounceTimer);
+      focusDebounceTimer = null;
+    }
+    if (blurDebounceTimer) clearTimeout(blurDebounceTimer);
+    blurDebounceTimer = setTimeout(async () => {
+      const activeId = stateStore.get("activeId");
+      const editor = getAppItem("editor");
+      if (activeId && editor) {
+        console.log("[Window-Blur-Event]: Force-flushing save...");
+        await stopAutoSave(editor, "flush");
+        const newCleanup = setupAutoSave(editor, activeId);
+        CLEANUP.set(editor, newCleanup);
+      }
+    }, DEBOUNCE_MS.very_fast);
+  });
+
+  window.electronAPI.onSystemResume(async () => {
+    const activeId = stateStore.get("activeId");
+    const note = noteStore.get("notes").find((n) => n.id === activeId);
+    stateStore.setState({ lastSyncedAt: 0 });
+    if (activeId && note) {
+      console.log("[System-Resume-Event]: Forcing JIT Sync...");
+      handleSync(activeId, note.updated_at).catch((error) => {
+        console.error("[System-Resume-Event]: Sync failed", error);
+      });
+    }
+  });
 }
 
 export { initListeners };

@@ -11,26 +11,33 @@ import { Node } from "@tiptap/pm/model";
 function setupAutoSave(editor: Editor, id: string) {
   let lastSavedDoc: Node = editor.state.doc;
   let pendingSave: Promise<void> | null = null;
-  const debouncedSave = debounce(async () => {
-    if (!id || pendingSave) return;
+  const performSave = async (isFlush: boolean) => {
+    if (pendingSave) {
+      try {
+        await pendingSave;
+      } catch (e) {}
+    }
     const docToSave = editor.state.doc;
-    if (docToSave.eq(lastSavedDoc)) return;
-    const savePromise = handleSaveNote(id, false);
+    if (!isFlush && docToSave.eq(lastSavedDoc)) return;
+    const savePromise = handleSaveNote(id, isFlush);
     pendingSave = savePromise;
     try {
       await savePromise;
       lastSavedDoc = docToSave;
     } finally {
-      pendingSave = null;
+      if (pendingSave === savePromise) {
+        pendingSave = null;
+      }
     }
-  }, DEBOUNCE_MS.slow);
+  };
+  const debouncedSave = debounce(() => performSave(false), DEBOUNCE_MS.slow);
   const updateHandler = () => debouncedSave();
   editor.on("update", updateHandler);
   return {
     flush: async () => {
       editor.off("update", updateHandler);
-      debouncedSave.flush();
-      await pendingSave;
+      debouncedSave.cancel();
+      await performSave(true);
     },
     cancel: () => {
       editor.off("update", updateHandler);
@@ -39,10 +46,13 @@ function setupAutoSave(editor: Editor, id: string) {
   };
 }
 
-function stopAutoSave(editor: Editor, action: "flush" | "cancel" = "flush") {
+async function stopAutoSave(
+  editor: Editor,
+  action: "flush" | "cancel" = "flush",
+) {
   const existingCleanup = CLEANUP.get(editor);
   if (existingCleanup) {
-    existingCleanup[action]();
+    await existingCleanup[action]();
     CLEANUP.delete(editor);
   }
 }

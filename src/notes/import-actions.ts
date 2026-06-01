@@ -7,7 +7,7 @@ import {
   YIELD_INTERVAL,
 } from "@shared/constants";
 import { AppErrorCode } from "@shared/errors";
-import { getMetadata } from "@shared/generators";
+import { getMetadata, titleGenerator } from "@shared/generators";
 import type { CreateNotePayload } from "@shared/schemas/note-schema";
 import type { ImportedContent, Result } from "@shared/types";
 import { Editor, type Content, type JSONContent } from "@tiptap/core";
@@ -84,10 +84,13 @@ async function setImportedContent(
       }
       const json = headlessEditor.getJSON();
       const plainText = headlessEditor.getText();
+      const markdown = headlessEditor.getMarkdown();
       const metadata = getMetadata(json, plainText);
       const payload: CreateNotePayload = {
+        title: titleGenerator(plainText),
         content: json,
         plainText: plainText,
+        markdown: markdown,
         ...metadata,
         pinned: false,
         bookmarked: false,

@@ -109,6 +109,7 @@ export {
   ExportRequestSchema,
   FileNameSchema,
   ImportRequestSchema,
+  StringContentSchema,
   SyncRequestSchema,
   WriteSyncRequestSchema,
   type DeleteSyncRequest,

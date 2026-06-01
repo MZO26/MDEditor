@@ -77,8 +77,8 @@
             ></select>
             <span class="info-span note-count"></span>
           </div>
+          <div class="resizer-sidebar"></div>
         </div>
-        <div class="resizer-sidebar"></div>
       </div>
 
       <div class="editor-container">
@@ -158,41 +158,37 @@
         </div>
       </form>
     </dialog>
-    <dialog class="merge-modal">
-      <form method="dialog" novalidate>
+    <dialog id="conflict-dialog" class="conflict-dialog">
+      <form method="dialog" class="conflict-dialog-form">
         <button
-          class="close-btn"
-          value="cancel"
+          class="conflict-close-btn"
           data-tippy-content="Close"
           data-shortcut="Escape"
+          value="cancel"
         >
-          <i data-lucide="x"></i>
+          <i data-lucide="x" class="conflict-close-icon"></i>
         </button>
-        <div class="merge-modal-selection">
-          <div class="merge-title">Merge Note</div>
+        <div class="conflict-dialog-header">
+          <span class="conflict-dialog-title">Conflict resolution</span>
         </div>
-        <div class="merge-modal-content">
-          <label for="noteId">Note ID (UUID)</label>
-          <input
-            type="text"
-            id="noteId"
-            name="noteId"
-            placeholder="00000000-0000-0000-0000-000000000000"
-            maxlength="40"
-            spellcheck="false"
-            autocomplete="off"
-            data-tippy-content="Valid Note ID Required"
-          />
-          <button
-            class="confirm-btn"
-            value="confirm"
-            data-tippy-content="Confirm Merge"
-          >
-            Merge
-          </button>
-          <p class="info-note">
-            Note with this ID gets merged into the selected one.
+        <div class="conflict-dialog-content">
+          <p class="conflict-dialog-description">
+            Changes detected in synced file.
           </p>
+          <button
+            value="overwrite"
+            class="conflict-overwrite-btn"
+            id="overwrite-conflict-btn"
+          >
+            Overwrite Content from FS
+          </button>
+          <button
+            value="accept"
+            class="conflict-accept-btn"
+            id="accept-conflict-btn"
+          >
+            Overwrite Content from DB
+          </button>
         </div>
       </form>
     </dialog>

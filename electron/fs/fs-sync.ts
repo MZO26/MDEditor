@@ -1,7 +1,7 @@
 import { sanitizeExportString } from "@electron/fs/fs-assets";
+import { writeAtomic } from "@electron/fs/fs-atomic-write";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import { validation } from "@electron/ipc/ipc-validation";
-import { SYNC_DRIFT_BUFFER_MS } from "@shared/constants";
 import { AppErrorCode } from "@shared/errors";
 import {
   FileNameSchema,
@@ -9,19 +9,16 @@ import {
   type SyncRequest,
   type WriteSyncRequest,
 } from "@shared/schemas/export-schema";
-import type { ExportedContent, FileContent } from "@shared/types";
-import { createHash } from "crypto";
+import type { ExportedContent, FileContent, SyncResult } from "@shared/types";
 import { app } from "electron";
-import { mkdir, readFile, rename, stat, unlink, writeFile } from "fs/promises";
+import { mkdir, readFile, rename, unlink } from "fs/promises";
 import path from "path";
-
-const activeSyncs = new Set<string>();
 
 function getPath(
   targetDirectory: string,
   payload: ExportedContent | FileContent | DeleteSyncRequest,
 ) {
-  const idSuffix = `_${payload.id.slice(0, 6)}.${payload.extension}`;
+  const idSuffix = `_${payload.id}.${payload.extension}`;
   const safeTitle = validation(FileNameSchema, payload.fileName);
   const newFileName = `${safeTitle}${idSuffix}`;
   const absoluteFilePath = path.resolve(targetDirectory, newFileName);
@@ -43,50 +40,48 @@ function resolveSyncPath(targetDir: string) {
     : path.join(normalized, "MZO Notes");
 }
 
-async function syncNote(
+function normalizeMarkdown(content: string) {
+  return content.replace(/\r\n/g, "\n");
+}
+
+const activeSyncLocks = new Set<string>();
+
+async function checkSyncState(
   targetDir: string,
   payload: SyncRequest,
-): Promise<string | null> {
-  if (activeSyncs.has(payload.id)) return null;
-  activeSyncs.add(payload.id);
+): Promise<SyncResult> {
+  const syncPath = resolveSyncPath(targetDir);
+  const { absoluteFilePath } = getPath(syncPath, {
+    fileName: payload.fileName,
+    id: payload.id,
+    extension: "md",
+  });
+  if (activeSyncLocks.has(absoluteFilePath)) {
+    throw new AppBackendError(AppErrorCode.CancelledOperation);
+  }
+  activeSyncLocks.add(absoluteFilePath);
   try {
-    const syncPath = resolveSyncPath(targetDir);
-    await mkdir(syncPath, { recursive: true }).catch(() => {
-      throw new AppBackendError(AppErrorCode.FileWriteError);
-    });
-    const { absoluteFilePath } = getPath(syncPath, {
-      fileName: payload.fileName,
-      id: payload.id,
-      extension: "md",
-    });
-    const updatedAt = new Date(payload.updated_at).getTime();
-    if (isNaN(updatedAt))
-      throw new AppBackendError(AppErrorCode.FileWriteError);
-    let fsStat: Awaited<ReturnType<typeof stat>>;
-    let externalContent = "";
+    let localContent: string | null = null;
     try {
-      fsStat = await stat(absoluteFilePath);
-      externalContent = await readFile(absoluteFilePath, "utf-8");
+      localContent = await readFile(absoluteFilePath, "utf-8");
     } catch (error: unknown) {
-      const nodeErr = error as NodeJS.ErrnoException;
-      if (nodeErr.code === "ENOENT") {
-        // file is missing
-        await writeFile(absoluteFilePath, payload.content, "utf-8");
-        return null;
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+        console.error("[checkSyncState]: Error checking file:", error);
+        throw new AppBackendError(AppErrorCode.InvalidData);
       }
-      throw error;
+      return { type: "MISSING_RESOLVED", content: null };
     }
-    const dbHash = createHash("sha256").update(payload.content).digest("hex");
-    const fsHash = createHash("sha256").update(externalContent).digest("hex");
-    if (fsHash === dbHash) return null;
-    if (fsStat.mtimeMs > updatedAt + SYNC_DRIFT_BUFFER_MS) {
-      return externalContent;
-    } else {
-      await writeFile(absoluteFilePath, payload.content, "utf-8");
-      return null;
+    const normalizedLocal = normalizeMarkdown(localContent).trimEnd();
+    const normalizedDB = normalizeMarkdown(payload.content).trimEnd();
+    if (normalizedLocal === normalizedDB) {
+      return { type: "IN_SYNC", content: localContent };
     }
+    if (normalizedLocal !== normalizedDB) {
+      return { type: "OUT_OF_SYNC", localContent, dbContent: payload.content };
+    }
+    return { type: "OUT_OF_SYNC", localContent, dbContent: payload.content };
   } finally {
-    activeSyncs.delete(payload.id);
+    activeSyncLocks.delete(absoluteFilePath);
   }
 }
 
@@ -95,16 +90,12 @@ async function writeSyncedNote(targetDir: string, payload: WriteSyncRequest) {
   await mkdir(syncPath, { recursive: true }).catch(() => {
     throw new AppBackendError(AppErrorCode.FileWriteError);
   });
-  const { absoluteFilePath, idSuffix } = getPath(syncPath, payload);
+  const { absoluteFilePath } = getPath(syncPath, payload);
   if (payload.previousTitle && payload.previousTitle !== payload.fileName) {
-    const safeOldTitle = validation(FileNameSchema, payload.previousTitle);
-    const oldFileName = `${safeOldTitle}${idSuffix}`;
-    const absoluteOldPath = path.resolve(syncPath, oldFileName);
-    const relative = path.relative(syncPath, absoluteOldPath);
-    const isOutside = relative.startsWith("..") || path.isAbsolute(relative);
-    if (isOutside) {
-      throw new AppBackendError(AppErrorCode.FileWriteError);
-    }
+    const { absoluteFilePath: absoluteOldPath } = getPath(syncPath, {
+      ...payload,
+      fileName: payload.previousTitle,
+    });
     if (absoluteOldPath !== absoluteFilePath) {
       await rename(absoluteOldPath, absoluteFilePath).catch(
         (error: unknown) => {
@@ -124,12 +115,10 @@ async function writeSyncedNote(targetDir: string, payload: WriteSyncRequest) {
   );
   const existing = await readFile(absoluteFilePath, "utf8").catch(() => null);
   if (existing !== portableContent) {
-    await writeFile(absoluteFilePath, portableContent, "utf8").catch(
-      (error) => {
-        console.error("[writeSyncedNote]: Error writing to file:", error);
-        throw new AppBackendError(AppErrorCode.FileWriteError);
-      },
-    );
+    await writeAtomic(absoluteFilePath, portableContent).catch((error) => {
+      console.error("[writeSyncedNote]: Error writing to file:", error);
+      throw new AppBackendError(AppErrorCode.FileWriteError);
+    });
   }
   return payload.fileName;
 }
@@ -149,4 +138,4 @@ async function deleteSyncedNote(targetDir: string, payload: DeleteSyncRequest) {
   });
 }
 
-export { deleteSyncedNote, getPath, syncNote, writeSyncedNote };
+export { checkSyncState, deleteSyncedNote, getPath, writeSyncedNote };

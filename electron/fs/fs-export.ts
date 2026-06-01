@@ -1,6 +1,8 @@
 import { sanitizeExportString } from "@electron/fs/fs-assets";
 import { writeAtomic } from "@electron/fs/fs-atomic-write";
 import { getPath } from "@electron/fs/fs-sync";
+import { AppBackendError } from "@electron/ipc/ipc-error-handler";
+import { AppErrorCode } from "@shared/errors";
 import { processWithLimit } from "@shared/limiter";
 import type { ExportedContent, ExportResult } from "@shared/types";
 import { app } from "electron";
@@ -23,7 +25,9 @@ async function batchExport(
   folder: string,
   payload: ExportedContent[],
 ): Promise<ExportResult[]> {
-  await fs.mkdir(folder, { recursive: true });
+  await fs.mkdir(folder, { recursive: true }).catch(() => {
+    throw new AppBackendError(AppErrorCode.FileWriteError);
+  });
   const absoluteTargetFolder = path.resolve(folder);
   const userDataPath = app.getPath("userData");
   const imagesFolder = path.join(userDataPath, "editor-images");

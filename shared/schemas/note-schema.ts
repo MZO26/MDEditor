@@ -74,6 +74,7 @@ const NoteTableSchema = z.object({
   title: TitleSchema,
   snippet: SnippetSchema,
   content: EditorDocSchema,
+  markdown: PlainTextSchema,
   todos_left: TodoSchema,
   plainText: PlainTextSchema,
   pinned: z.boolean(),
@@ -134,17 +135,16 @@ const UpdateTransactionSchema = NoteToDBSchema.omit({
   created_at: true,
 });
 
-const MergeTransactionSchema = z.object({ idA: IdSchema, idB: IdSchema });
-
 const NoteRowSchema = z.object({
   id: IdSchema,
   title: TitleSchema,
   content: z.string(),
+  markdown: PlainTextSchema,
+  plainText: PlainTextSchema,
   snippet: SnippetSchema,
   bookmarked: z.union([z.literal(0), z.literal(1)]).default(0),
   pinned: z.union([z.literal(0), z.literal(1)]).default(0),
   todos_left: TodoSchema,
-  plainText: PlainTextSchema,
   created_at: DateSchema,
   updated_at: DateSchema,
 });
@@ -155,7 +155,6 @@ type LinkRow = z.infer<typeof LinkRowSchema>;
 type Tag = z.infer<typeof TagSchema>;
 type Link = z.infer<typeof LinkSchema>;
 type TagName = z.infer<typeof TagNameRowSchema>;
-type MergeTransaction = z.infer<typeof MergeTransactionSchema>;
 type CreateTransaction = z.infer<typeof CreateTransactionSchema>;
 type UpdateTransaction = z.infer<typeof UpdateTransactionSchema>;
 type UpdateNotePayload = z.infer<typeof UpdateNotePayloadSchema>;
@@ -173,7 +172,6 @@ export {
   IdsSchema,
   LinkRowsSchema,
   LinksSchema,
-  MergeTransactionSchema,
   NoteFromDB,
   NoteRowSchema,
   NoteSchema,
@@ -194,7 +192,6 @@ export {
   type CreateTransaction,
   type Link,
   type LinkRow,
-  type MergeTransaction,
   type Note,
   type NoteRow,
   type Tag,

@@ -6,7 +6,7 @@ import {
   setupLocalImageProtocol,
 } from "@electron/handler/navigation-handler";
 import { setPermissions } from "@electron/handler/permission-handler";
-import { registerIpc } from "@electron/ipc/ipc-registry";
+import { registerIpc } from "@electron/ipc/ipc-validation";
 import { store } from "@electron/store";
 import {
   getTitleBarOverlay,
@@ -20,6 +20,7 @@ import {
   ipcMain,
   Menu,
   nativeTheme,
+  powerMonitor,
   type BrowserWindowConstructorOptions,
 } from "electron";
 import path from "node:path";
@@ -99,8 +100,8 @@ function createWindow() {
     win?.webContents.send("window:focus");
   });
 
-  win.on("restore", () => {
-    win?.webContents.send("window:focus");
+  win.on("blur", () => {
+    win?.webContents.send("window:blur");
   });
 
   win.on("close", (e) => {
@@ -124,17 +125,22 @@ app.whenReady().then(async () => {
     isReadyToClose = true;
     win?.close();
   });
+  powerMonitor.on("resume", () => {
+    if (win && !win.isDestroyed()) {
+      win.webContents.send("system-resumed");
+    }
+  });
   createWindow();
   setupLocalImageProtocol();
   setPermissions();
   registerIpc(win as BrowserWindow);
-  setUpEditorMenu();
+  setUpEditorMenu(win as BrowserWindow);
 });
 
 // global app events / lifecycle events
 
 nativeTheme.on("updated", () => {
-  if (win) onOSThemeChange(win, store.get("theme"));
+  if (win && !win.isDestroyed()) onOSThemeChange(win, store.get("theme"));
 });
 
 app.on("activate", () => {

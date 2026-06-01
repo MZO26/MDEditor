@@ -2,7 +2,6 @@ import type {
   DeleteSyncRequest,
   ExportRequest,
   ImportRequest,
-  SyncRequest,
   WriteSyncRequest,
 } from "@shared/schemas/export-schema";
 import type { Note } from "@shared/schemas/note-schema";
@@ -13,7 +12,7 @@ import {
   type ImagePayload,
   type UpdateNotePayload,
 } from "@shared/shared/types";
-import type { ImageSrc, MenuType } from "@shared/types";
+import type { ImageSrc, MenuType, SyncResult } from "@shared/types";
 
 declare module "*.css";
 
@@ -23,7 +22,7 @@ declare global {
       openSyncFolder: () => Promise<Result<string>>;
       syncWrite: (payload: WriteSyncRequest) => Promise<Result<ExportRequest>>;
       syncDelete: (payload: DeleteSyncRequest) => Promise<Result<void>>;
-      sync: (payload: SyncRequest) => Promise<Result<string | null>>;
+      sync: (payload: SyncRequest) => Promise<Result<SyncResult>>;
       noteExport: (payload: ExportRequest) => Promise<Result<ExportRequest>>;
       onTriggerExport: (
         callback: (id: string, extension: string) => void,
@@ -46,9 +45,11 @@ declare global {
       onTriggerNoteAction: (
         callback: (payload: NoteMenuPayload) => void,
       ) => void;
+      onSystemResume: (callback: () => void) => () => void;
       onRequestFlush: (callback: () => void) => () => void;
       confirmFlush: () => void;
       onWindowFocus: (callback: () => void) => () => void;
+      onWindowBlur: (callback: () => void) => () => void;
       zoom: (action: string) => Promise<Result<number>>;
     };
     noteAPI: {
@@ -57,7 +58,6 @@ declare global {
       getManyById: (ids: string[]) => Promise<Result<Note[]>>;
       create: (payload: CreateNotePayload) => Promise<Result<Note>>;
       createMany: (payload: CreateNotePayload[]) => Promise<Result<Note[]>>;
-      merge: (idA: string, idB: string) => Promise<Result<Note>>;
       update: (
         payload: UpdateNotePayload,
         flush: boolean,
@@ -65,7 +65,6 @@ declare global {
       delete: (id: string) => Promise<Result<void>>;
       onTriggerDelete: (callback: (id: string) => void) => () => void;
       onTriggerId: (callback: (id: string) => void) => () => void;
-      onTriggerMerge: (callback: (id: string) => void) => () => void;
       onTriggerDuplicate: (callback: (id: string) => void) => () => void;
       onTriggerPin: (callback: (id: string) => void) => () => void;
       onTriggerBookmark: (callback: (id: string) => void) => () => void;

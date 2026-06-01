@@ -1,12 +1,23 @@
+import { registerElectronIpc } from "@electron/ipc/ipc-electron";
 import {
   AppBackendError,
   handleIpcError,
 } from "@electron/ipc/ipc-error-handler";
+import { registerFileIpc } from "@electron/ipc/ipc-fs";
+import { registerNoteIpc } from "@electron/ipc/ipc-note";
+import { registerSettingsIpc } from "@electron/ipc/ipc-settings";
 import { APP_START_TIME, IPC_TIMERS } from "@shared/constants";
 import { AppErrorCode } from "@shared/errors";
 import type { Result } from "@shared/types";
 import { BrowserWindow, app, type IpcMainInvokeEvent } from "electron";
 import type z from "zod";
+
+function registerIpc(win: BrowserWindow) {
+  registerElectronIpc(win);
+  registerNoteIpc(win);
+  registerSettingsIpc(win);
+  registerFileIpc(win);
+}
 
 async function result<T>(
   event: IpcMainInvokeEvent,
@@ -83,4 +94,11 @@ function measure<T>(fn: () => T) {
   return Math.round((end - start) * 100) / 100;
 }
 
-export { checkRateLimit, measure, result, validateSender, validation };
+export {
+  checkRateLimit,
+  measure,
+  registerIpc,
+  result,
+  validateSender,
+  validation,
+};

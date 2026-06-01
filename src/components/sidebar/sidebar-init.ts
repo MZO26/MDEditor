@@ -18,16 +18,9 @@ import {
 } from "@/utils/registry";
 import { initTippyDelegate } from "@/utils/ui";
 import { VIEWS } from "@shared/constants";
-import type { View } from "@shared/types";
+import type { ResizeOptions, View } from "@shared/types";
 
 // resizing logic
-
-interface ResizeOptions {
-  minWidth?: number;
-  maxWidth?: number;
-  cssVariable?: string;
-  side?: "left" | "right";
-}
 
 function resizeSidebar(
   resizerSelector: string,
@@ -35,7 +28,7 @@ function resizeSidebar(
   options: ResizeOptions = {},
 ) {
   const {
-    minWidth = 200,
+    minWidth = 5,
     maxWidth = 600,
     cssVariable = "--sidebar-width",
     side = "left",
@@ -72,14 +65,16 @@ function resizeSidebar(
   document.addEventListener("pointerup", (e: PointerEvent) => {
     if (isResizing) {
       isResizing = false;
-      resizer.releasePointerCapture(e.pointerId);
+      if (resizer.hasPointerCapture(e.pointerId)) {
+        resizer.releasePointerCapture(e.pointerId);
+      }
       document.body.classList.remove("is-dragging");
       document.body.style.userSelect = "";
     }
   });
 }
 
-//------------------------------------------------------------
+//---------------------------------------------------------
 
 // sidebar
 
@@ -222,7 +217,7 @@ function applyInfoSidebarListeners(
   infoSidebar: HTMLDivElement,
 ) {
   resizeSidebar(".resizer-infobar", ".info-sidebar", {
-    minWidth: 220,
+    minWidth: 5,
     maxWidth: 400,
     cssVariable: "--infobar-width",
     side: "right",

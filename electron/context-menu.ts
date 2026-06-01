@@ -1,16 +1,17 @@
 import type { NoteMenuPayload } from "@shared/types";
-import { ipcMain, Menu, type BrowserWindow } from "electron";
+import { Menu, type BrowserWindow } from "electron";
 
-let activeId: string | null = null;
+// let activeId: string | null = null;
 
-ipcMain.on("set-active-note", (_event, id) => {
-  activeId = id;
-});
+// ipcMain.on("set-active-note", (_event, id) => {
+//   activeId = id;
+// });
 
-async function setUpEditorMenu() {
+async function setUpEditorMenu(win: BrowserWindow) {
   const { default: contextMenu } = await import("electron-context-menu");
-
   contextMenu({
+    window: win,
+    shouldShowMenu: (_event, params) => params.isEditable,
     menu: (defaultActions) => [
       defaultActions.cut({}),
       defaultActions.copy({}),
@@ -87,14 +88,10 @@ function setUpNoteMenu(win: BrowserWindow, payload: NoteMenuPayload) {
       label: "Duplicate Note",
       click: () => win.webContents.send("note:trigger-duplicate", id),
     },
-    {
-      label: "Merge Note",
-      click: () => win.webContents.send("note:trigger-merge", id),
-    },
     { type: "separator" },
     {
       label: "Export Note as...",
-      enabled: activeId !== null && activeId === id,
+      // enabled: activeId !== null && activeId === id,
       submenu: [
         {
           label: "Markdown (.md)",

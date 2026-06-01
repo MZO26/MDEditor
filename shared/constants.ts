@@ -35,6 +35,7 @@ const LIMITS = {
 };
 
 const DEBOUNCE_MS = {
+  very_fast: 150, // window events
   fast: 300,
   normal: 1000,
   slow: 2000,
@@ -179,8 +180,6 @@ const FUSE_OPTIONS: IFuseOptions<Note> = {
 const MAX_CHARS = 47; // snippet max chars before appending ...
 const PADDING = 15; // padding for highlight snippet to show context
 
-const SYNC_DRIFT_BUFFER_MS = 1000; // for comparing mtimeMs vs updated_at as tolerance window. Helps with timestamp precision issues between different OS
-
 const UNTITLED = "New Note";
 
 export {
@@ -199,7 +198,6 @@ export {
   MAX_SIZE,
   MIME_TO_EXT,
   PADDING,
-  SYNC_DRIFT_BUFFER_MS,
   THEME_DATA,
   THEME_MAP,
   UNTITLED,

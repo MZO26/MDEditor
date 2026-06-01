@@ -25,7 +25,7 @@ import { findElement, setActiveItem } from "@/utils/dom";
 import { resolveTitle } from "@/utils/note";
 import { getAppItem } from "@/utils/registry";
 import { CLEANUP, UNTITLED } from "@shared/constants";
-import { getMetadata } from "@shared/generators";
+import { getMetadata, titleGenerator } from "@shared/generators";
 import {
   type CreateNotePayload,
   type Note,
@@ -42,6 +42,7 @@ async function handleCreateNote() {
   const editorContent = {
     content: { type: "doc" as const, content: [{ type: "paragraph" }] },
     plainText: "",
+    markdown: "",
   };
   const metadata = getMetadata(editorContent.content, editorContent.plainText);
   const title = UNTITLED;
@@ -62,8 +63,8 @@ async function handleCreateNote() {
     sidebarChange: { type: "prepend", noteId: result.data.id },
   }));
   stateStore.setState({ activeId: result.data.id });
-  handleViewNote(result.data);
-  if (isSyncEnabled()) handleSyncWrite(result.data.id);
+  await handleViewNote(result.data);
+  if (isSyncEnabled()) handleSyncWrite(result.data.id, title);
 }
 
 //------------------------------------------------------------
@@ -106,7 +107,7 @@ async function handleDeleteNote(id: string) {
   const isActiveDeletedId = activeId === id;
   if (isActiveDeletedId) {
     debouncedUpdateStats.cancel();
-    stopAutoSave(editor, "cancel");
+    await stopAutoSave(editor, "cancel");
   }
   const result = await deleteNote(id);
   if (!result.success) {
@@ -139,10 +140,14 @@ async function handleSaveNote(id: string, flush: boolean = false) {
   const editorContent = getEditorContent();
   const metaData = getMetadata(editorContent.content, editorContent.plainText);
   const oldNote = noteStore.getState().notes.find((n) => n.id === id);
-  const title = resolveTitle(oldNote?.plainText, editorContent.plainText);
+  const previousTitle = oldNote?.title ?? "";
+  let newTitle = previousTitle;
+  if (!flush) {
+    newTitle = resolveTitle(previousTitle, editorContent.plainText);
+  } else newTitle = titleGenerator(editorContent.plainText);
   const payload: UpdateNotePayload = {
     id,
-    title,
+    title: newTitle,
     ...editorContent,
     ...metaData,
   };
@@ -156,7 +161,7 @@ async function handleSaveNote(id: string, flush: boolean = false) {
     sidebarChange: { type: "update", noteId: result.data.id },
   }));
   debouncedUpdateStats(result.data);
-  if (isSyncEnabled()) handleSyncWrite(result.data.id, oldNote?.title);
+  if (isSyncEnabled()) handleSyncWrite(result.data.id, newTitle, previousTitle);
 }
 
 //------------------------------------------------------------
@@ -164,46 +169,42 @@ async function handleSaveNote(id: string, flush: boolean = false) {
 // read or getById
 
 async function handleSelectNote(id: string) {
+  const sidebar = getAppItem("sidebar");
+  const editor = getAppItem("editor");
+  debouncedUpdateStats.cancel();
+  await stopAutoSave(editor, "flush");
   const result = await getNoteById(id);
   if (!result.success) {
     console.error("[handleSelectNote]: Failed to fetch note:", result.error);
     return;
   }
-  const syncResult = isSyncEnabled()
-    ? await handleSync(id, result.data.updated_at)
-    : null;
-  const syncedContent = syncResult
-    ? { content: syncResult, extension: "markdown" as const }
-    : undefined;
+  if (isSyncEnabled()) {
+    handleSync(id, result.data.updated_at).catch((error) =>
+      console.error(
+        "[handleSelectNote]: Error while trying to sync note",
+        error,
+      ),
+    );
+  }
   const noteElement = findElement<HTMLDivElement>(
     `.note-item[data-id="${id}"]`,
-    getAppItem("sidebar"),
+    sidebar,
   );
   if (!noteElement) return;
   stateStore.setState({ activeId: id });
-  handleViewNote(result.data, syncedContent);
-  setActiveItem(noteElement, getAppItem("sidebar"));
+  await handleViewNote(result.data);
+  setActiveItem(noteElement, sidebar);
 }
 
 //------------------------------------------------------------
 
 // view function for editor content. gets called in combination with handleSelect
 
-function handleViewNote(
-  note: Note,
-  syncedContent?: { content: string; extension: "markdown" },
-) {
+async function handleViewNote(note: Note) {
   const editor = getAppItem("editor");
-  debouncedUpdateStats.cancel();
-  stopAutoSave(editor, "flush");
-  editor.commands.setContent(syncedContent?.content ?? note.content, {
+  editor.commands.setContent(note.content, {
     emitUpdate: false,
-    contentType: syncedContent ? syncedContent.extension : "json",
   });
-  if (syncedContent) {
-    const converted = editor.getJSON();
-    updateNote({ ...note, content: converted, links: [] }, false);
-  }
   resetEditorHistory(editor);
   const newCleanup = setupAutoSave(editor, note.id);
   debouncedUpdateStats(note);
@@ -220,6 +221,5 @@ export {
   handleImportNote,
   handleSaveNote,
   handleSelectNote,
-  handleSync,
   handleViewNote,
 };

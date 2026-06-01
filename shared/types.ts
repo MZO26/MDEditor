@@ -179,6 +179,18 @@ type SidebarChange =
   | { type: "remove"; noteId: string }
   | null;
 
+type ResizeOptions = {
+  minWidth?: number;
+  maxWidth?: number;
+  cssVariable?: string;
+  side?: "left" | "right";
+};
+
+type SyncResult =
+  | { type: "MISSING_RESOLVED"; content: null }
+  | { type: "IN_SYNC"; content: string }
+  | { type: "OUT_OF_SYNC"; localContent: string; dbContent: string };
+
 export type {
   Action,
   ActionMap,
@@ -202,12 +214,14 @@ export type {
   NativeWindowColors,
   NoteMenuPayload,
   PDFAssets,
+  ResizeOptions,
   ResolvedTheme,
   Result,
   SelectOption,
   SidebarChange,
   SnippetCacheValue,
   Success,
+  SyncResult,
   TemplateRegistry,
   ThemeResult,
   TitleBarOverlayOptions,
