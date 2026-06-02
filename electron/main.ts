@@ -54,8 +54,8 @@ function createWindow() {
   const bounds = store.get("window-bounds");
   const windowConfig: BrowserWindowConstructorOptions = {
     show: false,
-    width: Math.max(1100, bounds.width ?? 1100),
-    height: Math.max(600, bounds.height ?? 600),
+    width: Math.max(1100, bounds?.width ?? 1100),
+    height: Math.max(600, bounds?.height ?? 600),
     minWidth: 1100,
     minHeight: 600,
     titleBarStyle: "hidden",
@@ -79,7 +79,7 @@ function createWindow() {
       spellcheck: true,
     },
   };
-  if (bounds.x !== undefined && bounds.y !== undefined) {
+  if (bounds?.x !== undefined && bounds?.y !== undefined) {
     windowConfig.x = bounds.x;
     windowConfig.y = bounds.y;
   } else {
@@ -95,14 +95,6 @@ function createWindow() {
   } else {
     win.loadFile(path.join(__dirname, "../../dist/index.html"));
   }
-
-  win.on("focus", () => {
-    win?.webContents.send("window:focus");
-  });
-
-  win.on("blur", () => {
-    win?.webContents.send("window:blur");
-  });
 
   win.on("close", (e) => {
     if (!isReadyToClose) {

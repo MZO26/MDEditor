@@ -1,5 +1,5 @@
 import { UNTITLED } from "@shared/constants";
-import { DateSchema } from "@shared/schemas/note-schema";
+import { DateSchema, TitleSchema } from "@shared/schemas/note-schema";
 import z from "zod";
 
 const normalizeFileName = (val: string): string => {
@@ -30,7 +30,7 @@ const StringContentSchema = z
   .optional()
   .transform((val) => {
     if (!val || val.trim() === "") {
-      return "New Note";
+      return UNTITLED;
     }
     return val;
   });
@@ -69,11 +69,11 @@ const ExportRequestSchema = z.discriminatedUnion("extension", [
   PdfSchema,
 ]);
 
-const WriteSyncRequestSchema = MdSchema.extend({
-  previousTitle: FileNameSchema,
+const WriteMirrorRequestSchema = MdSchema.extend({
+  oldFileName: TitleSchema.optional(),
 });
 
-const DeleteSyncRequestSchema = MdSchema.omit({
+const DeleteMirrorRequestSchema = MdSchema.omit({
   content: true,
 });
 
@@ -97,25 +97,25 @@ const ImportRequestSchema = z.discriminatedUnion("extension", [
 ]);
 
 type SyncRequest = z.infer<typeof SyncRequestSchema>;
-type WriteSyncRequest = z.infer<typeof WriteSyncRequestSchema>;
-type DeleteSyncRequest = z.infer<typeof DeleteSyncRequestSchema>;
+type WriteMirrorRequest = z.infer<typeof WriteMirrorRequestSchema>;
+type DeleteMirrorRequest = z.infer<typeof DeleteMirrorRequestSchema>;
 type ExportManyRequest = z.infer<typeof ExportManyRequestSchema>;
 type ImportRequest = z.infer<typeof ImportRequestSchema>;
 type ExportRequest = z.infer<typeof ExportRequestSchema>;
 
 export {
-  DeleteSyncRequestSchema,
+  DeleteMirrorRequestSchema,
   ExportManyRequestSchema,
   ExportRequestSchema,
   FileNameSchema,
   ImportRequestSchema,
   StringContentSchema,
   SyncRequestSchema,
-  WriteSyncRequestSchema,
-  type DeleteSyncRequest,
+  WriteMirrorRequestSchema,
+  type DeleteMirrorRequest,
   type ExportManyRequest,
   type ExportRequest,
   type ImportRequest,
   type SyncRequest,
-  type WriteSyncRequest,
+  type WriteMirrorRequest,
 };

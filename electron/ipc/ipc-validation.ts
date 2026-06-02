@@ -3,7 +3,6 @@ import {
   AppBackendError,
   handleIpcError,
 } from "@electron/ipc/ipc-error-handler";
-import { registerFileIpc } from "@electron/ipc/ipc-fs";
 import { registerNoteIpc } from "@electron/ipc/ipc-note";
 import { registerSettingsIpc } from "@electron/ipc/ipc-settings";
 import { APP_START_TIME, IPC_TIMERS } from "@shared/constants";
@@ -16,7 +15,6 @@ function registerIpc(win: BrowserWindow) {
   registerElectronIpc(win);
   registerNoteIpc(win);
   registerSettingsIpc(win);
-  registerFileIpc(win);
 }
 
 async function result<T>(

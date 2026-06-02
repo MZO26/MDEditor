@@ -1,9 +1,15 @@
 import { setUpNoteMenu, setUpTableMenu } from "@electron/context-menu";
+import { handleImageWrite } from "@electron/fs/fs-image";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
-import { checkRateLimit, result } from "@electron/ipc/ipc-validation";
+import {
+  checkRateLimit,
+  result,
+  validation,
+} from "@electron/ipc/ipc-validation";
 import { getTitleBarOverlay, initTheme } from "@electron/titlebar";
 import { LIMITS } from "@shared/constants";
 import { AppErrorCode } from "@shared/errors";
+import { ImagePayloadSchema } from "@shared/schemas/image-schema";
 import { type Theme } from "@shared/schemas/store-schema";
 import type { MenuType, NoteMenuPayload } from "@shared/types";
 import { BrowserWindow, ipcMain, Menu, Notification } from "electron";
@@ -54,6 +60,14 @@ function registerElectronIpc(win: BrowserWindow) {
         });
         notif.show();
       }
+    });
+  });
+  ipcMain.handle("image:write", (e, payload: unknown) => {
+    return result(e, async () => {
+      if (!checkRateLimit("image:write", LIMITS.WRITE_HEAVY))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      const validatedData = validation(ImagePayloadSchema, payload);
+      return await handleImageWrite(validatedData);
     });
   });
 }

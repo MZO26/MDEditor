@@ -85,9 +85,9 @@ async function setImportedContent(
       const json = headlessEditor.getJSON();
       const plainText = headlessEditor.getText();
       const markdown = headlessEditor.getMarkdown();
-      const metadata = getMetadata(json, plainText);
+      const metadata = getMetadata(json);
       const payload: CreateNotePayload = {
-        title: titleGenerator(plainText),
+        title: titleGenerator(json),
         content: json,
         plainText: plainText,
         markdown: markdown,

@@ -11,8 +11,8 @@ const StoreSchema = z.object({
   "line-height": z.enum(["1.4", "1.5", "1.6"]).catch("1.5"),
   spellcheck: z.boolean().catch(false),
   "delete-confirmation": z.boolean().catch(false),
-  "sync-mode": z.boolean().catch(false),
-  "sync-path": z.string().nullable().catch(null),
+  "mirror-mode": z.boolean().catch(false),
+  "mirror-path": z.string().nullable().catch(null),
   "code-theme": z.enum(["focus", "balanced", "colorless"]).catch("balanced"),
   highlight: z.enum(["info", "idea", "focus"]).catch("info"),
   "note-item-display": z.enum(["tags", "snippet", "minimal"]).catch("tags"),
@@ -28,8 +28,8 @@ const StoreSchema = z.object({
 
 type AppSettings = z.infer<typeof StoreSchema>;
 type Spellcheck = AppSettings["spellcheck"];
-type SyncPath = AppSettings["sync-path"];
-type SyncMode = AppSettings["sync-mode"];
+type MirrorPath = AppSettings["mirror-path"];
+type MirrorMode = AppSettings["mirror-mode"];
 type DeleteConfirmation = AppSettings["delete-confirmation"];
 type NoteItemDisplay = AppSettings["note-item-display"];
 type HighlightTheme = AppSettings["highlight"];
@@ -52,10 +52,10 @@ export {
   type FontSize,
   type HighlightTheme,
   type LineHeight,
+  type MirrorMode,
+  type MirrorPath,
   type NoteItemDisplay,
   type Spellcheck,
   type StyleKeys,
-  type SyncMode,
-  type SyncPath,
   type Theme,
 };

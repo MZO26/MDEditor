@@ -202,12 +202,10 @@ async function updateStats(note: Note) {
 
 // debounced functions
 
-const debouncedUpdateStats = debounce(updateStats, DEBOUNCE_MS.normal);
-
 const debouncedSearch = debounce((e: Event) => {
   const target = e.target as HTMLInputElement;
   const value = target.value.trim();
   handleSearchInput(value);
 }, DEBOUNCE_MS.normal);
 
-export { debouncedSearch, debouncedUpdateStats, handleViews };
+export { debouncedSearch, handleViews, updateStats };

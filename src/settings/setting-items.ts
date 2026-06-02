@@ -115,7 +115,7 @@ function buildSelects() {
       "App",
     ));
   selectBuilder(
-    "file-sync",
+    "mirror-mode",
     [
       { value: "true", label: "Enable" },
       { value: "false", label: "Disable" },

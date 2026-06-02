@@ -1,9 +1,7 @@
 import type {
-  DeleteSyncRequest,
   ExportManyRequest,
   ExportRequest,
   SyncRequest,
-  WriteSyncRequest,
 } from "@shared/schemas/export-schema";
 import type { ImagePayload } from "@shared/schemas/image-schema";
 import type {
@@ -27,30 +25,14 @@ function subscribe<T extends unknown[]>(
   };
 }
 
-contextBridge.exposeInMainWorld("fileAPI", {
-  openSyncFolder: () => ipcRenderer.invoke("sync-folder:open"),
-  syncWrite: (payload: WriteSyncRequest) =>
-    ipcRenderer.invoke("note:sync-write", payload),
-  syncDelete: (payload: DeleteSyncRequest) =>
-    ipcRenderer.invoke("note:sync-delete", payload),
-  sync: (payload: SyncRequest) => ipcRenderer.invoke("note:sync", payload),
-  noteExport: (payload: ExportRequest) =>
-    ipcRenderer.invoke("note:export", payload),
-  onTriggerExport: (callback: (id: string, extension: string) => void) => {
-    subscribe("note:trigger-export", callback);
-  },
-  noteExportMany: (payload: ExportManyRequest) =>
-    ipcRenderer.invoke("note:export-many", payload),
-  noteImport: () => ipcRenderer.invoke("note:import"),
-  imageWrite: (payload: ImagePayload) =>
-    ipcRenderer.invoke("image:write", payload),
-});
 contextBridge.exposeInMainWorld("electronAPI", {
   startupReady: () => ipcRenderer.send("app:start-ready"),
   showNotification: (title: string, body: string) =>
     ipcRenderer.invoke("notification:show", title, body),
   setTheme: (theme: Theme, focus?: boolean) =>
     ipcRenderer.invoke("theme:set", theme, focus),
+  imageWrite: (payload: ImagePayload) =>
+    ipcRenderer.invoke("image:write", payload),
   onThemeChanged: (
     callback: (resolvedTheme: Extract<Theme, "dark" | "light">) => void,
   ) => {
@@ -84,6 +66,16 @@ contextBridge.exposeInMainWorld("noteAPI", {
   update: (payload: UpdateNotePayload, flush: boolean) =>
     ipcRenderer.invoke("note:update", payload, flush),
   delete: (id: string) => ipcRenderer.invoke("note:delete", id),
+  openMirrorFolder: () => ipcRenderer.invoke("mirror-folder:open"),
+  sync: (payload: SyncRequest) => ipcRenderer.invoke("note:sync", payload),
+  noteExport: (payload: ExportRequest) =>
+    ipcRenderer.invoke("note:export", payload),
+  noteExportMany: (payload: ExportManyRequest) =>
+    ipcRenderer.invoke("note:export-many", payload),
+  noteImport: () => ipcRenderer.invoke("note:import"),
+  onTriggerExport: (callback: (id: string, extension: string) => void) => {
+    subscribe("note:trigger-export", callback);
+  },
   onTriggerDelete: (callback: (id: string) => void) => {
     subscribe("note:trigger-delete", callback);
   },

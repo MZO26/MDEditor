@@ -1,5 +1,22 @@
 import db from "@electron/db/database";
-import { handleDBBackupDialog } from "@electron/fs/fs-dialog";
+import {
+  handleDBBackupDialog,
+  handleExportDialog,
+  handleExportManyDialog,
+  handleImportDialog,
+} from "@electron/fs/fs-dialog";
+import {
+  batchExport,
+  batchPDFExport,
+  singleExport,
+  singlePDFExport,
+} from "@electron/fs/fs-export";
+import { batchImport } from "@electron/fs/fs-import";
+import {
+  checkSyncState,
+  deleteMirroredNote,
+  writeMirroredNote,
+} from "@electron/fs/fs-mirror";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import {
   checkRateLimit,
@@ -7,9 +24,14 @@ import {
   result,
   validation,
 } from "@electron/ipc/ipc-validation";
+import { store } from "@electron/store";
 import { LIMITS } from "@shared/constants";
 import { AppErrorCode } from "@shared/errors";
-import { runWithNoteLock } from "@shared/limiter";
+import {
+  ExportManyRequestSchema,
+  ExportRequestSchema,
+  SyncRequestSchema,
+} from "@shared/schemas/export-schema";
 import {
   CreateNotePayloadSchema,
   CreateNotesPayloadsSchema,
@@ -17,7 +39,7 @@ import {
   IdsSchema,
   UpdateNotePayloadSchema,
 } from "@shared/schemas/note-schema";
-import { BrowserWindow, ipcMain } from "electron";
+import { BrowserWindow, dialog, ipcMain } from "electron";
 
 function registerNoteIpc(win: BrowserWindow) {
   ipcMain.handle("note:getAll", (e) => {
@@ -33,7 +55,12 @@ function registerNoteIpc(win: BrowserWindow) {
       if (!checkRateLimit("note:create", LIMITS.WRITE_STANDARD))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(CreateNotePayloadSchema, payload);
-      return db.create(validatedData);
+      const result = db.create(validatedData);
+      if (store.get("mirror-mode") !== true) return result;
+      const targetDir = store.get("mirror-path");
+      if (!targetDir) return result;
+      await writeMirroredNote(targetDir, result);
+      return result;
     });
   });
 
@@ -57,9 +84,18 @@ function registerNoteIpc(win: BrowserWindow) {
         }
       }
       const validatedData = validation(UpdateNotePayloadSchema, payload);
-      return runWithNoteLock(validatedData.id, async () => {
-        return db.update(validatedData);
-      });
+      const oldNote = db.getById(validatedData.id);
+      const result = db.update(validatedData);
+      if (store.get("mirror-mode") !== true) {
+        console.log(
+          "[note:update]: Mirror mode disabled, skipping mirror update",
+        );
+        return result;
+      }
+      const targetDir = store.get("mirror-path");
+      if (!targetDir) return result;
+      await writeMirroredNote(targetDir, result, oldNote.title);
+      return result;
     });
   });
 
@@ -68,9 +104,13 @@ function registerNoteIpc(win: BrowserWindow) {
       if (!checkRateLimit("note:delete", LIMITS.WRITE_STANDARD))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(IdSchema, id);
-      return runWithNoteLock(validatedData, async () => {
-        return db.delete(validatedData);
-      });
+      const note = db.getById(validatedData);
+      const result = db.delete(validatedData);
+      if (store.get("mirror-mode") !== true) return result;
+      const targetDir = store.get("mirror-path");
+      if (!targetDir) return result;
+      await deleteMirroredNote(targetDir, note);
+      return result;
     });
   });
 
@@ -89,6 +129,77 @@ function registerNoteIpc(win: BrowserWindow) {
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(IdsSchema, id);
       return db.getManyById(validatedData);
+    });
+  });
+
+  ipcMain.handle("mirror-folder:open", (e) => {
+    return result(e, async () => {
+      if (!checkRateLimit("mirror-folder:open", LIMITS.READ_LIGHT))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      const result = await dialog.showOpenDialog(win, {
+        title: "Select Mirror Directory",
+        buttonLabel: "Choose Folder",
+        properties: ["openDirectory", "createDirectory"],
+      });
+      if (result.canceled || result.filePaths.length === 0) {
+        throw new AppBackendError(AppErrorCode.CancelledOperation);
+      }
+      return result.filePaths[0];
+    });
+  });
+
+  ipcMain.handle("note:sync", (e, payload: unknown) => {
+    return result(e, async () => {
+      if (!checkRateLimit("note:sync", LIMITS.READ_LIGHT))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      if (store.get("mirror-mode") !== true) return null;
+      const validatedData = validation(SyncRequestSchema, payload);
+      if (!validatedData.updated_at) return null;
+      const targetDir = store.get("mirror-path");
+      if (!targetDir) return null;
+      return await checkSyncState(targetDir, validatedData);
+    });
+  });
+
+  ipcMain.handle("note:import", (e) => {
+    return result(e, async () => {
+      if (!checkRateLimit("note:import", LIMITS.WRITE_HEAVY))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      const filePaths = await handleImportDialog(win);
+      return await batchImport(filePaths);
+    });
+  });
+
+  ipcMain.handle("note:export-many", (e, payload: unknown) => {
+    return result(e, async () => {
+      if (!checkRateLimit("note:export-many", LIMITS.WRITE_HEAVY))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      const validatedData = validation(ExportManyRequestSchema, payload);
+      const selectedFolder = await handleExportManyDialog(win);
+      const hasPdf = validatedData.some(
+        (item) => "extension" in item && item.extension === "pdf",
+      );
+      if (hasPdf) {
+        return await batchPDFExport(selectedFolder, validatedData);
+      }
+      return await batchExport(selectedFolder, validatedData);
+    });
+  });
+
+  ipcMain.handle("note:export", (e, payload: unknown) => {
+    return result(e, async () => {
+      if (!checkRateLimit("note:export", LIMITS.WRITE_STANDARD))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      const validatedData = validation(ExportRequestSchema, payload);
+      const data =
+        typeof validatedData.content === "string"
+          ? validatedData.content
+          : JSON.stringify(validatedData.content, null, 2);
+      const filePath = await handleExportDialog(win, validatedData);
+      if (validatedData.extension === "pdf") {
+        return await singlePDFExport(filePath, data);
+      }
+      return await singleExport(filePath, data);
     });
   });
 

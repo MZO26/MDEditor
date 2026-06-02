@@ -1,6 +1,5 @@
 import { createNote } from "@/api/api";
 import { resetEditorHistory } from "@/components/editor/editor-features";
-import { handleSyncWrite, isSyncEnabled } from "@/notes/note-sync";
 import { noteStore, stateStore } from "@/settings/app-state";
 import { getAppItem } from "@/utils/registry";
 import type { CreateNotePayload, Note } from "@shared/schemas/note-schema";
@@ -48,8 +47,6 @@ async function handleDuplicateNote(note: Note) {
   requestAnimationFrame(() => {
     editor.commands.focus();
   });
-  if (isSyncEnabled())
-    handleSyncWrite(result.data.id, result.data.markdown, result.data.title);
 }
 
 export { handleDuplicateNote };

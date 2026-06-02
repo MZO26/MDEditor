@@ -5,9 +5,9 @@ import { renderIcons } from "@/utils/icons";
 import { compareNotes, updateNoteCount } from "@/utils/note";
 import { getAppItem, getInfobarItems, getTemplateItem } from "@/utils/registry";
 import { getTodoStats } from "@shared/generators";
+import type { EditorDoc } from "@shared/schemas/editor-schema";
 import type { Note } from "@shared/schemas/note-schema";
 import type { ViewItem } from "@shared/types";
-import type { JSONContent } from "@tiptap/core";
 
 // sidebar
 
@@ -171,7 +171,7 @@ function updateNoteInList(note: Note) {
 
 // info-sidebar
 
-function showTodoProgress(content: JSONContent) {
+function showTodoProgress(content: EditorDoc) {
   const stats = getTodoStats(content);
   const { todoContainer, todoCount, todoProgress } = getInfobarItems([
     "todoContainer",

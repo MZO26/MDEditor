@@ -1,23 +1,20 @@
-import { sync, syncDelete, syncWrite, updateNote } from "@/api/api";
+import { sync, updateNote } from "@/api/api";
 import { getNoteEditorExtensions } from "@/components/editor/editor-init";
 import { noteStore, settingsStore, stateStore } from "@/settings/app-state";
 import { initConflictDialog } from "@/settings/dialog-init";
 import { getAppItem } from "@/utils/registry";
-import { DEBOUNCE_MS, UNTITLED } from "@shared/constants";
+import { DEBOUNCE_MS } from "@shared/constants";
 import { getMetadata, titleGenerator } from "@shared/generators";
-import type {
-  DeleteSyncRequest,
-  SyncRequest,
-} from "@shared/schemas/export-schema";
+import type { SyncRequest } from "@shared/schemas/export-schema";
 import { Editor } from "@tiptap/core";
 
 const { conflictDialog } = initConflictDialog();
 
-function isSyncEnabled() {
-  return settingsStore.get("sync-mode") ?? false;
+function isMirrorEnabled() {
+  return settingsStore.get("mirror-mode") ?? false;
 }
 
-async function handleSync(id: string, updated_at: string) {
+async function handleConflict(id: string, updated_at: string) {
   const now = Date.now();
   const lastSynced = stateStore.get("lastSyncedAt") || 0;
   if (now - lastSynced < DEBOUNCE_MS.slow) return;
@@ -25,8 +22,7 @@ async function handleSync(id: string, updated_at: string) {
   if (!dbNote) return;
   const syncPayload: SyncRequest = {
     id,
-    fileName:
-      dbNote?.title.trim() || titleGenerator(dbNote.plainText) || UNTITLED,
+    fileName: titleGenerator(dbNote.content),
     content: dbNote.markdown,
     extension: "md",
     updated_at,
@@ -56,8 +52,8 @@ async function handleSync(id: string, updated_at: string) {
             });
             const json = headlessEditor.getJSON();
             const plainText = headlessEditor.getText();
-            const newTitle = titleGenerator(plainText);
-            const metaData = getMetadata(json, plainText);
+            const newTitle = titleGenerator(json);
+            const metaData = getMetadata(json);
             const updatePayload = {
               ...note,
               ...metaData,
@@ -75,16 +71,28 @@ async function handleSync(id: string, updated_at: string) {
             }
           } catch (error) {
             console.error(
-              "[handleSync]: Headless editor failed to convert markdown",
+              "[handleConflict]: Headless editor failed to convert markdown",
               error,
             );
           } finally {
             if (headlessEditor) headlessEditor.destroy();
           }
         } else if (decision === "accept") {
-          // keep db content
-          const newTitle = titleGenerator(note.plainText);
-          await handleSyncWrite(note.id, newTitle, note.title);
+          // keep db content and overwrite local file
+          const updateResult = await updateNote(
+            {
+              ...dbNote,
+              ...getMetadata(dbNote.content),
+            },
+            true,
+          );
+          if (!updateResult.success) return;
+          noteStore.setState((state) => ({
+            notes: state.notes.map((n) =>
+              n.id === updateResult.data.id ? updateResult.data : n,
+            ),
+            sidebarChange: { type: "update", noteId: updateResult.data.id },
+          }));
         }
       };
       conflictDialog.addEventListener("close", handleConflictClose, {
@@ -96,40 +104,4 @@ async function handleSync(id: string, updated_at: string) {
   }
 }
 
-async function handleSyncWrite(
-  id: string,
-  markdown: string,
-  newTitle: string,
-  oldTitle?: string,
-) {
-  const writePayload = {
-    id,
-    content: markdown,
-    previousTitle: oldTitle ?? "",
-    fileName: newTitle,
-    extension: "md" as const,
-  };
-  const result = await syncWrite(writePayload);
-  if (!result.success) {
-    console.error(
-      "[handleSyncWrite]: Error synchronizing note to filesystem.",
-      result.error,
-    );
-    return;
-  }
-  return result.data;
-}
-
-async function handleSyncDelete(request: DeleteSyncRequest) {
-  const result = await syncDelete(request);
-  if (!result.success) {
-    console.error(
-      "[handleSyncDelete]: Error synchronizing deletion of synced note.",
-      result.error,
-    );
-    return;
-  }
-  return result.data;
-}
-
-export { handleSync, handleSyncDelete, handleSyncWrite, isSyncEnabled };
+export { handleConflict, isMirrorEnabled };

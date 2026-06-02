@@ -20,8 +20,8 @@ const DEFAULT_STORE: AppSettings = {
   highlight: "info",
   spellcheck: false,
   "delete-confirmation": true,
-  "sync-mode": false,
-  "sync-path": null,
+  "mirror-mode": false,
+  "mirror-path": null,
   "note-item-display": "tags",
   "window-bounds": { width: 1100, height: 600 },
 };

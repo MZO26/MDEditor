@@ -3,11 +3,9 @@ import { debounce } from "@/utils/async";
 import { DEBOUNCE_MS } from "@shared/constants";
 import { AppErrorCode } from "@shared/errors";
 import type {
-  DeleteSyncRequest,
   ExportRequest,
   ImportRequest,
   SyncRequest,
-  WriteSyncRequest,
 } from "@shared/schemas/export-schema";
 import type { ImagePayload } from "@shared/schemas/image-schema";
 import type {
@@ -38,6 +36,12 @@ async function invoke<T>(ipcPromise: Promise<Result<T>>): Promise<Result<T>> {
 
 //----------------------------------------------------------
 
+// note api
+
+async function getAll(): Promise<Result<Note[]>> {
+  return invoke(window.noteAPI.getAll());
+}
+
 async function createNote(payload: CreateNotePayload): Promise<Result<Note>> {
   return invoke(window.noteAPI.create(payload));
 }
@@ -59,16 +63,36 @@ async function deleteNote(id: string): Promise<Result<void>> {
   return invoke(window.noteAPI.delete(id));
 }
 
-async function getAll(): Promise<Result<Note[]>> {
-  return invoke(window.noteAPI.getAll());
-}
-
 async function getNoteById(id: string): Promise<Result<Note>> {
   return invoke(window.noteAPI.getById(id));
 }
 
 async function getManyById(ids: string[]): Promise<Result<Note[]>> {
   return invoke(window.noteAPI.getManyById(ids));
+}
+
+async function sync(payload: SyncRequest): Promise<Result<SyncResult>> {
+  return invoke(window.noteAPI.sync(payload));
+}
+
+async function openMirrorFolder(): Promise<Result<string>> {
+  return invoke(window.noteAPI.openMirrorFolder());
+}
+
+async function exportNote(
+  payload: ExportRequest,
+): Promise<Result<ExportRequest>> {
+  return invoke(window.noteAPI.noteExport(payload));
+}
+
+async function exportManyNotes(
+  payload: ExportedContent[],
+): Promise<Result<ExportedContent[]>> {
+  return invoke(window.noteAPI.noteExportMany(payload));
+}
+
+async function importNote(): Promise<Result<ImportRequest[]>> {
+  return invoke(window.noteAPI.noteImport());
 }
 
 async function pin(id: string): Promise<Result<boolean>> {
@@ -87,6 +111,10 @@ async function dbMaintenance(action: string): Promise<Result<number>> {
   return invoke(window.noteAPI.dbMaintenance(action));
 }
 
+//----------------------------------------------------------
+
+// settings api
+
 async function getSettings<K extends keyof AppSettings>(
   key: K,
 ): Promise<Result<AppSettings[K]>> {
@@ -103,45 +131,15 @@ async function setSettings(
   return invoke(window.storeAPI.setSettings(settings));
 }
 
-async function syncWrite(
-  payload: WriteSyncRequest,
-): Promise<Result<WriteSyncRequest>> {
-  return invoke(window.fileAPI.syncWrite(payload));
-}
+//----------------------------------------------------------
 
-async function syncDelete(payload: DeleteSyncRequest): Promise<Result<void>> {
-  return invoke(window.fileAPI.syncDelete(payload));
-}
-
-async function sync(payload: SyncRequest): Promise<Result<SyncResult>> {
-  return invoke(window.fileAPI.sync(payload));
-}
-
-async function exportNote(
-  payload: ExportRequest,
-): Promise<Result<ExportRequest>> {
-  return invoke(window.fileAPI.noteExport(payload));
-}
-
-async function exportManyNotes(
-  payload: ExportedContent[],
-): Promise<Result<ExportedContent[]>> {
-  return invoke(window.fileAPI.noteExportMany(payload));
-}
-
-async function importNote(): Promise<Result<ImportRequest[]>> {
-  return invoke(window.fileAPI.noteImport());
-}
+// electron api
 
 async function setTheme(
   theme: Theme,
   focus?: boolean,
 ): Promise<Result<Exclude<Theme, "system">>> {
   return invoke(window.electronAPI.setTheme(theme, focus));
-}
-
-async function openSyncFolder(): Promise<Result<string>> {
-  return invoke(window.fileAPI.openSyncFolder());
 }
 
 async function showNotification(
@@ -152,7 +150,7 @@ async function showNotification(
 }
 
 async function imageWrite(payload: ImagePayload): Promise<Result<ImageSrc>> {
-  return invoke(window.fileAPI.imageWrite(payload));
+  return invoke(window.electronAPI.imageWrite(payload));
 }
 
 async function handleZoom(action: ZoomAction): Promise<Result<ZoomAction>> {
@@ -203,13 +201,11 @@ export {
   handleZoom,
   imageWrite,
   importNote,
-  openSyncFolder,
+  openMirrorFolder,
   pin,
   setTheme,
   showNotification,
   sync,
-  syncDelete,
-  syncWrite,
   updateNote,
   updateSettings,
 };

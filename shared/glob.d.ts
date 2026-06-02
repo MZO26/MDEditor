@@ -1,8 +1,6 @@
 import type {
-  DeleteSyncRequest,
   ExportRequest,
   ImportRequest,
-  WriteSyncRequest,
 } from "@shared/schemas/export-schema";
 import type { Note } from "@shared/schemas/note-schema";
 import type { AppSettings, Theme } from "@shared/schemas/store-schema";
@@ -18,22 +16,8 @@ declare module "*.css";
 
 declare global {
   interface Window {
-    fileAPI: {
-      openSyncFolder: () => Promise<Result<string>>;
-      syncWrite: (payload: WriteSyncRequest) => Promise<Result<ExportRequest>>;
-      syncDelete: (payload: DeleteSyncRequest) => Promise<Result<void>>;
-      sync: (payload: SyncRequest) => Promise<Result<SyncResult>>;
-      noteExport: (payload: ExportRequest) => Promise<Result<ExportRequest>>;
-      onTriggerExport: (
-        callback: (id: string, extension: string) => void,
-      ) => () => void;
-      noteExportMany: (
-        payload: ExportedContent[],
-      ) => Promise<Result<ExportedContent[]>>;
-      noteImport: () => Promise<Result<ImportRequest[]>>;
-      imageWrite: (payload: ImagePayload) => Promise<Result<ImageSrc>>;
-    };
     electronAPI: {
+      imageWrite: (payload: ImagePayload) => Promise<Result<ImageSrc>>;
       startupReady: () => void;
       setTheme: (theme: Theme, focus?: boolean) => Promise<Result<Theme>>;
       showNotification: (title: string, body: string) => Promise<Result<void>>;
@@ -63,6 +47,16 @@ declare global {
         flush: boolean,
       ) => Promise<Result<Note>>;
       delete: (id: string) => Promise<Result<void>>;
+      openMirrorFolder: () => Promise<Result<string>>;
+      sync: (payload: SyncRequest) => Promise<Result<SyncResult>>;
+      noteExport: (payload: ExportRequest) => Promise<Result<ExportRequest>>;
+      onTriggerExport: (
+        callback: (id: string, extension: string) => void,
+      ) => () => void;
+      noteExportMany: (
+        payload: ExportedContent[],
+      ) => Promise<Result<ExportedContent[]>>;
+      noteImport: () => Promise<Result<ImportRequest[]>>;
       onTriggerDelete: (callback: (id: string) => void) => () => void;
       onTriggerId: (callback: (id: string) => void) => () => void;
       onTriggerDuplicate: (callback: (id: string) => void) => () => void;

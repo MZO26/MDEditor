@@ -28,7 +28,7 @@ function resizeSidebar(
   options: ResizeOptions = {},
 ) {
   const {
-    minWidth = 5,
+    minWidth = 3,
     maxWidth = 600,
     cssVariable = "--sidebar-width",
     side = "left",

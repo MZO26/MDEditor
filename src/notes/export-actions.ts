@@ -5,7 +5,6 @@ import { sleep } from "@/utils/async";
 import {
   BATCH_SIZE,
   DOMPURIFY_CONFIG,
-  UNTITLED,
   YIELD_INTERVAL,
 } from "@shared/constants";
 import { AppErrorCode } from "@shared/errors";
@@ -130,10 +129,7 @@ function getExportContent(
     const payload: ExportRequest = {
       id,
       extension,
-      fileName:
-        note.title.trim() ||
-        titleGenerator(headlessEditor.getText()) ||
-        UNTITLED,
+      fileName: titleGenerator(headlessEditor.getJSON()),
       content,
     };
     return { success: true, data: payload };

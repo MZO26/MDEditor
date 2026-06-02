@@ -1,7 +1,7 @@
 import {
   dbMaintenance,
   exportManyNotes,
-  openSyncFolder,
+  openMirrorFolder,
   showNotification,
   updateSettings,
 } from "@/api/api";
@@ -18,9 +18,9 @@ import type {
   FontSize,
   HighlightTheme,
   LineHeight,
+  MirrorPath,
   NoteItemDisplay,
   Spellcheck,
-  SyncPath,
   Theme,
 } from "@shared/schemas/store-schema";
 import type { DbOptimization, ExportFormat } from "@shared/types";
@@ -231,15 +231,15 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     "#delete-confirmation",
     container,
   );
-  const fileSyncSelect = findElement<HTMLSelectElement>(
-    "#file-sync",
+  const mirrorModeSelect = findElement<HTMLSelectElement>(
+    "#mirror-mode",
     container,
   );
   if (
     !batchExportSelect ||
     !dbOptimizeSelect ||
     !deleteConfirmSelect ||
-    !fileSyncSelect
+    !mirrorModeSelect
   )
     return;
 
@@ -310,26 +310,26 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     updateSettings({ "delete-confirmation": enabled as DeleteConfirmation });
   });
 
-  // sync fs mode
+  // mirror to fs mode
 
-  fileSyncSelect.value = settings["sync-mode"] ? "true" : "false";
-  fileSyncSelect.addEventListener(
+  mirrorModeSelect.value = settings["mirror-mode"] ? "true" : "false";
+  mirrorModeSelect.addEventListener(
     "change",
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLSelectElement;
       const enabled = target.value === "true";
       console.log(enabled);
       if (enabled) {
-        const result = await openSyncFolder();
+        const result = await openMirrorFolder();
         if (!result.success) {
           target.value = "false";
           return;
         }
         updateSettings({
-          "sync-mode": true,
-          "sync-path": result.data as SyncPath,
+          "mirror-mode": true,
+          "mirror-path": result.data as MirrorPath,
         });
-      } else updateSettings({ "sync-mode": false });
+      } else updateSettings({ "mirror-mode": false });
     }),
   );
 }

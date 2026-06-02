@@ -1,61 +1,116 @@
 import type { Metadata } from "@shared/types";
 import type { JSONContent } from "@tiptap/core";
+import { UNTITLED } from "./constants";
 import type { EditorDoc } from "./schemas/editor-schema";
 
-function getMetadata(content: EditorDoc, plainText: string): Metadata {
+function getMetadata(content: EditorDoc): Metadata {
   const { left } = getTodoStats(content);
   return {
-    snippet: snippetGenerator(plainText),
+    snippet: snippetGenerator(content),
     todos_left: left,
     links: getLinks(content),
     tags: getTags(content),
   };
 }
 
-function* iterateLines(text: string): IterableIterator<string> {
-  let start = 0;
-  while (start < text.length) {
-    let end = text.indexOf("\n", start);
-    if (end === -1) end = text.length;
-    yield text.slice(start, end);
-    start = end + 1;
+// function* iterateLines(text: string): IterableIterator<string> {
+//   let start = 0;
+//   while (start < text.length) {
+//     let end = text.indexOf("\n", start);
+//     if (end === -1) end = text.length;
+//     yield text.slice(start, end);
+//     start = end + 1;
+//   }
+// }
+
+// function titleGenerator(text: string) {
+//   if (typeof text !== "string") return "New Note";
+//   for (let line of iterateLines(text)) {
+//     line = line.replace(/#[\p{L}\p{N}_]+/gu, "").trim();
+//     if (line) return line.length > 50 ? line.slice(0, 47) + "..." : line;
+//   }
+//   return "New Note";
+// }
+
+function extractText(node: JSONContent): string {
+  if (node.text) return node.text;
+  if (Array.isArray(node.content)) {
+    return node.content.map(extractText).join("");
   }
+  return "";
 }
 
-function titleGenerator(text: string) {
-  if (typeof text !== "string") return "New Note";
-  for (let line of iterateLines(text)) {
-    line = line.replace(/#[\p{L}\p{N}_]+/gu, "").trim();
-    if (line) return line.length > 50 ? line.slice(0, 47) + "..." : line;
+function titleGenerator(doc: EditorDoc): string {
+  if (!doc || !Array.isArray(doc.content) || doc.content.length === 0) {
+    return UNTITLED;
   }
-  return "New Note";
+  const firstBlock = doc.content[0];
+  if (
+    firstBlock &&
+    (firstBlock.type === "heading" || firstBlock.type === "paragraph")
+  ) {
+    const text = extractText(firstBlock).trim();
+    if (text) return truncateTitle(text);
+  }
+  for (const block of doc.content) {
+    if (block.type === "paragraph" || block.type === "heading") {
+      const text = extractText(block).trim();
+      if (text) return truncateTitle(text);
+    }
+  }
+  return UNTITLED;
 }
 
-function snippetGenerator(text: string) {
-  if (typeof text !== "string") return "";
+function truncateTitle(text: string): string {
+  return text.length > 50 ? text.slice(0, 47) + "..." : text;
+}
+
+// function snippetGenerator(text: string) {
+//   if (typeof text !== "string") return "";
+//   let snippet = "";
+//   let validLineCount = 0;
+//   for (let line of iterateLines(text)) {
+//     line = line.replace(/#[\p{L}\p{N}_]+/gu, "").trim();
+//     if (!line) continue;
+//     validLineCount++;
+//     if (validLineCount === 1) continue;
+//     snippet += (snippet.length > 0 ? " " : "") + line;
+//     if (snippet.length >= 50) break;
+//   }
+//   const cleanedSnippet = snippet.replace(/\s{2,}/g, " ").trim();
+//   return cleanedSnippet.length > 47
+//     ? cleanedSnippet.slice(0, 47) + "..."
+//     : cleanedSnippet;
+// }
+
+function snippetGenerator(doc: EditorDoc | undefined): string {
+  if (!doc || !Array.isArray(doc.content) || doc.content.length === 0) {
+    return "";
+  }
   let snippet = "";
-  let validLineCount = 0;
-  for (let line of iterateLines(text)) {
-    line = line.replace(/#[\p{L}\p{N}_]+/gu, "").trim();
-    if (!line) continue;
-    validLineCount++;
-    if (validLineCount === 1) continue;
-    snippet += (snippet.length > 0 ? " " : "") + line;
+  let skippedTitle = false;
+  for (const block of doc.content) {
+    if (block.type !== "paragraph" && block.type !== "heading") continue;
+    const text = extractText(block).trim();
+    if (!text) continue;
+    if (!skippedTitle) {
+      skippedTitle = true;
+      continue;
+    }
+    snippet += (snippet.length > 0 ? " " : "") + text;
     if (snippet.length >= 50) break;
   }
-  const cleanedSnippet = snippet.replace(/\s{2,}/g, " ").trim();
-  return cleanedSnippet.length > 47
-    ? cleanedSnippet.slice(0, 47) + "..."
-    : cleanedSnippet;
+  const cleaned = snippet.replace(/\s+/g, " ").trim();
+  return cleaned.length > 50 ? cleaned.slice(0, 47) + "..." : cleaned;
 }
 
-function getTodoStats(content: EditorDoc) {
+function getTodoStats(doc: EditorDoc) {
   let total = 0;
   let completed = 0;
-  if (!content) {
+  if (!doc || !Array.isArray(doc.content) || doc.content.length === 0) {
     return { total, completed, left: 0 };
   }
-  const stack: JSONContent[] = [content];
+  const stack: JSONContent[] = [doc.content];
   while (stack.length > 0) {
     const node = stack.pop()!;
     if (node.type === "taskItem") {
@@ -81,10 +136,10 @@ function getTodoStats(content: EditorDoc) {
   };
 }
 
-function getLinks(jsonDoc: EditorDoc) {
-  if (!jsonDoc) return [];
+function getLinks(doc: EditorDoc) {
+  if (!doc) return [];
   const seen = new Set<string>();
-  const stack: JSONContent[] = [jsonDoc];
+  const stack: JSONContent[] = [doc];
   while (stack.length > 0) {
     const node = stack.pop()!;
     if (node.content) {
@@ -100,10 +155,10 @@ function getLinks(jsonDoc: EditorDoc) {
   return Array.from(seen);
 }
 
-function getTags(jsonDoc: EditorDoc) {
-  if (!jsonDoc) return [];
+function getTags(doc: EditorDoc) {
+  if (!doc) return [];
   const seen = new Set<string>();
-  const stack: JSONContent[] = [jsonDoc];
+  const stack: JSONContent[] = [doc.content];
   while (stack.length > 0) {
     const node = stack.pop()!;
     if (node.content) {
