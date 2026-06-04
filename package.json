@@ -1,5 +1,5 @@
 {
-  "name": "mdeditor",
+  "name": "mzo.md",
   "version": "1.0.0",
   "description": "MZO.md is a fast, distraction-free note-taking app for personal knowledge and documentation",
   "main": "dist-electron/main/main.js",

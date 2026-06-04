@@ -321,7 +321,6 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLSelectElement;
       const enabled = target.value === "true";
-      console.log(enabled);
       if (enabled) {
         const result = await openMirrorFolder();
         if (!result.success) {

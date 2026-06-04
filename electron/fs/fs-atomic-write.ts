@@ -8,17 +8,19 @@ async function writeAtomic(
 ) {
   const tempPath = `${targetPath}.tmp`;
   let fileHandle: FileHandle | undefined;
-
+  let writeSucceeded = false;
   try {
     // open the temp file for writing
-    fileHandle = await open(tempPath, "w");
+    fileHandle = await open(tempPath, "wx");
     // writes all new data into the temp file. If an error comes up, it jumps to finally and closes the temp file
     await fileHandle.writeFile(content);
     // flush saves file contents from memory to the fs
-    await fileHandle.sync();
+    await fileHandle.datasync();
+    writeSucceeded = true;
   } finally {
-    if (fileHandle) {
-      await fileHandle.close();
+    await fileHandle?.close();
+    if (!writeSucceeded) {
+      await unlink(tempPath).catch(() => {});
     }
   }
   // temp file is fully written and closed and gets renamed to targetPath from tempPath

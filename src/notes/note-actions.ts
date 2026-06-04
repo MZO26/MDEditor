@@ -13,7 +13,6 @@ import { setImportedContent } from "@/notes/import-actions";
 import { handleConflict, isMirrorEnabled } from "@/notes/note-conflict";
 import { noteStore, stateStore } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
-import { findElement, setActiveItem } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
 import { DEBOUNCE_MS, UNTITLED } from "@shared/constants";
 import { getMetadata, titleGenerator } from "@shared/generators";
@@ -159,7 +158,6 @@ const debouncedSaveNote = debounce(handleSaveNote, DEBOUNCE_MS.slow);
 // read or getById
 
 async function handleSelectNote(id: string) {
-  const sidebar = getAppItem("sidebar");
   const editor = getAppItem("editor");
   debouncedSaveNote.flush();
   stateStore.setState({ activeId: id });
@@ -178,10 +176,6 @@ async function handleSelectNote(id: string) {
     );
     if (stateStore.getState().activeId !== id) return;
   }
-  const noteElement = findElement<HTMLDivElement>(
-    `.note-item[data-id="${id}"]`,
-    sidebar,
-  );
   editor.commands.setContent(result.data.content, {
     emitUpdate: false,
   });
@@ -189,7 +183,6 @@ async function handleSelectNote(id: string) {
   requestAnimationFrame(() => {
     editor.commands.focus();
   });
-  if (noteElement) setActiveItem(noteElement, sidebar);
   await updateStats(result.data);
 }
 

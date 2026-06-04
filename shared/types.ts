@@ -148,7 +148,6 @@ interface InfobarRegistry {
   todoContainer: HTMLDivElement;
   todoCount: HTMLSpanElement;
   todoProgress: HTMLDivElement;
-  toggleBtn: HTMLButtonElement;
 }
 
 interface TemplateRegistry {

@@ -1,12 +1,6 @@
 import type { NoteMenuPayload } from "@shared/types";
 import { Menu, type BrowserWindow } from "electron";
 
-// let activeId: string | null = null;
-
-// ipcMain.on("set-active-note", (_event, id) => {
-//   activeId = id;
-// });
-
 async function setUpEditorMenu(win: BrowserWindow) {
   const { default: contextMenu } = await import("electron-context-menu");
   contextMenu({

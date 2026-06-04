@@ -1,3 +1,4 @@
+import { getEditorContent } from "@/components/editor/editor-features";
 import {
   CustomTableCell,
   CustomTableHeader,
@@ -33,7 +34,6 @@ import {
 import { Markdown } from "@tiptap/markdown";
 import StarterKit from "@tiptap/starter-kit";
 import DOMPurify from "dompurify";
-import { getEditorContent } from "./editor-features";
 
 let editor: Editor | null = null;
 

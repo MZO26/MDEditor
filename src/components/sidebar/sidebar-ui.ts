@@ -129,7 +129,6 @@ function prependNoteToList(note: Note) {
   const sidebar = getAppItem("sidebar");
   const noteElement = createNoteItem(note);
   sidebar.prepend(noteElement);
-  setActiveItem(noteElement, sidebar);
 }
 
 // delete note

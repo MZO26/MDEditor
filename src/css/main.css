@@ -136,17 +136,6 @@
   }
 }
 
-.close-btn {
-  position: absolute;
-  top: 8px;
-  right: 14px;
-  z-index: 2;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--text-main);
-}
-
 .info-note {
   margin: 0;
   font-size: 0.85rem;
@@ -552,18 +541,6 @@ label {
   flex: 0 0 30px;
 }
 
-#noteId {
-  width: 280px;
-  flex: 1;
-  border-radius: 5px;
-  background-color: var(--bg-sidebar-section);
-  border: none;
-  color: var(--text-main);
-  font-size: 0.8rem;
-  padding: 10px 17px;
-  outline: none;
-}
-
 .info-note {
   padding: 0;
   margin: 0;
@@ -835,6 +812,10 @@ label {
   transform: rotate(180deg);
 }
 
+.app-container.toolbar-collapsed .info-sidebar {
+  transform: translateY(-50px);
+}
+
 .editor-container {
   position: relative;
   display: grid;
@@ -970,15 +951,8 @@ svg.empty-state-icon {
   color: var(--text-main);
 }
 
-.spacer {
-  display: inline-block;
-  height: 20px;
-  border-left: 1px solid var(--border-color);
-  margin: 0 10px;
-}
-
 .sidebar-spacer {
-  margin: 10px 0;
+  margin: 20px 0;
 }
 
 .hidden {

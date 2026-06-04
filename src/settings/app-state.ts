@@ -6,7 +6,9 @@ import {
   updateNoteCount,
 } from "@/components/sidebar/sidebar-ui";
 import { NoteSearch } from "@/notes/search";
+import { findElement, setActiveItem } from "@/utils/dom";
 import { compareNotes } from "@/utils/note";
+import { getAppItem } from "@/utils/registry";
 import type { Note } from "@shared/schemas/note-schema";
 import type { AppSettings } from "@shared/schemas/store-schema";
 import type { SidebarChange } from "@shared/types";
@@ -116,6 +118,12 @@ stateStore.subscribe((state) => {
   if (state.activeId !== previousId) {
     previousId = state.activeId;
     window.noteAPI.setActiveNote(state.activeId);
+    const sidebar = getAppItem("sidebar");
+    const noteElement = findElement<HTMLDivElement>(
+      `.note-item[data-id="${state.activeId}"]`,
+      sidebar,
+    );
+    if (noteElement) setActiveItem(noteElement, sidebar);
     handleEditorEmptyState();
   }
   if (state.searchQuery !== previousSearchQuery) {

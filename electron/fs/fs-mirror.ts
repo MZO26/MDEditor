@@ -14,8 +14,8 @@ import {
 import type { Note } from "@shared/schemas/note-schema";
 import type { ExportedContent, FileContent, SyncResult } from "@shared/types";
 import console from "console";
-import { app } from "electron";
-import fs, { mkdir, readFile, unlink } from "fs/promises";
+import { app, shell } from "electron";
+import fs, { access, constants, mkdir, readFile } from "fs/promises";
 import path from "path";
 
 function getFilePath(
@@ -168,9 +168,9 @@ async function deleteMirroredNoteLogic(
   payload: DeleteMirrorRequest,
 ) {
   const mirrorPath = resolveMirrorPath(targetDir);
-  await mkdir(mirrorPath, { recursive: true });
   const { absoluteFilePath } = getFilePath(mirrorPath, payload);
-  await unlink(absoluteFilePath);
+  await access(absoluteFilePath, constants.F_OK);
+  await shell.trashItem(absoluteFilePath);
 }
 
 async function deleteMirroredNote(targetDir: string, result: Note) {

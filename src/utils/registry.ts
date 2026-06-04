@@ -119,7 +119,6 @@ function initializeInfobarRegistry() {
     todoContainer: requireElement<HTMLDivElement>(".todo-progress-container"),
     todoCount: requireElement<HTMLSpanElement>("#todo-count"),
     todoProgress: requireElement<HTMLDivElement>("#todo-progress"),
-    toggleBtn: requireElement<HTMLButtonElement>(".info-sidebar-toggle"),
   });
 }
 

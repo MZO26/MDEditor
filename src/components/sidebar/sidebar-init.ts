@@ -13,7 +13,7 @@ import { createAsyncHandler } from "@/utils/async";
 import { requireElement } from "@/utils/dom";
 import {
   getAppItem,
-  getInfobarItems,
+  getInfobarItem,
   initializeInfobarRegistry,
   registerAppEvents,
 } from "@/utils/registry";
@@ -143,27 +143,14 @@ function applySidebarListeners(
 
 function initInfoSidebar() {
   initializeInfobarRegistry();
-  const { toggleBtn, infoSidebar } = getInfobarItems([
-    "toggleBtn",
-    "infoSidebar",
-  ]);
-  setSidebarState(infoSidebar, true);
-  applyInfoSidebarListeners(toggleBtn, infoSidebar);
-  registerAppEvents(document, {
-    "app:toggle-info-sidebar": () => {
-      const collapsed = infoSidebar.classList.contains("collapsed");
-      setSidebarState(infoSidebar, !collapsed);
-    },
-  });
+  const infoSidebar = getInfobarItem("infoSidebar");
+  applyInfoSidebarListeners(infoSidebar);
 }
 
-function applyInfoSidebarListeners(
-  toggleBtn: HTMLButtonElement,
-  infoSidebar: HTMLDivElement,
-) {
+function applyInfoSidebarListeners(infoSidebar: HTMLDivElement) {
   resizeSidebar(".resizer-infobar", ".info-sidebar", {
     minWidth: 0,
-    maxWidth: 320,
+    maxWidth: 400,
     cssVariable: "--infobar-width",
     side: "right",
   });
@@ -181,10 +168,6 @@ function applyInfoSidebarListeners(
       }
     }),
   );
-  toggleBtn.addEventListener("click", () => {
-    const collapsed = infoSidebar.classList.contains("collapsed");
-    setSidebarState(infoSidebar, !collapsed);
-  });
 }
 
 export { initInfoSidebar, initNotesSidebar };

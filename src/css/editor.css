@@ -324,24 +324,24 @@
 
 .ProseMirror pre {
   position: relative;
-  background: var(--bg-sidebar);
   border: 1px solid var(--border-color);
+  background-color: var(--hljs-bg);
   border-radius: 0.5rem;
   color: var(--hljs-fg);
   padding: 1rem;
-  font-family: monospace;
   white-space: pre-wrap;
   overflow-wrap: break-word;
 }
 
 .ProseMirror pre code {
   display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
   line-height: inherit;
   background: var(--hljs-bg);
   color: var(--hljs-fg);
   padding: 0;
   white-space: inherit;
-  font-size: 100%;
 }
 
 .ProseMirror img {
