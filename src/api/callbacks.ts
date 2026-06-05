@@ -7,7 +7,7 @@ import {
 } from "@/api/api";
 import { getExportContent } from "@/notes/export-actions";
 import { debouncedSaveNote, handleDeleteNote } from "@/notes/note-actions";
-import { handleConflict } from "@/notes/note-conflict";
+import { handleConflict, isMirrorEnabled } from "@/notes/note-conflict";
 import { handleDuplicateNote } from "@/notes/note-duplicate";
 import { noteStore, settingsStore, stateStore } from "@/settings/app-state";
 import { initDeleteDialog } from "@/settings/dialog-init";
@@ -187,12 +187,16 @@ function initListeners() {
   window.electronAPI.onSystemResume(async () => {
     const activeId = stateStore.get("activeId");
     const note = noteStore.get("notes").find((n) => n.id === activeId);
+    const editor = getAppItem("editor");
     stateStore.setState({ lastSyncedAt: 0 });
-    if (activeId && note) {
+    if (isMirrorEnabled() && activeId && note) {
       console.log("[System-Resume-Event]: Forcing JIT Sync...");
-      handleConflict(activeId, note.updated_at).catch((error: Error) => {
-        console.error("[System-Resume-Event]: Sync failed", error);
-      });
+      const markdown = editor.getMarkdown();
+      handleConflict(activeId, markdown, note.updated_at).catch(
+        (error: Error) => {
+          console.error("[System-Resume-Event]: Sync failed", error);
+        },
+      );
     }
   });
 }

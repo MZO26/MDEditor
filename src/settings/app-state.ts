@@ -111,6 +111,7 @@ async function syncNoteStore() {
       notes: sortedNotes,
       sidebarChange: { type: "reload" },
     });
+    searchEngine.bulkLoad(sortedNotes);
   }
 }
 
@@ -139,8 +140,8 @@ const searchEngine = new NoteSearch(noteStore.getState().notes);
 
 noteStore.subscribe((state) => {
   if (state.notes !== previousNotesRef) {
-    previousNotesRef = state.notes;
-    searchEngine.updateNotes(state.notes);
+    const notes = state.notes;
+    if (notes === previousNotesRef) return;
     handleSidebarEmptyState();
   }
   if (state.notes.length !== previousNotesLength) {

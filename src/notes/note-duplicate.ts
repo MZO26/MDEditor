@@ -1,8 +1,13 @@
 import { createNote } from "@/api/api";
-import { resetEditorHistory } from "@/components/editor/editor-features";
-import { noteStore, stateStore } from "@/settings/app-state";
+import {
+  getNoteEditorExtensions,
+  resetEditorHistory,
+} from "@/components/editor/editor-init";
+import { isMirrorEnabled } from "@/notes/note-conflict";
+import { noteStore, searchEngine, stateStore } from "@/settings/app-state";
 import { getAppItem } from "@/utils/registry";
 import type { CreateNotePayload, Note } from "@shared/schemas/note-schema";
+import { Editor } from "@tiptap/core";
 
 async function handleDuplicateNote(note: Note) {
   const editor = getAppItem("editor");
@@ -14,14 +19,30 @@ async function handleDuplicateNote(note: Note) {
     ...rest
   } = note;
   // does not duplicate incoming links because other notes would be forced to point to this new duplicate
-  const outgoingLinkIds: string[] = [];
-  for (const link of originalLinks) {
-    if (link.dir === "out") {
-      outgoingLinkIds.push(link.id);
+  const outgoingLinkIds = originalLinks
+    .filter((link) => link.dir === "out")
+    .map((link) => link.id);
+
+  let markdown: string | undefined;
+  if (isMirrorEnabled()) {
+    const headlessEditor = new Editor({
+      extensions: getNoteEditorExtensions(),
+      content: note.content,
+    });
+    try {
+      markdown = headlessEditor.getMarkdown();
+    } catch (error) {
+      console.error(
+        "[handleDuplicateNote]: Markdown conversion failed:",
+        error,
+      );
+    } finally {
+      if (headlessEditor) headlessEditor.destroy();
     }
   }
   const data: CreateNotePayload = {
     ...rest,
+    ...(isMirrorEnabled() && markdown !== undefined ? { markdown } : {}),
     links: outgoingLinkIds,
     pinned: false,
     bookmarked: false,
@@ -39,6 +60,7 @@ async function handleDuplicateNote(note: Note) {
     notes: [result.data, ...state.notes],
     sidebarChange: { type: "prepend", noteId: result.data.id },
   }));
+  searchEngine.upsertNote(result.data);
   stateStore.setState({ activeId: result.data.id });
   editor.commands.setContent(result.data.content, {
     emitUpdate: false,

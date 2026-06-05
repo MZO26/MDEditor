@@ -55,11 +55,24 @@ function registerNoteIpc(win: BrowserWindow) {
       if (!checkRateLimit("note:create", LIMITS.WRITE_STANDARD))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(CreateNotePayloadSchema, payload);
-      const result = db.create(validatedData);
-      if (store.get("mirror-mode") !== true) return result;
-      const targetDir = store.get("mirror-path");
-      if (!targetDir) return result;
-      await writeMirroredNote(targetDir, result);
+      const { markdown, ...noteData } = validatedData;
+      const isMirrorMode = store.get("mirror-mode") === true;
+      const targetDir = isMirrorMode ? store.get("mirror-path") : null;
+      const result = db.create(noteData);
+      if (!isMirrorMode || !targetDir) {
+        console.log(
+          "[note:create]: Mirror mode disabled, skipping mirror create.",
+        );
+        return result;
+      }
+      if (markdown === undefined)
+        throw new AppBackendError(AppErrorCode.InvalidData);
+      await writeMirroredNote({
+        id: result.id,
+        fileName: result.title,
+        markdown: markdown,
+        targetDir: targetDir,
+      });
       return result;
     });
   });
@@ -84,17 +97,29 @@ function registerNoteIpc(win: BrowserWindow) {
         }
       }
       const validatedData = validation(UpdateNotePayloadSchema, payload);
-      const oldNote = db.getById(validatedData.id);
-      const result = db.update(validatedData);
-      if (store.get("mirror-mode") !== true) {
+      const { markdown, ...noteData } = validatedData;
+      const isMirrorMode = store.get("mirror-mode") === true;
+      const targetDir = isMirrorMode ? store.get("mirror-path") : null;
+      const oldTitle =
+        isMirrorMode && targetDir
+          ? db.getOldNoteTitle(validatedData.id)
+          : undefined;
+      const result = db.update(noteData);
+      if (!isMirrorMode || !targetDir) {
         console.log(
-          "[note:update]: Mirror mode disabled, skipping mirror update",
+          "[note:update]: Mirror mode disabled, skipping mirror update.",
         );
         return result;
       }
-      const targetDir = store.get("mirror-path");
-      if (!targetDir) return result;
-      await writeMirroredNote(targetDir, result, oldNote.title);
+      if (markdown === undefined)
+        throw new AppBackendError(AppErrorCode.InvalidData);
+      await writeMirroredNote({
+        id: result.id,
+        fileName: result.title,
+        markdown: markdown,
+        targetDir: targetDir,
+        oldFileName: oldTitle,
+      });
       return result;
     });
   });
@@ -104,12 +129,17 @@ function registerNoteIpc(win: BrowserWindow) {
       if (!checkRateLimit("note:delete", LIMITS.WRITE_STANDARD))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(IdSchema, id);
-      const note = db.getById(validatedData);
+      const isMirrorMode = store.get("mirror-mode") === true;
+      const targetDir = isMirrorMode ? store.get("mirror-path") : null;
+      const oldTitle = db.getOldNoteTitle(validatedData);
       const result = db.delete(validatedData);
-      if (store.get("mirror-mode") !== true) return result;
-      const targetDir = store.get("mirror-path");
-      if (!targetDir) return result;
-      await deleteMirroredNote(targetDir, note);
+      if (!isMirrorMode || !targetDir) {
+        console.log(
+          "[note:delete]: Mirror mode disabled, skipping mirror delete.",
+        );
+        return result;
+      }
+      await deleteMirroredNote(targetDir, validatedData, oldTitle);
       return result;
     });
   });

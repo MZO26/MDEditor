@@ -11,7 +11,10 @@ import {
   type SyncRequest,
   type WriteMirrorRequest,
 } from "@shared/schemas/export-schema";
-import type { Note } from "@shared/schemas/note-schema";
+import type {
+  MirroredNoteWritePayload,
+  Note,
+} from "@shared/schemas/note-schema";
 import type { ExportedContent, FileContent, SyncResult } from "@shared/types";
 import console from "console";
 import { app, shell } from "electron";
@@ -132,16 +135,18 @@ async function writeMirroredNoteLogic(
   }
 }
 
-async function writeMirroredNote(
-  targetDir: string,
-  result: Note,
-  oldFileName?: string,
-) {
+async function writeMirroredNote({
+  id,
+  fileName,
+  markdown,
+  targetDir,
+  oldFileName,
+}: MirroredNoteWritePayload) {
   const writePayload = {
-    id: result.id,
-    fileName: result.title,
-    oldFileName: oldFileName,
-    content: result.markdown,
+    id,
+    fileName,
+    oldFileName,
+    content: markdown,
     extension: "md",
   };
   const validatedFileData = validation(WriteMirrorRequestSchema, writePayload);
@@ -173,10 +178,14 @@ async function deleteMirroredNoteLogic(
   await shell.trashItem(absoluteFilePath);
 }
 
-async function deleteMirroredNote(targetDir: string, result: Note) {
+async function deleteMirroredNote(
+  targetDir: string,
+  id: Note["id"],
+  oldTitle: Note["title"],
+) {
   const deletePayload = {
-    id: result.id,
-    fileName: result.title,
+    id,
+    fileName: oldTitle,
     extension: "md",
   };
   const validatedFileData = validation(

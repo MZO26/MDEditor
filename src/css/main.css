@@ -611,7 +611,7 @@ label {
   justify-content: safe center;
   gap: 5px;
   padding-top: 2px;
-  overflow: auto;
+  overflow: visible;
   flex-wrap: nowrap;
   flex-direction: row;
   width: 100%;

@@ -15,7 +15,6 @@ import {
   type Note,
   type NoteRow,
   type Tag,
-  type TagName,
   type TagRow,
   type UpdateNotePayload,
 } from "@shared/schemas/note-schema";
@@ -37,6 +36,7 @@ class NoteDB {
   private getAllLinksStmt: BetterSqlite.Statement;
   private getTagsByIdStmt: BetterSqlite.Statement;
   private getLinksByIdStmt: BetterSqlite.Statement;
+  private getOldTitleStmt: BetterSqlite.Statement;
   private toggleBookmarkStmt: BetterSqlite.Statement;
   private togglePinStmt: BetterSqlite.Statement;
   private searchByTagStmt: BetterSqlite.Statement;
@@ -45,69 +45,62 @@ class NoteDB {
     try {
       const BetterSqlite = require("better-sqlite3");
       this.db = new BetterSqlite(dbPath);
-      console.log(`Database initialized at: ${dbPath}`);
-    } catch (error) {
-      console.error("[NoteDB]: Failed to initialize database:", error);
-
-      const msg = error instanceof Error ? error.message : String(error);
-
-      if (
-        msg.includes("Cannot find module") ||
-        msg.includes("compiled against a different Node.js") ||
-        msg.includes("invalid ELF header") ||
-        msg.includes("dlopen")
-      ) {
-        throw new Error(
-          "better-sqlite3 native module failed to load. " +
-            "Try: npm run rebuild && npm run pack:" +
-            process.platform,
-        );
-      }
-      throw error;
-    }
-    this.db.pragma("journal_mode = WAL");
-    this.db.pragma("foreign_keys = ON");
-    this.createTables();
-    this.views = new Views(this.db);
-    this.transactions = new Transactions(this.db);
-    // predefined statements to prevent parsing them for every transaction
-    this.getAllNotesStmt = this.db.prepare(
-      "SELECT * FROM notes ORDER BY created_at DESC",
-    );
-    this.getNoteByIdStmt = this.db.prepare(
-      "SELECT * FROM notes WHERE id = @id",
-    );
-    this.getManyNotesByIdStmt = this.db.prepare(`
+      this.db.pragma("journal_mode = WAL");
+      this.db.pragma("foreign_keys = ON");
+      this.createTables();
+      this.views = new Views(this.db);
+      this.transactions = new Transactions(this.db);
+      // predefined statements to prevent parsing them for every transaction
+      this.getAllNotesStmt = this.db.prepare(
+        "SELECT * FROM notes ORDER BY created_at DESC",
+      );
+      this.getNoteByIdStmt = this.db.prepare(
+        "SELECT * FROM notes WHERE id = @id",
+      );
+      this.getManyNotesByIdStmt = this.db.prepare(`
       SELECT * FROM notes WHERE id IN (SELECT value FROM json_each(@idsList))
     `);
-    this.getAllTagsStmt = this.db.prepare(
-      "SELECT note_id, tag_name FROM note_tags",
-    );
-    this.getAllLinksStmt = this.db.prepare(
-      "SELECT source_id, target_id FROM note_links",
-    );
-    this.getTagsByIdStmt = this.db.prepare(
-      "SELECT tag_name FROM note_tags WHERE note_id = @id",
-    );
-    this.getLinksByIdStmt = this.db.prepare(`
+      this.getAllTagsStmt = this.db.prepare(
+        "SELECT note_id, tag_name FROM note_tags",
+      );
+      this.getAllLinksStmt = this.db.prepare(
+        "SELECT source_id, target_id FROM note_links",
+      );
+      this.getTagsByIdStmt = this.db.prepare(
+        "SELECT tag_name FROM note_tags WHERE note_id = @id",
+      );
+      this.getLinksByIdStmt = this.db.prepare(`
       SELECT target_id AS id, 'out' AS dir FROM note_links WHERE source_id = @id UNION ALL SELECT source_id AS id, 'in' AS dir FROM note_links WHERE target_id = @id
       `);
-    this.toggleBookmarkStmt = this.db.prepare(`
+      this.getOldTitleStmt = this.db
+        .prepare(`SELECT title FROM notes WHERE id = @id`)
+        .pluck();
+      this.toggleBookmarkStmt = this.db.prepare(`
       UPDATE notes 
       SET bookmarked = NOT bookmarked, updated_at = @updated_at
       WHERE id = @id RETURNING bookmarked
     `);
-    this.togglePinStmt = this.db.prepare(`
+      this.togglePinStmt = this.db.prepare(`
       UPDATE notes 
       SET pinned = NOT pinned, updated_at = @updated_at
       WHERE id = @id RETURNING pinned
     `);
-    this.searchByTagStmt = this.db.prepare(`
+      this.searchByTagStmt = this.db.prepare(`
       SELECT notes.* 
       FROM notes
       JOIN note_tags as t ON notes.id = t.note_id
       WHERE t.tag_name = @tag_name
       `);
+      console.log(`Database initialized at: ${dbPath}`);
+    } catch (error) {
+      console.error("[NoteDB]: Failed to initialize database:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const msg =
+        `better-sqlite3 native module failed to load on platform: ${process.platform}. ` +
+        `Try running: npm run rebuild && npm run pack. Original error: ${errorMessage}`;
+      throw new AppBackendError(AppErrorCode.DBError, msg);
+    }
   }
 
   private createTables() {
@@ -116,8 +109,6 @@ class NoteDB {
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL CHECK(length(title) > 0),
         content TEXT NOT NULL,
-        plainText TEXT NOT NULL DEFAULT '',
-        markdown TEXT NOT NULL DEFAULT '',
         bookmarked INTEGER NOT NULL DEFAULT 0,
         pinned INTEGER NOT NULL DEFAULT 0,
         todos_left INTEGER NOT NULL DEFAULT 0,
@@ -241,7 +232,9 @@ class NoteDB {
 
   public getAll(): Note[] {
     const rows = this.getAllNotesStmt.all() as NoteRow[];
-    if (!rows || rows.length === 0) return [];
+    if (!Array.isArray(rows)) {
+      throw new AppBackendError(AppErrorCode.DBError);
+    }
     const tagMap = this.getTagMap() ?? [];
     const linkMap = this.getLinkMap() ?? [];
     return rows.map((note) => {
@@ -254,12 +247,12 @@ class NoteDB {
   }
 
   public getById(id: string): Note {
-    const dbRow = this.getNoteByIdStmt.get({ id }) as NoteRow;
-    if (!dbRow) {
+    const row = this.getNoteByIdStmt.get({ id }) as NoteRow;
+    if (!row) {
       throw new AppBackendError(AppErrorCode.DBError);
     }
     return validation(NoteFromDB, {
-      ...dbRow,
+      ...row,
       tags: this.getTagsById(id) ?? [],
       links: this.getLinksById(id) ?? [],
     });
@@ -269,6 +262,9 @@ class NoteDB {
     if (ids.length === 0) return [];
     const params = { idsList: JSON.stringify(ids) };
     const rows = this.getManyNotesByIdStmt.all(params) as NoteRow[];
+    if (!Array.isArray(rows)) {
+      throw new AppBackendError(AppErrorCode.DBError);
+    }
     const tagMap = this.getTagMap() ?? [];
     const linkMap = this.getLinkMap() ?? [];
     return rows.map((row) => {
@@ -299,13 +295,20 @@ class NoteDB {
   }
 
   public getTagsById(id: string): Tag[] {
-    const result = this.getTagsByIdStmt.all({ id }) as TagName[];
-    const tagArr = result.map((row) => row.tag_name);
-    return tagArr;
+    const rows = this.getTagsByIdStmt.all({ id });
+    if (!Array.isArray(rows)) {
+      throw new AppBackendError(AppErrorCode.DBError);
+    }
+    const tagArr = rows.map((row) => (row as { tag_name: string }).tag_name);
+    return tagArr as Tag[];
   }
 
   public getLinksById(id: string): Link[] {
-    return this.getLinksByIdStmt.all({ id }) as Link[];
+    const rows = this.getLinksByIdStmt.all({ id });
+    if (!Array.isArray(rows)) {
+      throw new AppBackendError(AppErrorCode.DBError);
+    }
+    return rows as Link[];
   }
 
   public searchByTag(tagName: string): Note[] {
@@ -371,6 +374,14 @@ class NoteDB {
         links: linkMap.get(note.id) ?? [],
       });
     });
+  }
+
+  public getOldNoteTitle(id: string): Note["title"] {
+    const title = this.getOldTitleStmt.get({ id }) as Note["title"] | undefined;
+    if (!title) {
+      throw new AppBackendError(AppErrorCode.DBError);
+    }
+    return title;
   }
 
   optimizeDb() {

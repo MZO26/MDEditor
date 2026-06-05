@@ -1,5 +1,8 @@
 import { getAll } from "@/api/api";
-import { getNoteEditorExtensions } from "@/components/editor/editor-init";
+import {
+  getNoteEditorExtensions,
+  getPlainTextFromJson,
+} from "@/components/editor/editor-init";
 import { noteStore } from "@/settings/app-state";
 import { sleep } from "@/utils/async";
 import {
@@ -36,7 +39,7 @@ async function getBatchExportContent(
           fileName: note.title,
           content: isJson
             ? JSON.stringify(note.content, null, 2)
-            : (note.plainText ?? ""),
+            : getPlainTextFromJson(note.content),
           extension,
         });
       }

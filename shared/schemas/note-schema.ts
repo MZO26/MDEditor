@@ -74,9 +74,7 @@ const NoteTableSchema = z.object({
   title: TitleSchema,
   snippet: SnippetSchema,
   content: EditorDocSchema,
-  markdown: PlainTextSchema,
   todos_left: TodoSchema,
-  plainText: PlainTextSchema,
   pinned: z.boolean(),
   bookmarked: z.boolean(),
   created_at: DateSchema,
@@ -87,6 +85,10 @@ const NoteTableSchema = z.object({
 const NoteSchema = NoteTableSchema.extend({
   tags: TagsSchema,
   links: LinksSchema,
+});
+
+const NoteMetaData = NoteSchema.omit({
+  content: true,
 });
 
 // Full Array of Note Objects
@@ -114,7 +116,7 @@ const CreateNotePayloadSchema = NoteSchema.omit({
   id: true,
   created_at: true,
   updated_at: true,
-}).extend({ links: LinkPayloadSchema });
+}).extend({ links: LinkPayloadSchema, markdown: PlainTextSchema.optional() });
 
 const CreateNotesPayloadsSchema = z.array(CreateNotePayloadSchema);
 
@@ -124,7 +126,7 @@ const UpdateNotePayloadSchema = NoteSchema.omit({
   bookmarked: true,
   created_at: true,
   updated_at: true,
-}).extend({ links: LinkPayloadSchema });
+}).extend({ links: LinkPayloadSchema, markdown: PlainTextSchema.optional() });
 
 // Everything gets written to DB.
 const CreateTransactionSchema = NoteToDBSchema;
@@ -139,8 +141,6 @@ const NoteRowSchema = z.object({
   id: IdSchema,
   title: TitleSchema,
   content: z.string(),
-  markdown: PlainTextSchema,
-  plainText: PlainTextSchema,
   snippet: SnippetSchema,
   bookmarked: z.union([z.literal(0), z.literal(1)]).default(0),
   pinned: z.union([z.literal(0), z.literal(1)]).default(0),
@@ -149,6 +149,27 @@ const NoteRowSchema = z.object({
   updated_at: DateSchema,
 });
 
+const NoteSearchDoc = NoteSchema.omit({
+  content: true,
+  bookmarked: true,
+  pinned: true,
+  links: true,
+  created_at: true,
+  updated_at: true,
+  todos_left: true,
+}).extend({ plainText: PlainTextSchema });
+
+const MirroredNoteWritePayloadSchema = z.object({
+  id: IdSchema,
+  fileName: TitleSchema,
+  markdown: PlainTextSchema,
+  targetDir: z.string(),
+  oldFileName: z.string().optional(),
+});
+
+type MirroredNoteWritePayload = z.infer<typeof MirroredNoteWritePayloadSchema>;
+type NoteSearchDoc = z.infer<typeof NoteSearchDoc>;
+type NoteMetaData = z.infer<typeof NoteMetaData>;
 type NoteRow = z.infer<typeof NoteRowSchema>;
 type TagRow = z.infer<typeof TagRowSchema>;
 type LinkRow = z.infer<typeof LinkRowSchema>;
@@ -172,6 +193,7 @@ export {
   IdsSchema,
   LinkRowsSchema,
   LinksSchema,
+  MirroredNoteWritePayloadSchema,
   NoteFromDB,
   NoteRowSchema,
   NoteSchema,
@@ -192,8 +214,11 @@ export {
   type CreateTransaction,
   type Link,
   type LinkRow,
+  type MirroredNoteWritePayload,
   type Note,
+  type NoteMetaData,
   type NoteRow,
+  type NoteSearchDoc,
   type Tag,
   type TagName,
   type TagRow,

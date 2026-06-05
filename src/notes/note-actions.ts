@@ -7,18 +7,18 @@ import {
   showNotification,
   updateNote,
 } from "@/api/api";
-import { resetEditorHistory } from "@/components/editor/editor-features";
+import { resetEditorHistory } from "@/components/editor/editor-init";
 import { updateStats } from "@/components/sidebar/sidebar-features";
 import { setImportedContent } from "@/notes/import-actions";
 import { handleConflict, isMirrorEnabled } from "@/notes/note-conflict";
-import { noteStore, stateStore } from "@/settings/app-state";
+import { noteStore, searchEngine, stateStore } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
 import { getAppItem } from "@/utils/registry";
-import { DEBOUNCE_MS, UNTITLED } from "@shared/constants";
+import { DEBOUNCE_MS, EMPTY_DOC, UNTITLED } from "@shared/constants";
 import { getMetadata, titleGenerator } from "@shared/generators";
-import type { EditorDoc } from "@shared/schemas/editor-schema";
 import {
   type CreateNotePayload,
+  type Note,
   type UpdateNotePayload,
 } from "@shared/schemas/note-schema";
 
@@ -30,14 +30,11 @@ import {
 
 async function handleCreateNote() {
   const editor = getAppItem("editor");
-  const editorContent = {
-    content: { type: "doc" as const, content: [{ type: "paragraph" }] },
-    plainText: "",
-    markdown: "",
-  };
-  const metadata = getMetadata(editorContent.content);
+  const editorContent = EMPTY_DOC;
+  const metadata = getMetadata(editorContent);
   const payload: CreateNotePayload = {
-    ...editorContent,
+    content: editorContent,
+    ...(isMirrorEnabled() ? { markdown: "" } : {}),
     ...metadata,
     title: UNTITLED,
     pinned: false,
@@ -52,6 +49,7 @@ async function handleCreateNote() {
     notes: [result.data, ...state.notes],
     sidebarChange: { type: "prepend", noteId: result.data.id },
   }));
+  searchEngine.upsertNote(result.data);
   stateStore.setState({ activeId: result.data.id });
   editor.commands.setContent(result.data.content, {
     emitUpdate: false,
@@ -88,6 +86,7 @@ async function handleImportNote() {
     notes: [...result.data, ...state.notes],
     sidebarChange: { type: "reload" },
   }));
+  searchEngine.bulkLoad(result.data);
 }
 
 //----------------------------------------------------------
@@ -110,6 +109,7 @@ async function handleDeleteNote(id: string) {
     notes: state.notes.filter((note) => note.id !== id),
     sidebarChange: { type: "remove", noteId: id },
   }));
+  searchEngine.removeNote(id);
   if (isActiveDeletedId) {
     stateStore.setState({ activeId: null });
     editor.commands.clearContent();
@@ -122,22 +122,18 @@ async function handleDeleteNote(id: string) {
 
 async function handleSaveNote(
   id: string,
-  editorContent: {
-    content: EditorDoc;
-    plainText: string;
-    markdown: string;
-  },
+  content: Note["content"],
+  markdown?: string,
   flush: boolean = false,
 ) {
-  const metaData = getMetadata(editorContent.content);
-  const oldNote = noteStore.getState().notes.find((n) => n.id === id);
-  if (oldNote?.markdown === editorContent.markdown) return; // if content is the same, do not proceed with save. prevents resetting of editor history and unnecessary writes
-  const newTitle = titleGenerator(editorContent.content);
+  const metaData = getMetadata(content);
+  const newTitle = titleGenerator(content);
   const payload: UpdateNotePayload = {
     id,
     title: newTitle,
-    ...editorContent,
+    content,
     ...metaData,
+    ...(isMirrorEnabled() && markdown !== undefined ? { markdown } : {}),
   };
   const result = await updateNote(payload, flush);
   if (!result.success) {
@@ -148,6 +144,7 @@ async function handleSaveNote(
     notes: state.notes.map((n) => (n.id === result.data.id ? result.data : n)),
     sidebarChange: { type: "update", noteId: result.data.id },
   }));
+  searchEngine.upsertNote(result.data);
   await updateStats(result.data);
 }
 
@@ -167,18 +164,18 @@ async function handleSelectNote(id: string) {
     console.error("[handleSelectNote]: Failed to fetch note:", result.error);
     return;
   }
-  if (isMirrorEnabled()) {
-    await handleConflict(id, result.data.updated_at).catch((error) =>
+  editor.commands.setContent(result.data.content, {
+    emitUpdate: false,
+  });
+  const markdown = isMirrorEnabled() ? editor.getMarkdown() : undefined;
+  if (markdown !== undefined) {
+    await handleConflict(id, markdown, result.data.updated_at).catch((error) =>
       console.error(
         "[handleSelectNote -> handleConflict]: Error while trying to sync note",
         error,
       ),
     );
-    if (stateStore.getState().activeId !== id) return;
   }
-  editor.commands.setContent(result.data.content, {
-    emitUpdate: false,
-  });
   resetEditorHistory(editor);
   requestAnimationFrame(() => {
     editor.commands.focus();

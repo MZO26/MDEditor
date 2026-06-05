@@ -1,6 +1,11 @@
 import { sync, updateNote } from "@/api/api";
 import { getNoteEditorExtensions } from "@/components/editor/editor-init";
-import { noteStore, settingsStore, stateStore } from "@/settings/app-state";
+import {
+  noteStore,
+  searchEngine,
+  settingsStore,
+  stateStore,
+} from "@/settings/app-state";
 import { initConflictDialog } from "@/settings/dialog-init";
 import { getAppItem } from "@/utils/registry";
 import { DEBOUNCE_MS } from "@shared/constants";
@@ -14,7 +19,11 @@ function isMirrorEnabled() {
   return settingsStore.get("mirror-mode") ?? false;
 }
 
-async function handleConflict(id: string, updated_at: string) {
+async function handleConflict(
+  id: string,
+  markdown: string,
+  updated_at: string,
+) {
   const now = Date.now();
   const lastSynced = stateStore.get("lastSyncedAt") || 0;
   if (now - lastSynced < DEBOUNCE_MS.slow) return;
@@ -23,7 +32,7 @@ async function handleConflict(id: string, updated_at: string) {
   const syncPayload: SyncRequest = {
     id,
     fileName: titleGenerator(dbNote.content),
-    content: dbNote.markdown,
+    content: markdown,
     extension: "md",
     updated_at,
   };
@@ -51,7 +60,6 @@ async function handleConflict(id: string, updated_at: string) {
               contentType: "markdown",
             });
             const json = headlessEditor.getJSON();
-            const plainText = headlessEditor.getText();
             const newTitle = titleGenerator(json);
             const metaData = getMetadata(json);
             const updatePayload = {
@@ -60,7 +68,6 @@ async function handleConflict(id: string, updated_at: string) {
               title: newTitle,
               content: json,
               markdown: localContent,
-              plainText,
             };
             const result = await updateNote(updatePayload, true);
             if (!result.success) {
@@ -81,6 +88,7 @@ async function handleConflict(id: string, updated_at: string) {
                 ),
                 sidebarChange: { type: "update", noteId: result.data.id },
               }));
+              searchEngine.upsertNote(result.data);
             }
           } catch (error) {
             console.error(
@@ -95,6 +103,7 @@ async function handleConflict(id: string, updated_at: string) {
           const updateResult = await updateNote(
             {
               ...dbNote,
+              ...(markdown !== undefined ? { markdown } : {}),
               ...getMetadata(dbNote.content),
             },
             true,
@@ -112,6 +121,7 @@ async function handleConflict(id: string, updated_at: string) {
             ),
             sidebarChange: { type: "update", noteId: updateResult.data.id },
           }));
+          searchEngine.upsertNote(updateResult.data);
         }
       };
       conflictDialog.addEventListener("close", handleConflictClose, {

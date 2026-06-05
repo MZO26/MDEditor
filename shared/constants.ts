@@ -1,4 +1,4 @@
-import type { Note } from "@shared/schemas/note-schema";
+import type { NoteSearchDoc } from "@shared/schemas/note-schema";
 import type { CodeTheme, Theme } from "@shared/schemas/store-schema";
 import type { Code, ContentType, ResolvedTheme, ViewItem } from "@shared/types";
 import type { Editor } from "@tiptap/core";
@@ -164,7 +164,7 @@ const DOMPURIFY_CONFIG = {
   FORCE_BODY: true, // prevents mXSS via fragment parsing edge cases
 };
 
-const FUSE_OPTIONS: IFuseOptions<Note> = {
+const FUSE_OPTIONS: IFuseOptions<NoteSearchDoc> = {
   useExtendedSearch: true,
   includeMatches: true,
   ignoreLocation: true,

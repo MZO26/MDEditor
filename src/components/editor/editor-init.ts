@@ -1,4 +1,3 @@
-import { getEditorContent } from "@/components/editor/editor-features";
 import {
   CustomTableCell,
   CustomTableHeader,
@@ -11,14 +10,16 @@ import { NoteTag } from "@/extensions/tag";
 import { Typography } from "@/extensions/typography";
 import { WikiLink } from "@/extensions/wikilinks";
 import { debouncedSaveNote, handleSelectNote } from "@/notes/note-actions";
+import { isMirrorEnabled } from "@/notes/note-conflict";
 import { noteStore, stateStore } from "@/settings/app-state";
 import { sleep } from "@/utils/async";
 import { requireElement } from "@/utils/dom";
 import { useDelayedSpinner } from "@/utils/ui";
 import { DOMPURIFY_CONFIG } from "@shared/constants";
 import { processWithLimit } from "@shared/limiter";
+import type { EditorDoc } from "@shared/schemas/editor-schema";
 import type { AppSettings } from "@shared/schemas/store-schema";
-import { Editor } from "@tiptap/core";
+import { Editor, generateText } from "@tiptap/core";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import Highlight from "@tiptap/extension-highlight";
 import Image from "@tiptap/extension-image";
@@ -32,6 +33,7 @@ import {
   Selection,
 } from "@tiptap/extensions";
 import { Markdown } from "@tiptap/markdown";
+import { EditorState } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
 import DOMPurify from "dompurify";
 
@@ -100,11 +102,13 @@ function initEditor(settings: Partial<AppSettings>): Editor {
     },
     autofocus: true,
   });
-  editor.on("update", () => {
+  editor.on("update", ({ editor, transaction }) => {
+    if (!transaction.docChanged) return;
     const activeId = stateStore.getState().activeId;
     if (!activeId) return;
-    const editorContent = getEditorContent();
-    debouncedSaveNote(activeId, editorContent, false);
+    const content = editor?.getJSON();
+    const markdown = isMirrorEnabled() ? editor.getMarkdown() : undefined;
+    debouncedSaveNote(activeId, content, markdown, false);
   });
   return editor;
 }
@@ -259,4 +263,26 @@ function setupEditorListeners(editorWrapper: HTMLDivElement, editor: Editor) {
   );
 }
 
-export { editor, getNoteEditorExtensions, initEditor, setupEditorListeners };
+function resetEditorHistory(editor: Editor) {
+  const newState = EditorState.create({
+    doc: editor.state.doc,
+    plugins: editor.state.plugins,
+    schema: editor.state.schema,
+  });
+  editor.view.updateState(newState);
+}
+
+function getPlainTextFromJson(json: EditorDoc): string {
+  return generateText(json, getNoteEditorExtensions(), {
+    blockSeparator: "\n",
+  });
+}
+
+export {
+  editor,
+  getNoteEditorExtensions,
+  getPlainTextFromJson,
+  initEditor,
+  resetEditorHistory,
+  setupEditorListeners,
+};
