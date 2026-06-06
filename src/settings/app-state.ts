@@ -20,7 +20,7 @@ const DEFAULT_STORE: AppSettings = {
   "font-size": "18",
   "line-height": "1.5",
   "code-theme": "balanced",
-  highlight: "info",
+  highlight: "context",
   spellcheck: false,
   "delete-confirmation": true,
   "mirror-mode": false,

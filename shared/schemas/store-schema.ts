@@ -4,9 +4,7 @@ const StoreSchema = z.object({
   theme: z
     .enum(["system", "light", "dark", "light-warm", "dark-warm"])
     .catch("system"),
-  "font-family": z
-    .enum(["system", "arial", "georgia", "garamond"])
-    .catch("system"),
+  "font-family": z.enum(["system", "arial", "serif"]).catch("system"),
   "font-size": z.enum(["16", "18", "20"]).catch("18"),
   "line-height": z.enum(["1.4", "1.5", "1.6"]).catch("1.5"),
   spellcheck: z.boolean().catch(false),
@@ -14,7 +12,7 @@ const StoreSchema = z.object({
   "mirror-mode": z.boolean().catch(false),
   "mirror-path": z.string().nullable().catch(null),
   "code-theme": z.enum(["focus", "balanced", "colorless"]).catch("balanced"),
-  highlight: z.enum(["info", "idea", "focus"]).catch("info"),
+  highlight: z.enum(["context", "insight", "action"]).catch("context"),
   "note-item-display": z.enum(["tags", "snippet", "minimal"]).catch("tags"),
   "window-bounds": z
     .object({

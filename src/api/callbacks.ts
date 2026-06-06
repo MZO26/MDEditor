@@ -193,7 +193,7 @@ function initListeners() {
     if (isMirrorEnabled() && activeId && note) {
       console.log("[System-Resume-Event]: Forcing JIT Sync...");
       const markdown = editor.getMarkdown();
-      handleConflict(note, markdown).catch((error: Error) => {
+      await handleConflict(note, markdown).catch((error: Error) => {
         console.error("[Focus-Event]: Sync failed", error);
       });
     }
@@ -208,7 +208,7 @@ function initListeners() {
     if (isMirrorEnabled() && activeId && note) {
       console.log("[System-Resume-Event]: Forcing JIT Sync...");
       const markdown = editor.getMarkdown();
-      handleConflict(note, markdown).catch((error: Error) => {
+      await handleConflict(note, markdown).catch((error: Error) => {
         console.error("[System-Resume-Event]: Sync failed", error);
       });
     }

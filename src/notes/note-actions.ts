@@ -61,6 +61,7 @@ async function handleCreateNote() {
   requestAnimationFrame(() => {
     editor.commands.focus();
   });
+  updateStats();
 }
 
 //------------------------------------------------------------

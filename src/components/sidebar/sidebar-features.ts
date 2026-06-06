@@ -13,25 +13,41 @@ import type { ResizeOptions, SnippetCacheValue, View } from "@shared/types";
 
 // search handled by fuse
 
-function handleSearchInput(searchInput: string) {
-  const editor = getAppItem("editor");
-  const sidebar = getAppItem("sidebar");
-  stateStore.setState({ searchQuery: searchInput });
-  editor.commands.setSearchTerm(searchInput);
-  const noteElements = Array.from(
-    sidebar.getElementsByClassName("note-item"),
-  ) as HTMLDivElement[];
-  // revert ui to normal if search input is empty and go back to normal content snippets instead of highlight snippets as well as unhide any note item
-  if (searchInput === "") {
-    for (const element of noteElements) {
-      element.classList.remove("hidden");
-      const contentEl = findElement<HTMLDivElement>(".note-content", element);
-      const noteId = element.getAttribute("data-id");
-      const note = noteStore.get("notes").find((n) => n.id === noteId);
-      if (contentEl && note) contentEl.textContent = note.snippet;
-    }
-    return;
+function revertSearchItems(noteElements: HTMLDivElement[]) {
+  for (const element of noteElements) {
+    element.classList.remove("hidden");
+    const contentEl = findElement<HTMLDivElement>(".note-content", element);
+    const noteId = element.getAttribute("data-id");
+    const note = noteStore.get("notes").find((n) => n.id === noteId);
+    if (contentEl && note) contentEl.textContent = note.snippet;
   }
+}
+
+function showSearchItems(
+  noteElements: HTMLDivElement[],
+  searchCache: Map<string, SnippetCacheValue>,
+  noteMap: Map<string, NoteListItem>,
+) {
+  for (const element of noteElements) {
+    const noteId = element.getAttribute("data-id");
+    if (!noteId) continue;
+    const matchData = searchCache.get(noteId);
+    const isMatch = matchData !== undefined;
+    element.classList.toggle("hidden", !isMatch);
+    const contentEl = findElement<HTMLDivElement>(".note-content", element);
+    if (!contentEl) continue;
+    if (isMatch) {
+      updateSnippetHighlight(contentEl, matchData.snippet, matchData.indices);
+    } else {
+      const note = noteMap.get(noteId);
+      if (note && contentEl.textContent !== note.snippet) {
+        contentEl.textContent = note.snippet;
+      }
+    }
+  }
+}
+
+function search(searchInput: string) {
   const results = searchEngine.search(searchInput);
   // holds id together with highlighted snippet text and indices where the match was found
   const searchCache = new Map<string, SnippetCacheValue>();
@@ -49,7 +65,6 @@ function handleSearchInput(searchInput: string) {
       const fullText = note.plainText ?? "";
       const firstMatch = exactRegex.exec(fullText);
       exactRegex.lastIndex = 0;
-
       if (!firstMatch) {
         searchCache.set(note.id, { snippet: note.snippet, indices: [] });
         continue;
@@ -79,25 +94,26 @@ function handleSearchInput(searchInput: string) {
       searchCache.set(note.id, { snippet, indices });
     }
   }
+  return searchCache; // returns to be highlighted snippets
+}
+
+function handleSearchInput(searchInput: string) {
+  const editor = getAppItem("editor");
+  const sidebar = getAppItem("sidebar");
+  stateStore.setState({ searchQuery: searchInput });
+  editor.commands.setSearchTerm(searchInput);
+  const noteElements = Array.from(
+    sidebar.getElementsByClassName("note-item"),
+  ) as HTMLDivElement[];
+  // revert ui to normal if search input is empty and go back to normal content snippets instead of highlight snippets as well as unhide any note item
+  if (searchInput === "") {
+    revertSearchItems(noteElements);
+    return;
+  }
+  const searchCache = search(searchInput);
   // for fast lookups to avoid calling note store everytime
   const noteMap = new Map(noteStore.get("notes").map((n) => [n.id, n]));
-  for (const element of noteElements) {
-    const noteId = element.getAttribute("data-id");
-    if (!noteId) continue;
-    const matchData = searchCache.get(noteId);
-    const isMatch = matchData !== undefined;
-    element.classList.toggle("hidden", !isMatch);
-    const contentEl = findElement<HTMLDivElement>(".note-content", element);
-    if (!contentEl) continue;
-    if (isMatch) {
-      updateSnippetHighlight(contentEl, matchData.snippet, matchData.indices);
-    } else {
-      const note = noteMap.get(noteId);
-      if (note && contentEl.textContent !== note.snippet) {
-        contentEl.textContent = note.snippet;
-      }
-    }
-  }
+  showSearchItems(noteElements, searchCache, noteMap);
 }
 
 // views handled by db
@@ -163,7 +179,7 @@ function updateStats() {
   readingTime.textContent = estimateReadingTime(wordCount);
 }
 
-//---------------------------------------------------------
+//------------------------------------------------------------
 
 // resizing logic
 

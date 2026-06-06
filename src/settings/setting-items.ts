@@ -24,9 +24,9 @@ function buildSelects() {
   selectBuilder(
     "highlight-theme",
     [
-      { value: "info", label: "Info" },
-      { value: "idea", label: "Idea" },
-      { value: "focus", label: "Focus" },
+      { value: "context", label: "Context" },
+      { value: "insight", label: "Insight" },
+      { value: "action", label: "Action" },
     ],
     "Appearance",
   );
@@ -53,8 +53,7 @@ function buildSelects() {
     [
       { value: "system", label: "System" },
       { value: "arial", label: "Arial" },
-      { value: "georgia", label: "Georgia" },
-      { value: "garamond", label: "Garamond" },
+      { value: "serif", label: "Serif" },
     ],
     "Editor",
   );
