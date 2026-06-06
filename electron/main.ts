@@ -88,7 +88,6 @@ function createWindow() {
   win = new BrowserWindow(windowConfig);
   // attach listeners to win after it's assigned to BrowserWindow and not null
   navigationHandler(win);
-  win.webContents.openDevTools();
   win.setMenuBarVisibility(false);
   if (process.env["ELECTRON_RENDERER_URL"]) {
     win.loadURL(process.env["ELECTRON_RENDERER_URL"]);
@@ -105,16 +104,13 @@ function createWindow() {
     }
   });
   ipcMain.once("app:start-ready", () => {
-    console.log("ready-to-show:", Math.round(performance.now() - start), "ms");
     win?.show();
   });
 }
 
 // app start
-const start = performance.now();
 
 app.whenReady().then(async () => {
-  console.log("app.whenReady():", Math.round(performance.now() - start), "ms");
   Menu.setApplicationMenu(null);
   ipcMain.on("flush-confirmed", () => {
     isReadyToClose = true;

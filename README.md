@@ -11,6 +11,7 @@ Built with Electron, TypeScript, Better SQLite3, and TipTap.
 - Markdown-focused editing with TipTap
 - Export notes to Markdown, Plain Text, HTML, JSON and PDF
 - Import notes from Markdown, Plain Text, HTML and JSON
+- Resolve external file changes with local JIT sync
 - Focus mode and read-only mode
 - Adjustable editor width (Ultrawide support)
 - Light and dark theme support
@@ -70,6 +71,7 @@ Shortcuts use `$mod` which maps to `Ctrl` on Windows/Linux and `Cmd` on macOS.
 | `Mod + N`             | Create new note       |
 | `Mod + F`             | Open global search    |
 | `Mod + O`             | Toggle sidebar        |
+| `Mod + Shift + T`     | Toggle toolbar        |
 | `Mod + Shift + R`     | Toggle read-only mode |
 | `Mod + Shift + W`     | Set editor width      |
 | `Mod + Shift + V`     | Toggle view filter    |
@@ -124,7 +126,7 @@ Shortcuts use `$mod` which maps to `Ctrl` on Windows/Linux and `Cmd` on macOS.
 
 ```mermaid
 flowchart TD
-    A[src UI] -- IPC via preload --> B[Main Process]
+    A[UI] -- IPC via preload --> B[Main Process]
     B --> C[(SQLite Database)]
 ```
 
@@ -159,7 +161,7 @@ TipTap powers the editor with support for:
 - SQLite schema design
 - Rich editor integration without a frontend framework
 - Native module handling with `electron-rebuild`
-- Separation between main / renderer (src) / shared
+- Separation between main / renderer / shared
 
 ## Bug reports
 

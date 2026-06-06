@@ -87,8 +87,7 @@ async function checkSyncState(
   const normalizedDB = normalizeMarkdown(payload.content).trimEnd();
   if (normalizedLocal === normalizedDB) {
     return { type: "IN_SYNC", content: localContent };
-  } else console.log(normalizedLocal.length, normalizedDB.length);
-  console.log(`File Content: ${normalizedLocal}, DB Content: ${normalizedDB}`);
+  }
   return { type: "OUT_OF_SYNC", localContent, dbContent: payload.content };
 }
 
