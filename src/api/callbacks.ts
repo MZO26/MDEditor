@@ -67,7 +67,7 @@ function initListeners() {
   });
 
   window.noteAPI.onTriggerExport(async (id: string, extension: string) => {
-    const result = getExportContent(id, extension);
+    const result = await getExportContent(id, extension);
     if (!result.success) {
       console.error(
         "[exportTrigger]: Failed to fetch note data:",
@@ -186,17 +186,16 @@ function initListeners() {
 
   window.electronAPI.onSystemResume(async () => {
     const activeId = stateStore.get("activeId");
-    const note = noteStore.get("notes").find((n) => n.id === activeId);
+    const note = noteStore.get("activeNote");
+    if (!activeId || !note) return;
     const editor = getAppItem("editor");
     stateStore.setState({ lastSyncedAt: 0 });
     if (isMirrorEnabled() && activeId && note) {
       console.log("[System-Resume-Event]: Forcing JIT Sync...");
       const markdown = editor.getMarkdown();
-      handleConflict(activeId, markdown, note.updated_at).catch(
-        (error: Error) => {
-          console.error("[System-Resume-Event]: Sync failed", error);
-        },
-      );
+      handleConflict(note, markdown).catch((error: Error) => {
+        console.error("[System-Resume-Event]: Sync failed", error);
+      });
     }
   });
 }

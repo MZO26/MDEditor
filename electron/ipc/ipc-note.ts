@@ -42,11 +42,19 @@ import {
 import { BrowserWindow, dialog, ipcMain } from "electron";
 
 function registerNoteIpc(win: BrowserWindow) {
-  ipcMain.handle("note:getAll", (e) => {
+  ipcMain.handle("note:get-all", (e) => {
     return result(e, async () => {
-      if (!checkRateLimit("note:getAll", LIMITS.READ_HEAVY))
+      if (!checkRateLimit("note:get-all", LIMITS.READ_HEAVY))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       return db.getAll();
+    });
+  });
+
+  ipcMain.handle("note:get-all-backup", (e) => {
+    return result(e, async () => {
+      if (!checkRateLimit("note:get-all-backup", LIMITS.READ_HEAVY))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      return db.getAllBackup();
     });
   });
 
@@ -251,7 +259,7 @@ function registerNoteIpc(win: BrowserWindow) {
     });
   });
 
-  ipcMain.handle("views:get", (e, view: unknown) => {
+  ipcMain.handle("views:get", (e, view: unknown, id: unknown) => {
     return result(e, async () => {
       if (!checkRateLimit(`views:get:${view}`, LIMITS.READ_HEAVY))
         throw new AppBackendError(AppErrorCode.RateLimitError);
@@ -266,6 +274,12 @@ function registerNoteIpc(win: BrowserWindow) {
           return db.getAll();
         case "untagged":
           return db.getUntaggedNotes();
+        case "links":
+          if (id) {
+            const validatedId = validation(IdSchema, id);
+            return db.getIncomingLinks(validatedId);
+          }
+          return db.getAll();
         default:
           throw new AppBackendError(AppErrorCode.InvalidViewError);
       }

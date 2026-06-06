@@ -13,6 +13,7 @@ import { setImportedContent } from "@/notes/import-actions";
 import { handleConflict, isMirrorEnabled } from "@/notes/note-conflict";
 import { noteStore, searchEngine, stateStore } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
+import { toNoteListItem } from "@/utils/note";
 import { getAppItem } from "@/utils/registry";
 import { DEBOUNCE_MS, EMPTY_DOC, UNTITLED } from "@shared/constants";
 import { getMetadata, titleGenerator } from "@shared/generators";
@@ -45,11 +46,13 @@ async function handleCreateNote() {
     console.error("[handleCreateNote]: Failed to create note:", result.error);
     return;
   }
+  const noteListItem = toNoteListItem(result.data);
   noteStore.setState((state) => ({
-    notes: [result.data, ...state.notes],
+    activeNote: result.data,
+    notes: [noteListItem, ...state.notes],
     sidebarChange: { type: "prepend", noteId: result.data.id },
   }));
-  searchEngine.upsertNote(result.data);
+  searchEngine.upsertNote(noteListItem);
   stateStore.setState({ activeId: result.data.id });
   editor.commands.setContent(result.data.content, {
     emitUpdate: false,
@@ -82,11 +85,18 @@ async function handleImportNote() {
     "Import Successful.",
     `Successfully imported ${count} file${count === 1 ? "" : "s"}`,
   );
+  const notes = new Array(result.data.length);
+  let i = 0;
+  for (const note of result.data) {
+    const noteListItem = toNoteListItem(note);
+    notes[i] = noteListItem;
+    i++;
+  }
   noteStore.setState((state) => ({
-    notes: [...result.data, ...state.notes],
+    notes: [...notes, ...state.notes],
     sidebarChange: { type: "reload" },
   }));
-  searchEngine.bulkLoad(result.data);
+  searchEngine.addMany(notes);
 }
 
 //----------------------------------------------------------
@@ -106,6 +116,7 @@ async function handleDeleteNote(id: string) {
     return;
   }
   noteStore.setState((state) => ({
+    activeNote: state.activeNote?.id === id ? null : state.activeNote,
     notes: state.notes.filter((note) => note.id !== id),
     sidebarChange: { type: "remove", noteId: id },
   }));
@@ -140,12 +151,17 @@ async function handleSaveNote(
     console.error("[handleSaveNote]: Save failed.", result.error);
     return;
   }
+  const updatedListItem = toNoteListItem(result.data);
   noteStore.setState((state) => ({
-    notes: state.notes.map((n) => (n.id === result.data.id ? result.data : n)),
+    activeNote:
+      state.activeNote?.id === result.data.id ? result.data : state.activeNote,
+    notes: state.notes.map((n) =>
+      n.id === updatedListItem.id ? updatedListItem : n,
+    ),
     sidebarChange: { type: "update", noteId: result.data.id },
   }));
-  searchEngine.upsertNote(result.data);
-  await updateStats(result.data);
+  searchEngine.upsertNote(updatedListItem);
+  updateStats();
 }
 
 const debouncedSaveNote = debounce(handleSaveNote, DEBOUNCE_MS.slow);
@@ -158,6 +174,7 @@ async function handleSelectNote(id: string) {
   const editor = getAppItem("editor");
   debouncedSaveNote.flush();
   stateStore.setState({ activeId: id });
+  noteStore.setState({ activeNote: null });
   const result = await getNoteById(id);
   if (stateStore.getState().activeId !== id) return;
   if (!result.success) {
@@ -167,9 +184,10 @@ async function handleSelectNote(id: string) {
   editor.commands.setContent(result.data.content, {
     emitUpdate: false,
   });
+  noteStore.setState({ activeNote: result.data });
   const markdown = isMirrorEnabled() ? editor.getMarkdown() : undefined;
   if (markdown !== undefined) {
-    await handleConflict(id, markdown, result.data.updated_at).catch((error) =>
+    await handleConflict(result.data, markdown).catch((error) =>
       console.error(
         "[handleSelectNote -> handleConflict]: Error while trying to sync note",
         error,
@@ -180,7 +198,7 @@ async function handleSelectNote(id: string) {
   requestAnimationFrame(() => {
     editor.commands.focus();
   });
-  await updateStats(result.data);
+  updateStats();
 }
 
 //------------------------------------------------------------

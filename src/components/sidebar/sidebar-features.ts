@@ -1,14 +1,12 @@
-import { getManyById, getViews } from "@/api/api";
+import { getViews } from "@/api/api";
 import { updateSnippetHighlight } from "@/components/sidebar/sidebar-note-items";
-import { showTodoProgress } from "@/components/sidebar/sidebar-ui";
 import { noteStore, searchEngine, stateStore } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
-import { formatNoteDate } from "@/utils/date";
 import { findElement, requireElement } from "@/utils/dom";
-import { estimateReadingTime } from "@/utils/note";
-import { getAppItem, getInfobarItem, getInfobarItems } from "@/utils/registry";
+import { estimateReadingTime, toNoteListItem } from "@/utils/note";
+import { getAppItem, getStatItems } from "@/utils/registry";
 import { DEBOUNCE_MS, MAX_CHARS, PADDING } from "@shared/constants";
-import type { Note } from "@shared/schemas/note-schema";
+import type { Note, NoteListItem } from "@shared/schemas/note-schema";
 import type { ResizeOptions, SnippetCacheValue, View } from "@shared/types";
 
 // sidebar
@@ -105,80 +103,55 @@ function handleSearchInput(searchInput: string) {
 // views handled by db
 
 async function handleViews(view: View) {
+  const activeId = stateStore.getState().activeId;
+  if (view === "links" && !activeId) {
+    return;
+  }
   const editor = getAppItem("editor");
   stateStore.setState({ searchQuery: "" });
   editor.commands.setSearchTerm("");
-  const result = await getViews(view);
+  const result = await getViews(view, activeId);
   if (!result.success) {
     console.error("[handleViews]: Failed to fetch views:", result.error);
     return;
   }
-  noteStore.setState({ notes: result.data, sidebarChange: { type: "reload" } });
+  if (view === "all") {
+    noteStore.setState({
+      notes: result.data as NoteListItem[],
+      sidebarChange: { type: "reload" },
+    });
+    return;
+  }
+  const notes = new Array(result.data.length);
+  let i = 0;
+  for (const note of result.data as Note[]) {
+    const noteListItem = toNoteListItem(note);
+    notes[i] = noteListItem;
+    i++;
+  }
+  noteStore.setState({
+    notes: notes,
+    sidebarChange: { type: "reload" },
+  });
+}
+
+function updateLinksOption(activeId?: string | null) {
+  const select = requireElement<HTMLSelectElement>(".view-select");
+  const linksOption = findElement<HTMLOptionElement>(
+    'option[value="links"]',
+    select,
+  );
+  if (!linksOption) return;
+  linksOption.disabled = !activeId;
 }
 
 //------------------------------------------------------------
 
-// info-sidebar
+// footer-bar
 
-function updateInfoHeader(date: Note["created_at"], title: Note["title"]) {
-  const container = getInfobarItem("headerContainer");
-  if (!container) return;
-  container.replaceChildren();
-  if (!date || !title) return;
-  const formattedDate = formatNoteDate(date);
-  const span = document.createElement("span");
-  const h4 = document.createElement("h4");
-  span.classList.add("info-span");
-  span.textContent = formattedDate;
-  h4.classList.add("note-title");
-  h4.textContent = title.trim();
-  container.append(span, h4);
-}
-
-function updateNoteTags(tags: Note["tags"]) {
-  const container = getInfobarItem("tagContainer");
-  if (!container) return;
-  container.replaceChildren();
-  if (!tags || tags.length === 0) return;
-  for (const tag of tags) {
-    const span = document.createElement("span");
-    span.classList.add("tag", "searchTag");
-    span.setAttribute("data-tag", String(tag));
-    span.textContent = `#${tag}`;
-    container.append(span);
-  }
-}
-
-async function updateNoteLinks(links: Note["links"]) {
-  const container = getInfobarItem("linkContainer");
-  if (!container) return;
-  container.replaceChildren();
-  if (!links || links.length === 0) return;
-  const ids: string[] = links.map((link) => link.id);
-  const relatedNotes = await getManyById(ids);
-  if (!relatedNotes.success) {
-    console.error(
-      "[updateNoteLinks]: Failed to fetch linked notes:",
-      relatedNotes.error,
-    );
-    return;
-  }
-  const linkMap = new Map<string, string>();
-  for (const note of relatedNotes.data) {
-    linkMap.set(note.id, note.title.trim());
-  }
-  for (const link of links) {
-    const span = document.createElement("span");
-    span.classList.add("link");
-    span.setAttribute("data-link", link.id);
-    span.textContent = `${link.dir}: ${linkMap.get(link.id) ?? link.id}`;
-    container.append(span);
-  }
-}
-
-async function updateStats(note: Note) {
+function updateStats() {
   const editor = getAppItem("editor");
-  const { wordCountEl, charCountEl, readingTime } = getInfobarItems([
+  const { wordCountEl, charCountEl, readingTime } = getStatItems([
     "wordCountEl",
     "charCountEl",
     "readingTime",
@@ -188,10 +161,6 @@ async function updateStats(note: Note) {
   charCountEl.textContent = charCount.toString();
   wordCountEl.textContent = wordCount === 1 ? "1 word" : `${wordCount} words`;
   readingTime.textContent = estimateReadingTime(wordCount);
-  showTodoProgress(note.content);
-  updateNoteTags(note.tags);
-  updateInfoHeader(note.created_at, note.title);
-  await updateNoteLinks(note.links);
 }
 
 //---------------------------------------------------------
@@ -207,7 +176,6 @@ function resizeSidebar(
     minWidth = 0,
     maxWidth = 600,
     cssVariable = "--sidebar-width",
-    side = "left",
   } = options;
   const resizer = requireElement<HTMLDivElement>(resizerSelector);
   const sidebar = requireElement<HTMLDivElement>(sidebarSelector);
@@ -229,8 +197,7 @@ function resizeSidebar(
     isUpdatePending = true;
     requestAnimationFrame(() => {
       const deltaX = e.clientX - startX;
-      const adjustedWidth =
-        side === "right" ? startWidth - deltaX : startWidth + deltaX;
+      const adjustedWidth = startWidth + deltaX;
       const newWidth = Math.max(minWidth, Math.min(adjustedWidth, maxWidth));
 
       document.documentElement.style.setProperty(cssVariable, `${newWidth}px`);
@@ -267,5 +234,6 @@ export {
   debouncedUpdateStats,
   handleViews,
   resizeSidebar,
+  updateLinksOption,
   updateStats,
 };

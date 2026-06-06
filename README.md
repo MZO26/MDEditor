@@ -70,7 +70,6 @@ Shortcuts use `$mod` which maps to `Ctrl` on Windows/Linux and `Cmd` on macOS.
 | `Mod + N`             | Create new note       |
 | `Mod + F`             | Open global search    |
 | `Mod + O`             | Toggle sidebar        |
-| `Mod + Alt + O`       | Toggle info sidebar   |
 | `Mod + Shift + R`     | Toggle read-only mode |
 | `Mod + Shift + W`     | Set editor width      |
 | `Mod + Shift + V`     | Toggle view filter    |

@@ -1,11 +1,10 @@
-import { getPlainTextFromJson } from "@/components/editor/editor-init";
 import { FUSE_OPTIONS } from "@shared/constants";
-import type { Note, NoteSearchDoc } from "@shared/schemas/note-schema";
+import type { NoteListItem, NoteSearchDoc } from "@shared/schemas/note-schema";
 import type { FuseResult, FuseResultMatch } from "fuse.js";
 import Fuse from "fuse.js";
 
 export interface SearchMatchResult {
-  item: Note;
+  item: NoteListItem;
   matches?: readonly FuseResultMatch[];
 }
 
@@ -14,26 +13,26 @@ class NoteSearch {
   private lastQuery: string = "";
   private lastResults: FuseResult<NoteSearchDoc>[] = [];
 
-  constructor(initialNotes: Note[] = []) {
+  constructor(initialNotes: NoteListItem[] = []) {
     this.fuse = new Fuse<NoteSearchDoc>(
       initialNotes.map((note) => ({
         id: note.id,
         snippet: note.snippet,
         title: note.title,
-        plainText: getPlainTextFromJson(note.content),
+        plainText: note.plainText,
         tags: note.tags,
       })),
       FUSE_OPTIONS,
     );
   }
 
-  public bulkLoad(notes: Note[]) {
+  public bulkLoad(notes: NoteListItem[]) {
     this.fuse.setCollection(
       notes.map((note) => ({
         id: note.id,
         snippet: note.snippet,
         title: note.title,
-        plainText: getPlainTextFromJson(note.content),
+        plainText: note.plainText,
         tags: note.tags,
       })),
     );
@@ -41,13 +40,21 @@ class NoteSearch {
     this.lastResults = [];
   }
 
-  public upsertNote(note: Note) {
+  public addMany(notes: NoteListItem[]) {
+    for (const note of notes) {
+      this.fuse.add(note);
+    }
+    this.lastQuery = "";
+    this.lastResults = [];
+  }
+
+  public upsertNote(note: NoteListItem) {
     this.fuse.remove((doc) => doc.id === note.id);
     this.fuse.add({
       id: note.id,
       snippet: note.snippet,
       title: note.title,
-      plainText: getPlainTextFromJson(note.content),
+      plainText: note.plainText,
       tags: note.tags,
     });
     this.lastQuery = "";

@@ -47,10 +47,6 @@ function initGlobalShortcuts() {
       e.preventDefault();
       document.dispatchEvent(new CustomEvent("app:toggle-view-filter"));
     },
-    "$mod+Alt+O": (e) => {
-      e.preventDefault();
-      document.dispatchEvent(new CustomEvent("app:toggle-info-sidebar"));
-    },
     "$mod+,": (e) => {
       e.preventDefault();
       document.dispatchEvent(new CustomEvent("app:open-settings"));

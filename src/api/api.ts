@@ -11,6 +11,7 @@ import type { ImagePayload } from "@shared/schemas/image-schema";
 import type {
   CreateNotePayload,
   Note,
+  NoteListItem,
   UpdateNotePayload,
 } from "@shared/schemas/note-schema";
 import type { AppSettings, Theme } from "@shared/schemas/store-schema";
@@ -38,8 +39,12 @@ async function invoke<T>(ipcPromise: Promise<Result<T>>): Promise<Result<T>> {
 
 // note api
 
-async function getAll(): Promise<Result<Note[]>> {
+async function getAll(): Promise<Result<NoteListItem[]>> {
   return invoke(window.noteAPI.getAll());
+}
+
+async function getAllBackup(): Promise<Result<Note[]>> {
+  return invoke(window.noteAPI.getAllBackup());
 }
 
 async function createNote(payload: CreateNotePayload): Promise<Result<Note>> {
@@ -103,8 +108,11 @@ async function bookmark(id: string): Promise<Result<boolean>> {
   return invoke(window.noteAPI.bookmark(id));
 }
 
-async function getViews(view: View): Promise<Result<Note[]>> {
-  return invoke(window.noteAPI.getViews(view));
+async function getViews(
+  view: View,
+  id: string | null,
+): Promise<Result<Note[] | NoteListItem[]>> {
+  return invoke(window.noteAPI.getViews(view, id));
 }
 
 async function dbMaintenance(action: string): Promise<Result<number>> {
@@ -193,6 +201,7 @@ export {
   exportManyNotes,
   exportNote,
   getAll,
+  getAllBackup,
   getAllSettings,
   getManyById,
   getNoteById,

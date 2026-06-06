@@ -3,6 +3,7 @@ import { Views } from "@electron/db/views";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import { validation } from "@electron/ipc/ipc-validation";
 import { AppErrorCode } from "@shared/errors";
+import { extractText } from "@shared/generators";
 import {
   CreateTransactionSchema,
   NoteFromDB,
@@ -13,6 +14,7 @@ import {
   type Link,
   type LinkRow,
   type Note,
+  type NoteListItem,
   type NoteRow,
   type Tag,
   type TagRow,
@@ -230,20 +232,36 @@ class NoteDB {
     if (!result) throw new AppBackendError(AppErrorCode.DBError);
   }
 
-  public getAll(): Note[] {
-    const rows = this.getAllNotesStmt.all() as NoteRow[];
-    if (!Array.isArray(rows)) {
-      throw new AppBackendError(AppErrorCode.DBError);
-    }
-    const tagMap = this.getTagMap() ?? [];
-    const linkMap = this.getLinkMap() ?? [];
-    return rows.map((note) => {
-      return validation(NoteFromDB, {
-        ...note,
-        tags: tagMap.get(note.id) ?? [],
-        links: linkMap.get(note.id) ?? [],
+  public getAll(): NoteListItem[] {
+    const tagMap = this.getTagMap() ?? new Map();
+    const linkMap = this.getLinkMap() ?? new Map();
+    const results: NoteListItem[] = [];
+    for (const row of this.getAllNotesStmt.iterate() as IterableIterator<NoteRow>) {
+      const validatedNote = validation(NoteFromDB, {
+        ...row,
+        tags: tagMap.get(row.id),
+        links: linkMap.get(row.id),
       });
-    });
+      const plainText = extractText(validatedNote.content);
+      const { content, ...lightweightNote } = validatedNote;
+      results.push({ ...lightweightNote, plainText });
+    }
+    return results;
+  }
+
+  public getAllBackup(): Note[] {
+    const results: Note[] = [];
+    const tagMap = this.getTagMap() ?? new Map();
+    const linkMap = this.getLinkMap() ?? new Map();
+    for (const row of this.getAllNotesStmt.iterate() as IterableIterator<NoteRow>) {
+      const validatedNote = validation(NoteFromDB, {
+        ...row,
+        tags: tagMap.get(row.id),
+        links: linkMap.get(row.id),
+      });
+      results.push(validatedNote);
+    }
+    return results;
   }
 
   public getById(id: string): Note {
@@ -265,8 +283,8 @@ class NoteDB {
     if (!Array.isArray(rows)) {
       throw new AppBackendError(AppErrorCode.DBError);
     }
-    const tagMap = this.getTagMap() ?? [];
-    const linkMap = this.getLinkMap() ?? [];
+    const tagMap = this.getTagMap() ?? new Map();
+    const linkMap = this.getLinkMap() ?? new Map();
     return rows.map((row) => {
       return validation(NoteFromDB, {
         ...row,
@@ -313,8 +331,8 @@ class NoteDB {
 
   public searchByTag(tagName: string): Note[] {
     const result = this.searchByTagStmt.all({ tag_name: tagName }) as NoteRow[];
-    const tagMap = this.getTagMap() ?? [];
-    const linkMap = this.getLinkMap() ?? [];
+    const tagMap = this.getTagMap() ?? new Map();
+    const linkMap = this.getLinkMap() ?? new Map();
     return result.map((note) => {
       return validation(NoteFromDB, {
         ...note,
@@ -326,8 +344,8 @@ class NoteDB {
 
   public getPinnedNotes(): Note[] {
     const rows = this.views.getPinnedNotes();
-    const tagMap = this.getTagMap() ?? [];
-    const linkMap = this.getLinkMap() ?? [];
+    const tagMap = this.getTagMap() ?? new Map();
+    const linkMap = this.getLinkMap() ?? new Map();
     return rows.map((note) => {
       return validation(NoteFromDB, {
         ...note,
@@ -339,8 +357,8 @@ class NoteDB {
 
   public getBookMarkedNotes(): Note[] {
     const rows = this.views.getBookmarkedNotes();
-    const tagMap = this.getTagMap() ?? [];
-    const linkMap = this.getLinkMap() ?? [];
+    const tagMap = this.getTagMap() ?? new Map();
+    const linkMap = this.getLinkMap() ?? new Map();
     return rows.map((note) => {
       return validation(NoteFromDB, {
         ...note,
@@ -352,8 +370,8 @@ class NoteDB {
 
   public getNotesWithActionItems(): Note[] {
     const rows = this.views.getNotesWithActionItems();
-    const tagMap = this.getTagMap() ?? [];
-    const linkMap = this.getLinkMap() ?? [];
+    const tagMap = this.getTagMap() ?? new Map();
+    const linkMap = this.getLinkMap() ?? new Map();
     return rows.map((note) => {
       return validation(NoteFromDB, {
         ...note,
@@ -365,8 +383,21 @@ class NoteDB {
 
   public getUntaggedNotes(): Note[] {
     const rows = this.views.getUntaggedNotes();
-    const tagMap = this.getTagMap() ?? [];
-    const linkMap = this.getLinkMap() ?? [];
+    const tagMap = this.getTagMap() ?? new Map();
+    const linkMap = this.getLinkMap() ?? new Map();
+    return rows.map((note) => {
+      return validation(NoteFromDB, {
+        ...note,
+        tags: tagMap.get(note.id) ?? [],
+        links: linkMap.get(note.id) ?? [],
+      });
+    });
+  }
+
+  public getIncomingLinks(id: string): Note[] {
+    const tagMap = this.getTagMap() ?? new Map();
+    const linkMap = this.getLinkMap() ?? new Map();
+    const rows = this.views.getIncomingLinks(id);
     return rows.map((note) => {
       return validation(NoteFromDB, {
         ...note,

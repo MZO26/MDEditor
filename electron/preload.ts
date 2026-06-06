@@ -9,7 +9,12 @@ import type {
   UpdateNotePayload,
 } from "@shared/schemas/note-schema";
 import type { AppSettings, Theme } from "@shared/schemas/store-schema";
-import type { MenuType, NoteMenuPayload, ZoomAction } from "@shared/types";
+import type {
+  MenuType,
+  NoteMenuPayload,
+  View,
+  ZoomAction,
+} from "@shared/types";
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from "electron";
 
 function subscribe<T extends unknown[]>(
@@ -54,7 +59,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   zoom: (action: ZoomAction) => ipcRenderer.invoke("zoom", action),
 });
 contextBridge.exposeInMainWorld("noteAPI", {
-  getAll: () => ipcRenderer.invoke("note:getAll"),
+  getAll: () => ipcRenderer.invoke("note:get-all"),
+  getAllBackup: () => ipcRenderer.invoke("note:get-all-backup"),
   create: (payload: CreateNotePayload) =>
     ipcRenderer.invoke("note:create", payload),
   createMany: (payload: CreateNotePayload[]) =>
@@ -91,7 +97,8 @@ contextBridge.exposeInMainWorld("noteAPI", {
   getManyById: (ids: string[]) => ipcRenderer.invoke("note:getManyById", ids),
   pin: (id: string) => ipcRenderer.invoke("note:pin", id),
   bookmark: (id: string) => ipcRenderer.invoke("note:bookmark", id),
-  getViews: (view: string) => ipcRenderer.invoke("views:get", view),
+  getViews: (view: View, id: string | null) =>
+    ipcRenderer.invoke("views:get", view, id),
   dbMaintenance: (action: string) =>
     ipcRenderer.invoke("db-maintenance", action),
   setActiveNote: (id: string | null) => ipcRenderer.send("set-active-note", id),

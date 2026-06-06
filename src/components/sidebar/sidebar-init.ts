@@ -9,14 +9,10 @@ import {
   handleImportNote,
   handleSelectNote,
 } from "@/notes/note-actions";
+import { stateStore } from "@/settings/app-state";
 import { createAsyncHandler } from "@/utils/async";
 import { requireElement } from "@/utils/dom";
-import {
-  getAppItem,
-  getInfobarItem,
-  initializeInfobarRegistry,
-  registerAppEvents,
-} from "@/utils/registry";
+import { getAppItem, registerAppEvents } from "@/utils/registry";
 import { initTippyDelegate } from "@/utils/ui";
 import { VIEWS } from "@shared/constants";
 import type { View } from "@shared/types";
@@ -81,7 +77,13 @@ function applySidebarListeners(
     "change",
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLSelectElement;
-      await handleViews(target.value as View);
+      const view = target.value as View;
+      const activeId = stateStore.getState().activeId;
+      if (view === "links" && !activeId) {
+        target.value = "all";
+        return;
+      }
+      await handleViews(view);
     }),
   );
   sidebar.addEventListener("contextmenu", (e) => {
@@ -137,37 +139,4 @@ function applySidebarListeners(
   );
 }
 
-//------------------------------------------------------------
-
-// info-sidebar
-
-function initInfoSidebar() {
-  initializeInfobarRegistry();
-  const infoSidebar = getInfobarItem("infoSidebar");
-  applyInfoSidebarListeners(infoSidebar);
-}
-
-function applyInfoSidebarListeners(infoSidebar: HTMLDivElement) {
-  resizeSidebar(".resizer-infobar", ".info-sidebar", {
-    minWidth: 0,
-    maxWidth: 400,
-    cssVariable: "--infobar-width",
-    side: "right",
-  });
-  infoSidebar.addEventListener(
-    "click",
-    createAsyncHandler(async (e: Event) => {
-      const target = e.target as HTMLElement;
-      if (target === infoSidebar) return;
-      const linkEl = target.closest<HTMLSpanElement>(".link");
-      if (linkEl) {
-        const link = linkEl.getAttribute("data-link");
-        if (!link) return;
-        await handleSelectNote(link);
-        return;
-      }
-    }),
-  );
-}
-
-export { initInfoSidebar, initNotesSidebar };
+export { initNotesSidebar };

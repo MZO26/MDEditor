@@ -2,7 +2,7 @@ import type {
   ExportRequest,
   ImportRequest,
 } from "@shared/schemas/export-schema";
-import type { Note } from "@shared/schemas/note-schema";
+import type { Note, NoteListItem } from "@shared/schemas/note-schema";
 import type { AppSettings, Theme } from "@shared/schemas/store-schema";
 import {
   Result,
@@ -10,7 +10,7 @@ import {
   type ImagePayload,
   type UpdateNotePayload,
 } from "@shared/shared/types";
-import type { ImageSrc, MenuType, SyncResult } from "@shared/types";
+import type { ImageSrc, MenuType, SyncResult, View } from "@shared/types";
 
 declare module "*.css";
 
@@ -35,7 +35,8 @@ declare global {
       zoom: (action: string) => Promise<Result<number>>;
     };
     noteAPI: {
-      getAll: () => Promise<Result<Note[]>>;
+      getAll: () => Promise<Result<NoteListItem[]>>;
+      getAllBackup: () => Promise<Result<Note[]>>;
       getById: (id: string) => Promise<Result<Note>>;
       getManyById: (ids: string[]) => Promise<Result<Note[]>>;
       create: (payload: CreateNotePayload) => Promise<Result<Note>>;
@@ -62,7 +63,10 @@ declare global {
       onTriggerBookmark: (callback: (id: string) => void) => () => void;
       pin: (id: string) => Promise<Result<boolean>>;
       bookmark: (id: string) => Promise<Result<boolean>>;
-      getViews: (view) => Promise<Result<Note[]>>;
+      getViews: (
+        view: View,
+        id: string | null,
+      ) => Promise<Result<Note[] | NoteListItem[]>>;
       dbMaintenance: (action) => Promise<Result<number>>;
       setActiveNote: (id: string | null) => void;
     };

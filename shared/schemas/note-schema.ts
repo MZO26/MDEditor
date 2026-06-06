@@ -102,6 +102,10 @@ const NoteFromDB = NoteSchema.extend({
   links: LinksSchema,
 });
 
+const NoteListItemFromDB = NoteFromDB.omit({ content: true }).extend({
+  plainText: PlainTextSchema,
+});
+
 // Payload Evaluation: Expects content to be stringified and converts booleans to 0 or 1 for DB
 const NoteToDBSchema = NoteSchema.extend({
   id: IdSchema,
@@ -167,6 +171,7 @@ const MirroredNoteWritePayloadSchema = z.object({
   oldFileName: z.string().optional(),
 });
 
+type NoteListItem = z.infer<typeof NoteListItemFromDB>;
 type MirroredNoteWritePayload = z.infer<typeof MirroredNoteWritePayloadSchema>;
 type NoteSearchDoc = z.infer<typeof NoteSearchDoc>;
 type NoteMetaData = z.infer<typeof NoteMetaData>;
@@ -195,6 +200,7 @@ export {
   LinksSchema,
   MirroredNoteWritePayloadSchema,
   NoteFromDB,
+  NoteListItemFromDB,
   NoteRowSchema,
   NoteSchema,
   NotesSchema,
@@ -216,6 +222,7 @@ export {
   type LinkRow,
   type MirroredNoteWritePayload,
   type Note,
+  type NoteListItem,
   type NoteMetaData,
   type NoteRow,
   type NoteSearchDoc,

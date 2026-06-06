@@ -3,10 +3,8 @@ import { noteStore, stateStore } from "@/settings/app-state";
 import { findElement, requireElement, setActiveItem } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
 import { compareNotes, updateNoteCount } from "@/utils/note";
-import { getAppItem, getInfobarItems, getTemplateItem } from "@/utils/registry";
-import { getTodoStats } from "@shared/generators";
-import type { EditorDoc } from "@shared/schemas/editor-schema";
-import type { Note } from "@shared/schemas/note-schema";
+import { getAppItem, getTemplateItem } from "@/utils/registry";
+import type { NoteListItem } from "@shared/schemas/note-schema";
 import type { ViewItem } from "@shared/types";
 
 // sidebar
@@ -21,7 +19,7 @@ function setSidebarState(element: HTMLDivElement, collapsed: boolean) {
 
 //-----------------------------------------------------------
 
-// sidebar empty state (only applies to normal sidebar. info-sidebar does not have one)
+// sidebar empty state
 
 function handleSidebarEmptyState() {
   const sidebar = getAppItem("sidebar");
@@ -89,12 +87,13 @@ function updateSidebarEmptyState(emptyState: HTMLDivElement) {
 
 // create view options
 
-function createViews(views: ViewItem[]) {
+function createViews(views: ViewItem[], activeId?: string | null) {
   const select = requireElement<HTMLSelectElement>(".view-select");
   for (const view of views) {
     const option = document.createElement("option");
     option.textContent = view["label"];
     option.value = view["id"];
+    option.disabled = view.id === "links" && !activeId;
     select.append(option);
   }
   return select;
@@ -104,7 +103,7 @@ function createViews(views: ViewItem[]) {
 
 // render note list
 
-function renderNoteList(notes: Note[]) {
+function renderNoteList(notes: NoteListItem[]) {
   const sidebar = getAppItem("sidebar");
   const fragment = document.createDocumentFragment();
   for (const note of [...notes].sort(compareNotes)) {
@@ -125,7 +124,7 @@ function renderNoteList(notes: Note[]) {
 
 // create note
 
-function prependNoteToList(note: Note) {
+function prependNoteToList(note: NoteListItem) {
   const sidebar = getAppItem("sidebar");
   const noteElement = createNoteItem(note);
   sidebar.prepend(noteElement);
@@ -148,7 +147,7 @@ function removeNoteFromList(noteId: string) {
 
 // update note
 
-function updateNoteInList(note: Note) {
+function updateNoteInList(note: NoteListItem) {
   const sidebar = getAppItem("sidebar");
   const noteElement = findElement<HTMLDivElement>(
     `.note-item[data-id="${note.id}"]`,
@@ -166,32 +165,6 @@ function updateNoteInList(note: Note) {
   }
 }
 
-//------------------------------------------------------------
-
-// info-sidebar
-
-function showTodoProgress(content: EditorDoc) {
-  const stats = getTodoStats(content);
-  const { todoContainer, todoCount, todoProgress } = getInfobarItems([
-    "todoContainer",
-    "todoCount",
-    "todoProgress",
-  ]);
-  if (stats.total === 0) {
-    if (todoContainer.style.display !== "none")
-      todoContainer.style.display = "none";
-    return;
-  }
-  if (todoContainer.style.display !== "block")
-    todoContainer.style.display = "block";
-
-  todoCount.textContent = `${stats.completed}/${stats.total}`;
-  const percentage = (stats.completed / stats.total) * 100;
-  todoProgress.style.width = `${percentage}%`;
-  todoProgress.style.backgroundColor =
-    percentage === 100 ? "var(--tag-color)" : "var(--text-muted)";
-}
-
 export {
   createViews,
   handleSidebarEmptyState,
@@ -199,7 +172,6 @@ export {
   removeNoteFromList,
   renderNoteList,
   setSidebarState,
-  showTodoProgress,
   updateNoteCount,
   updateNoteInList,
 };

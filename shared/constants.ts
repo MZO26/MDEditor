@@ -58,6 +58,7 @@ const VIEWS: ViewItem[] = [
   { id: "pinned", label: "Pinned" },
   { id: "todos", label: "Pending Todos" },
   { id: "untagged", label: "Untagged Notes" },
+  { id: "links", label: "Incoming Links" },
 ];
 
 const THEME_MAP = {
@@ -184,10 +185,19 @@ const UNTITLED = "New Note";
 
 const EMPTY_DOC = { type: "doc" as const, content: [{ type: "paragraph" }] };
 
+const BLOCK_TYPES = new Set([
+  "paragraph",
+  "heading",
+  "listItem",
+  "codeBlock",
+  "tableRow",
+]);
+
 export {
   ALLOWED_TYPES,
   APP_START_TIME,
   BATCH_SIZE,
+  BLOCK_TYPES,
   CLEANUP,
   CODE_THEME_MAP,
   CONTENT_TYPE_MAP,

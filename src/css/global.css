@@ -16,7 +16,6 @@
   --font-garamond: Garamond, serif;
   --current-font: var(--font-system);
   --sidebar-width: 280px;
-  --infobar-width: 200px;
 }
 
 :root[data-theme="light"] {

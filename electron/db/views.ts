@@ -8,6 +8,7 @@ class Views {
   private getPinnedNotesStmt: BetterSqlite.Statement;
   private getNotesWithActionItemsStmt: BetterSqlite.Statement;
   private getUntaggedNotesStmt: BetterSqlite.Statement;
+  private getIncomingLinksStmt: BetterSqlite.Statement;
   constructor(dbConnection: DatabaseType) {
     this.db = dbConnection;
     this.getBookmarkedNotesStmt = this.db.prepare(
@@ -31,8 +32,14 @@ class Views {
     this.getUntaggedNotesStmt = this.db.prepare(`
       SELECT notes.*
       FROM notes
-      LEFT JOIN note_tags as t ON notes.id = t.note_id
+      LEFT JOIN note_tags AS t ON notes.id = t.note_id
       WHERE t.note_id IS NULL
+      `);
+    this.getIncomingLinksStmt = this.db.prepare(`
+      SELECT DISTINCT notes.*
+      FROM notes
+      JOIN note_links AS l ON notes.id = l.source_id
+      WHERE l.target_id = @id
       `);
   }
 
@@ -50,6 +57,10 @@ class Views {
 
   public getUntaggedNotes(): NoteRow[] {
     return this.getUntaggedNotesStmt.all() as NoteRow[];
+  }
+
+  public getIncomingLinks(id: string): NoteRow[] {
+    return this.getIncomingLinksStmt.all({ id }) as NoteRow[];
   }
 }
 

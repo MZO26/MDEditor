@@ -4,14 +4,14 @@ import type { AppSettings } from "@shared/schemas/store-schema";
 import type {
   AppRegistry,
   CoreRegistry,
-  InfobarRegistry,
+  StatRegistry,
   TemplateRegistry,
 } from "@shared/types";
 
 // set settings to empty object to avoid undefined errors, will be populated in app.ts on startup
 const registry = {
   core: {},
-  infoSidebar: {},
+  stats: {},
   template: {},
 } as AppRegistry;
 
@@ -28,9 +28,9 @@ const getAppItem = <K extends keyof CoreRegistry>(key: K): CoreRegistry[K] => {
   return item;
 };
 
-const setInfobarItems = (obj: Partial<InfobarRegistry>) => {
-  if (!registry.infoSidebar) registry.infoSidebar = {};
-  Object.assign(registry.infoSidebar, obj);
+const setStatItems = (obj: Partial<StatRegistry>) => {
+  if (!registry.stats) registry.stats = {};
+  Object.assign(registry.stats, obj);
 };
 
 const setTemplateItems = (obj: Partial<TemplateRegistry>) => {
@@ -62,22 +62,20 @@ const getTemplateItem = <K extends keyof TemplateRegistry>(
   return item;
 };
 
-const getInfobarItem = <K extends keyof InfobarRegistry>(
-  key: K,
-): InfobarRegistry[K] => {
-  const item = registry.infoSidebar[key];
+const getStatItem = <K extends keyof StatRegistry>(key: K): StatRegistry[K] => {
+  const item = registry.stats[key];
   if (!item) {
     throw new Error(`Element "${key}" is missing from the registry.`);
   }
   return item;
 };
 
-const getInfobarItems = <K extends keyof InfobarRegistry>(
+const getStatItems = <K extends keyof StatRegistry>(
   keys: K[],
-): Pick<InfobarRegistry, K> => {
-  const result = {} as Pick<InfobarRegistry, K>;
+): Pick<StatRegistry, K> => {
+  const result = {} as Pick<StatRegistry, K>;
   for (const key of keys) {
-    const item = registry.infoSidebar[key];
+    const item = registry.stats[key];
     if (!item) {
       throw new Error(`Element "${key}" is missing from the registry.`);
     }
@@ -107,18 +105,11 @@ function initializeCoreRegistry(settings: AppSettings) {
   });
 }
 
-function initializeInfobarRegistry() {
-  setInfobarItems({
-    infoSidebar: requireElement<HTMLDivElement>(".info-sidebar"),
+function initializeStatRegistry() {
+  setStatItems({
     wordCountEl: requireElement<HTMLSpanElement>("#word-count"),
     charCountEl: requireElement<HTMLSpanElement>("#char-count"),
     readingTime: requireElement<HTMLSpanElement>("#reading-time"),
-    linkContainer: requireElement<HTMLDivElement>(".link-container"),
-    tagContainer: requireElement<HTMLDivElement>(".tag-container"),
-    headerContainer: requireElement<HTMLDivElement>(".info-sidebar-header"),
-    todoContainer: requireElement<HTMLDivElement>(".todo-progress-container"),
-    todoCount: requireElement<HTMLSpanElement>("#todo-count"),
-    todoProgress: requireElement<HTMLDivElement>("#todo-progress"),
   });
 }
 
@@ -139,16 +130,15 @@ function initializeTemplateRegistry() {
 
 export {
   getAppItem,
-  getInfobarItem,
-  getInfobarItems,
+  getStatItem,
+  getStatItems,
   getTemplateItem,
   getTemplateItems,
   initializeCoreRegistry,
-  initializeInfobarRegistry,
+  initializeStatRegistry,
   initializeTemplateRegistry,
   registerAppEvents,
   setAppItems,
-  setInfobarItems,
+  setStatItems,
   type AppRegistry,
-  type InfobarRegistry,
 };

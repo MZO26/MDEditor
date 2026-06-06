@@ -72,7 +72,7 @@ async function syncCheck() {
     );
   }
   const activeId = stateStore.get("activeId");
-  const activeNote = noteStore.get("notes").find((n) => n.id === activeId);
+  const activeNote = noteStore.get("activeNote");
   if (!activeId || !activeNote) {
     await showNotification(
       "No note selected.",
@@ -82,11 +82,7 @@ async function syncCheck() {
   }
   const editor = getAppItem("editor");
   const markdown = editor.getMarkdown();
-  const result = await handleConflict(
-    activeNote.id,
-    markdown,
-    activeNote.updated_at,
-  ).catch((error) =>
+  const result = await handleConflict(activeNote, markdown).catch((error) =>
     console.error("[handleConflict]: Error while trying to sync note", error),
   );
   if (!result) return;

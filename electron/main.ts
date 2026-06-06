@@ -105,13 +105,16 @@ function createWindow() {
     }
   });
   ipcMain.once("app:start-ready", () => {
+    console.log("ready-to-show:", Math.round(performance.now() - start), "ms");
     win?.show();
   });
 }
 
 // app start
+const start = performance.now();
 
 app.whenReady().then(async () => {
+  console.log("app.whenReady():", Math.round(performance.now() - start), "ms");
   Menu.setApplicationMenu(null);
   ipcMain.on("flush-confirmed", () => {
     isReadyToClose = true;

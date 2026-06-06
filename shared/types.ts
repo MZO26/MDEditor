@@ -97,7 +97,7 @@ type ExportResult = {
 
 type PDFAssets = { template: string; css: string };
 
-type View = "all" | "bookmarked" | "pinned" | "todos" | "untagged";
+type View = "all" | "bookmarked" | "pinned" | "todos" | "untagged" | "links";
 
 type ContentType = "markdown" | "html" | "json";
 
@@ -124,7 +124,7 @@ type ViewItem = {
 };
 
 interface AppRegistry {
-  infoSidebar: Partial<InfobarRegistry>;
+  stats: Partial<StatRegistry>;
   core: Partial<CoreRegistry>;
   template: Partial<TemplateRegistry>;
 }
@@ -137,17 +137,10 @@ interface CoreRegistry {
   editorContainer: HTMLDivElement;
 }
 
-interface InfobarRegistry {
-  infoSidebar: HTMLDivElement;
+interface StatRegistry {
   wordCountEl: HTMLSpanElement;
   charCountEl: HTMLSpanElement;
   readingTime: HTMLSpanElement;
-  linkContainer: HTMLDivElement;
-  tagContainer: HTMLDivElement;
-  headerContainer: HTMLDivElement;
-  todoContainer: HTMLDivElement;
-  todoCount: HTMLSpanElement;
-  todoProgress: HTMLDivElement;
 }
 
 interface TemplateRegistry {
@@ -182,7 +175,6 @@ type ResizeOptions = {
   minWidth?: number;
   maxWidth?: number;
   cssVariable?: string;
-  side?: "left" | "right";
 };
 
 type SyncResult =
@@ -207,7 +199,6 @@ export type {
   FileContent,
   ImageSrc,
   ImportedContent,
-  InfobarRegistry,
   MenuType,
   Metadata,
   NativeWindowColors,
@@ -219,6 +210,7 @@ export type {
   SelectOption,
   SidebarChange,
   SnippetCacheValue,
+  StatRegistry,
   Success,
   SyncResult,
   TemplateRegistry,

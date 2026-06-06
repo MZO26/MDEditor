@@ -1,4 +1,4 @@
-import { UNTITLED } from "@shared/constants";
+import { BLOCK_TYPES, UNTITLED } from "@shared/constants";
 import type { EditorDoc } from "@shared/schemas/editor-schema";
 import type { Metadata } from "@shared/types";
 import type { JSONContent } from "@tiptap/core";
@@ -13,11 +13,24 @@ function getMetadata(content: EditorDoc): Metadata {
 }
 
 function extractText(node: JSONContent): string {
-  if (node.text) return node.text;
-  if (Array.isArray(node.content)) {
-    return node.content.map(extractText).join("");
+  const parts: string[] = [];
+  function walk(n: JSONContent) {
+    if (!n) return;
+    if (n.type === "text" && n.text) {
+      parts.push(n.text);
+      return;
+    }
+    if (n.content) {
+      for (const child of n.content) {
+        walk(child);
+      }
+      if (BLOCK_TYPES.has(n.type!)) {
+        parts.push(" ");
+      }
+    }
   }
-  return "";
+  walk(node);
+  return parts.join("").trim();
 }
 
 function titleGenerator(doc: EditorDoc): string {
@@ -151,6 +164,7 @@ function textConverter(plainText: string) {
 }
 
 export {
+  extractText,
   getMetadata,
   getTodoStats,
   snippetGenerator,

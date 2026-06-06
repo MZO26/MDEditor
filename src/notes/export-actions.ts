@@ -1,4 +1,4 @@
-import { getAll } from "@/api/api";
+import { getAllBackup, getNoteById } from "@/api/api";
 import {
   getNoteEditorExtensions,
   getPlainTextFromJson,
@@ -13,6 +13,7 @@ import {
 import { AppErrorCode } from "@shared/errors";
 import { titleGenerator } from "@shared/generators";
 import type { ExportRequest } from "@shared/schemas/export-schema";
+import type { Note } from "@shared/schemas/note-schema";
 import type { ExportedContent, ExportFormat, Result } from "@shared/types";
 import { Editor } from "@tiptap/core";
 import DOMPurify from "dompurify";
@@ -24,7 +25,7 @@ import DOMPurify from "dompurify";
 async function getBatchExportContent(
   extension: ExportFormat,
 ): Promise<Result<ExportedContent[]>> {
-  const result = await getAll();
+  const result = await getAllBackup();
   if (!result.success) {
     return { success: false, error: result.error };
   }
@@ -90,11 +91,21 @@ async function getBatchExportContent(
 
 // single export content function triggered by callback on note menu interaction
 
-function getExportContent(
+async function getExportContent(
   id: string,
   extension: string,
-): Result<ExportRequest> {
-  const note = noteStore.get("notes").find((n) => n.id === id);
+): Promise<Result<ExportRequest>> {
+  const activeNote = noteStore.getState().activeNote;
+  let note: Note | null = null;
+  if (activeNote?.id === id) {
+    note = activeNote;
+  } else {
+    const result = await getNoteById(id);
+    if (!result.success) {
+      return { success: false, error: result.error };
+    }
+    note = result.data;
+  }
   if (!note) return { success: false, error: AppErrorCode.InvalidData };
   const headlessEditor = new Editor({
     extensions: getNoteEditorExtensions(),

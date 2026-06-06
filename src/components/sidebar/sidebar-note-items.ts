@@ -10,12 +10,12 @@ import { findElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
 import { getTemplateItem } from "@/utils/registry";
 import { UNTITLED } from "@shared/constants";
-import type { Note } from "@shared/schemas/note-schema";
+import type { NoteListItem } from "@shared/schemas/note-schema";
 import type { SidebarChange } from "@shared/types";
 
 let cachedNoteItem: HTMLDivElement | null = null;
 
-function createNoteItem(note: Note) {
+function createNoteItem(note: NoteListItem) {
   cachedNoteItem ??= getTemplateItem("noteItemTemplate").content
     .firstElementChild as HTMLDivElement; // if left side has a value it doesn't run right side. -> getTemplateItem only runs once
   const item = cachedNoteItem.cloneNode(true) as HTMLDivElement;
@@ -46,7 +46,7 @@ function createNoteItem(note: Note) {
   return item;
 }
 
-function handleSidebarChange(change: SidebarChange, notes: Note[]) {
+function handleSidebarChange(change: SidebarChange, notes: NoteListItem[]) {
   if (!change) return;
   switch (change.type) {
     case "reload":

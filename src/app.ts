@@ -1,10 +1,7 @@
 import { initListeners } from "@/api/callbacks";
 import { setupEditorListeners } from "@/components/editor/editor-init";
 import { handleEditorEmptyState } from "@/components/editor/editor-ui";
-import {
-  initInfoSidebar,
-  initNotesSidebar,
-} from "@/components/sidebar/sidebar-init";
+import { initNotesSidebar } from "@/components/sidebar/sidebar-init";
 import { handleSidebarEmptyState } from "@/components/sidebar/sidebar-ui";
 import {
   buildMenu,
@@ -37,7 +34,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   await initAppSettings(settings);
   initListeners();
   initNotesSidebar();
-  initInfoSidebar();
   await syncNoteStore();
   handleSidebarEmptyState();
   handleEditorEmptyState();

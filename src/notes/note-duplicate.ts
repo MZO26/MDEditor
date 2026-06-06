@@ -5,6 +5,7 @@ import {
 } from "@/components/editor/editor-init";
 import { isMirrorEnabled } from "@/notes/note-conflict";
 import { noteStore, searchEngine, stateStore } from "@/settings/app-state";
+import { toNoteListItem } from "@/utils/note";
 import { getAppItem } from "@/utils/registry";
 import type { CreateNotePayload, Note } from "@shared/schemas/note-schema";
 import { Editor } from "@tiptap/core";
@@ -56,11 +57,13 @@ async function handleDuplicateNote(note: Note) {
     );
     return;
   }
+  const updatedListItem = toNoteListItem(result.data);
   noteStore.setState((state) => ({
-    notes: [result.data, ...state.notes],
+    activeNote: result.data,
+    notes: [updatedListItem, ...state.notes],
     sidebarChange: { type: "prepend", noteId: result.data.id },
   }));
-  searchEngine.upsertNote(result.data);
+  searchEngine.upsertNote(updatedListItem);
   stateStore.setState({ activeId: result.data.id });
   editor.commands.setContent(result.data.content, {
     emitUpdate: false,

@@ -12,7 +12,6 @@ function nextZoom(current: number, action: ZoomAction): number {
   let targetIndex: number;
   const index = ZOOMS.findIndex((z) => z >= current);
   const safeIndex = index === -1 ? ZOOMS.length - 1 : index;
-
   if (action === "in") {
     targetIndex = Math.min(safeIndex + 1, ZOOMS.length - 1);
   } else {

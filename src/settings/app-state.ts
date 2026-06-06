@@ -1,5 +1,6 @@
 import { getAll, getAllSettings } from "@/api/api";
 import { handleEditorEmptyState } from "@/components/editor/editor-ui";
+import { updateLinksOption } from "@/components/sidebar/sidebar-features";
 import { handleSidebarChange } from "@/components/sidebar/sidebar-note-items";
 import {
   handleSidebarEmptyState,
@@ -9,7 +10,7 @@ import { NoteSearch } from "@/notes/search";
 import { findElement, setActiveItem } from "@/utils/dom";
 import { compareNotes } from "@/utils/note";
 import { getAppItem } from "@/utils/registry";
-import type { Note } from "@shared/schemas/note-schema";
+import type { Note, NoteListItem } from "@shared/schemas/note-schema";
 import type { AppSettings } from "@shared/schemas/store-schema";
 import type { SidebarChange } from "@shared/types";
 
@@ -42,7 +43,7 @@ const STATE_STORE: AppState = {
 
 let previousId: string | null = null;
 let previousSearchQuery: string = "";
-let previousNotesRef: Note[] = [];
+let previousNotesRef: NoteListItem[] = [];
 let previousNotesLength: number | null = null;
 let previousSidebarChange: SidebarChange = null;
 let previousSync: number = 0;
@@ -52,12 +53,14 @@ const stateStore = createStore<AppState>(STATE_STORE);
 const settingsStore = createStore<AppSettings>(DEFAULT_STORE);
 
 interface NoteStore {
-  notes: Note[];
+  notes: NoteListItem[];
+  activeNote: Note | null;
   sidebarChange: SidebarChange;
 }
 
 const NOTE_STORE: NoteStore = {
   notes: [],
+  activeNote: null,
   sidebarChange: null,
 };
 
@@ -126,6 +129,7 @@ stateStore.subscribe((state) => {
     );
     if (noteElement) setActiveItem(noteElement, sidebar);
     handleEditorEmptyState();
+    updateLinksOption(state.activeId);
   }
   if (state.searchQuery !== previousSearchQuery) {
     previousSearchQuery = state.searchQuery;

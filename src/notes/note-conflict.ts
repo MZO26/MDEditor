@@ -7,10 +7,12 @@ import {
   stateStore,
 } from "@/settings/app-state";
 import { initConflictDialog } from "@/settings/dialog-init";
+import { toNoteListItem } from "@/utils/note";
 import { getAppItem } from "@/utils/registry";
 import { DEBOUNCE_MS } from "@shared/constants";
 import { getMetadata, titleGenerator } from "@shared/generators";
 import type { SyncRequest } from "@shared/schemas/export-schema";
+import type { Note } from "@shared/schemas/note-schema";
 import { Editor } from "@tiptap/core";
 
 const { conflictDialog } = initConflictDialog();
@@ -19,22 +21,16 @@ function isMirrorEnabled() {
   return settingsStore.get("mirror-mode") ?? false;
 }
 
-async function handleConflict(
-  id: string,
-  markdown: string,
-  updated_at: string,
-) {
+async function handleConflict(note: Note, markdown: string) {
   const now = Date.now();
   const lastSynced = stateStore.get("lastSyncedAt") || 0;
   if (now - lastSynced < DEBOUNCE_MS.slow) return;
-  const dbNote = noteStore.get("notes").find((n) => n.id === id);
-  if (!dbNote) return;
   const syncPayload: SyncRequest = {
-    id,
-    fileName: titleGenerator(dbNote.content),
+    id: note.id,
+    fileName: titleGenerator(note.content),
     content: markdown,
     extension: "md",
-    updated_at,
+    updated_at: note.updated_at,
   };
   stateStore.setState({ lastSyncedAt: now });
   const result = await sync(syncPayload);
@@ -49,7 +45,6 @@ async function handleConflict(
       conflictDialog.returnValue = "";
       const handleConflictClose = async () => {
         const decision = conflictDialog.returnValue;
-        const note = noteStore.get("notes").find((n) => n.id === id);
         if (!note) return;
         if (decision === "overwrite") {
           let headlessEditor;
@@ -77,18 +72,23 @@ async function handleConflict(
               );
               return;
             }
-            if (stateStore.get("activeId") === id) {
+            if (stateStore.get("activeId") === note.id) {
               const activeEditor = getAppItem("editor");
               if (activeEditor) {
                 activeEditor.commands.setContent(json, { emitUpdate: false });
               }
+              const updatedListItem = toNoteListItem(result.data);
               noteStore.setState((state) => ({
+                activeNote:
+                  state.activeNote?.id === result.data.id
+                    ? result.data
+                    : state.activeNote,
                 notes: state.notes.map((n) =>
-                  n.id === result.data.id ? result.data : n,
+                  n.id === updatedListItem.id ? updatedListItem : n,
                 ),
                 sidebarChange: { type: "update", noteId: result.data.id },
               }));
-              searchEngine.upsertNote(result.data);
+              searchEngine.upsertNote(updatedListItem);
             }
           } catch (error) {
             console.error(
@@ -102,9 +102,9 @@ async function handleConflict(
           // keep db content and overwrite local file
           const updateResult = await updateNote(
             {
-              ...dbNote,
+              ...note,
               ...(markdown !== undefined ? { markdown } : {}),
-              ...getMetadata(dbNote.content),
+              ...getMetadata(note.content),
             },
             true,
           );
@@ -115,13 +115,18 @@ async function handleConflict(
             );
             return;
           }
+          const updatedListItem = toNoteListItem(updateResult.data);
           noteStore.setState((state) => ({
+            activeNote:
+              state.activeNote?.id === updateResult.data.id
+                ? updateResult.data
+                : state.activeNote,
             notes: state.notes.map((n) =>
-              n.id === updateResult.data.id ? updateResult.data : n,
+              n.id === updatedListItem.id ? updatedListItem : n,
             ),
             sidebarChange: { type: "update", noteId: updateResult.data.id },
           }));
-          searchEngine.upsertNote(updateResult.data);
+          searchEngine.upsertNote(updatedListItem);
         }
       };
       conflictDialog.addEventListener("close", handleConflictClose, {
