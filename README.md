@@ -66,6 +66,8 @@ Shortcuts use `$mod` which maps to `Ctrl` on Windows/Linux and `Cmd` on macOS.
 
 ## App Shortcuts
 
+### Global
+
 | Shortcut              | Action                |
 | --------------------- | --------------------- |
 | `Mod + N`             | Create new note       |
@@ -80,36 +82,59 @@ Shortcuts use `$mod` which maps to `Ctrl` on Windows/Linux and `Cmd` on macOS.
 | `Mod + 0`             | Reset zoom            |
 | `F11`                 | Toggle focus mode     |
 
-### Editor Shortcuts
+<br>
+<details>
+<summary><b>Click to view all Editor Shortcuts</b></summary>
+<br>
 
-| Shortcut                  | Action                      |
-| ------------------------- | --------------------------- |
-| `Mod + Z`                 | Undo                        |
-| `Mod + Y`                 | Redo                        |
-| `Mod + Shift + Z`         | Redo                        |
-| `Mod + B`                 | Bold                        |
-| `Mod + I`                 | Italic                      |
-| `Mod + Shift + X`         | Strikethrough               |
-| `Mod + Shift + H`         | Highlight                   |
-| `Mod + E`                 | Inline code                 |
-| `Mod + Alt + 1`           | Heading 1                   |
-| `Mod + Alt + 2`           | Heading 2                   |
-| `Mod + Alt + 3`           | Heading 3                   |
-| `Mod + Shift + 7`         | Ordered list                |
-| `Mod + Shift + 8`         | Bullet list                 |
-| `Mod + Shift + 9`         | Task list                   |
-| `Mod + Shift + B`         | Blockquote                  |
-| `Mod + Alt + C`           | Code block                  |
-| `Mod + Shift + -`         | Horizontal rule             |
-| `Mod + Alt + T`           | Insert table                |
-| `Mod + Alt + I`           | Insert image                |
-| `Mod + Alt + Arrow Down`  | Add row after               |
-| `Mod + Alt + Arrow Up`    | Add row before              |
-| `Mod + Alt + Arrow Right` | Add column after            |
-| `Mod + Alt + Arrow Left`  | Add column before           |
-| `Mod + Alt + Backspace`   | Delete table                |
-| `Mod + Alt + Enter`       | Open Link                   |
-| `Mod + Shift + F`         | Toggle focus mode in editor |
+| Shortcut                                               | Markdown     | Action                      |
+| :----------------------------------------------------- | :----------- | :-------------------------- |
+| **History & Selection**                                |              |                             |
+| <kbd>Mod</kbd> + <kbd>Z</kbd>                          |              | Undo                        |
+| <kbd>Mod</kbd> + <kbd>Y</kbd>                          |              | Redo                        |
+| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd>       |              | Redo                        |
+| <kbd>Mod</kbd> + <kbd>A</kbd>                          |              | Select all                  |
+| **Inline Formatting**                                  |              |                             |
+| <kbd>Mod</kbd> + <kbd>B</kbd>                          | `**text**`   | Bold                        |
+| <kbd>Mod</kbd> + <kbd>I</kbd>                          | `*text*`     | Italic                      |
+| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>X</kbd>       | `~~text~~`   | Strikethrough               |
+| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd>       | `==text==`   | Highlight                   |
+| <kbd>Mod</kbd> + <kbd>E</kbd>                          | `` `code` `` | Inline code                 |
+| **Headings & Paragraphs**                              |              |                             |
+| <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>1</kbd>         | `# `         | Heading 1                   |
+| <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>2</kbd>         | `## `        | Heading 2                   |
+| <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>3</kbd>         | `### `       | Heading 3                   |
+| <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>4</kbd>         | `#### `      | Heading 4                   |
+| <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>5</kbd>         | `##### `     | Heading 5                   |
+| <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>6</kbd>         | `###### `    | Heading 6                   |
+| **Lists**                                              |              |                             |
+| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>7</kbd>       | `1. `        | Ordered list                |
+| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>8</kbd>       | `- `         | Bullet list                 |
+| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>9</kbd>       | `[] `        | Task list                   |
+| <kbd>Tab</kbd>                                         |              | Indent list item            |
+| <kbd>Shift</kbd> + <kbd>Tab</kbd>                      |              | Outdent list item           |
+| <kbd>Enter</kbd>                                       |              | Next list item              |
+| **Blocks & Elements**                                  |              |                             |
+| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>       | `> `         | Blockquote                  |
+| <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>C</kbd>         | ` ``` `      | Code block                  |
+| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>-</kbd>       | `---`        | Horizontal rule             |
+| <kbd>Shift</kbd> + <kbd>Enter</kbd>                    |              | Hard break (`<br>`)         |
+| **Links & Media**                                      |              |                             |
+| <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>Enter</kbd>     |              | Open Link                   |
+| <kbd>Mod</kbd> + <kbd>K</kbd>                          |              | Toggle Link                 |
+| <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>I</kbd>         |              | Insert image                |
+| **Tables**                                             |              |                             |
+| <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>T</kbd>         |              | Insert table                |
+| <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>↓</kbd>         |              | Add row after               |
+| <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>↑</kbd>         |              | Add row before              |
+| <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>→</kbd>         |              | Add column after            |
+| <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>←</kbd>         |              | Add column before           |
+| <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>Backspace</kbd> |              | Delete table                |
+| **Editor Controls**                                    |              |                             |
+| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd>       |              | Paste without formatting    |
+| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd>       |              | Toggle focus mode in editor |
+
+</details>
 
 ## Architecture
 
@@ -126,7 +151,7 @@ Shortcuts use `$mod` which maps to `Ctrl` on Windows/Linux and `Cmd` on macOS.
 
 ```mermaid
 flowchart TD
-    A[UI] -- IPC via preload --> B[Main Process]
+    A[Renderer] -- IPC via preload --> B[Main Process]
     B --> C[(SQLite Database)]
 ```
 

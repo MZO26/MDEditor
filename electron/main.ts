@@ -86,7 +86,6 @@ function createWindow() {
     windowConfig.center = true;
   }
   win = new BrowserWindow(windowConfig);
-  // attach listeners to win after it's assigned to BrowserWindow and not null
   navigationHandler(win);
   win.setMenuBarVisibility(false);
   if (process.env["ELECTRON_RENDERER_URL"]) {
@@ -132,8 +131,6 @@ app.whenReady().then(async () => {
   registerIpc(win as BrowserWindow);
   setUpEditorMenu(win as BrowserWindow);
 });
-
-// global app events / lifecycle events
 
 nativeTheme.on("updated", () => {
   if (win && !win.isDestroyed()) onOSThemeChange(win, store.get("theme"));

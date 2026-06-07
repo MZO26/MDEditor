@@ -58,7 +58,7 @@ export const MasterShortcuts = Extension.create({
         }
         return false;
       },
-      "Mod-Shift-F": () => {
+      "Mod-Shift-f": () => {
         this.editor.view.dom.classList.toggle("focus-mode-active");
         return true;
       },

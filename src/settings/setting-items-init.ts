@@ -337,7 +337,7 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
           `Path: ${result.data}`,
         );
       } else {
-        updateSettings({ "mirror-mode": false });
+        updateSettings({ "mirror-mode": false, "mirror-path": null });
         mirrorModeSelect.setAttribute(
           "data-tippy-content",
           "No path selected.",

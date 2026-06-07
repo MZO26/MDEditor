@@ -196,6 +196,7 @@ function getNoteEditorExtensions() {
     Highlight.configure({ multicolor: true }),
     StarterKit.configure({
       codeBlock: false,
+      underline: false,
       link: {
         openOnClick: false,
         autolink: true,

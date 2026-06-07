@@ -6,6 +6,7 @@ function createTooltipContent(baseText: string, shortcut?: string) {
   const tooltipContent = document.createElement("span");
   tooltipContent.textContent = baseText
     .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/([a-zA-Z])(\d)/g, "$1 $2")
     .replace(/^./, (char) => char.toUpperCase());
   if (shortcut) {
     const formatted = formatShortcut(shortcut);
