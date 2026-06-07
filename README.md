@@ -95,8 +95,8 @@ Shortcuts use `$mod` which maps to `Ctrl` on Windows/Linux and `Cmd` on macOS.
 | `Mod + Alt + 1`           | Heading 1                   |
 | `Mod + Alt + 2`           | Heading 2                   |
 | `Mod + Alt + 3`           | Heading 3                   |
-| `Mod + Shift + 8`         | Bullet list                 |
 | `Mod + Shift + 7`         | Ordered list                |
+| `Mod + Shift + 8`         | Bullet list                 |
 | `Mod + Shift + 9`         | Task list                   |
 | `Mod + Shift + B`         | Blockquote                  |
 | `Mod + Alt + C`           | Code block                  |
@@ -136,21 +136,9 @@ Designed with security in mind:
 
 - **Context Isolation** — Renderer and main process are strictly separated via Electron's `contextBridge`
 - **No `nodeIntegration`** — Node.js APIs are never exposed to the renderer
-- **HTML Sanitization** — All rendered content is sanitized with DOMPurify before display
-- **IPC Validation** — Every IPC message is validated with Zod schemas in the main process
-- **XSS Prevention** — Editor output is never injected as raw `innerHTML` without sanitization
+- **Data Validation & Sanitization** — HTML content is strictly sanitized before rendering to prevent XSS, while non-HTML payloads are validated against robust Zod Schemas
+- **Secure IPC Communication** — IPC Channels are protected by Zod Schema validation and built-in rate limiting
 - **Local-Only Storage** — No external network requests; all data stays on your machine
-
-## Editor
-
-TipTap powers the editor with support for:
-
-- Markdown import/export
-- Syntax-highlighted code blocks
-- Tables
-- Task lists
-- Images
-- Text highlight and inline formatting
 
 ## What this project tries to demonstrate
 

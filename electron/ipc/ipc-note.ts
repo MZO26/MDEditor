@@ -67,12 +67,7 @@ function registerNoteIpc(win: BrowserWindow) {
       const isMirrorMode = store.get("mirror-mode") === true;
       const targetDir = isMirrorMode ? store.get("mirror-path") : null;
       const result = db.create(noteData);
-      if (!isMirrorMode || !targetDir) {
-        console.log(
-          "[note:create]: Mirror mode disabled, skipping mirror create.",
-        );
-        return result;
-      }
+      if (!isMirrorMode || !targetDir) return result;
       if (markdown === undefined)
         throw new AppBackendError(AppErrorCode.InvalidData);
       await writeMirroredNote({
@@ -113,12 +108,7 @@ function registerNoteIpc(win: BrowserWindow) {
           ? db.getOldNoteTitle(validatedData.id)
           : undefined;
       const result = db.update(noteData);
-      if (!isMirrorMode || !targetDir) {
-        console.log(
-          "[note:update]: Mirror mode disabled, skipping mirror update.",
-        );
-        return result;
-      }
+      if (!isMirrorMode || !targetDir) return result;
       if (markdown === undefined)
         throw new AppBackendError(AppErrorCode.InvalidData);
       await writeMirroredNote({
@@ -141,12 +131,7 @@ function registerNoteIpc(win: BrowserWindow) {
       const targetDir = isMirrorMode ? store.get("mirror-path") : null;
       const oldTitle = db.getOldNoteTitle(validatedData);
       const result = db.delete(validatedData);
-      if (!isMirrorMode || !targetDir) {
-        console.log(
-          "[note:delete]: Mirror mode disabled, skipping mirror delete.",
-        );
-        return result;
-      }
+      if (!isMirrorMode || !targetDir) return result;
       await deleteMirroredNote(targetDir, validatedData, oldTitle);
       return result;
     });

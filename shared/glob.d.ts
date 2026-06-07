@@ -16,6 +16,7 @@ declare module "*.css";
 
 declare global {
   interface Window {
+    appInfo: Readonly<{ isMac: boolean }>;
     electronAPI: {
       imageWrite: (payload: ImagePayload) => Promise<Result<ImageSrc>>;
       startupReady: () => void;

@@ -38,7 +38,7 @@ function registerElectronIpc(win: BrowserWindow) {
 
   ipcMain.handle("open:external", (e, url: unknown) => {
     return result(e, async () => {
-      if (!checkRateLimit("theme:set", LIMITS.READ_LIGHT))
+      if (!checkRateLimit("open:external", LIMITS.READ_LIGHT))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedUrl = validation(ExternalUrlSchema, url);
       shell.openExternal(validatedUrl);

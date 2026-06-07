@@ -69,6 +69,18 @@ export const MasterShortcuts = Extension.create({
         void openExternal(href);
         return true;
       },
+      "Mod-k": () => {
+        if (!this.editor) return false;
+        if (this.editor.isActive("link")) {
+          return this.editor
+            .chain()
+            .focus()
+            .extendMarkRange("link")
+            .unsetLink()
+            .run();
+        }
+        return this.editor.chain().focus().setLink({ href: "" }).run();
+      },
     };
   },
 });

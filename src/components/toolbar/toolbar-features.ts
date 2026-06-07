@@ -245,8 +245,10 @@ const TOOLBAR_ACTIONS: ActionMap = {
   link: {
     run: (editor) => {
       if (!editor) return false;
-      if (!editor.isActive("link")) return false;
-      return editor.chain().focus().extendMarkRange("link").unsetLink().run();
+      if (editor.isActive("link")) {
+        return editor.chain().focus().extendMarkRange("link").unsetLink().run();
+      }
+      return editor.chain().focus().setLink({ href: "" }).run();
     },
     isActive: (editor) => editor?.isActive("link"),
     icon: "link",

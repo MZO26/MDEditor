@@ -5,7 +5,8 @@ async function setUpEditorMenu(win: BrowserWindow) {
   const { default: contextMenu } = await import("electron-context-menu");
   contextMenu({
     window: win,
-    shouldShowMenu: (_event, params) => params.isEditable,
+    shouldShowMenu: (_event, params) =>
+      params.isEditable || params.mediaType === "image" || !!params.linkURL,
     menu: (defaultActions) => [
       defaultActions.cut({}),
       defaultActions.copy({}),
@@ -18,8 +19,6 @@ async function setUpEditorMenu(win: BrowserWindow) {
       defaultActions.separator(),
       defaultActions.copyImage({}),
       defaultActions.copyImageAddress({}),
-      defaultActions.saveImage({}),
-      defaultActions.saveImageAs({}),
       defaultActions.copyLink({}),
     ],
   });

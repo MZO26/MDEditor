@@ -17,16 +17,19 @@ function createTooltipContent(baseText: string, shortcut?: string) {
   return tooltipContent;
 }
 
+function isMac(): boolean {
+  return window.appInfo.isMac;
+}
+
 function formatShortcut(shortcut?: string) {
   if (!shortcut) return "";
-
-  const isMac = typeof process !== "undefined" && process.platform === "darwin";
-
+  const mac = isMac();
   return shortcut
-    .replace(/mod[-+]?/gi, isMac ? "⌘" : "Ctrl+")
-    .replace(/shift[-+]?/gi, isMac ? "⇧" : "Shift+")
-    .replace(/alt[-+]?/gi, isMac ? "⌥" : "Alt+")
-    .replace(/meta[-+]?/gi, isMac ? "⌘" : "Meta+");
+    .replace(/mod[-+]?/gi, mac ? "⌘" : "Ctrl+")
+    .replace(/ctrl[-+]?/gi, mac ? "⌃" : "Ctrl+")
+    .replace(/shift[-+]?/gi, mac ? "⇧" : "Shift+")
+    .replace(/alt[-+]?/gi, mac ? "⌥" : "Alt+")
+    .replace(/meta[-+]?/gi, mac ? "⌘" : "Meta+");
 }
 
 function useDelayedSpinner(delay = 100) {

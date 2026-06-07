@@ -30,6 +30,12 @@ function subscribe<T extends unknown[]>(
   };
 }
 
+contextBridge.exposeInMainWorld(
+  "appInfo",
+  Object.freeze({
+    isMac: process.platform === "darwin",
+  }),
+);
 contextBridge.exposeInMainWorld("electronAPI", {
   startupReady: () => ipcRenderer.send("app:start-ready"),
   showNotification: (title: string, body: string) =>
