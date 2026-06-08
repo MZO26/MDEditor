@@ -21,12 +21,59 @@ import { app, shell } from "electron";
 import fs, { access, constants, mkdir, readFile, stat } from "fs/promises";
 import path from "path";
 
+function normalizeText(content: string | null | undefined) {
+  if (!content) return "";
+  const cleaned = content
+    // strip the UTF-8 byte mark
+    .replace(/^\uFEFF/, "")
+    // for single, precomposed characters that could trigger false positives
+    .normalize("NFC")
+    // forces line-break to be \n
+    .replace(/\r\n|\r/g, "\n")
+    // remove white spaces at end of file
+    .trimEnd();
+  // to respect POSIX standard: append one empty newline at the end
+  return cleaned ? cleaned + "\n" : "";
+}
+
+async function safeRename(
+  oldAbsoluteFilePath: string,
+  absoluteFilePath: string,
+) {
+  if (!oldAbsoluteFilePath || oldAbsoluteFilePath === absoluteFilePath) return;
+  try {
+    const src = oldAbsoluteFilePath.normalize("NFC");
+    const dest = absoluteFilePath.normalize("NFC");
+    const sameIgnoringCase = src.toLowerCase() === dest.toLowerCase();
+    if (sameIgnoringCase) {
+      const temp = `${dest}.${crypto.randomUUID()}.rename-tmp`;
+      await fs.rename(src, temp);
+      try {
+        await fs.rename(temp, dest);
+      } catch (error) {
+        await fs.rename(temp, src).catch(() => {});
+        throw error;
+      }
+    } else {
+      await fs.rename(src, dest);
+    }
+  } catch (error: unknown) {
+    const err = error as NodeJS.ErrnoException;
+    if (err.code !== "ENOENT") {
+      console.error(
+        "[writeMirroredNoteLogic -> safeRename]: Safe rename failed",
+        error,
+      );
+    }
+  }
+}
+
 function getFilePath(
   targetDirectory: string,
   payload: ExportedContent | FileContent | DeleteMirrorRequest,
 ) {
   const extension = payload.extension ?? "md";
-  const idSuffix = `_${payload.id}.${extension}`;
+  const idSuffix = `_${payload.id.slice(0, 6)}.${extension}`;
   const safeTitle = validation(FileNameSchema, payload.fileName);
   const newFileName = `${safeTitle}${idSuffix}`;
   const absoluteFilePath = path.resolve(targetDirectory, newFileName);
@@ -42,25 +89,9 @@ function getFilePath(
 function resolveMirrorPath(targetDir: string) {
   const normalized = path.resolve(targetDir);
   const baseName = path.basename(normalized).toLowerCase();
-
   return baseName === "mzo notes"
     ? normalized
     : path.join(normalized, "MZO Notes");
-}
-
-function normalizeMarkdown(content: string | null | undefined) {
-  if (!content) return "";
-  const cleaned = content
-    // strip the UTF-8 byte mark
-    .replace(/^\uFEFF/, "")
-    // for single, precomposed characters that could trigger false positives
-    .normalize("NFC")
-    // forces line-break to be \n
-    .replace(/\r\n|\r/g, "\n")
-    // remove white spaces at end of file
-    .trimEnd();
-  // to respect POSIX standard: append one empty newline at the end
-  return cleaned ? cleaned + "\n" : "";
 }
 
 async function checkSyncState(
@@ -87,8 +118,8 @@ async function checkSyncState(
     }
     return { type: "MISSING_RESOLVED" };
   }
-  const normalizedLocal = normalizeMarkdown(localContent).trimEnd();
-  const normalizedDB = normalizeMarkdown(payload.content).trimEnd();
+  const normalizedLocal = normalizeText(localContent).trimEnd();
+  const normalizedDB = normalizeText(payload.content).trimEnd();
   if (normalizedLocal === normalizedDB) {
     return { type: "IN_SYNC" };
   }
@@ -108,7 +139,7 @@ async function writeMirroredNoteLogic(
     extension,
   });
   const oldAbsoluteFilePath = oldFileName
-    ? getFilePath(targetDir, { fileName: oldFileName, id, extension })
+    ? getFilePath(mirrorPath, { fileName: oldFileName, id, extension })
         .absoluteFilePath
     : undefined;
   const userDataPath = app.getPath("userData");
@@ -118,23 +149,17 @@ async function writeMirroredNoteLogic(
     mirrorPath,
     imagesFolder,
   );
-  try {
-    // check for rename: if oldFileName exists and is different from new file name, attempt to rename the file before writing new content. This is to avoid duplicate files when a note is renamed.
-    if (oldAbsoluteFilePath && oldAbsoluteFilePath !== absoluteFilePath) {
-      await fs.rename(oldAbsoluteFilePath, absoluteFilePath);
-    }
-  } catch (error: unknown) {
-    // if enonent, it means the file doesn't exist and a new one can be created
-    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-      console.error(
-        "[writeMirroredNoteLogic]: Safe rename lookup failed",
-        error,
-      );
-    }
+  // check for rename: if oldFileName exists and is different from new file name, attempt to rename the file before writing new content. This is to avoid duplicate files when a note is renamed.
+  if (oldAbsoluteFilePath && oldAbsoluteFilePath !== absoluteFilePath) {
+    await safeRename(oldAbsoluteFilePath, absoluteFilePath);
   }
-  const existing = await readFile(absoluteFilePath, "utf8").catch(() => null);
-  if (existing !== portableContent) {
-    await writeAtomic(absoluteFilePath, portableContent);
+  const localContent = await readFile(absoluteFilePath, "utf8").catch(
+    () => null,
+  );
+  const normalizedLocal = normalizeText(localContent).trimEnd();
+  const normalizedContent = normalizeText(portableContent).trimEnd();
+  if (normalizedLocal !== normalizedContent) {
+    await writeAtomic(absoluteFilePath, normalizedContent);
   }
 }
 
@@ -153,18 +178,15 @@ async function writeMirroredNote({
     extension: "md",
   };
   const validatedFileData = validation(WriteMirrorRequestSchema, writePayload);
-  const validatedOldFileName = validatedFileData.oldFileName
-    ? validation(FileNameSchema, validatedFileData.oldFileName)
-    : undefined;
   console.log("[writeMirroredNote]: Attempting to sync note:", {
     id: validatedFileData.id,
     fileName: validatedFileData.fileName,
-    oldFileName: validatedOldFileName,
+    oldFileName,
   });
   try {
     await writeMirroredNoteLogic(targetDir, {
       ...validatedFileData,
-      oldFileName: validatedOldFileName,
+      oldFileName,
     });
   } catch (error) {
     console.error("[writeMirroredNote]: Failed to sync note on update:", error);

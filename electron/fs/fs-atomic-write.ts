@@ -6,7 +6,7 @@ async function writeAtomic(
   targetPath: string,
   content: string | Buffer | Uint8Array,
 ) {
-  const tempPath = `${targetPath}.tmp`;
+  const tempPath = `${targetPath}.${crypto.randomUUID()}.tmp`;
   let fileHandle: FileHandle | undefined;
   let writeSucceeded = false;
   try {

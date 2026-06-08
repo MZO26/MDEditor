@@ -45,7 +45,6 @@ Requirements:
 git clone https://github.com/MZO26/MDEditor.git
 cd MDEditor
 npm install
-npm run dev
 ```
 
 ## Scripts
@@ -66,7 +65,10 @@ Shortcuts use `$mod` which maps to `Ctrl` on Windows/Linux and `Cmd` on macOS.
 
 ## App Shortcuts
 
-### Global
+<br>
+<details>
+<summary><b>Click to view all App Shortcuts</b></summary>
+<br>
 
 | Shortcut                                                      | Action                |
 | ------------------------------------------------------------- | --------------------- |
@@ -82,6 +84,7 @@ Shortcuts use `$mod` which maps to `Ctrl` on Windows/Linux and `Cmd` on macOS.
 | <kbd>Mod</kbd> + <kbd>0</kbd>                                 | Reset zoom            |
 | <kbd>F11</kbd>                                                | Toggle focus mode     |
 
+</details>
 <br>
 <details>
 <summary><b>Click to view all Editor Shortcuts</b></summary>

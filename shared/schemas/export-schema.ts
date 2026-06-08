@@ -4,18 +4,19 @@ import z from "zod";
 
 const normalizeFileName = (val: string): string => {
   if (!val) return UNTITLED;
-
-  return (
-    val
-      .normalize("NFC") // ensures consistent unicode representation ('é' as one char)
-      .trim()
-      .replace(/[\x00-\x1f\x80-\x9f]/g, "")
-      .replace(/[/\\?%*:|"<>]/g, "")
-      .replace(/\s+/g, "_")
-      .replace(/^\.+|\.+$/g, "")
-      .replace(/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\..+)?$/i, "_$1$2")
-      .slice(0, 200) || UNTITLED
-  );
+  const safe = val
+    .normalize("NFC")
+    .trim()
+    .replace(/[\x00-\x1f\x80-\x9f]/g, "")
+    .replace(/[/\\?%*:|"<>]/g, "")
+    .replace(/\s+/g, " ")
+    .replace(/-+/g, "-")
+    .replace(/^\.+/, "")
+    .replace(/[. ]+$/g, "")
+    .replace(/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\..+)?$/i, "_$1$2")
+    .slice(0, 200)
+    .trim();
+  return safe || UNTITLED;
 };
 
 const FileNameSchema = z
