@@ -23,9 +23,8 @@ import { Editor, generateText } from "@tiptap/core";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import Highlight from "@tiptap/extension-highlight";
 import Image from "@tiptap/extension-image";
-import { TaskItem, TaskList } from "@tiptap/extension-list";
+import { ListKit } from "@tiptap/extension-list";
 import { Table, TableRow } from "@tiptap/extension-table";
-import { TextStyleKit } from "@tiptap/extension-text-style";
 import {
   CharacterCount,
   Focus,
@@ -119,6 +118,9 @@ function getNoteEditorExtensions() {
     Markdown.configure({ markedOptions: { gfm: true } }),
     MasterShortcuts,
     Typography,
+    ListKit.configure({
+      taskItem: { nested: true },
+    }),
     WikiLink.configure({
       onClick: async (id) => {
         const noteExists = noteStore.get("notes").some((n) => n.id === id);
@@ -158,10 +160,6 @@ function getNoteEditorExtensions() {
     Selection.configure({
       className: "editor-selection-blur",
     }),
-    TaskList,
-    TaskItem.configure({
-      nested: true,
-    }),
     Image.configure({
       allowBase64: true,
       resize: {
@@ -173,12 +171,6 @@ function getNoteEditorExtensions() {
       },
     }),
     NoteTag,
-    TextStyleKit.configure({
-      fontSize: {
-        types: ["textStyle", "paragraph", "heading", "code", "codeBlock"],
-      },
-      backgroundColor: false,
-    }),
     Table.configure({
       resizable: true,
       allowTableNodeSelection: true,

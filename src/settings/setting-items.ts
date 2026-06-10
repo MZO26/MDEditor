@@ -34,12 +34,12 @@ function buildSelects() {
     "note-item-display",
     [
       {
-        value: "tags",
-        label: "Tags",
-      },
-      {
         value: "snippet",
         label: "Snippet",
+      },
+      {
+        value: "tags",
+        label: "Tags",
       },
       {
         value: "minimal",
