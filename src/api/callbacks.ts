@@ -2,11 +2,18 @@ import {
   bookmark,
   exportNote,
   getNoteById,
+  getSyncPath,
+  openSyncFolder,
+  openSyncPath,
   pin,
   showNotification,
 } from "@/api/api";
 import { getExportContent } from "@/notes/export-actions";
-import { debouncedSaveNote, handleDeleteNote } from "@/notes/note-actions";
+import {
+  debouncedSaveNote,
+  handleDeleteNote,
+  handleSaveNote,
+} from "@/notes/note-actions";
 import { handleConflict, isMirrorEnabled } from "@/notes/note-conflict";
 import { handleDuplicateNote } from "@/notes/note-duplicate";
 import { noteStore, settingsStore, stateStore } from "@/settings/app-state";
@@ -16,7 +23,29 @@ import { getAppItem } from "@/utils/registry";
 import { ERROR_MESSAGES } from "@shared/errors";
 import type { NoteMenuPayload } from "@shared/types";
 
+//----------------------------------------------------------
+
+// helper functions for callbacks
+
 const { deleteDialog } = initDeleteDialog();
+
+async function ensureNoteSaved(id: string) {
+  const note = noteStore.get("notes").find((n) => n.id === id);
+  const activeId = stateStore.get("activeId");
+  if (!note || activeId !== note.id) return;
+  const editor = getAppItem("editor");
+  const syncPayload = {
+    id: note.id,
+    fileName: note.title,
+    extension: "md" as const,
+    updated_at: note.updated_at,
+  };
+  debouncedSaveNote.cancel();
+  await handleSaveNote(note.id, editor.getJSON(), editor.getMarkdown());
+  return syncPayload;
+}
+
+//----------------------------------------------------------
 
 // electron callbacks that only get registered once at startup. Thus no need for assignment of cleanups
 function initListeners() {
@@ -93,6 +122,78 @@ function initListeners() {
     );
   });
 
+  window.noteAPI.onTriggerView(async (id: string) => {
+    const syncPayload = await ensureNoteSaved(id);
+    if (!syncPayload) return;
+    const result = await openSyncPath(syncPayload);
+    if (!result.success || result.data === false) {
+      await showNotification(
+        "Could not open note in editor.",
+        "Start editing the note to initialize file mirror.",
+      );
+      return;
+    }
+  });
+
+  window.noteAPI.onTriggerPath(async (id: string) => {
+    const syncPayload = await ensureNoteSaved(id);
+    if (!syncPayload) return;
+    const result = await openSyncFolder(syncPayload);
+    if (!result.success || result.data === false) {
+      await showNotification(
+        "Could not open note path.",
+        "Start editing the note to initialize file mirror.",
+      );
+      return;
+    }
+  });
+
+  window.noteAPI.onTriggerCopyPath(async (id: string) => {
+    const syncPayload = await ensureNoteSaved(id);
+    if (!syncPayload) return;
+    const result = await getSyncPath(syncPayload);
+    if (!result.success) {
+      console.error(
+        "[onTriggerCopyPath]: Failed to retrieve file path:",
+        result.error,
+      );
+      await showNotification("Failed to retrieve file path.", "");
+      return;
+    }
+    if (!result.data) {
+      console.warn("[onTriggerCopyPath]: File path was empty.");
+      await showNotification("No file path to copy.", "");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(result.data);
+      await showNotification("Copied to clipboard.", "");
+    } catch (error) {
+      await showNotification("Failed to copy to clipboard.", "");
+      console.error("[onTriggerCopyPath]: Failed to copy file path:", error);
+    }
+  });
+
+  window.noteAPI.onTriggerCopyMarkdown(async (id: string) => {
+    const result = await getExportContent(id, "md");
+    if (!result.success) {
+      console.error(
+        "[onTriggerCopyMarkdown]: Failed to fetch note data:",
+        result.error,
+      );
+      await showNotification("Failed to get Markdown.", "");
+      return;
+    }
+    const markdown = result.data.content;
+    try {
+      await navigator.clipboard.writeText(markdown);
+      await showNotification("Copied to clipboard.", "");
+    } catch (error) {
+      await showNotification("Failed to copy to clipboard.", "");
+      console.error("[onTriggerCopyMarkdown]: Failed to copy markdown:", error);
+    }
+  });
+
   window.noteAPI.onTriggerDelete(async (id: string) => {
     const confirmationEnabled =
       settingsStore.get("delete-confirmation") === true;
@@ -123,14 +224,14 @@ function initListeners() {
       await showNotification("Copied to clipboard.", "");
     } catch (error) {
       await showNotification("Failed to copy to clipboard.", "");
-      console.error("[idTrigger]: Failed to copy text: ", error);
+      console.error("[onTriggerId]: Failed to copy text: ", error);
     }
   });
 
   window.noteAPI.onTriggerPin(async (id: string) => {
     const result = await pin(id);
     if (!result.success) {
-      console.error("[pinTrigger]: Failed to toggle pin:", result.error);
+      console.error("[onTriggerPin]: Failed to toggle pin:", result.error);
       return;
     }
     noteStore.setState((state) => ({
@@ -145,7 +246,7 @@ function initListeners() {
     const result = await bookmark(id);
     if (!result.success) {
       console.error(
-        "[bookmarkTrigger]: Failed to toggle bookmark:",
+        "[onTriggerBookmark]: Failed to toggle bookmark:",
         result.error,
       );
       return;
@@ -162,7 +263,7 @@ function initListeners() {
     const result = await getNoteById(id);
     if (!result.success) {
       console.error(
-        "[duplicateTrigger]: Failed to fetch note for duplication:",
+        "[onTriggerDuplicate]: Failed to fetch note for duplication:",
         result.error,
       );
       return;
@@ -191,10 +292,10 @@ function initListeners() {
     const editor = getAppItem("editor");
     stateStore.setState({ lastSyncedAt: 0 });
     if (isMirrorEnabled() && activeId && note) {
-      console.log("[System-Resume-Event]: Forcing JIT Sync...");
+      console.log("[onFocus]: Forcing JIT Sync...");
       const markdown = editor.getMarkdown();
       await handleConflict(note, markdown).catch((error: Error) => {
-        console.error("[Focus-Event]: Sync failed", error);
+        console.error("[onFocus]: Sync failed", error);
       });
     }
   });
@@ -206,10 +307,10 @@ function initListeners() {
     const editor = getAppItem("editor");
     stateStore.setState({ lastSyncedAt: 0 });
     if (isMirrorEnabled() && activeId && note) {
-      console.log("[System-Resume-Event]: Forcing JIT Sync...");
+      console.log("[onSystemResume]: Forcing JIT Sync...");
       const markdown = editor.getMarkdown();
       await handleConflict(note, markdown).catch((error: Error) => {
-        console.error("[System-Resume-Event]: Sync failed", error);
+        console.error("[onSystemResume]: Sync failed", error);
       });
     }
   });

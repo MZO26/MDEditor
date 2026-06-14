@@ -65,8 +65,8 @@ function initAppearanceSettings(
   themeSelect.addEventListener(
     "change",
     createAsyncHandler(async (e) => {
-      const target = e.target as HTMLSelectElement;
-      const result = await applyAppTheme(target.value as Theme);
+      const target = e.target as HTMLSelectElement | null;
+      const result = await applyAppTheme(target?.value as Theme);
       if (!result.success) {
         console.error("[applyAppTheme]: Failed to apply theme", result.error);
         return;
@@ -86,11 +86,13 @@ function initAppearanceSettings(
   );
   highlightSelect.value = settings["highlight"];
   highlightSelect.addEventListener("change", (e) => {
-    const target = e.target as HTMLSelectElement;
-    document.documentElement.setAttribute("data-highlight", target.value);
-    updateSettings({
-      highlight: target.value as HighlightTheme,
-    });
+    const target = e.target as HTMLSelectElement | null;
+    if (target?.value) {
+      document.documentElement.setAttribute("data-highlight", target.value);
+      updateSettings({
+        highlight: target?.value as HighlightTheme,
+      });
+    }
   });
 
   // note item display
@@ -100,12 +102,14 @@ function initAppearanceSettings(
   noteItemSelect.addEventListener(
     "change",
     createAsyncHandler(async (e) => {
-      const target = e.target as HTMLSelectElement;
-      updateSettings({
-        "note-item-display": target.value as NoteItemDisplay,
-      });
-      sidebar.setAttribute("data-noteItem", target.value);
-      await syncNoteStore();
+      const target = e.target as HTMLSelectElement | null;
+      if (target?.value) {
+        updateSettings({
+          "note-item-display": target.value as NoteItemDisplay,
+        });
+        sidebar.setAttribute("data-noteItem", target.value);
+        await syncNoteStore();
+      }
     }),
   );
 }
@@ -151,10 +155,12 @@ function initEditorSettings(settings: AppSettings, container: HTMLDivElement) {
 
   applyFont(settings["font-family"]);
   fontFamilySelect.addEventListener("change", (e) => {
-    const target = e.target as HTMLSelectElement;
-    const newFont = target.value;
-    applyFont(newFont);
-    updateSettings({ "font-family": newFont as FontFamily });
+    const target = e.target as HTMLSelectElement | null;
+    if (target?.value) {
+      const newFont = target.value;
+      applyFont(newFont);
+      updateSettings({ "font-family": newFont as FontFamily });
+    }
   });
 
   // editor font size
@@ -172,10 +178,12 @@ function initEditorSettings(settings: AppSettings, container: HTMLDivElement) {
 
   applySize(settings["font-size"]);
   fontSizeSelect.addEventListener("change", (e) => {
-    const target = e.target as HTMLSelectElement;
-    const newSize = target.value;
-    applySize(newSize);
-    updateSettings({ "font-size": String(newSize) as FontSize });
+    const target = e.target as HTMLSelectElement | null;
+    if (target?.value) {
+      const newSize = target.value;
+      applySize(newSize);
+      updateSettings({ "font-size": String(newSize) as FontSize });
+    }
   });
 
   // editor line height
@@ -193,10 +201,12 @@ function initEditorSettings(settings: AppSettings, container: HTMLDivElement) {
 
   applyLineHeight(settings["line-height"]);
   lineHeightSelect.addEventListener("change", (e) => {
-    const target = e.target as HTMLSelectElement;
-    const newHeight = target.value;
-    applyLineHeight(newHeight);
-    updateSettings({ "line-height": String(newHeight) as LineHeight });
+    const target = e.target as HTMLSelectElement | null;
+    if (target?.value) {
+      const newHeight = target.value;
+      applyLineHeight(newHeight);
+      updateSettings({ "line-height": String(newHeight) as LineHeight });
+    }
   });
 
   // spellcheck
@@ -207,11 +217,13 @@ function initEditorSettings(settings: AppSettings, container: HTMLDivElement) {
   spellcheckSelect.value = enabled ? "true" : "false";
   spellcheckSelect.addEventListener("change", (e) => {
     const editor = getAppItem("editor");
-    const target = e.target as HTMLSelectElement;
-    const enabled = target.value === "true";
-    editor.view.dom.spellcheck = enabled;
-    editor.commands.focus();
-    updateSettings({ spellcheck: enabled as Spellcheck });
+    const target = e.target as HTMLSelectElement | null;
+    if (target?.value) {
+      const enabled = target.value === "true";
+      editor.view.dom.spellcheck = enabled;
+      editor.commands.focus();
+      updateSettings({ spellcheck: enabled as Spellcheck });
+    }
   });
 }
 
@@ -248,29 +260,31 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
   batchExportSelect.addEventListener(
     "change",
     createAsyncHandler(async (e) => {
-      const target = e.target as HTMLSelectElement;
-      const selectedExtension = target.value as ExportFormat;
-      const exportContent = await getBatchExportContent(selectedExtension);
-      if (!exportContent.success) {
-        console.error(
-          "[initAppSettings -> getBatchExportContent]: Failed to get export content:",
-          exportContent.error,
+      const target = e.target as HTMLSelectElement | null;
+      if (target?.value) {
+        const selectedExtension = target.value as ExportFormat;
+        const exportContent = await getBatchExportContent(selectedExtension);
+        if (!exportContent.success) {
+          console.error(
+            "[initAppSettings -> getBatchExportContent]: Failed to get export content:",
+            exportContent.error,
+          );
+          return;
+        }
+        const result = await exportManyNotes(exportContent.data);
+        target.value = "";
+        if (!result.success) {
+          console.error(
+            "[initAppSettings -> exportManyNotes]: Export failed or Operation got cancelled:",
+            result.error,
+          );
+          return;
+        }
+        await showNotification(
+          "Export Successful.",
+          `${result.data.length} files exported to .${selectedExtension}`,
         );
-        return;
       }
-      const result = await exportManyNotes(exportContent.data);
-      target.value = "";
-      if (!result.success) {
-        console.error(
-          "[initAppSettings -> exportManyNotes]: Export failed or Operation got cancelled:",
-          result.error,
-        );
-        return;
-      }
-      await showNotification(
-        "Export Successful.",
-        `${result.data.length} files exported to .${selectedExtension}`,
-      );
     }),
   );
 
@@ -280,22 +294,24 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
   dbOptimizeSelect.addEventListener(
     "change",
     createAsyncHandler(async (e) => {
-      const target = e.target as HTMLSelectElement;
-      const selectedOpt = target.value as DbOptimization;
-      const result = await dbMaintenance(selectedOpt);
-      target.value = "";
-      if (!result.success) {
-        console.error(
-          "[initAppSettings -> dbMaintenance]: Database maintenance failed:",
-          result.error,
-        );
-        return;
+      const target = e.target as HTMLSelectElement | null;
+      if (target?.value) {
+        const selectedOpt = target.value as DbOptimization;
+        const result = await dbMaintenance(selectedOpt);
+        target.value = "";
+        if (!result.success) {
+          console.error(
+            "[initAppSettings -> dbMaintenance]: Database maintenance failed:",
+            result.error,
+          );
+          return;
+        }
+        if (selectedOpt === "backup-db" && result.success) {
+          await showNotification("Backup saved.", "");
+          return;
+        }
+        await showNotification(`Optimized db in ${result.data} ms.`, "");
       }
-      if (selectedOpt === "backup-db" && result.success) {
-        await showNotification("Backup saved.", "");
-        return;
-      }
-      await showNotification(`Optimized db in ${result.data} ms.`, "");
     }),
   );
   // delete confirmation
@@ -304,9 +320,11 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     ? "true"
     : "false";
   deleteConfirmSelect.addEventListener("change", (e) => {
-    const target = e.target as HTMLSelectElement;
-    const enabled = target.value === "true";
-    updateSettings({ "delete-confirmation": enabled as DeleteConfirmation });
+    const target = e.target as HTMLSelectElement | null;
+    if (target?.value) {
+      const enabled = target.value === "true";
+      updateSettings({ "delete-confirmation": enabled as DeleteConfirmation });
+    }
   });
 
   // mirror to fs mode
@@ -320,28 +338,30 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
   mirrorModeSelect.addEventListener(
     "change",
     createAsyncHandler(async (e) => {
-      const target = e.target as HTMLSelectElement;
-      const enabled = target.value === "true";
-      if (enabled) {
-        const result = await openMirrorFolder();
-        if (!result.success) {
-          target.value = "false";
-          return;
+      const target = e.target as HTMLSelectElement | null;
+      if (target?.value) {
+        const enabled = target.value === "true";
+        if (enabled) {
+          const result = await openMirrorFolder();
+          if (!result.success) {
+            target.value = "false";
+            return;
+          }
+          updateSettings({
+            "mirror-mode": true,
+            "mirror-path": result.data as MirrorPath,
+          });
+          mirrorModeSelect.setAttribute(
+            "data-tippy-content",
+            `Path: ${result.data}`,
+          );
+        } else {
+          updateSettings({ "mirror-mode": false, "mirror-path": null });
+          mirrorModeSelect.setAttribute(
+            "data-tippy-content",
+            "No path selected.",
+          );
         }
-        updateSettings({
-          "mirror-mode": true,
-          "mirror-path": result.data as MirrorPath,
-        });
-        mirrorModeSelect.setAttribute(
-          "data-tippy-content",
-          `Path: ${result.data}`,
-        );
-      } else {
-        updateSettings({ "mirror-mode": false, "mirror-path": null });
-        mirrorModeSelect.setAttribute(
-          "data-tippy-content",
-          "No path selected.",
-        );
       }
     }),
   );

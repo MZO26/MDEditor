@@ -46,6 +46,7 @@ import {
   SlidersHorizontal,
   Strikethrough,
   TextQuote,
+  Underline,
   Undo2,
   X,
 } from "lucide";
@@ -82,6 +83,7 @@ function renderIcons(scope: Document | HTMLElement = document): void {
       Bold,
       Italic,
       Strikethrough,
+      Underline,
       Heading1,
       Heading2,
       Heading3,

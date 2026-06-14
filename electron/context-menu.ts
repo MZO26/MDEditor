@@ -1,5 +1,48 @@
+import db from "@electron/db/database";
+import { getFilePath, resolveMirrorPath } from "@electron/fs/fs-mirror";
+import { validation } from "@electron/ipc/ipc-validation";
+import { store } from "@electron/store";
+import { AppErrorCode } from "@shared/errors";
+import { IdSchema } from "@shared/schemas/note-schema";
 import type { NoteMenuPayload } from "@shared/types";
-import { Menu, type BrowserWindow } from "electron";
+import { ipcMain, Menu, type BrowserWindow } from "electron";
+import fs from "fs";
+import { AppBackendError } from "./ipc/ipc-error-handler";
+
+let activeId: string | null = null;
+
+ipcMain.on("note:set-active", (_e, id: string | null) => {
+  activeId = id;
+});
+
+async function isMirrored(id: string) {
+  const validatedData = validation(IdSchema, id);
+  const note = db.getById(validatedData);
+  const enabled = store.get("mirror-mode") ?? false;
+  if (!enabled) return false;
+  const targetDir = (enabled && store.get("mirror-path")) ?? null;
+  if (!targetDir) return false;
+  const mirrorPath = resolveMirrorPath(targetDir);
+  const absoluteFilePath = getFilePath(mirrorPath, {
+    fileName: note.title,
+    id: note.id,
+    extension: "md",
+  }).absoluteFilePath;
+  try {
+    if (!!absoluteFilePath && fs.readFileSync(absoluteFilePath)) {
+      console.log("[isMirrored]: This note is mirrored.");
+      return true;
+    }
+    console.log("[isMirrored]: This note is not mirrored yet.");
+    return false;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return;
+    }
+    console.error("[isMirrored]: Failed to detect if note is mirrored:", error);
+    throw new AppBackendError(AppErrorCode.UnknownError);
+  }
+}
 
 async function setUpEditorMenu(win: BrowserWindow) {
   const { default: contextMenu } = await import("electron-context-menu");
@@ -65,8 +108,28 @@ function setUpNoteMenu(win: BrowserWindow, payload: NoteMenuPayload) {
   const { id, pinned, bookmarked } = payload;
   const noteItemMenu = Menu.buildFromTemplate([
     {
-      label: "Copy Note ID",
-      click: () => win.webContents.send("note:trigger-id", id),
+      label: "Copy...",
+      submenu: [
+        {
+          label: "Copy Note Link",
+          click: () => win.webContents.send("note:trigger-id", id),
+        },
+        {
+          label: "Copy Markdown",
+          click: () => win.webContents.send("note:trigger-copy-markdown", id),
+        },
+        {
+          label: "Copy File Path",
+          enabled: activeId !== null && activeId === id,
+          click: async () => {
+            const mirrored = (await isMirrored(id)) ? true : false;
+            if (!mirrored) {
+              console.log("Note is not mirrored.");
+            }
+            win.webContents.send("note:trigger-copy-path", id);
+          },
+        },
+      ],
     },
     { type: "separator" },
     {
@@ -84,7 +147,6 @@ function setUpNoteMenu(win: BrowserWindow, payload: NoteMenuPayload) {
     { type: "separator" },
     {
       label: "Export Note as...",
-      // enabled: activeId !== null && activeId === id,
       submenu: [
         {
           label: "Markdown (.md)",
@@ -107,6 +169,28 @@ function setUpNoteMenu(win: BrowserWindow, payload: NoteMenuPayload) {
           click: () => win.webContents.send("note:trigger-export", id, "pdf"),
         },
       ],
+    },
+    {
+      label: "Open File Path",
+      enabled: activeId !== null && activeId === id,
+      click: async () => {
+        const mirrored = (await isMirrored(id)) ? true : false;
+        if (!mirrored) {
+          console.log("Note is not mirrored.");
+        }
+        win.webContents.send("note:trigger-path", id);
+      },
+    },
+    {
+      label: "View in Editor",
+      enabled: activeId !== null && activeId === id,
+      click: async () => {
+        const mirrored = (await isMirrored(id)) ? true : false;
+        if (!mirrored) {
+          console.log("Note is not mirrored.");
+        }
+        win.webContents.send("note:trigger-view", id);
+      },
     },
     { type: "separator" },
     {

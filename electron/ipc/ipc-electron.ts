@@ -12,7 +12,7 @@ import { getTitleBarOverlay, initTheme } from "@electron/titlebar";
 import { LIMITS } from "@shared/constants";
 import { AppErrorCode } from "@shared/errors";
 import { ExternalUrlSchema } from "@shared/schemas/editor-schema";
-import { SyncRequestSchema } from "@shared/schemas/export-schema";
+import { OpenSyncRequestSchema } from "@shared/schemas/export-schema";
 import { ImagePayloadSchema } from "@shared/schemas/image-schema";
 import { type Theme } from "@shared/schemas/store-schema";
 import type { MenuType, NoteMenuPayload } from "@shared/types";
@@ -24,6 +24,7 @@ import {
   Notification,
   shell,
 } from "electron";
+import fs from "fs/promises";
 
 function registerElectronIpc(win: BrowserWindow) {
   ipcMain.on(
@@ -60,12 +61,55 @@ function registerElectronIpc(win: BrowserWindow) {
       if (!checkRateLimit("open:sync-path", LIMITS.READ_LIGHT))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       if (store.get("mirror-mode") !== true) return null;
-      const validatedData = validation(SyncRequestSchema, payload);
+      const validatedData = validation(OpenSyncRequestSchema, payload);
       if (!validatedData.updated_at) return null;
       const targetDir = store.get("mirror-path");
       if (!targetDir) return null;
       const filePath = getFilePath(targetDir, validatedData);
-      return shell.openPath(filePath.absoluteFilePath);
+      const error = await shell.openPath(filePath.absoluteFilePath);
+      if (error === "") return true;
+      else return false;
+    });
+  });
+
+  ipcMain.handle("open:sync-folder", (e, payload: unknown) => {
+    return result(e, async () => {
+      if (!checkRateLimit("open:sync-folder", LIMITS.READ_LIGHT))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      if (store.get("mirror-mode") !== true) return null;
+      const validatedData = validation(OpenSyncRequestSchema, payload);
+      if (!validatedData.updated_at) return null;
+      const targetDir = store.get("mirror-path");
+      if (!targetDir) return null;
+      const filePath = getFilePath(targetDir, validatedData);
+      try {
+        await fs.access(filePath.absoluteFilePath, fs.constants.R_OK);
+        shell.showItemInFolder(filePath.absoluteFilePath);
+        return true;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+        else throw new AppBackendError(AppErrorCode.InvalidData);
+      }
+    });
+  });
+
+  ipcMain.handle("get:sync-path", (e, payload: unknown) => {
+    return result(e, async () => {
+      if (!checkRateLimit("get:sync-path", LIMITS.READ_LIGHT))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      if (store.get("mirror-mode") !== true) return null;
+      const validatedData = validation(OpenSyncRequestSchema, payload);
+      if (!validatedData.updated_at) return null;
+      const targetDir = store.get("mirror-path");
+      if (!targetDir) return null;
+      const filePath = getFilePath(targetDir, validatedData);
+      try {
+        await fs.access(filePath.absoluteFilePath, fs.constants.R_OK);
+        return filePath.absoluteFilePath;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+        else throw new AppBackendError(AppErrorCode.InvalidData);
+      }
     });
   });
 
@@ -74,7 +118,9 @@ function registerElectronIpc(win: BrowserWindow) {
       if (!checkRateLimit("open:app-path", LIMITS.READ_LIGHT))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const userDataPath = app.getPath("userData");
-      return shell.openPath(userDataPath);
+      const error = await shell.openPath(userDataPath);
+      if (error === "") return true;
+      else return false;
     });
   });
 

@@ -102,24 +102,33 @@ function inEditorSearch(editor: Editor) {
 
   inputWrapper.addEventListener("click", (event: Event) => {
     const target = event.target as HTMLElement | null;
-
     if (target?.closest(".search-prev")) {
       event.preventDefault();
       goPrev();
+      return;
     } else if (target?.closest(".search-next")) {
       event.preventDefault();
       goNext();
-    } else if (target?.closest(".replace-one")) {
+      return;
+    } else if (target?.closest(".search-close")) {
+      event.preventDefault();
+      close();
+      return;
+    }
+  });
+
+  replaceInputWrapper.addEventListener("click", (event: Event) => {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest(".replace-one")) {
       event.preventDefault();
       syncQuery();
       editor.commands.replaceNext();
+      return;
     } else if (target?.closest(".replace-all")) {
       event.preventDefault();
       syncQuery();
       editor.commands.replaceAll();
-    } else if (target?.closest(".search-close")) {
-      event.preventDefault();
-      close();
+      return;
     }
   });
 

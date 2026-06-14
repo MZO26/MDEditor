@@ -1,4 +1,5 @@
 import { openSyncPath, sync } from "@/api/api";
+import { handleSaveNote } from "@/notes/note-actions";
 import { settingsStore, stateStore } from "@/settings/app-state";
 import { initConflictDialog } from "@/settings/dialog-init";
 import { getAppItem } from "@/utils/registry";
@@ -6,7 +7,6 @@ import { DEBOUNCE_MS } from "@shared/constants";
 import { titleGenerator } from "@shared/generators";
 import { type SyncRequest } from "@shared/schemas/export-schema";
 import type { Note } from "@shared/schemas/note-schema";
-import { handleSaveNote } from "./note-actions";
 
 const { conflictDialog } = initConflictDialog();
 
@@ -16,7 +16,7 @@ function isMirrorEnabled() {
 
 async function handleConflicDecision(
   decision: string,
-  syncPayload: SyncRequest,
+  syncPayload: Omit<SyncRequest, "markdown">,
   note: Note,
 ) {
   if (decision === "open") {

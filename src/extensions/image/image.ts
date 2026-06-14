@@ -82,8 +82,8 @@ async function promptImageUpload(editor: Editor | null) {
   input.type = "file";
   input.accept = "image/jpeg,image/png,image/gif,image/webp";
   input.onchange = async (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    const file = target.files?.[0];
+    const target = event.target as HTMLInputElement | null;
+    const file = target?.files?.[0];
     if (!file) return;
     const stopSpinner = useDelayedSpinner();
     await processAndInsertImage(file, editor).finally(() => {

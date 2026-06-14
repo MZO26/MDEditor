@@ -1,6 +1,7 @@
 import type {
   ExportRequest,
   ImportRequest,
+  OpenSyncRequest,
   SyncRequest,
 } from "@shared/schemas/export-schema";
 import type { Note, NoteListItem } from "@shared/schemas/note-schema";
@@ -38,8 +39,10 @@ declare global {
       confirmFlush: () => void;
       zoom: (action: string) => Promise<Result<number>>;
       openExternal: (url: string) => Promise<Result<void>>;
-      openSyncPath: (payload: SyncRequest) => Promise<Result<void>>;
-      openAppPath: () => Promise<Result<void>>;
+      openSyncPath: (payload: OpenSyncRequest) => Promise<Result<boolean>>;
+      openSyncFolder: (payload: OpenSyncRequest) => Promise<Result<boolean>>;
+      openAppPath: () => Promise<Result<boolean>>;
+      getSyncPath: (payload: OpenSyncRequest) => Promise<Result<string | null>>;
     };
     noteAPI: {
       getAll: () => Promise<Result<NoteListItem[]>>;
@@ -59,6 +62,10 @@ declare global {
       onTriggerExport: (
         callback: (id: string, extension: string) => void,
       ) => () => void;
+      onTriggerView: (callback: (id: string) => void) => () => void;
+      onTriggerPath: (callback: (id: string) => void) => () => void;
+      onTriggerCopyMarkdown: (callback: (id: string) => void) => () => void;
+      onTriggerCopyPath: (callback: (id: string) => void) => () => void;
       noteExportMany: (
         payload: ExportedContent[],
       ) => Promise<Result<ExportedContent[]>>;

@@ -10,6 +10,7 @@ import { processAndInsertImage } from "@/extensions/image/image";
 import { lowlight } from "@/extensions/lowlight";
 import { NoteTag } from "@/extensions/tag";
 import { Typography } from "@/extensions/typography";
+import { CustomUnderline } from "@/extensions/underline";
 import { WikiLink } from "@/extensions/wikilinks";
 import { debouncedSaveNote, handleSelectNote } from "@/notes/note-actions";
 import { isMirrorEnabled } from "@/notes/note-conflict";
@@ -122,6 +123,7 @@ function getNoteEditorExtensions() {
     ListKit.configure({
       taskItem: { nested: true },
     }),
+    CustomUnderline,
     WikiLink.configure({
       onClick: async (id) => {
         const noteExists = noteStore.get("notes").some((n) => n.id === id);
@@ -193,11 +195,11 @@ function getNoteEditorExtensions() {
     Highlight.configure({ multicolor: true }),
     StarterKit.configure({
       codeBlock: false,
-      underline: false,
       listItem: false,
       listKeymap: false,
       orderedList: false,
       bulletList: false,
+      underline: false,
       link: {
         openOnClick: false,
         autolink: true,
@@ -240,8 +242,8 @@ function getNoteEditorExtensions() {
 
 function setupEditorListeners(editorWrapper: HTMLDivElement, editor: Editor) {
   editorWrapper.addEventListener("contextmenu", (e: MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.closest(".ProseMirror") && target.closest("table")) {
+    const target = e.target as HTMLElement | null;
+    if (target?.closest(".ProseMirror") && target?.closest("table")) {
       e.preventDefault();
       window.electronAPI.showContextMenu("table");
     }
@@ -249,7 +251,7 @@ function setupEditorListeners(editorWrapper: HTMLDivElement, editor: Editor) {
   editorWrapper.addEventListener(
     "error",
     (event: ErrorEvent) => {
-      const target = event.target as HTMLImageElement;
+      const target = event.target as HTMLImageElement | null;
       if (target && target.tagName === "IMG") {
         const pos = editor.view.posAtDOM(target, 0);
         if (pos !== null) {

@@ -5,6 +5,7 @@ import { AppErrorCode } from "@shared/errors";
 import type {
   ExportRequest,
   ImportRequest,
+  OpenSyncRequest,
   SyncRequest,
 } from "@shared/schemas/export-schema";
 import type { ImagePayload } from "@shared/schemas/image-schema";
@@ -169,12 +170,26 @@ async function openExternal(url: string): Promise<Result<void>> {
   return invoke(window.electronAPI.openExternal(url));
 }
 
-async function openSyncPath(payload: SyncRequest): Promise<Result<void>> {
+async function openSyncPath(
+  payload: OpenSyncRequest,
+): Promise<Result<boolean>> {
   return invoke(window.electronAPI.openSyncPath(payload));
 }
 
-async function openAppPath(): Promise<Result<void>> {
+async function openSyncFolder(
+  payload: OpenSyncRequest,
+): Promise<Result<boolean>> {
+  return invoke(window.electronAPI.openSyncFolder(payload));
+}
+
+async function openAppPath(): Promise<Result<boolean>> {
   return invoke(window.electronAPI.openAppPath());
+}
+
+async function getSyncPath(
+  payload: OpenSyncRequest,
+): Promise<Result<string | null>> {
+  return invoke(window.electronAPI.getSyncPath(payload));
 }
 
 async function pinWindow(): Promise<Result<boolean>> {
@@ -222,6 +237,7 @@ export {
   getManyById,
   getNoteById,
   getSettings,
+  getSyncPath,
   getViews,
   handleZoom,
   imageWrite,
@@ -229,6 +245,7 @@ export {
   openAppPath,
   openExternal,
   openMirrorFolder,
+  openSyncFolder,
   openSyncPath,
   pin,
   pinWindow,

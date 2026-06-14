@@ -55,7 +55,12 @@ const WikiLink = Node.create<WikiLinkOptions>({
     ];
   },
   renderText({ node }) {
-    return `[[${this.options.getLabel(node.attrs["id"])}]]`;
+    const id = String(node.attrs?.["id"] ?? "").trim();
+    return id ? `[[${this.options.getLabel(id)}]]` : "";
+  },
+  renderMarkdown(node) {
+    const id = String(node.attrs?.["id"] ?? "").trim();
+    return id ? `[[${id}]]` : "";
   },
   addInputRules() {
     return [

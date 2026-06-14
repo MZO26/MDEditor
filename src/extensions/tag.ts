@@ -25,20 +25,25 @@ const NoteTag = Node.create<NoteTagOptions>({
   parseHTML: () => [{ tag: 'span[data-type="noteTag"]' }],
 
   renderHTML({ node, HTMLAttributes }) {
+    const id = node.attrs?.["id"] || "";
     return [
       "span",
       mergeAttributes(HTMLAttributes, {
         "data-type": "noteTag",
         class: "tag-node",
       }),
-      `#${node.attrs["id"]}`,
+      `#${id}`,
     ];
   },
-
   renderText({ node }) {
-    return `#${node.attrs["id"]}`;
+    const id = String(node.attrs?.["id"] ?? "").trim();
+    return id ? `#${id}` : "";
   },
 
+  renderMarkdown(node) {
+    const id = String(node.attrs?.["id"] ?? "").trim();
+    return id ? `#${id}` : "";
+  },
   addInputRules() {
     return [
       new InputRule({

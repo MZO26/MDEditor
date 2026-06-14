@@ -77,8 +77,8 @@ function buildMenu(container: HTMLDivElement, actions: ActionMap) {
 function setupToolbarListeners(container: HTMLDivElement, actions: ActionMap) {
   const editor = getAppItem("editor");
   container.addEventListener("click", (e) => {
-    const target = e.target as HTMLElement;
-    const btn = target.closest<HTMLButtonElement>("[data-action]");
+    const target = e.target as HTMLElement | null;
+    const btn = target?.closest<HTMLButtonElement>("[data-action]");
     const key = btn?.getAttribute("data-action") as keyof typeof actions;
     const item = actions[key];
     if (item && "run" in item) {

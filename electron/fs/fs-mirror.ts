@@ -15,7 +15,7 @@ import type {
   MirroredNoteWritePayload,
   Note,
 } from "@shared/schemas/note-schema";
-import type { ExportedContent, FileContent, SyncResult } from "@shared/types";
+import type { SyncResult } from "@shared/types";
 import console from "console";
 import { app, shell } from "electron";
 import fs, { access, constants, mkdir, readFile, stat } from "fs/promises";
@@ -64,16 +64,17 @@ async function safeRename(
         "[writeMirroredNoteLogic -> safeRename]: Safe rename failed",
         error,
       );
+      throw new AppBackendError(AppErrorCode.FileWriteError);
     }
   }
 }
 
 function getFilePath(
   targetDirectory: string,
-  payload: ExportedContent | FileContent | DeleteMirrorRequest,
+  payload: { fileName: string; id: string; extension: string },
 ) {
   const extension = payload.extension ?? "md";
-  const idSuffix = `_${payload.id.slice(0, 6)}.${extension}`;
+  const idSuffix = `-${payload.id.slice(0, 11)}.${extension}`;
   const safeTitle = validation(FileNameSchema, payload.fileName);
   const newFileName = `${safeTitle}${idSuffix}`;
   const absoluteFilePath = path.resolve(targetDirectory, newFileName);
@@ -194,6 +195,7 @@ async function writeMirroredNote({
     });
   } catch (error) {
     console.error("[writeMirroredNote]: Failed to sync note on update:", error);
+    throw new AppBackendError(AppErrorCode.FileWriteError);
   }
 }
 
@@ -228,7 +230,14 @@ async function deleteMirroredNote(
       return;
     }
     console.error("[deleteMirroredNote]: Failed to sync note deletion:", error);
+    throw new AppBackendError(AppErrorCode.FileWriteError);
   }
 }
 
-export { checkSyncState, deleteMirroredNote, getFilePath, writeMirroredNote };
+export {
+  checkSyncState,
+  deleteMirroredNote,
+  getFilePath,
+  resolveMirrorPath,
+  writeMirroredNote,
+};

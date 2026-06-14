@@ -187,6 +187,12 @@ const TOOLBAR_ACTIONS: ActionMap = {
     icon: "strikethrough",
     shortcut: "MOD+Shift+X | ~~text~~",
   },
+  underline: {
+    run: (editor) => editor?.chain().focus().toggleUnderline().run(),
+    isActive: (editor) => editor?.isActive("underline"),
+    icon: "underline",
+    shortcut: "MOD+U | ++text++",
+  },
   highlight: {
     run: (editor) => editor?.chain().focus().toggleHighlight().run(),
     isActive: (editor) => editor?.isActive("highlight"),

@@ -57,14 +57,14 @@ function applySidebarListeners(
   sidebarHeader.addEventListener(
     "click",
     createAsyncHandler(async (e) => {
-      const target = e.target as HTMLElement;
+      const target = e.target as HTMLElement | null;
       if (target === sidebarHeader) return;
-      const addNoteBtn = target.closest<HTMLButtonElement>(".add-note-btn");
+      const addNoteBtn = target?.closest<HTMLButtonElement>(".add-note-btn");
       if (addNoteBtn) {
         await handleCreateNote();
         return;
       }
-      const importBtn = target.closest<HTMLButtonElement>(".import-btn");
+      const importBtn = target?.closest<HTMLButtonElement>(".import-btn");
       if (importBtn) {
         await handleImportNote();
         return;
@@ -75,18 +75,18 @@ function applySidebarListeners(
   viewSelect.addEventListener(
     "change",
     createAsyncHandler(async (e) => {
-      const target = e.target as HTMLSelectElement;
-      const view = target.value as View;
+      const target = e.target as HTMLSelectElement | null;
+      const view = target?.value as View;
       const activeId = stateStore.getState().activeId;
       if (view === "links" && !activeId) {
-        target.value = "all";
+        if (target) target.value = "all";
         return;
       }
       await handleViews(view);
     }),
   );
   sidebar.addEventListener("contextmenu", (e) => {
-    const target = e.target as HTMLElement;
+    const target = e.target as HTMLElement | null;
     const isEmptySidebar =
       sidebar.childElementCount === 1 &&
       sidebar.firstElementChild?.classList.contains("sidebar-empty-state");
@@ -95,7 +95,7 @@ function applySidebarListeners(
       return;
     }
     e.preventDefault();
-    const noteElement = target.closest<HTMLDivElement>(".note-item");
+    const noteElement = target?.closest<HTMLDivElement>(".note-item");
     const id = noteElement?.getAttribute("data-id");
     const isPinned = noteElement?.getAttribute("data-pinned") === "true";
     const isBookmarked =
@@ -110,13 +110,13 @@ function applySidebarListeners(
   sidebar.addEventListener(
     "click",
     createAsyncHandler(async (e) => {
-      const target = e.target as HTMLElement;
+      const target = e.target as HTMLElement | null;
       if (target === sidebar) return;
-      const actionBtn = target.closest<HTMLButtonElement>(".menu-btn");
+      const actionBtn = target?.closest<HTMLButtonElement>(".menu-btn");
       if (actionBtn) {
         e.preventDefault();
         e.stopPropagation();
-        const noteElement = target.closest<HTMLElement>(".note-item");
+        const noteElement = target?.closest<HTMLElement>(".note-item");
         const id = noteElement?.getAttribute("data-id");
         const isPinned = noteElement?.getAttribute("data-pinned") === "true";
         const isBookmarked =
@@ -128,7 +128,7 @@ function applySidebarListeners(
         });
         return;
       }
-      const noteItem = target.closest<HTMLDivElement>(".note-item");
+      const noteItem = target?.closest<HTMLDivElement>(".note-item");
       const id = noteItem?.getAttribute("data-id");
       if (id) {
         await handleSelectNote(id);

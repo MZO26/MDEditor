@@ -1,6 +1,7 @@
 import type {
   ExportManyRequest,
   ExportRequest,
+  OpenSyncRequest,
   SyncRequest,
 } from "@shared/schemas/export-schema";
 import type { ImagePayload } from "@shared/schemas/image-schema";
@@ -29,6 +30,8 @@ function subscribe<T extends unknown[]>(
     ipcRenderer.removeListener(channel, listener);
   };
 }
+
+//----------------------------------------------------------
 
 contextBridge.exposeInMainWorld(
   "appInfo",
@@ -66,9 +69,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
   confirmFlush: () => ipcRenderer.send("flush-confirmed"),
   zoom: (action: ZoomAction) => ipcRenderer.invoke("zoom", action),
   openExternal: (url: string) => ipcRenderer.invoke("open:external", url),
-  openSyncPath: (payload: SyncRequest) =>
+  openSyncPath: (payload: OpenSyncRequest) =>
     ipcRenderer.invoke("open:sync-path", payload),
+  openSyncFolder: (payload: OpenSyncRequest) =>
+    ipcRenderer.invoke("open:sync-folder", payload),
   openAppPath: () => ipcRenderer.invoke("open:app-path"),
+  getSyncPath: (payload: OpenSyncRequest) =>
+    ipcRenderer.invoke("get:sync-path", payload),
 });
 contextBridge.exposeInMainWorld("noteAPI", {
   getAll: () => ipcRenderer.invoke("note:get-all"),
@@ -89,6 +96,18 @@ contextBridge.exposeInMainWorld("noteAPI", {
   noteImport: () => ipcRenderer.invoke("note:import"),
   onTriggerExport: (callback: (id: string, extension: string) => void) => {
     subscribe("note:trigger-export", callback);
+  },
+  onTriggerView: (callback: (id: string) => void) => {
+    subscribe("note:trigger-view", callback);
+  },
+  onTriggerPath: (callback: (id: string) => void) => {
+    subscribe("note:trigger-path", callback);
+  },
+  onTriggerCopyMarkdown: (callback: (id: string) => void) => {
+    subscribe("note:trigger-copy-markdown", callback);
+  },
+  onTriggerCopyPath: (callback: (id: string) => void) => {
+    subscribe("note:trigger-copy-path", callback);
   },
   onTriggerDelete: (callback: (id: string) => void) => {
     subscribe("note:trigger-delete", callback);
@@ -113,7 +132,7 @@ contextBridge.exposeInMainWorld("noteAPI", {
     ipcRenderer.invoke("views:get", view, id),
   dbMaintenance: (action: string) =>
     ipcRenderer.invoke("db-maintenance", action),
-  setActiveNote: (id: string | null) => ipcRenderer.send("set-active-note", id),
+  setActiveNote: (id: string | null) => ipcRenderer.send("note:set-active", id),
 });
 contextBridge.exposeInMainWorld("storeAPI", {
   onSettingsChanged: (callback: (settings: Partial<AppSettings>) => void) => {
