@@ -21,9 +21,6 @@ const NoteTag = Node.create<NoteTagOptions>({
       default: null,
     },
   }),
-
-  parseHTML: () => [{ tag: 'span[data-type="noteTag"]' }],
-
   renderHTML({ node, HTMLAttributes }) {
     const id = node.attrs?.["id"] || "";
     return [
@@ -39,7 +36,6 @@ const NoteTag = Node.create<NoteTagOptions>({
     const id = String(node.attrs?.["id"] ?? "").trim();
     return id ? `#${id}` : "";
   },
-
   renderMarkdown(node) {
     const id = String(node.attrs?.["id"] ?? "").trim();
     return id ? `#${id}` : "";
@@ -63,7 +59,6 @@ const NoteTag = Node.create<NoteTagOptions>({
       }),
     ];
   },
-
   addProseMirrorPlugins() {
     return [
       new Plugin({

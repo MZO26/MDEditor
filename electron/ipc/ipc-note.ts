@@ -1,5 +1,9 @@
 import db from "@electron/db/database";
 import {
+  deleteAutoExportFile,
+  writeAutoExportFile,
+} from "@electron/fs/fs-auto-export";
+import {
   handleDBBackupDialog,
   handleExportDialog,
   handleExportManyDialog,
@@ -12,11 +16,6 @@ import {
   singlePDFExport,
 } from "@electron/fs/fs-export";
 import { batchImport } from "@electron/fs/fs-import";
-import {
-  checkSyncState,
-  deleteMirroredNote,
-  writeMirroredNote,
-} from "@electron/fs/fs-mirror";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import {
   checkRateLimit,
@@ -30,7 +29,6 @@ import { AppErrorCode } from "@shared/errors";
 import {
   ExportManyRequestSchema,
   ExportRequestSchema,
-  SyncRequestSchema,
 } from "@shared/schemas/export-schema";
 import {
   CreateNotePayloadSchema,
@@ -63,20 +61,7 @@ function registerNoteIpc(win: BrowserWindow) {
       if (!checkRateLimit("note:create", LIMITS.WRITE_STANDARD))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(CreateNotePayloadSchema, payload);
-      const { markdown, ...noteData } = validatedData;
-      const isMirrorMode = store.get("mirror-mode") === true;
-      const targetDir = isMirrorMode ? store.get("mirror-path") : null;
-      const result = db.create(noteData);
-      if (!isMirrorMode || !targetDir) return result;
-      if (markdown === undefined)
-        throw new AppBackendError(AppErrorCode.InvalidData);
-      await writeMirroredNote({
-        id: result.id,
-        fileName: result.title,
-        markdown: markdown,
-        targetDir: targetDir,
-      });
-      return result;
+      return db.create(validatedData);
     });
   });
 
@@ -101,17 +86,17 @@ function registerNoteIpc(win: BrowserWindow) {
       }
       const validatedData = validation(UpdateNotePayloadSchema, payload);
       const { markdown, ...noteData } = validatedData;
-      const isMirrorMode = store.get("mirror-mode") === true;
-      const targetDir = isMirrorMode ? store.get("mirror-path") : null;
+      const result = db.update(noteData);
+      const isAutoExport = store.get("auto-export") === true;
+      const targetDir = isAutoExport ? store.get("auto-export-path") : null;
       const oldTitle =
-        isMirrorMode && targetDir
+        isAutoExport && targetDir
           ? db.getOldNoteTitle(validatedData.id)
           : undefined;
-      const result = db.update(noteData);
-      if (!isMirrorMode || !targetDir) return result;
+      if (!isAutoExport || !targetDir) return result;
       if (markdown === undefined)
         throw new AppBackendError(AppErrorCode.InvalidData);
-      await writeMirroredNote({
+      await writeAutoExportFile({
         id: result.id,
         fileName: result.title,
         markdown: markdown,
@@ -127,12 +112,12 @@ function registerNoteIpc(win: BrowserWindow) {
       if (!checkRateLimit("note:delete", LIMITS.WRITE_STANDARD))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(IdSchema, id);
-      const isMirrorMode = store.get("mirror-mode") === true;
-      const targetDir = isMirrorMode ? store.get("mirror-path") : null;
+      const isAutoExport = store.get("auto-export") === true;
+      const targetDir = isAutoExport ? store.get("auto-export-path") : null;
       const oldTitle = db.getOldNoteTitle(validatedData);
       const result = db.delete(validatedData);
-      if (!isMirrorMode || !targetDir) return result;
-      await deleteMirroredNote(targetDir, validatedData, oldTitle);
+      if (!isAutoExport || !targetDir) return result;
+      await deleteAutoExportFile(targetDir, validatedData, oldTitle);
       return result;
     });
   });
@@ -155,12 +140,12 @@ function registerNoteIpc(win: BrowserWindow) {
     });
   });
 
-  ipcMain.handle("mirror-folder:open", (e) => {
+  ipcMain.handle("select:auto-export-folder", (e) => {
     return result(e, async () => {
-      if (!checkRateLimit("mirror-folder:open", LIMITS.READ_LIGHT))
+      if (!checkRateLimit("select:auto-export-folder", LIMITS.READ_LIGHT))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const result = await dialog.showOpenDialog(win, {
-        title: "Select Mirror Directory",
+        title: "Select Auto Export Directory",
         buttonLabel: "Choose Folder",
         properties: ["openDirectory", "createDirectory"],
       });
@@ -168,19 +153,6 @@ function registerNoteIpc(win: BrowserWindow) {
         throw new AppBackendError(AppErrorCode.CancelledOperation);
       }
       return result.filePaths[0];
-    });
-  });
-
-  ipcMain.handle("note:sync", (e, payload: unknown) => {
-    return result(e, async () => {
-      if (!checkRateLimit("note:sync", LIMITS.READ_LIGHT))
-        throw new AppBackendError(AppErrorCode.RateLimitError);
-      if (store.get("mirror-mode") !== true) return null;
-      const validatedData = validation(SyncRequestSchema, payload);
-      if (!validatedData.updated_at) return null;
-      const targetDir = store.get("mirror-path");
-      if (!targetDir) return null;
-      return await checkSyncState(targetDir, validatedData);
     });
   });
 

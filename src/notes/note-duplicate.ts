@@ -3,7 +3,7 @@ import {
   getNoteEditorExtensions,
   resetEditorHistory,
 } from "@/components/editor/editor-init";
-import { isMirrorEnabled } from "@/notes/note-conflict";
+import { isAutoExportEnabled } from "@/notes/note-actions";
 import { noteStore, searchEngine, stateStore } from "@/settings/app-state";
 import { toNoteListItem } from "@/utils/note";
 import { getAppItem } from "@/utils/registry";
@@ -25,7 +25,7 @@ async function handleDuplicateNote(note: Note) {
     .map((link) => link.id);
 
   let markdown: string | undefined;
-  if (isMirrorEnabled()) {
+  if (isAutoExportEnabled()) {
     const headlessEditor = new Editor({
       extensions: getNoteEditorExtensions(),
       content: note.content,
@@ -43,7 +43,7 @@ async function handleDuplicateNote(note: Note) {
   }
   const data: CreateNotePayload = {
     ...rest,
-    ...(isMirrorEnabled() && markdown !== undefined ? { markdown } : {}),
+    ...(isAutoExportEnabled() && markdown !== undefined ? { markdown } : {}),
     links: outgoingLinkIds,
     pinned: false,
     bookmarked: false,

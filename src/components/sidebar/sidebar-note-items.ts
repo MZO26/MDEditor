@@ -58,6 +58,11 @@ function handleSidebarChange(change: SidebarChange, notes: NoteListItem[]) {
       break;
     }
     case "prepend": {
+      const needsToBeSorted = notes.some((n) => n.pinned || n.bookmarked);
+      if (needsToBeSorted) {
+        renderNoteList(notes);
+        break;
+      }
       const note = notes.find((n) => n.id === change.noteId);
       if (note) prependNoteToList(note);
       break;

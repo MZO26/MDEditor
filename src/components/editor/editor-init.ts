@@ -12,8 +12,11 @@ import { NoteTag } from "@/extensions/tag";
 import { Typography } from "@/extensions/typography";
 import { CustomUnderline } from "@/extensions/underline";
 import { WikiLink } from "@/extensions/wikilinks";
-import { debouncedSaveNote, handleSelectNote } from "@/notes/note-actions";
-import { isMirrorEnabled } from "@/notes/note-conflict";
+import {
+  debouncedSaveNote,
+  handleSelectNote,
+  isAutoExportEnabled,
+} from "@/notes/note-actions";
 import { noteStore, stateStore } from "@/settings/app-state";
 import { sleep } from "@/utils/async";
 import { requireElement } from "@/utils/dom";
@@ -107,7 +110,7 @@ function initEditor(settings: Partial<AppSettings>): Editor {
     const activeId = stateStore.getState().activeId;
     if (!activeId) return;
     const content = editor?.getJSON();
-    const markdown = isMirrorEnabled() ? editor.getMarkdown() : undefined;
+    const markdown = isAutoExportEnabled() ? editor.getMarkdown() : undefined;
     debouncedSaveNote(activeId, content, markdown, false);
   });
   inEditorSearch(editor);

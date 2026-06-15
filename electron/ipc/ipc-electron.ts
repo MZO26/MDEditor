@@ -1,6 +1,6 @@
 import { setUpNoteMenu, setUpTableMenu } from "@electron/context-menu";
+import { getFilePath } from "@electron/fs/fs-auto-export";
 import { handleImageWrite } from "@electron/fs/fs-image";
-import { getFilePath } from "@electron/fs/fs-mirror";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import {
   checkRateLimit,
@@ -12,7 +12,7 @@ import { getTitleBarOverlay, initTheme } from "@electron/titlebar";
 import { LIMITS } from "@shared/constants";
 import { AppErrorCode } from "@shared/errors";
 import { ExternalUrlSchema } from "@shared/schemas/editor-schema";
-import { OpenSyncRequestSchema } from "@shared/schemas/export-schema";
+import { OpenAutoExportPathSchema } from "@shared/schemas/export-schema";
 import { ImagePayloadSchema } from "@shared/schemas/image-schema";
 import { type Theme } from "@shared/schemas/store-schema";
 import type { MenuType, NoteMenuPayload } from "@shared/types";
@@ -56,14 +56,15 @@ function registerElectronIpc(win: BrowserWindow) {
     });
   });
 
-  ipcMain.handle("open:sync-path", (e, payload: unknown) => {
+  // opens note in editor
+  ipcMain.handle("open:auto-export-path", (e, payload: unknown) => {
     return result(e, async () => {
-      if (!checkRateLimit("open:sync-path", LIMITS.READ_LIGHT))
+      if (!checkRateLimit("open:auto-export-path", LIMITS.READ_LIGHT))
         throw new AppBackendError(AppErrorCode.RateLimitError);
-      if (store.get("mirror-mode") !== true) return null;
-      const validatedData = validation(OpenSyncRequestSchema, payload);
+      if (store.get("auto-export") !== true) return null;
+      const validatedData = validation(OpenAutoExportPathSchema, payload);
       if (!validatedData.updated_at) return null;
-      const targetDir = store.get("mirror-path");
+      const targetDir = store.get("auto-export-path");
       if (!targetDir) return null;
       const filePath = getFilePath(targetDir, validatedData);
       const error = await shell.openPath(filePath.absoluteFilePath);
@@ -72,14 +73,15 @@ function registerElectronIpc(win: BrowserWindow) {
     });
   });
 
-  ipcMain.handle("open:sync-folder", (e, payload: unknown) => {
+  // opens auto dir and shows note
+  ipcMain.handle("open:auto-export-folder", (e, payload: unknown) => {
     return result(e, async () => {
-      if (!checkRateLimit("open:sync-folder", LIMITS.READ_LIGHT))
+      if (!checkRateLimit("open:auto-export-folder", LIMITS.READ_LIGHT))
         throw new AppBackendError(AppErrorCode.RateLimitError);
-      if (store.get("mirror-mode") !== true) return null;
-      const validatedData = validation(OpenSyncRequestSchema, payload);
+      if (store.get("auto-export") !== true) return null;
+      const validatedData = validation(OpenAutoExportPathSchema, payload);
       if (!validatedData.updated_at) return null;
-      const targetDir = store.get("mirror-path");
+      const targetDir = store.get("auto-export-path");
       if (!targetDir) return null;
       const filePath = getFilePath(targetDir, validatedData);
       try {
@@ -93,14 +95,15 @@ function registerElectronIpc(win: BrowserWindow) {
     });
   });
 
-  ipcMain.handle("get:sync-path", (e, payload: unknown) => {
+  // returns absolute file path ready to copy
+  ipcMain.handle("get:auto-export-path", (e, payload: unknown) => {
     return result(e, async () => {
-      if (!checkRateLimit("get:sync-path", LIMITS.READ_LIGHT))
+      if (!checkRateLimit("get:auto-export-path", LIMITS.READ_LIGHT))
         throw new AppBackendError(AppErrorCode.RateLimitError);
-      if (store.get("mirror-mode") !== true) return null;
-      const validatedData = validation(OpenSyncRequestSchema, payload);
+      if (store.get("auto-export") !== true) return null;
+      const validatedData = validation(OpenAutoExportPathSchema, payload);
       if (!validatedData.updated_at) return null;
-      const targetDir = store.get("mirror-path");
+      const targetDir = store.get("auto-export-path");
       if (!targetDir) return null;
       const filePath = getFilePath(targetDir, validatedData);
       try {

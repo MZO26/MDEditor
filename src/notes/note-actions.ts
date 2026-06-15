@@ -10,8 +10,12 @@ import {
 import { resetEditorHistory } from "@/components/editor/editor-init";
 import { updateStats } from "@/components/sidebar/sidebar-features";
 import { setImportedContent } from "@/notes/import-actions";
-import { handleConflict, isMirrorEnabled } from "@/notes/note-conflict";
-import { noteStore, searchEngine, stateStore } from "@/settings/app-state";
+import {
+  noteStore,
+  searchEngine,
+  settingsStore,
+  stateStore,
+} from "@/settings/app-state";
 import { debounce } from "@/utils/async";
 import { toNoteListItem } from "@/utils/note";
 import { getAppItem } from "@/utils/registry";
@@ -23,9 +27,15 @@ import {
   type UpdateNotePayload,
 } from "@shared/schemas/note-schema";
 
-// note crud operations + import
+// helpers
 
-//------------------------------------------------------------
+function isAutoExportEnabled() {
+  return settingsStore.get("auto-export") ?? false;
+}
+
+//----------------------------------------------------------
+
+// note crud operations + import
 
 // create
 
@@ -35,7 +45,6 @@ async function handleCreateNote() {
   const metadata = getMetadata(editorContent);
   const payload: CreateNotePayload = {
     content: editorContent,
-    ...(isMirrorEnabled() ? { markdown: "" } : {}),
     ...metadata,
     title: UNTITLED,
     pinned: false,
@@ -140,26 +149,27 @@ async function handleSaveNote(
 ) {
   const metaData = getMetadata(content);
   const newTitle = titleGenerator(content);
+  const autoExportEnabled = isAutoExportEnabled();
   const payload: UpdateNotePayload = {
     id,
     title: newTitle,
     content,
     ...metaData,
-    ...(isMirrorEnabled() && markdown !== undefined ? { markdown } : {}),
+    ...(autoExportEnabled && markdown !== undefined ? { markdown } : {}),
   };
   const result = await updateNote(payload, flush);
   if (!result.success) {
     console.error("[handleSaveNote]: Save failed.", result.error);
     return;
   }
-  const updatedListItem = toNoteListItem(result.data);
+  const note = result.data;
+  const updatedListItem = toNoteListItem(note);
   noteStore.setState((state) => ({
-    activeNote:
-      state.activeNote?.id === result.data.id ? result.data : state.activeNote,
+    activeNote: state.activeNote?.id === note.id ? note : state.activeNote,
     notes: state.notes.map((n) =>
       n.id === updatedListItem.id ? updatedListItem : n,
     ),
-    sidebarChange: { type: "update", noteId: result.data.id },
+    sidebarChange: { type: "update", noteId: note.id },
   }));
   searchEngine.upsertNote(updatedListItem);
   updateStats();
@@ -182,19 +192,11 @@ async function handleSelectNote(id: string) {
     console.error("[handleSelectNote]: Failed to fetch note:", result.error);
     return;
   }
-  editor.commands.setContent(result.data.content, {
+  const note = result.data;
+  editor.commands.setContent(note.content, {
     emitUpdate: false,
   });
-  noteStore.setState({ activeNote: result.data });
-  const markdown = isMirrorEnabled() ? editor.getMarkdown() : undefined;
-  if (markdown !== undefined) {
-    await handleConflict(result.data, markdown).catch((error) =>
-      console.error(
-        "[handleSelectNote -> handleConflict]: Error while trying to sync note",
-        error,
-      ),
-    );
-  }
+  noteStore.setState({ activeNote: note });
   resetEditorHistory(editor);
   requestAnimationFrame(() => {
     editor.commands.focus();
@@ -211,4 +213,5 @@ export {
   handleImportNote,
   handleSaveNote,
   handleSelectNote,
+  isAutoExportEnabled,
 };

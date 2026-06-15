@@ -5,8 +5,7 @@ import { AppErrorCode } from "@shared/errors";
 import type {
   ExportRequest,
   ImportRequest,
-  OpenSyncRequest,
-  SyncRequest,
+  OpenAutoExportPathRequest,
 } from "@shared/schemas/export-schema";
 import type { ImagePayload } from "@shared/schemas/image-schema";
 import type {
@@ -20,7 +19,6 @@ import type {
   ExportedContent,
   ImageSrc,
   Result,
-  SyncResult,
   View,
   ZoomAction,
 } from "@shared/types";
@@ -77,14 +75,6 @@ async function getManyById(ids: string[]): Promise<Result<Note[]>> {
   return invoke(window.noteAPI.getManyById(ids));
 }
 
-async function sync(payload: SyncRequest): Promise<Result<SyncResult>> {
-  return invoke(window.noteAPI.sync(payload));
-}
-
-async function openMirrorFolder(): Promise<Result<string>> {
-  return invoke(window.noteAPI.openMirrorFolder());
-}
-
 async function exportNote(
   payload: ExportRequest,
 ): Promise<Result<ExportRequest>> {
@@ -118,6 +108,10 @@ async function getViews(
 
 async function dbMaintenance(action: string): Promise<Result<number>> {
   return invoke(window.noteAPI.dbMaintenance(action));
+}
+
+async function selectAutoExportFolder(): Promise<Result<string>> {
+  return invoke(window.noteAPI.selectAutoExportFolder());
 }
 
 //----------------------------------------------------------
@@ -170,26 +164,26 @@ async function openExternal(url: string): Promise<Result<void>> {
   return invoke(window.electronAPI.openExternal(url));
 }
 
-async function openSyncPath(
-  payload: OpenSyncRequest,
+async function openAutoExportPath(
+  payload: OpenAutoExportPathRequest,
 ): Promise<Result<boolean>> {
-  return invoke(window.electronAPI.openSyncPath(payload));
+  return invoke(window.electronAPI.openAutoExportPath(payload));
 }
 
-async function openSyncFolder(
-  payload: OpenSyncRequest,
+async function openAutoExportFolder(
+  payload: OpenAutoExportPathRequest,
 ): Promise<Result<boolean>> {
-  return invoke(window.electronAPI.openSyncFolder(payload));
+  return invoke(window.electronAPI.openAutoExportFolder(payload));
 }
 
 async function openAppPath(): Promise<Result<boolean>> {
   return invoke(window.electronAPI.openAppPath());
 }
 
-async function getSyncPath(
-  payload: OpenSyncRequest,
+async function getAutoExportPath(
+  payload: OpenAutoExportPathRequest,
 ): Promise<Result<string | null>> {
-  return invoke(window.electronAPI.getSyncPath(payload));
+  return invoke(window.electronAPI.getAutoExportPath(payload));
 }
 
 async function pinWindow(): Promise<Result<boolean>> {
@@ -234,24 +228,23 @@ export {
   getAll,
   getAllBackup,
   getAllSettings,
+  getAutoExportPath,
   getManyById,
   getNoteById,
   getSettings,
-  getSyncPath,
   getViews,
   handleZoom,
   imageWrite,
   importNote,
   openAppPath,
+  openAutoExportFolder,
+  openAutoExportPath,
   openExternal,
-  openMirrorFolder,
-  openSyncFolder,
-  openSyncPath,
   pin,
   pinWindow,
+  selectAutoExportFolder,
   setTheme,
   showNotification,
-  sync,
   updateNote,
   updateSettings,
 };

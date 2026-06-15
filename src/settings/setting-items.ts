@@ -96,10 +96,10 @@ function buildSelects() {
       "Backup Format",
     ),
     selectBuilder(
-      "db-optimization",
+      "database",
       [
-        { value: "optimize-db", label: "Optimize database" },
         { value: "vacuum-db", label: "Free up disk space" },
+        { value: "optimize-db", label: "Optimize database" },
         { value: "backup-db", label: "Backup database" },
       ],
       "App",
@@ -114,7 +114,7 @@ function buildSelects() {
       "App",
     ));
   selectBuilder(
-    "mirror-mode",
+    "auto-export",
     [
       { value: "true", label: "Enable" },
       { value: "false", label: "Disable" },

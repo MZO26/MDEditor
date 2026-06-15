@@ -10,7 +10,6 @@ const CustomUnderline = Underline.extend({
       }),
     ];
   },
-
   addPasteRules() {
     return [
       markPasteRule({

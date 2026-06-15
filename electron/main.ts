@@ -27,14 +27,27 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
+export let win: BrowserWindow | null = null;
+
+let isReadyToClose = false;
+
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+} else {
+  app.on("second-instance", () => {
+    if (win) {
+      if (win.isMinimized()) win.restore();
+      win.focus();
+    }
+  });
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env["DIST"] = path.join(__dirname, "../dist");
 process.env["VITE_PUBLIC"] = app.isPackaged
   ? process.env["DIST"]
   : path.join(process.env["DIST"], "../public");
-
-export let win: BrowserWindow | null = null;
-let isReadyToClose = false;
 
 registerCustomProtocol();
 setupGlobalErrorHandling({

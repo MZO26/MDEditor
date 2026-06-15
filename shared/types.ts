@@ -177,15 +177,6 @@ type ResizeOptions = {
   cssVariable?: string;
 };
 
-type SyncResult =
-  | { type: "MISSING_RESOLVED" }
-  | { type: "IN_SYNC" }
-  | {
-      type: "OUT_OF_SYNC";
-      localContent: string;
-      dbContent: string;
-    };
-
 type SearchOptions = {
   searchTerm?: string;
   replaceTerm?: string;
@@ -226,7 +217,6 @@ export type {
   SnippetCacheValue,
   StatRegistry,
   Success,
-  SyncResult,
   TemplateRegistry,
   ThemeResult,
   TitleBarOverlayOptions,

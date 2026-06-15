@@ -120,7 +120,7 @@ const CreateNotePayloadSchema = NoteSchema.omit({
   id: true,
   created_at: true,
   updated_at: true,
-}).extend({ links: LinkPayloadSchema, markdown: PlainTextSchema.optional() });
+}).extend({ links: LinkPayloadSchema });
 
 const CreateNotesPayloadsSchema = z.array(CreateNotePayloadSchema);
 
@@ -163,7 +163,7 @@ const NoteSearchDoc = NoteSchema.omit({
   todos_left: true,
 }).extend({ plainText: PlainTextSchema });
 
-const MirroredNoteWritePayloadSchema = z.object({
+const AutoExportWritePayloadSchema = z.object({
   id: IdSchema,
   fileName: TitleSchema,
   markdown: PlainTextSchema,
@@ -172,7 +172,7 @@ const MirroredNoteWritePayloadSchema = z.object({
 });
 
 type NoteListItem = z.infer<typeof NoteListItemFromDB>;
-type MirroredNoteWritePayload = z.infer<typeof MirroredNoteWritePayloadSchema>;
+type AutoExportWritePayload = z.infer<typeof AutoExportWritePayloadSchema>;
 type NoteSearchDoc = z.infer<typeof NoteSearchDoc>;
 type NoteMetaData = z.infer<typeof NoteMetaData>;
 type NoteRow = z.infer<typeof NoteRowSchema>;
@@ -189,6 +189,7 @@ type CreateNotesPayload = z.infer<typeof CreateNotesPayloadsSchema>;
 type Note = z.infer<typeof NoteSchema>;
 
 export {
+  AutoExportWritePayloadSchema,
   CreateNotePayloadSchema,
   CreateNotesPayloadsSchema,
   CreateTransactionSchema,
@@ -198,7 +199,6 @@ export {
   IdsSchema,
   LinkRowsSchema,
   LinksSchema,
-  MirroredNoteWritePayloadSchema,
   NoteFromDB,
   NoteListItemFromDB,
   NoteRowSchema,
@@ -215,12 +215,12 @@ export {
   TogglePinSchema,
   UpdateNotePayloadSchema,
   UpdateTransactionSchema,
+  type AutoExportWritePayload,
   type CreateNotePayload,
   type CreateNotesPayload,
   type CreateTransaction,
   type Link,
   type LinkRow,
-  type MirroredNoteWritePayload,
   type Note,
   type NoteListItem,
   type NoteMetaData,

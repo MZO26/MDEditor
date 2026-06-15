@@ -1,9 +1,5 @@
-import {
-  mergeAttributes,
-  Node,
-  nodeInputRule,
-  nodePasteRule,
-} from "@tiptap/core";
+import { noteStore } from "@/settings/app-state";
+import { Node, nodeInputRule, nodePasteRule } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 
 const UUID_PATTERN = "([a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12})";
@@ -33,34 +29,26 @@ const WikiLink = Node.create<WikiLinkOptions>({
   addAttributes: () => ({
     id: {
       default: null,
-      parseHTML: (el) =>
-        el
-          .getAttribute("data-id")
-          ?.replace(/[\[\]]/g, "")
-          .trim() || "",
     },
   }),
-  parseHTML: () => [{ tag: "span[data-wikilink]" }],
-  renderHTML({ node, HTMLAttributes }) {
-    const id = node.attrs["id"];
-    const label = this.options.getLabel(id); // Note title
+  renderHTML({ node }) {
+    const id = String(node.attrs?.["id"] ?? "").trim();
+    const note = noteStore.get("notes").find((n) => n.id === id);
     return [
       "span",
-      mergeAttributes(HTMLAttributes, {
-        "data-wikilink": "",
-        "data-id": id,
-        class: "wikilink",
-      }),
-      label, // Renders the title
+      { class: "wikilink" },
+      note ? `[[${note.title}]]` : id ? `[[${id}]]` : "",
     ];
   },
   renderText({ node }) {
     const id = String(node.attrs?.["id"] ?? "").trim();
-    return id ? `[[${this.options.getLabel(id)}]]` : "";
+    const note = noteStore.get("notes").find((n) => n.id === id);
+    return note ? `[[${note.title}]]` : id ? `[[${id}]]` : "";
   },
   renderMarkdown(node) {
     const id = String(node.attrs?.["id"] ?? "").trim();
-    return id ? `[[${id}]]` : "";
+    const note = noteStore.get("notes").find((n) => n.id === id);
+    return note ? `[[${note.title}]]` : id ? `[[${id}]]` : "";
   },
   addInputRules() {
     return [

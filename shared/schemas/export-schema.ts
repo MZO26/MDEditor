@@ -82,17 +82,19 @@ const ExportRequestSchema = z.discriminatedUnion("extension", [
   PdfSchema,
 ]);
 
-const WriteMirrorRequestSchema = MdSchema.extend({
+const WriteAutoExportRequestSchema = MdSchema.extend({
   oldFileName: TitleSchema.optional(),
 });
 
-const DeleteMirrorRequestSchema = MdSchema.omit({
+const DeleteAutoExportRequestSchema = MdSchema.omit({
   content: true,
 });
 
-const SyncRequestSchema = MdSchema.extend({ updated_at: DateSchema });
+const AutoExportRequestSchema = MdSchema.extend({ updated_at: DateSchema });
 
-const OpenSyncRequestSchema = SyncRequestSchema.omit({ content: true });
+const OpenAutoExportPathSchema = AutoExportRequestSchema.omit({
+  content: true,
+});
 
 const ExportItemSchema = z.discriminatedUnion("extension", [
   HtmlSchema,
@@ -111,29 +113,29 @@ const ImportRequestSchema = z.discriminatedUnion("extension", [
   JsonSchema.omit({ id: true }),
 ]);
 
-type OpenSyncRequest = z.infer<typeof OpenSyncRequestSchema>;
-type SyncRequest = z.infer<typeof SyncRequestSchema>;
-type WriteMirrorRequest = z.infer<typeof WriteMirrorRequestSchema>;
-type DeleteMirrorRequest = z.infer<typeof DeleteMirrorRequestSchema>;
+type OpenAutoExportPathRequest = z.infer<typeof OpenAutoExportPathSchema>;
+type AutoExportRequest = z.infer<typeof AutoExportRequestSchema>;
+type WriteAutoExportRequest = z.infer<typeof WriteAutoExportRequestSchema>;
+type DeleteAutoExportRequest = z.infer<typeof DeleteAutoExportRequestSchema>;
 type ExportManyRequest = z.infer<typeof ExportManyRequestSchema>;
 type ImportRequest = z.infer<typeof ImportRequestSchema>;
 type ExportRequest = z.infer<typeof ExportRequestSchema>;
 
 export {
-  DeleteMirrorRequestSchema,
+  AutoExportRequestSchema,
+  DeleteAutoExportRequestSchema,
   ExportManyRequestSchema,
   ExportRequestSchema,
   FileNameSchema,
   ImportRequestSchema,
-  OpenSyncRequestSchema,
+  OpenAutoExportPathSchema,
   StringContentSchema,
-  SyncRequestSchema,
-  WriteMirrorRequestSchema,
-  type DeleteMirrorRequest,
+  WriteAutoExportRequestSchema,
+  type AutoExportRequest,
+  type DeleteAutoExportRequest,
   type ExportManyRequest,
   type ExportRequest,
   type ImportRequest,
-  type OpenSyncRequest,
-  type SyncRequest,
-  type WriteMirrorRequest,
+  type OpenAutoExportPathRequest,
+  type WriteAutoExportRequest,
 };

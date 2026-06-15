@@ -1,8 +1,7 @@
 import type {
   ExportRequest,
   ImportRequest,
-  OpenSyncRequest,
-  SyncRequest,
+  OpenAutoExportPathRequest,
 } from "@shared/schemas/export-schema";
 import type { Note, NoteListItem } from "@shared/schemas/note-schema";
 import type { AppSettings, Theme } from "@shared/schemas/store-schema";
@@ -12,7 +11,7 @@ import {
   type ImagePayload,
   type UpdateNotePayload,
 } from "@shared/shared/types";
-import type { ImageSrc, MenuType, SyncResult, View } from "@shared/types";
+import type { ImageSrc, MenuType, View } from "@shared/types";
 
 declare module "*.css";
 
@@ -39,10 +38,16 @@ declare global {
       confirmFlush: () => void;
       zoom: (action: string) => Promise<Result<number>>;
       openExternal: (url: string) => Promise<Result<void>>;
-      openSyncPath: (payload: OpenSyncRequest) => Promise<Result<boolean>>;
-      openSyncFolder: (payload: OpenSyncRequest) => Promise<Result<boolean>>;
+      openAutoExportPath: (
+        payload: OpenAutoExportPathRequest,
+      ) => Promise<Result<boolean>>;
+      openAutoExportFolder: (
+        payload: OpenAutoExportPathRequest,
+      ) => Promise<Result<boolean>>;
+      getAutoExportPath: (
+        payload: OpenAutoExportPathRequest,
+      ) => Promise<Result<string>>;
       openAppPath: () => Promise<Result<boolean>>;
-      getSyncPath: (payload: OpenSyncRequest) => Promise<Result<string | null>>;
     };
     noteAPI: {
       getAll: () => Promise<Result<NoteListItem[]>>;
@@ -56,8 +61,7 @@ declare global {
         flush: boolean,
       ) => Promise<Result<Note>>;
       delete: (id: string) => Promise<Result<void>>;
-      openMirrorFolder: () => Promise<Result<string>>;
-      sync: (payload: SyncRequest) => Promise<Result<SyncResult>>;
+      selectAutoExportFolder: () => Promise<Result<string>>;
       noteExport: (payload: ExportRequest) => Promise<Result<ExportRequest>>;
       onTriggerExport: (
         callback: (id: string, extension: string) => void,

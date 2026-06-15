@@ -23,8 +23,8 @@ const DEFAULT_STORE: AppSettings = {
   highlight: "context",
   spellcheck: false,
   "delete-confirmation": true,
-  "mirror-mode": false,
-  "mirror-path": null,
+  "auto-export": false,
+  "auto-export-path": null,
   "note-item-display": "snippet",
   "window-bounds": { width: 1100, height: 600 },
 };
@@ -32,13 +32,11 @@ const DEFAULT_STORE: AppSettings = {
 interface AppState {
   activeId: string | null;
   searchQuery: string;
-  lastSyncedAt: number;
 }
 
 const STATE_STORE: AppState = {
   activeId: null,
   searchQuery: "",
-  lastSyncedAt: 0,
 };
 
 let previousId: string | null = null;
@@ -46,7 +44,6 @@ let previousSearchQuery: string = "";
 let previousNotesRef: NoteListItem[] = [];
 let previousNotesLength: number | null = null;
 let previousSidebarChange: SidebarChange = null;
-let previousSync: number = 0;
 
 const stateStore = createStore<AppState>(STATE_STORE);
 
@@ -136,9 +133,6 @@ stateStore.subscribe((state) => {
     requestAnimationFrame(() => {
       handleSidebarEmptyState();
     });
-  }
-  if (state.lastSyncedAt !== previousSync) {
-    previousSync = state.lastSyncedAt;
   }
 });
 

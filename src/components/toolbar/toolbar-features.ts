@@ -1,7 +1,5 @@
-import { pinWindow, setTheme, showNotification } from "@/api/api";
+import { pinWindow, setTheme } from "@/api/api";
 import { promptImageUpload } from "@/extensions/image/image";
-import { handleConflict, isMirrorEnabled } from "@/notes/note-conflict";
-import { noteStore, stateStore } from "@/settings/app-state";
 import { createAsyncHandler } from "@/utils/async";
 import { requireElement } from "@/utils/dom";
 import { getAppItem, registerAppEvents } from "@/utils/registry";
@@ -22,9 +20,6 @@ function initTopToolbar() {
     "app:set-editor-width": () => setEditorWidth(appContainer),
     "app:toggle-read-only": () => editor?.setEditable(!editor.isEditable),
     "app:toggle-focus-mode": () => initFocusMode(),
-    "app:check-sync-state": async () => {
-      await syncCheck();
-    },
     "app:escape": () => {
       if (appContainer.classList.contains("focus")) {
         initFocusMode();
@@ -80,34 +75,6 @@ function toggleToolbar() {
   });
 }
 
-async function syncCheck() {
-  if (!isMirrorEnabled()) {
-    await showNotification(
-      "Unable to sync.",
-      "Enable Mirror Mode to sync notes.",
-    );
-  }
-  const activeId = stateStore.get("activeId");
-  const activeNote = noteStore.get("activeNote");
-  if (!activeId || !activeNote) {
-    await showNotification(
-      "No note selected.",
-      "Select a note to check its sync state.",
-    );
-    return;
-  }
-  const editor = getAppItem("editor");
-  const markdown = editor.getMarkdown();
-  const result = await handleConflict(activeNote, markdown).catch((error) =>
-    console.error("[handleConflict]: Error while trying to sync note", error),
-  );
-  if (!result) return;
-  await showNotification(
-    "Synced Note.",
-    `${result === "IN_SYNC" ? "No change found." : result === "MISSING_RESOLVED" ? "File is missing." : "Change found."}`,
-  );
-}
-
 const TOP_TOOLBAR_ACTIONS: ActionMap = {
   readOnly: {
     type: "action",
@@ -129,14 +96,6 @@ const TOP_TOOLBAR_ACTIONS: ActionMap = {
     run: () => initFocusMode(),
     icon: "focus",
     shortcut: "F11",
-  },
-  checkSyncState: {
-    type: "action",
-    run: async () => {
-      await syncCheck();
-    },
-    icon: "file-check",
-    shortcut: "MOD+Alt+S",
   },
   toggleToolbar: {
     type: "action",

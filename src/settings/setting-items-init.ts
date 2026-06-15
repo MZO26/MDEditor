@@ -1,24 +1,24 @@
 import {
   dbMaintenance,
   exportManyNotes,
-  openMirrorFolder,
+  selectAutoExportFolder,
   showNotification,
   updateSettings,
 } from "@/api/api";
 import { getBatchExportContent } from "@/notes/export-actions";
-import { syncNoteStore } from "@/settings/app-state";
+import { stateStore, syncNoteStore } from "@/settings/app-state";
 import { applyAppTheme, resolveTheme, setCodeTheme } from "@/settings/theme";
 import { createAsyncHandler } from "@/utils/async";
 import { findElement } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
 import type {
   AppSettings,
+  AutoExportPath,
   DeleteConfirmation,
   FontFamily,
   FontSize,
   HighlightTheme,
   LineHeight,
-  MirrorPath,
   NoteItemDisplay,
   Spellcheck,
   Theme,
@@ -234,23 +234,20 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     "#file-backup",
     container,
   );
-  const dbOptimizeSelect = findElement<HTMLSelectElement>(
-    "#db-optimization",
-    container,
-  );
+  const databaseSelect = findElement<HTMLSelectElement>("#database", container);
   const deleteConfirmSelect = findElement<HTMLSelectElement>(
     "#delete-confirmation",
     container,
   );
-  const mirrorModeSelect = findElement<HTMLSelectElement>(
-    "#mirror-mode",
+  const autoExportSelect = findElement<HTMLSelectElement>(
+    "#auto-export",
     container,
   );
   if (
     !batchExportSelect ||
-    !dbOptimizeSelect ||
+    !databaseSelect ||
     !deleteConfirmSelect ||
-    !mirrorModeSelect
+    !autoExportSelect
   )
     return;
 
@@ -290,8 +287,8 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
 
   // db maintenance
 
-  dbOptimizeSelect.value = "";
-  dbOptimizeSelect.addEventListener(
+  databaseSelect.value = "";
+  databaseSelect.addEventListener(
     "change",
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLSelectElement | null;
@@ -327,37 +324,38 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     }
   });
 
-  // mirror to fs mode
-  const mirrorPath = settings["mirror-path"];
-  mirrorModeSelect.setAttribute("data-tippy-dynamic", "");
-  mirrorModeSelect.setAttribute(
+  // auto export setting
+  const autoExportPath = settings["auto-export-path"];
+  autoExportSelect.setAttribute("data-tippy-dynamic", "");
+  autoExportSelect.setAttribute(
     "data-tippy-content",
-    mirrorPath ? `Path: ${mirrorPath}` : "No path selected.",
+    autoExportPath ? `Path: ${autoExportPath}` : "No path selected.",
   );
-  mirrorModeSelect.value = settings["mirror-mode"] ? "true" : "false";
-  mirrorModeSelect.addEventListener(
+  autoExportSelect.value = settings["auto-export"] ? "true" : "false";
+  autoExportSelect.addEventListener(
     "change",
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLSelectElement | null;
       if (target?.value) {
         const enabled = target.value === "true";
         if (enabled) {
-          const result = await openMirrorFolder();
+          const result = await selectAutoExportFolder();
           if (!result.success) {
             target.value = "false";
             return;
           }
           updateSettings({
-            "mirror-mode": true,
-            "mirror-path": result.data as MirrorPath,
+            "auto-export": true,
+            "auto-export-path": result.data as AutoExportPath,
           });
-          mirrorModeSelect.setAttribute(
+          autoExportSelect.setAttribute(
             "data-tippy-content",
             `Path: ${result.data}`,
           );
         } else {
-          updateSettings({ "mirror-mode": false, "mirror-path": null });
-          mirrorModeSelect.setAttribute(
+          updateSettings({ "auto-export": false, "auto-export-path": null });
+          stateStore.setState({ activeExportPath: null });
+          autoExportSelect.setAttribute(
             "data-tippy-content",
             "No path selected.",
           );

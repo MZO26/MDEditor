@@ -1,25 +1,59 @@
+import db from "@electron/db/database";
 import { sanitizeExportString } from "@electron/fs/fs-assets";
 import { writeAtomic } from "@electron/fs/fs-atomic-write";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import { validation } from "@electron/ipc/ipc-validation";
+import { store } from "@electron/store";
 import { AppErrorCode } from "@shared/errors";
 import {
-  DeleteMirrorRequestSchema,
+  DeleteAutoExportRequestSchema,
   FileNameSchema,
-  WriteMirrorRequestSchema,
-  type DeleteMirrorRequest,
-  type SyncRequest,
-  type WriteMirrorRequest,
+  WriteAutoExportRequestSchema,
+  type DeleteAutoExportRequest,
+  type WriteAutoExportRequest,
 } from "@shared/schemas/export-schema";
-import type {
-  MirroredNoteWritePayload,
-  Note,
+import {
+  IdSchema,
+  type AutoExportWritePayload,
+  type Note,
 } from "@shared/schemas/note-schema";
-import type { SyncResult } from "@shared/types";
 import console from "console";
 import { app, shell } from "electron";
-import fs, { access, constants, mkdir, readFile, stat } from "fs/promises";
+import { readFileSync } from "fs";
+import fs, { access, constants, mkdir, readFile } from "fs/promises";
 import path from "path";
+
+async function isAutoExport(id: string) {
+  const validatedData = validation(IdSchema, id);
+  const note = db.getById(validatedData);
+  const enabled = store.get("auto-export") ?? false;
+  if (!enabled) return false;
+  const targetDir = (enabled && store.get("auto-export-path")) ?? null;
+  if (!targetDir) return false;
+  const exportPath = resolveAutoExportPath(targetDir);
+  const absoluteFilePath = getFilePath(exportPath, {
+    fileName: note.title,
+    id: note.id,
+    extension: "md",
+  }).absoluteFilePath;
+  try {
+    if (!!absoluteFilePath && readFileSync(absoluteFilePath)) {
+      console.log("[isAutoExport]: This note is on file system.");
+      return true;
+    }
+    console.log("[isAutoExport]: This note is not on file system yet.");
+    return false;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return;
+    }
+    console.error(
+      "[isAutoExport]: Failed to detect if note is on file system:",
+      error,
+    );
+    throw new AppBackendError(AppErrorCode.UnknownError);
+  }
+}
 
 function normalizeText(content: string | null | undefined) {
   if (!content) return "";
@@ -61,7 +95,7 @@ async function safeRename(
     const err = error as NodeJS.ErrnoException;
     if (err.code !== "ENOENT") {
       console.error(
-        "[writeMirroredNoteLogic -> safeRename]: Safe rename failed",
+        "[writeAutoExportFileLogic -> safeRename]: Safe rename failed",
         error,
       );
       throw new AppBackendError(AppErrorCode.FileWriteError);
@@ -87,7 +121,7 @@ function getFilePath(
   return { absoluteFilePath, idSuffix };
 }
 
-function resolveMirrorPath(targetDir: string) {
+function resolveAutoExportPath(targetDir: string) {
   const normalized = path.resolve(targetDir);
   const baseName = path.basename(normalized).toLowerCase();
   return baseName === "mzo notes"
@@ -95,86 +129,52 @@ function resolveMirrorPath(targetDir: string) {
     : path.join(normalized, "MZO Notes");
 }
 
-async function checkSyncState(
+async function writeAutoExportFileLogic(
   targetDir: string,
-  payload: SyncRequest,
-): Promise<SyncResult> {
-  const mirrorPath = resolveMirrorPath(targetDir);
-  const { absoluteFilePath } = getFilePath(mirrorPath, {
-    fileName: payload.fileName,
-    id: payload.id,
-    extension: "md",
-  });
-  let localContent: string | null = null;
-  try {
-    const fsStat = await stat(absoluteFilePath).catch(() => null);
-    if (!fsStat) return { type: "MISSING_RESOLVED" };
-    const dbUpdatedAt = new Date(payload.updated_at).getTime();
-    if (fsStat.mtimeMs <= dbUpdatedAt) return { type: "IN_SYNC" };
-    localContent = await readFile(absoluteFilePath, "utf-8");
-  } catch (error: unknown) {
-    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-      console.error("[checkSyncState]: Error checking file:", error);
-      throw new AppBackendError(AppErrorCode.InvalidData);
-    }
-    return { type: "MISSING_RESOLVED" };
-  }
-  const normalizedLocal = normalizeText(localContent).trimEnd();
-  const normalizedDB = normalizeText(payload.content).trimEnd();
-  if (normalizedLocal === normalizedDB) {
-    return { type: "IN_SYNC" };
-  }
-  return {
-    type: "OUT_OF_SYNC",
-    localContent,
-    dbContent: payload.content,
-  };
-}
-
-async function writeMirroredNoteLogic(
-  targetDir: string,
-  payload: WriteMirrorRequest,
+  payload: WriteAutoExportRequest,
 ) {
   const { id, fileName, oldFileName, extension } = payload;
-  const mirrorPath = resolveMirrorPath(targetDir);
-  await mkdir(mirrorPath, { recursive: true });
-  const { absoluteFilePath } = getFilePath(mirrorPath, {
+  const exportPath = resolveAutoExportPath(targetDir);
+  await mkdir(exportPath, { recursive: true });
+  const { absoluteFilePath } = getFilePath(exportPath, {
     fileName,
     id,
     extension,
   });
   const oldAbsoluteFilePath = oldFileName
-    ? getFilePath(mirrorPath, { fileName: oldFileName, id, extension })
+    ? getFilePath(exportPath, { fileName: oldFileName, id, extension })
         .absoluteFilePath
     : undefined;
   const userDataPath = app.getPath("userData");
   const imagesFolder = path.join(userDataPath, "editor-images");
   const portableContent = sanitizeExportString(
     payload.content,
-    mirrorPath,
+    exportPath,
     imagesFolder,
   );
   // check for rename: if oldFileName exists and is different from new file name, attempt to rename the file before writing new content. This is to avoid duplicate files when a note is renamed.
   if (oldAbsoluteFilePath && oldAbsoluteFilePath !== absoluteFilePath) {
+    console.log("New rename.");
     await safeRename(oldAbsoluteFilePath, absoluteFilePath);
-  }
+  } else console.log("No rename needed.");
   const localContent = await readFile(absoluteFilePath, "utf8").catch(
     () => null,
   );
   const normalizedLocal = normalizeText(localContent).trimEnd();
   const normalizedContent = normalizeText(portableContent).trimEnd();
   if (normalizedLocal !== normalizedContent) {
+    console.log("New write.");
     await writeAtomic(absoluteFilePath, normalizedContent);
-  }
+  } else console.log("No write needed.");
 }
 
-async function writeMirroredNote({
+async function writeAutoExportFile({
   id,
   fileName,
   markdown,
   targetDir,
   oldFileName,
-}: MirroredNoteWritePayload) {
+}: AutoExportWritePayload) {
   const writePayload = {
     id,
     fileName,
@@ -182,34 +182,37 @@ async function writeMirroredNote({
     content: markdown,
     extension: "md",
   };
-  const validatedFileData = validation(WriteMirrorRequestSchema, writePayload);
-  console.log("[writeMirroredNote]: Attempting to sync note:", {
+  const validatedFileData = validation(
+    WriteAutoExportRequestSchema,
+    writePayload,
+  );
+  console.log("[writeNote]: Looking at file:", {
     id: validatedFileData.id,
     fileName: validatedFileData.fileName,
     oldFileName,
   });
   try {
-    await writeMirroredNoteLogic(targetDir, {
+    await writeAutoExportFileLogic(targetDir, {
       ...validatedFileData,
       oldFileName,
     });
   } catch (error) {
-    console.error("[writeMirroredNote]: Failed to sync note on update:", error);
+    console.error("[writeMirroredNote]: Failed to write file:", error);
     throw new AppBackendError(AppErrorCode.FileWriteError);
   }
 }
 
-async function deleteMirroredNoteLogic(
+async function deleteAutoExportFileLogic(
   targetDir: string,
-  payload: DeleteMirrorRequest,
+  payload: DeleteAutoExportRequest,
 ) {
-  const mirrorPath = resolveMirrorPath(targetDir);
-  const { absoluteFilePath } = getFilePath(mirrorPath, payload);
+  const exportPath = resolveAutoExportPath(targetDir);
+  const { absoluteFilePath } = getFilePath(exportPath, payload);
   await access(absoluteFilePath, constants.F_OK);
   await shell.trashItem(absoluteFilePath);
 }
 
-async function deleteMirroredNote(
+async function deleteAutoExportFile(
   targetDir: string,
   id: Note["id"],
   oldTitle: Note["title"],
@@ -220,24 +223,24 @@ async function deleteMirroredNote(
     extension: "md",
   };
   const validatedFileData = validation(
-    DeleteMirrorRequestSchema,
+    DeleteAutoExportRequestSchema,
     deletePayload,
   );
   try {
-    await deleteMirroredNoteLogic(targetDir, validatedFileData);
+    await deleteAutoExportFileLogic(targetDir, validatedFileData);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       return;
     }
-    console.error("[deleteMirroredNote]: Failed to sync note deletion:", error);
+    console.error("[deleteFile]: Failed to delete file:", error);
     throw new AppBackendError(AppErrorCode.FileWriteError);
   }
 }
 
 export {
-  checkSyncState,
-  deleteMirroredNote,
+  deleteAutoExportFile,
   getFilePath,
-  resolveMirrorPath,
-  writeMirroredNote,
+  isAutoExport,
+  resolveAutoExportPath,
+  writeAutoExportFile,
 };

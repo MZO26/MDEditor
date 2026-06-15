@@ -1,10 +1,10 @@
 import {
   bookmark,
   exportNote,
+  getAutoExportPath,
   getNoteById,
-  getSyncPath,
-  openSyncFolder,
-  openSyncPath,
+  openAutoExportFolder,
+  openAutoExportPath,
   pin,
   showNotification,
 } from "@/api/api";
@@ -14,7 +14,6 @@ import {
   handleDeleteNote,
   handleSaveNote,
 } from "@/notes/note-actions";
-import { handleConflict, isMirrorEnabled } from "@/notes/note-conflict";
 import { handleDuplicateNote } from "@/notes/note-duplicate";
 import { noteStore, settingsStore, stateStore } from "@/settings/app-state";
 import { initDeleteDialog } from "@/settings/dialog-init";
@@ -34,7 +33,7 @@ async function ensureNoteSaved(id: string) {
   const activeId = stateStore.get("activeId");
   if (!note || activeId !== note.id) return;
   const editor = getAppItem("editor");
-  const syncPayload = {
+  const autoExportPayload = {
     id: note.id,
     fileName: note.title,
     extension: "md" as const,
@@ -42,7 +41,7 @@ async function ensureNoteSaved(id: string) {
   };
   debouncedSaveNote.cancel();
   await handleSaveNote(note.id, editor.getJSON(), editor.getMarkdown());
-  return syncPayload;
+  return autoExportPayload;
 }
 
 //----------------------------------------------------------
@@ -125,25 +124,19 @@ function initListeners() {
   window.noteAPI.onTriggerView(async (id: string) => {
     const syncPayload = await ensureNoteSaved(id);
     if (!syncPayload) return;
-    const result = await openSyncPath(syncPayload);
+    const result = await openAutoExportPath(syncPayload);
     if (!result.success || result.data === false) {
-      await showNotification(
-        "Could not open note in editor.",
-        "Start editing the note to initialize file mirror.",
-      );
+      await showNotification("Could not open note in editor.", "");
       return;
     }
   });
 
   window.noteAPI.onTriggerPath(async (id: string) => {
-    const syncPayload = await ensureNoteSaved(id);
-    if (!syncPayload) return;
-    const result = await openSyncFolder(syncPayload);
+    const autoExportPayload = await ensureNoteSaved(id);
+    if (!autoExportPayload) return;
+    const result = await openAutoExportFolder(autoExportPayload);
     if (!result.success || result.data === false) {
-      await showNotification(
-        "Could not open note path.",
-        "Start editing the note to initialize file mirror.",
-      );
+      await showNotification("Could not open note path.", "");
       return;
     }
   });
@@ -151,7 +144,7 @@ function initListeners() {
   window.noteAPI.onTriggerCopyPath(async (id: string) => {
     const syncPayload = await ensureNoteSaved(id);
     if (!syncPayload) return;
-    const result = await getSyncPath(syncPayload);
+    const result = await getAutoExportPath(syncPayload);
     if (!result.success) {
       console.error(
         "[onTriggerCopyPath]: Failed to retrieve file path:",
@@ -283,36 +276,6 @@ function initListeners() {
   window.electronAPI.onRequestFlush(async () => {
     debouncedSaveNote.flush();
     window.electronAPI.confirmFlush();
-  });
-
-  window.electronAPI.onFocus(async () => {
-    const activeId = stateStore.get("activeId");
-    const note = noteStore.get("activeNote");
-    if (!activeId || !note) return;
-    const editor = getAppItem("editor");
-    stateStore.setState({ lastSyncedAt: 0 });
-    if (isMirrorEnabled() && activeId && note) {
-      console.log("[onFocus]: Forcing JIT Sync...");
-      const markdown = editor.getMarkdown();
-      await handleConflict(note, markdown).catch((error: Error) => {
-        console.error("[onFocus]: Sync failed", error);
-      });
-    }
-  });
-
-  window.electronAPI.onSystemResume(async () => {
-    const activeId = stateStore.get("activeId");
-    const note = noteStore.get("activeNote");
-    if (!activeId || !note) return;
-    const editor = getAppItem("editor");
-    stateStore.setState({ lastSyncedAt: 0 });
-    if (isMirrorEnabled() && activeId && note) {
-      console.log("[onSystemResume]: Forcing JIT Sync...");
-      const markdown = editor.getMarkdown();
-      await handleConflict(note, markdown).catch((error: Error) => {
-        console.error("[onSystemResume]: Sync failed", error);
-      });
-    }
   });
 }
 

@@ -1,8 +1,7 @@
 import type {
   ExportManyRequest,
   ExportRequest,
-  OpenSyncRequest,
-  SyncRequest,
+  OpenAutoExportPathRequest,
 } from "@shared/schemas/export-schema";
 import type { ImagePayload } from "@shared/schemas/image-schema";
 import type {
@@ -61,21 +60,18 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onTriggerNoteAction: (callback: (payload: NoteMenuPayload) => void) => {
     subscribe("trigger:note-action", callback);
   },
-  onFocus: (callback: () => void) => subscribe("app:focus", () => callback()),
-  onSystemResume: (callback: () => void) =>
-    subscribe("system-resumed", () => callback()),
   onRequestFlush: (callback: () => void) =>
     subscribe("request-flush", () => callback()),
   confirmFlush: () => ipcRenderer.send("flush-confirmed"),
   zoom: (action: ZoomAction) => ipcRenderer.invoke("zoom", action),
   openExternal: (url: string) => ipcRenderer.invoke("open:external", url),
-  openSyncPath: (payload: OpenSyncRequest) =>
-    ipcRenderer.invoke("open:sync-path", payload),
-  openSyncFolder: (payload: OpenSyncRequest) =>
-    ipcRenderer.invoke("open:sync-folder", payload),
+  openAutoExportPath: (payload: OpenAutoExportPathRequest) =>
+    ipcRenderer.invoke("open:auto-export-path", payload),
+  openAutoExportFolder: (payload: OpenAutoExportPathRequest) =>
+    ipcRenderer.invoke("open:auto-export-folder", payload),
+  getAutoExportPath: (payload: OpenAutoExportPathRequest) =>
+    ipcRenderer.invoke("get:auto-export-path", payload),
   openAppPath: () => ipcRenderer.invoke("open:app-path"),
-  getSyncPath: (payload: OpenSyncRequest) =>
-    ipcRenderer.invoke("get:sync-path", payload),
 });
 contextBridge.exposeInMainWorld("noteAPI", {
   getAll: () => ipcRenderer.invoke("note:get-all"),
@@ -87,8 +83,7 @@ contextBridge.exposeInMainWorld("noteAPI", {
   update: (payload: UpdateNotePayload, flush: boolean) =>
     ipcRenderer.invoke("note:update", payload, flush),
   delete: (id: string) => ipcRenderer.invoke("note:delete", id),
-  openMirrorFolder: () => ipcRenderer.invoke("mirror-folder:open"),
-  sync: (payload: SyncRequest) => ipcRenderer.invoke("note:sync", payload),
+  selectAutoExportFolder: () => ipcRenderer.invoke("select:auto-export-folder"),
   noteExport: (payload: ExportRequest) =>
     ipcRenderer.invoke("note:export", payload),
   noteExportMany: (payload: ExportManyRequest) =>

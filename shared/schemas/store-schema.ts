@@ -9,8 +9,8 @@ const StoreSchema = z.object({
   "line-height": z.enum(["1.4", "1.5", "1.6"]).catch("1.5"),
   spellcheck: z.boolean().catch(false),
   "delete-confirmation": z.boolean().catch(false),
-  "mirror-mode": z.boolean().catch(false),
-  "mirror-path": z.string().nullable().catch(null),
+  "auto-export": z.boolean().catch(false),
+  "auto-export-path": z.string().nullable().catch(null),
   "code-theme": z.enum(["focus", "balanced", "colorless"]).catch("balanced"),
   highlight: z.enum(["context", "insight", "action"]).catch("context"),
   "note-item-display": z.enum(["tags", "snippet", "minimal"]).catch("tags"),
@@ -26,8 +26,8 @@ const StoreSchema = z.object({
 
 type AppSettings = z.infer<typeof StoreSchema>;
 type Spellcheck = AppSettings["spellcheck"];
-type MirrorPath = AppSettings["mirror-path"];
-type MirrorMode = AppSettings["mirror-mode"];
+type AutoExportPath = AppSettings["auto-export-path"];
+type AutoExport = AppSettings["auto-export"];
 type DeleteConfirmation = AppSettings["delete-confirmation"];
 type NoteItemDisplay = AppSettings["note-item-display"];
 type HighlightTheme = AppSettings["highlight"];
@@ -44,14 +44,14 @@ type StyleKeys = Extract<
 export {
   StoreSchema,
   type AppSettings,
+  type AutoExport,
+  type AutoExportPath,
   type CodeTheme,
   type DeleteConfirmation,
   type FontFamily,
   type FontSize,
   type HighlightTheme,
   type LineHeight,
-  type MirrorMode,
-  type MirrorPath,
   type NoteItemDisplay,
   type Spellcheck,
   type StyleKeys,

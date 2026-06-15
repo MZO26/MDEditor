@@ -2,7 +2,7 @@ import { handleZoom } from "@/api/api";
 
 function initGlobalShortcuts() {
   window.addEventListener("keydown", (e) => {
-    const { key, ctrlKey, metaKey, altKey, shiftKey } = e;
+    const { key, ctrlKey, metaKey, shiftKey } = e;
     const isMod = ctrlKey || metaKey;
     if (isMod && (key === "+" || key === "=")) {
       e.preventDefault();
@@ -17,11 +17,6 @@ function initGlobalShortcuts() {
     if (isMod && key === "0") {
       e.preventDefault();
       handleZoom("reset");
-      return;
-    }
-    if (isMod && altKey && key === "S") {
-      e.preventDefault();
-      document.dispatchEvent(new CustomEvent("app:check-sync-state"));
       return;
     }
     if (isMod && shiftKey && key === "T") {
