@@ -69,7 +69,6 @@ async function setImportedContent(
         content: json,
         ...metadata,
         pinned: false,
-        bookmarked: false,
       };
       processedPayloads.push(payload);
       i++;

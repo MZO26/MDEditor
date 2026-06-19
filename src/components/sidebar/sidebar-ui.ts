@@ -79,13 +79,12 @@ function updateSidebarEmptyState(emptyState: HTMLDivElement) {
 
 // create view options
 
-function createViews(views: readonly ViewItem[], activeId?: string | null) {
+function createViews(views: readonly ViewItem[]) {
   const select = requireElement<HTMLSelectElement>(".view-select");
   for (const view of views) {
     const option = document.createElement("option");
     option.textContent = view["label"];
     option.value = view["id"];
-    option.disabled = view.id === "links" && !activeId;
     select.append(option);
   }
   return select;

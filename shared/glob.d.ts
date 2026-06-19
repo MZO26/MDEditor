@@ -78,9 +78,7 @@ declare global {
       onTriggerId: (callback: (id: string) => void) => () => void;
       onTriggerDuplicate: (callback: (id: string) => void) => () => void;
       onTriggerPin: (callback: (id: string) => void) => () => void;
-      onTriggerBookmark: (callback: (id: string) => void) => () => void;
       pin: (id: string) => Promise<Result<boolean>>;
-      bookmark: (id: string) => Promise<Result<boolean>>;
       getViews: (
         view: ViewId,
         id: string | null,

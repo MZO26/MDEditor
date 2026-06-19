@@ -425,23 +425,15 @@ body.is-dragging * {
   margin: 2px 4px 0 0;
 }
 
-.note-item[data-pinned="true"] .icon-div,
-.note-item[data-bookmarked="true"] .icon-div {
+.note-item[data-pinned="true"] .icon-div {
   display: flex;
 }
 
-.note-item .icon-div .pin,
-.note-item .icon-div .bookmark {
+.note-item .icon-div .pin {
   display: none;
 }
 
 .note-item[data-pinned="true"] .icon-div .pin {
-  display: inline-block;
-  stroke: var(--tag-color);
-  fill: var(--tag-bg);
-}
-
-.note-item[data-bookmarked="true"] .icon-div .bookmark {
   display: inline-block;
   stroke: var(--tag-color);
   fill: var(--tag-bg);

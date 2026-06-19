@@ -22,11 +22,8 @@ function createNoteItem(note: NoteListItem) {
   // Deep clone with true
   item.setAttribute("data-id", note.id);
   item.setAttribute("data-pinned", String(!!note.pinned));
-  item.setAttribute("data-bookmarked", String(!!note.bookmarked));
   item.setAttribute("data-tippy-content", note.title);
-  if (note.pinned || note.bookmarked) {
-    renderIcons(item);
-  }
+  if (note.pinned) renderIcons(item);
   const titleEl = findElement<HTMLSpanElement>(".note-title", item);
   if (titleEl) titleEl.textContent = note.title.trim() || UNTITLED;
   const dateEl = findElement<HTMLDivElement>(".note-date", item);
@@ -59,7 +56,7 @@ function handleSidebarChange(change: SidebarChange, notes: NoteListItem[]) {
       break;
     }
     case "prepend": {
-      const needsToBeSorted = notes.some((n) => n.pinned || n.bookmarked);
+      const needsToBeSorted = notes.some((n) => n.pinned);
       if (needsToBeSorted) {
         renderNoteList(notes);
         break;

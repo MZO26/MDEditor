@@ -113,7 +113,6 @@ type MenuType = "table" | "text" | "note";
 
 type NoteMenuPayload = {
   id: string;
-  bookmarked: boolean;
   pinned: boolean;
 };
 

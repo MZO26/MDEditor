@@ -70,7 +70,7 @@ function setUpTableMenu(win: BrowserWindow) {
 }
 
 function setUpNoteMenu(win: BrowserWindow, payload: NoteMenuPayload) {
-  const { id, pinned, bookmarked } = payload;
+  const { id, pinned } = payload;
   const noteItemMenu = Menu.buildFromTemplate([
     {
       label: "Copy...",
@@ -104,10 +104,6 @@ function setUpNoteMenu(win: BrowserWindow, payload: NoteMenuPayload) {
     {
       label: pinned ? "Unpin Note" : "Pin to Top",
       click: () => win.webContents.send("note:trigger-pin", id),
-    },
-    {
-      label: bookmarked ? "Remove Bookmark" : "Add Bookmark",
-      click: () => win.webContents.send("note:trigger-bookmark", id),
     },
     {
       label: "Duplicate Note",

@@ -116,13 +116,9 @@ contextBridge.exposeInMainWorld("noteAPI", {
   onTriggerPin: (callback: (id: string) => void) => {
     subscribe("note:trigger-pin", callback);
   },
-  onTriggerBookmark: (callback: (id: string) => void) => {
-    subscribe("note:trigger-bookmark", callback);
-  },
   getById: (id: string) => ipcRenderer.invoke("note:getById", id),
   getManyById: (ids: string[]) => ipcRenderer.invoke("note:getManyById", ids),
   pin: (id: string) => ipcRenderer.invoke("note:pin", id),
-  bookmark: (id: string) => ipcRenderer.invoke("note:bookmark", id),
   getViews: (view: ViewId, id: string | null) =>
     ipcRenderer.invoke("views:get", view, id),
   dbMaintenance: (action: string) =>

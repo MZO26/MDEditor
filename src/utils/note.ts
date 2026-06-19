@@ -14,10 +14,8 @@ function createNoteUpdater() {
 const updateNoteCount = createNoteUpdater();
 
 function getNotePriority(note: NoteListItem) {
-  if (note.pinned && note.bookmarked) return 0; // top priority if it happens
-  if (note.pinned) return 1; // highest priority
-  if (note.bookmarked) return 2; // middle
-  return 3; // normal
+  if (note.pinned) return 0; // highest priority
+  return 1; // normal
 }
 
 // this function returns a number by which note items are being displayed in the sidebar. If it returns a negative number, a comes first, then b
@@ -44,7 +42,6 @@ function toNoteListItem(note: Note): NoteListItem {
     created_at: note.created_at,
     updated_at: note.updated_at,
     pinned: note.pinned,
-    bookmarked: note.bookmarked,
     tags: note.tags,
     links: note.links,
   };

@@ -207,15 +207,6 @@ function registerNoteIpc(win: BrowserWindow) {
     });
   });
 
-  ipcMain.handle("note:bookmark", (e, id: unknown) => {
-    return result(e, async () => {
-      if (!checkRateLimit("note:bookmark", LIMITS.READ_LIGHT))
-        throw new AppBackendError(AppErrorCode.RateLimitError);
-      const validatedData = validation(IdSchema, id);
-      return db.toggleBookmark(validatedData);
-    });
-  });
-
   ipcMain.handle("views:get", (e, view: unknown) => {
     return result(e, async () => {
       if (!checkRateLimit(`views:get:${view}`, LIMITS.READ_HEAVY))

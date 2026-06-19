@@ -13,6 +13,30 @@ type PreviewInstance = Instance & {
   state: { isDataFetched?: boolean; isFetching?: boolean };
 };
 
+function buildPreviewCard(content: Note["content"]) {
+  const card = document.createElement("div");
+  card.className = "wikilink-preview";
+  const cardContent = document.createElement("div");
+  cardContent.className = "wikilink-preview-content";
+  const html = generateHTML(content, getNoteEditorExtensions());
+  const sanitized = DOMPurify.sanitize(html, DOMPURIFY_CONFIG);
+  if (sanitized) {
+    cardContent.innerHTML = sanitized;
+    cardContent.querySelectorAll("pre code").forEach((block) => {
+      hljs.highlightElement(block as HTMLElement);
+    });
+  }
+  const hasText = (cardContent.textContent || "").trim().length > 0;
+  const hasMedia = cardContent.querySelectorAll("img, hr").length > 0;
+  if (!hasText && !hasMedia) {
+    cardContent.replaceChildren();
+    cardContent.textContent = "Empty Note";
+    card.classList.add("is-empty");
+  } else card.classList.remove("is-empty");
+  card.append(cardContent);
+  return card;
+}
+
 export const WikiLinkPreview = Extension.create({
   name: "wikilinkPreview",
 
@@ -44,6 +68,11 @@ export const WikiLinkPreview = Extension.create({
         const notes = noteStore.get("notes");
         const targetNote = notes.find((n) => n.id === id);
         if (!targetNote) return false;
+        const activeId = stateStore.get("activeId");
+        if (targetNote.id === activeId) {
+          instance.setContent("Can't reference the same note.");
+          return;
+        }
         const matchingNotes = notes.filter(
           (n) => n.title.toLowerCase() === targetNote.title.toLowerCase(),
         );
@@ -87,27 +116,3 @@ export const WikiLinkPreview = Extension.create({
     this.storage.tippyDelegate = null;
   },
 });
-
-function buildPreviewCard(content: Note["content"]) {
-  const card = document.createElement("div");
-  card.className = "wikilink-preview";
-  const cardContent = document.createElement("div");
-  cardContent.className = "wikilink-preview-content";
-  const html = generateHTML(content, getNoteEditorExtensions());
-  const sanitized = DOMPurify.sanitize(html, DOMPURIFY_CONFIG);
-  if (sanitized) {
-    cardContent.innerHTML = sanitized;
-    cardContent.querySelectorAll("pre code").forEach((block) => {
-      hljs.highlightElement(block as HTMLElement);
-    });
-  }
-  const hasText = (cardContent.textContent || "").trim().length > 0;
-  const hasMedia = cardContent.querySelectorAll("img, hr").length > 0;
-  if (!hasText && !hasMedia) {
-    cardContent.replaceChildren();
-    cardContent.textContent = "Empty Note";
-    card.classList.add("is-empty");
-  } else card.classList.remove("is-empty");
-  card.append(cardContent);
-  return card;
-}

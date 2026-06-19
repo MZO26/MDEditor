@@ -15,6 +15,8 @@ export const MasterShortcuts = Extension.create({
       "Mod-i": () => this.editor.commands.toggleItalic(),
       "Mod-Shift-x": () => this.editor.commands.toggleStrike(),
       "Mod-Shift-h": () => this.editor.commands.toggleHighlight(),
+      "Mod-Shift-c": () => this.editor.commands.toggleConceal(),
+      "Mod-Shift-m": () => this.editor.commands.toggleAnnotation(),
       "Mod-e": () => this.editor.commands.toggleCode(),
       "Mod-Alt-1": () => this.editor.commands.toggleHeading({ level: 1 }),
       "Mod-Alt-2": () => this.editor.commands.toggleHeading({ level: 2 }),
@@ -25,6 +27,7 @@ export const MasterShortcuts = Extension.create({
       "Mod-Shift-b": () => this.editor.commands.toggleBlockquote(),
       "Mod-Alt-c": () => this.editor.commands.toggleCodeBlock(),
       "Mod-Shift--": () => this.editor.commands.setHorizontalRule(),
+      "Mod-Shift-f": () => this.editor.commands.setFootnote(),
       "Mod-Alt-t": () =>
         this.editor.commands.insertTable({
           rows: 3,
@@ -58,7 +61,7 @@ export const MasterShortcuts = Extension.create({
         }
         return false;
       },
-      "Mod-Shift-f": () => {
+      "Mod-Alt-d": () => {
         this.editor.view.dom.classList.toggle("focus-mode-active");
         return true;
       },

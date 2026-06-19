@@ -95,10 +95,6 @@ async function pin(id: string): Promise<Result<boolean>> {
   return invoke(window.noteAPI.pin(id));
 }
 
-async function bookmark(id: string): Promise<Result<boolean>> {
-  return invoke(window.noteAPI.bookmark(id));
-}
-
 async function getViews(
   view: ViewId,
   id: string | null,
@@ -218,7 +214,6 @@ const updateSettings = (settings: Partial<AppSettings>) => {
 };
 
 export {
-  bookmark,
   createManyNotes,
   createNote,
   dbMaintenance,

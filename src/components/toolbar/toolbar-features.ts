@@ -156,9 +156,13 @@ function renderLinks(container: HTMLDivElement) {
   const activeNote = noteStore.get("activeNote");
   container.replaceChildren();
   if (!activeNote) return;
-  const backlinks = activeNote.links.filter((l) => l.dir === "in") ?? [];
-  const outgoingLinks = activeNote.links.filter((l) => l.dir === "out") ?? [];
-  if (backlinks.length === 0 && outgoingLinks.length === 0) {
+  const validLinks = activeNote.links.filter((l) => l.id !== activeNote.id);
+  const backlinks = validLinks.filter((l) => l.dir === "in");
+  const outgoingLinks = validLinks.filter((l) => l.dir === "out");
+  if (
+    (backlinks.length === 0 && outgoingLinks.length === 0) ||
+    validLinks.length === 0
+  ) {
     const span = document.createElement("span");
     span.classList.add("link", `link-current`);
     span.setAttribute("data-link", activeNote.id);
@@ -312,6 +316,18 @@ const TOOLBAR_ACTIONS: ActionMap = {
     icon: "highlighter",
     shortcut: "MOD+Shift+H | ==text==",
   },
+  annotation: {
+    run: (editor) => editor?.chain().focus().toggleAnnotation().run(),
+    isActive: (editor) => editor?.isActive("annotation"),
+    icon: "sticky-note",
+    shortcut: "MOD+Shift+A | //text//",
+  },
+  conceal: {
+    run: (editor) => editor?.chain().focus().toggleConceal().run(),
+    isActive: (editor) => editor?.isActive("conceal"),
+    icon: "eye-off",
+    shortcut: "MOD+Shift+C | ||text||",
+  },
   divider2: { type: "divider" },
   heading1: {
     run: (editor) => editor?.chain().focus().toggleHeading({ level: 1 }).run(),
@@ -332,6 +348,12 @@ const TOOLBAR_ACTIONS: ActionMap = {
     shortcut: "MOD+Alt+3 | ### ",
   },
   divider3: { type: "divider" },
+  details: {
+    run: (editor) => editor?.chain().focus().insertDetailsBlock().run(),
+    isActive: (editor) => editor?.isActive("detailsBlock"),
+    icon: "list-collapse",
+    shortcut: "MOD+Shift+D",
+  },
   bulletList: {
     run: (editor) => editor?.chain().focus().toggleBulletList().run(),
     isActive: (editor) => editor?.isActive("bulletList"),
@@ -357,7 +379,6 @@ const TOOLBAR_ACTIONS: ActionMap = {
     shortcut: "MOD+Shift+B | > ",
   },
   divider4: { type: "divider" },
-
   inlineCode: {
     run: (editor) => editor?.chain().focus().toggleCode().run(),
     isActive: (editor) => editor?.isActive("code"),

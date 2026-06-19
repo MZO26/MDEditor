@@ -1,5 +1,4 @@
 import {
-  bookmark,
   exportNote,
   getAutoExportPath,
   getNoteById,
@@ -88,9 +87,6 @@ function initListeners() {
     if (!noteElement) return;
     if (payload.pinned !== undefined) {
       noteElement.dataset["pinned"] = String(payload.pinned);
-    }
-    if (payload.bookmarked !== undefined) {
-      noteElement.dataset["bookmarked"] = String(payload.bookmarked);
     }
   });
 
@@ -227,29 +223,20 @@ function initListeners() {
       console.error("[onTriggerPin]: Failed to toggle pin:", result.error);
       return;
     }
-    noteStore.setState((state) => ({
-      notes: state.notes.map((note) =>
-        note.id === id ? { ...note, pinned: result.data } : note,
-      ),
-      sidebarChange: { type: "reload" },
-    }));
-  });
+    console.log("need reload");
 
-  window.noteAPI.onTriggerBookmark(async (id: string) => {
-    const result = await bookmark(id);
-    if (!result.success) {
-      console.error(
-        "[onTriggerBookmark]: Failed to toggle bookmark:",
-        result.error,
-      );
-      return;
-    }
-    noteStore.setState((state) => ({
-      notes: state.notes.map((note) =>
-        note.id === id ? { ...note, bookmarked: result.data } : note,
-      ),
-      sidebarChange: { type: "reload" },
-    }));
+    noteStore.setState((state) => {
+      const existingNote = state.notes.find((n) => n.id === id);
+      if (!existingNote) return state;
+      const updatedNote = { ...existingNote, pinned: result.data };
+      const nextNoteIndex = new Map(state.noteIndex);
+      nextNoteIndex.set(updatedNote.id, updatedNote);
+      return {
+        notes: state.notes.map((n) => (n.id === id ? updatedNote : n)),
+        noteIndex: nextNoteIndex,
+        sidebarChange: { type: "reload" },
+      };
+    });
   });
 
   window.noteAPI.onTriggerDuplicate(async (id: string) => {

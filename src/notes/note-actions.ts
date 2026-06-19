@@ -49,7 +49,6 @@ async function handleCreateNote() {
     ...metadata,
     title: UNTITLED,
     pinned: false,
-    bookmarked: false,
   };
   const result = await createNote(payload);
   if (!result.success) {

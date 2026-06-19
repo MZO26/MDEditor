@@ -4,9 +4,14 @@ import {
   resetEditorHistory,
 } from "@/components/editor/editor-features";
 import { handleSearchInput } from "@/components/sidebar/sidebar-features";
+import { Annotation } from "@/extensions/annotation";
+import { Conceal } from "@/extensions/conceal";
+import { DetailsBlock } from "@/extensions/details";
 import { SearchAndReplace } from "@/extensions/docSearch";
 import { MasterShortcuts } from "@/extensions/editor-shortcuts";
+import { Footnote } from "@/extensions/footnote";
 import { CustomHeading } from "@/extensions/headings";
+import { Highlight } from "@/extensions/highlight";
 import { processAndInsertImage } from "@/extensions/image/image";
 import { lowlight } from "@/extensions/lowlight";
 import {
@@ -32,7 +37,6 @@ import { processWithLimit } from "@shared/limiter";
 import type { AppSettings } from "@shared/schemas/store-schema";
 import { Editor } from "@tiptap/core";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
-import Highlight from "@tiptap/extension-highlight";
 import Image from "@tiptap/extension-image";
 import { ListKit } from "@tiptap/extension-list";
 import {
@@ -138,6 +142,11 @@ function getNoteEditorExtensions() {
       taskItem: { nested: true },
     }),
     CustomUnderline,
+    DetailsBlock,
+    Annotation,
+    Conceal,
+    Footnote,
+    Highlight,
     WikiLinkPreview,
     WikiLink.configure({
       onClick: async (id) => {
@@ -203,7 +212,6 @@ function getNoteEditorExtensions() {
     TableCell.configure({
       HTMLAttributes: { class: "td" },
     }),
-    Highlight.configure({ multicolor: true }),
     CustomHeading.configure({
       levels: [1, 2, 3, 4, 5, 6],
     }),

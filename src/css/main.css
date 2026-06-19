@@ -1059,7 +1059,6 @@ svg.empty-state-icon {
 
 .wikilink-preview-content {
   overflow: auto;
-  padding: 14px;
   white-space: pre-wrap;
   overscroll-behavior: contain;
   padding: 15px;

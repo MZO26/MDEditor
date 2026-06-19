@@ -46,7 +46,6 @@ async function handleDuplicateNote(note: Note) {
     ...(isAutoExportEnabled() && markdown !== undefined ? { markdown } : {}),
     links: outgoingLinkIds,
     pinned: false,
-    bookmarked: false,
   };
   // not handleCreateNote because content is already there
   const result = await createNote(data);

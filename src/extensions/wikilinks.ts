@@ -3,7 +3,7 @@ import { InputRule, mergeAttributes, Node, nodePasteRule } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 
 const UUID_PATTERN = "([a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12})";
-const INPUT_REGEX = /\[\[([^\]]+)\]\]$/;
+const INPUT_REGEX = /(?<!!)\[\[([^\]]+)\]\]$/;
 const PASTE_REGEX = new RegExp(
   `(?:\\[\\[)?\\s*${UUID_PATTERN}\\s*(?:\\]\\])?`,
   "gi",

@@ -120,7 +120,6 @@ function getVisibleNotes(state: NoteStore) {
   const notes = state.visibleIds
     .map((id) => state.noteIndex.get(id))
     .filter((note): note is NoteListItem => !!note);
-  console.log(notes);
   return notes;
 }
 

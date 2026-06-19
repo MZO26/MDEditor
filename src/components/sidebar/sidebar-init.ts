@@ -91,12 +91,9 @@ function applySidebarListeners(
     const noteElement = target?.closest<HTMLDivElement>(".note-item");
     const id = noteElement?.getAttribute("data-id");
     const isPinned = noteElement?.getAttribute("data-pinned") === "true";
-    const isBookmarked =
-      noteElement?.getAttribute("data-bookmarked") === "true";
     window.electronAPI.showContextMenu("note", {
       id: id,
       pinned: isPinned,
-      bookmarked: isBookmarked,
     });
     return;
   });
@@ -112,12 +109,9 @@ function applySidebarListeners(
         const noteElement = target?.closest<HTMLElement>(".note-item");
         const id = noteElement?.getAttribute("data-id");
         const isPinned = noteElement?.getAttribute("data-pinned") === "true";
-        const isBookmarked =
-          noteElement?.getAttribute("data-bookmarked") === "true";
         window.electronAPI.showContextMenu("note", {
           id: id,
           pinned: isPinned,
-          bookmarked: isBookmarked,
         });
         return;
       }

@@ -35,10 +35,6 @@ const TogglePinSchema = z.object({
   pinned: DBBooleanSchema,
 });
 
-const ToggleBookmarkSchema = z.object({
-  bookmarked: DBBooleanSchema,
-});
-
 const TagSchema = z.string().trim().min(1).max(40).toLowerCase();
 
 const TagsSchema = z.array(TagSchema).max(3).default([]);
@@ -76,7 +72,6 @@ const NoteTableSchema = z.object({
   content: EditorDocSchema,
   todos_left: TodoSchema,
   pinned: z.boolean(),
-  bookmarked: z.boolean(),
   created_at: DateSchema,
   updated_at: DateSchema,
 });
@@ -98,7 +93,6 @@ const NotesSchema = z.array(NoteSchema);
 const NoteFromDB = NoteSchema.extend({
   content: DbContentSchema,
   pinned: DBBooleanSchema,
-  bookmarked: DBBooleanSchema,
   links: LinksSchema,
 });
 
@@ -111,7 +105,6 @@ const NoteToDBSchema = NoteSchema.extend({
   id: IdSchema,
   content: z.string(),
   pinned: BooleanSchema,
-  bookmarked: BooleanSchema,
   links: LinkPayloadSchema,
 });
 
@@ -124,10 +117,9 @@ const CreateNotePayloadSchema = NoteSchema.omit({
 
 const CreateNotesPayloadsSchema = z.array(CreateNotePayloadSchema);
 
-// Update payload does not send updated_at. Timestamp for it gets generated in DB. Pinned and Bookmarked do not need to be sent over because they get toggled individually.
+// Update payload does not send updated_at. Timestamp for it gets generated in DB. Pinned does not need to be sent over because it gets toggled individually.
 const UpdateNotePayloadSchema = NoteSchema.omit({
   pinned: true,
-  bookmarked: true,
   created_at: true,
   updated_at: true,
 }).extend({ links: LinkPayloadSchema, markdown: PlainTextSchema.optional() });
@@ -137,7 +129,6 @@ const CreateTransactionSchema = NoteToDBSchema;
 
 const UpdateTransactionSchema = NoteToDBSchema.omit({
   pinned: true,
-  bookmarked: true,
   created_at: true,
 });
 
@@ -146,7 +137,6 @@ const NoteRowSchema = z.object({
   title: TitleSchema,
   content: z.string(),
   snippet: SnippetSchema,
-  bookmarked: z.union([z.literal(0), z.literal(1)]).default(0),
   pinned: z.union([z.literal(0), z.literal(1)]).default(0),
   todos_left: TodoSchema,
   created_at: DateSchema,
@@ -155,7 +145,6 @@ const NoteRowSchema = z.object({
 
 const NoteSearchDoc = NoteSchema.omit({
   content: true,
-  bookmarked: true,
   pinned: true,
   links: true,
   created_at: true,
@@ -211,7 +200,6 @@ export {
   TagSchema,
   TagsSchema,
   TitleSchema,
-  ToggleBookmarkSchema,
   TogglePinSchema,
   UpdateNotePayloadSchema,
   UpdateTransactionSchema,

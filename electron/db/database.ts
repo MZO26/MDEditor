@@ -7,7 +7,6 @@ import { extractText } from "@shared/generators";
 import {
   CreateTransactionSchema,
   NoteFromDB,
-  ToggleBookmarkSchema,
   TogglePinSchema,
   UpdateTransactionSchema,
   type CreateNotePayload,
@@ -39,7 +38,6 @@ class NoteDB {
   private getTagsByIdStmt: BetterSqlite.Statement;
   private getLinksByIdStmt: BetterSqlite.Statement;
   private getOldTitleStmt: BetterSqlite.Statement;
-  private toggleBookmarkStmt: BetterSqlite.Statement;
   private togglePinStmt: BetterSqlite.Statement;
   private searchByTagStmt: BetterSqlite.Statement;
   constructor() {
@@ -77,11 +75,6 @@ class NoteDB {
       this.getOldTitleStmt = this.db
         .prepare(`SELECT title FROM notes WHERE id = @id`)
         .pluck();
-      this.toggleBookmarkStmt = this.db.prepare(`
-      UPDATE notes 
-      SET bookmarked = NOT bookmarked, updated_at = @updated_at
-      WHERE id = @id RETURNING bookmarked
-    `);
       this.togglePinStmt = this.db.prepare(`
       UPDATE notes 
       SET pinned = NOT pinned, updated_at = @updated_at
@@ -111,7 +104,6 @@ class NoteDB {
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL CHECK(length(title) > 0),
         content TEXT NOT NULL,
-        bookmarked INTEGER NOT NULL DEFAULT 0,
         pinned INTEGER NOT NULL DEFAULT 0,
         todos_left INTEGER NOT NULL DEFAULT 0,
         snippet TEXT DEFAULT '',
@@ -292,15 +284,6 @@ class NoteDB {
         links: linkMap.get(row.id) ?? [],
       });
     });
-  }
-
-  public toggleBookmark(id: string): boolean {
-    const now = new Date().toISOString();
-    const result = this.toggleBookmarkStmt.get({ updated_at: now, id });
-    if (!result) {
-      throw new AppBackendError(AppErrorCode.DBError);
-    }
-    return validation(ToggleBookmarkSchema, result).bookmarked;
   }
 
   public togglePin(id: string): boolean {

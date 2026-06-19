@@ -25,7 +25,7 @@ class Transactions {
     this.db = dbConnection;
 
     this.createNoteStmt = this.db.prepare(
-      `INSERT INTO notes (id, title, content, snippet, pinned, bookmarked, todos_left, created_at, updated_at) VALUES (@id, @title, @content, @snippet, @pinned, @bookmarked, @todos_left, @created_at, @updated_at) RETURNING *`,
+      `INSERT INTO notes (id, title, content, snippet, pinned, todos_left, created_at, updated_at) VALUES (@id, @title, @content, @snippet, @pinned, @todos_left, @created_at, @updated_at) RETURNING *`,
     );
     this.updateNoteStmt = this.db
       .prepare(`UPDATE notes SET title = @title, content = @content, snippet = @snippet, todos_left = @todos_left, updated_at = @updated_at WHERE id = @id RETURNING *
@@ -85,7 +85,9 @@ class Transactions {
       validation(NoteFromDB, {
         ...result.row,
         tags: result.safeTags,
-        links: result.safeLinks.map((id) => ({ id, dir: "out" as const })),
+        links: result.safeLinks
+          .filter((id) => id !== result.row.id)
+          .map((id) => ({ id, dir: "out" as const })),
       }),
     );
   }
@@ -117,10 +119,11 @@ class Transactions {
     );
     const result = transactionRunner(noteParams, safeTags, safeLinks);
     const allLinks = NoteDB.getLinksById(result.id) ?? [];
+    const validLinks = allLinks.filter((l) => l.id !== params.id);
     return validation(NoteFromDB, {
       ...result,
       tags: safeTags,
-      links: allLinks,
+      links: validLinks,
     });
   }
 
@@ -161,10 +164,11 @@ class Transactions {
     const transactionRunner = this.db.transaction(this.updateLogic.bind(this));
     const result = transactionRunner(noteParams, safeTags, safeLinks);
     const allLinks = NoteDB.getLinksById(result.id) ?? [];
+    const validLinks = allLinks.filter((l) => l.id !== params.id);
     return validation(NoteFromDB, {
       ...result,
       tags: safeTags,
-      links: allLinks,
+      links: validLinks,
     });
   }
 }
