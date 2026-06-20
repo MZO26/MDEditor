@@ -13,17 +13,14 @@ import { findElement } from "@/utils/dom";
 import { getAppItem } from "@/utils/registry";
 import type {
   AppSettings,
-  AutoExportPath,
-  DeleteConfirmation,
   FontFamily,
   FontSize,
   HighlightTheme,
   LineHeight,
   NoteItemDisplay,
-  Spellcheck,
   Theme,
 } from "@shared/schemas/store-schema";
-import type { DbOptimization, ExportFormat } from "@shared/types";
+import type { ExportFormat } from "@shared/types";
 
 function initAppearanceSettings(
   settings: AppSettings,
@@ -66,7 +63,8 @@ function initAppearanceSettings(
     "change",
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLSelectElement | null;
-      const result = await applyAppTheme(target?.value as Theme);
+      if (!target) return;
+      const result = await applyAppTheme(target.value as Theme);
       if (!result.success) {
         console.error("[applyAppTheme]: Failed to apply theme", result.error);
         return;
@@ -87,12 +85,11 @@ function initAppearanceSettings(
   highlightSelect.value = settings["highlight"];
   highlightSelect.addEventListener("change", (e) => {
     const target = e.target as HTMLSelectElement | null;
-    if (target?.value) {
-      document.documentElement.setAttribute("data-highlight", target.value);
-      updateSettings({
-        highlight: target?.value as HighlightTheme,
-      });
-    }
+    if (!target) return;
+    document.documentElement.setAttribute("data-highlight", target.value);
+    updateSettings({
+      highlight: target?.value as HighlightTheme,
+    });
   });
 
   // note item display
@@ -103,13 +100,12 @@ function initAppearanceSettings(
     "change",
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLSelectElement | null;
-      if (target?.value) {
-        updateSettings({
-          "note-item-display": target.value as NoteItemDisplay,
-        });
-        sidebar.setAttribute("data-noteItem", target.value);
-        await syncNoteStore();
-      }
+      if (!target) return;
+      updateSettings({
+        "note-item-display": target.value as NoteItemDisplay,
+      });
+      sidebar.setAttribute("data-noteItem", target.value);
+      await syncNoteStore();
     }),
   );
 }
@@ -156,11 +152,10 @@ function initEditorSettings(settings: AppSettings, container: HTMLDivElement) {
   applyFont(settings["font-family"]);
   fontFamilySelect.addEventListener("change", (e) => {
     const target = e.target as HTMLSelectElement | null;
-    if (target?.value) {
-      const newFont = target.value;
-      applyFont(newFont);
-      updateSettings({ "font-family": newFont as FontFamily });
-    }
+    if (!target) return;
+    const newFont = target.value;
+    applyFont(newFont);
+    updateSettings({ "font-family": newFont as FontFamily });
   });
 
   // editor font size
@@ -179,11 +174,10 @@ function initEditorSettings(settings: AppSettings, container: HTMLDivElement) {
   applySize(settings["font-size"]);
   fontSizeSelect.addEventListener("change", (e) => {
     const target = e.target as HTMLSelectElement | null;
-    if (target?.value) {
-      const newSize = target.value;
-      applySize(newSize);
-      updateSettings({ "font-size": String(newSize) as FontSize });
-    }
+    if (!target) return;
+    const newSize = target.value;
+    applySize(newSize);
+    updateSettings({ "font-size": String(newSize) as FontSize });
   });
 
   // editor line height
@@ -202,11 +196,10 @@ function initEditorSettings(settings: AppSettings, container: HTMLDivElement) {
   applyLineHeight(settings["line-height"]);
   lineHeightSelect.addEventListener("change", (e) => {
     const target = e.target as HTMLSelectElement | null;
-    if (target?.value) {
-      const newHeight = target.value;
-      applyLineHeight(newHeight);
-      updateSettings({ "line-height": String(newHeight) as LineHeight });
-    }
+    if (!target) return;
+    const newHeight = target.value;
+    applyLineHeight(newHeight);
+    updateSettings({ "line-height": String(newHeight) as LineHeight });
   });
 
   // spellcheck
@@ -218,12 +211,11 @@ function initEditorSettings(settings: AppSettings, container: HTMLDivElement) {
   spellcheckSelect.addEventListener("change", (e) => {
     const editor = getAppItem("editor");
     const target = e.target as HTMLSelectElement | null;
-    if (target?.value) {
-      const enabled = target.value === "true";
-      editor.view.dom.spellcheck = enabled;
-      editor.commands.focus();
-      updateSettings({ spellcheck: enabled as Spellcheck });
-    }
+    if (!target) return;
+    const enabled = target.value === "true";
+    editor.view.dom.spellcheck = enabled;
+    editor.commands.focus();
+    updateSettings({ spellcheck: enabled });
   });
 }
 
@@ -236,7 +228,7 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
   );
   const databaseSelect = findElement<HTMLSelectElement>("#database", container);
   const deleteConfirmSelect = findElement<HTMLSelectElement>(
-    "#delete-confirmation",
+    "#delete-confirm",
     container,
   );
   const autoExportSelect = findElement<HTMLSelectElement>(
@@ -258,30 +250,29 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     "change",
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLSelectElement | null;
-      if (target?.value) {
-        const selectedExtension = target.value as ExportFormat;
-        const exportContent = await getBatchExportContent(selectedExtension);
-        if (!exportContent.success) {
-          console.error(
-            "[initAppSettings -> getBatchExportContent]: Failed to get export content:",
-            exportContent.error,
-          );
-          return;
-        }
-        const result = await exportManyNotes(exportContent.data);
-        target.value = "";
-        if (!result.success) {
-          console.error(
-            "[initAppSettings -> exportManyNotes]: Export failed or Operation got cancelled:",
-            result.error,
-          );
-          return;
-        }
-        await showNotification(
-          "Export Successful.",
-          `${result.data.length} files exported to .${selectedExtension}`,
+      if (!target) return;
+      const selectedExtension = target.value as ExportFormat;
+      const exportContent = await getBatchExportContent(selectedExtension);
+      if (!exportContent.success) {
+        console.error(
+          "[initAppSettings -> getBatchExportContent]: Failed to get export content:",
+          exportContent.error,
         );
+        return;
       }
+      const result = await exportManyNotes(exportContent.data);
+      target.value = "";
+      if (!result.success) {
+        console.error(
+          "[initAppSettings -> exportManyNotes]: Export failed or Operation got cancelled:",
+          result.error,
+        );
+        return;
+      }
+      await showNotification(
+        "Export Successful.",
+        `${result.data.length} files exported to .${selectedExtension}`,
+      );
     }),
   );
 
@@ -292,36 +283,34 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     "change",
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLSelectElement | null;
-      if (target?.value) {
-        const selectedOpt = target.value as DbOptimization;
-        const result = await dbMaintenance(selectedOpt);
-        target.value = "";
-        if (!result.success) {
-          console.error(
-            "[initAppSettings -> dbMaintenance]: Database maintenance failed:",
-            result.error,
-          );
-          return;
-        }
-        if (selectedOpt === "backup-db" && result.success) {
-          await showNotification("Backup saved.", "");
-          return;
-        }
-        await showNotification(`Optimized db in ${result.data} ms.`, "");
+      if (!target) return;
+      const selectedOpt = target.value;
+      const result = await dbMaintenance(selectedOpt);
+      target.value = "";
+      if (!result.success) {
+        console.error(
+          "[initAppSettings -> dbMaintenance]: Database maintenance failed:",
+          result.error,
+        );
+        return;
       }
+      if (selectedOpt === "backup-db" && result.success) {
+        await showNotification("Backup saved.", "");
+        return;
+      }
+      await showNotification(`Optimized db in ${result.data} ms.`, "");
     }),
   );
   // delete confirmation
-
   deleteConfirmSelect.value = settings["delete-confirmation"]
     ? "true"
     : "false";
   deleteConfirmSelect.addEventListener("change", (e) => {
     const target = e.target as HTMLSelectElement | null;
-    if (target?.value) {
-      const enabled = target.value === "true";
-      updateSettings({ "delete-confirmation": enabled as DeleteConfirmation });
-    }
+    if (!target) return;
+    const enabled = target.value === "true";
+    console.log(enabled);
+    updateSettings({ "delete-confirmation": enabled });
   });
 
   // auto export setting
@@ -346,7 +335,7 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
           }
           updateSettings({
             "auto-export": true,
-            "auto-export-path": result.data as AutoExportPath,
+            "auto-export-path": result.data,
           });
           autoExportSelect.setAttribute(
             "data-tippy-content",

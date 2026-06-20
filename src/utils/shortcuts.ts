@@ -1,4 +1,20 @@
 import { handleZoom } from "@/api/api";
+import { setSelectionMode } from "@/components/sidebar/sidebar-init";
+import { findElement } from "@/utils/dom";
+import { getAppItem } from "@/utils/registry";
+
+function isFocusActive() {
+  return getAppItem("appContainer").classList.contains("focus");
+}
+
+function isSelectionActive() {
+  return getAppItem("sidebar").classList.contains("selection-mode");
+}
+
+function isEditorFocused(target: EventTarget | null) {
+  const el = target as HTMLElement | null;
+  return !!el?.closest(".ProseMirror");
+}
 
 function initGlobalShortcuts() {
   window.addEventListener("keydown", (e) => {
@@ -58,6 +74,40 @@ function initGlobalShortcuts() {
       e.preventDefault();
       document.dispatchEvent(new CustomEvent("app:toggle-focus-mode"));
       return;
+    }
+    if (e.shiftKey && e.key.toLowerCase() === "s") {
+      if (isEditorFocused(e.target)) return;
+      e.preventDefault();
+      setSelectionMode(!isSelectionActive());
+      return;
+    }
+    if (isSelectionActive() && key === "Backspace") {
+      e.preventDefault();
+      document.dispatchEvent(new CustomEvent("app:delete-selected"));
+      return;
+    }
+    if (isSelectionActive() && isMod && key === "a") {
+      if (isEditorFocused(e.target)) return;
+      e.preventDefault();
+      document.dispatchEvent(new CustomEvent("app:select-all-visible"));
+      return;
+    }
+    if (key === "Escape") {
+      const target = e.target as HTMLElement | null;
+      const openDialog = findElement("dialog[open]");
+      if (target?.closest("dialog") || openDialog) {
+        return;
+      }
+      if (isSelectionActive()) {
+        e.preventDefault();
+        document.dispatchEvent(new CustomEvent("app:exit-selection-mode"));
+        return;
+      }
+      if (isFocusActive()) {
+        e.preventDefault();
+        document.dispatchEvent(new CustomEvent("app:exit-focus-mode"));
+        return;
+      }
     }
   });
 }

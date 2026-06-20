@@ -587,12 +587,12 @@ body.is-dragging * {
   margin: 7px 5px;
   padding: 0;
   cursor: pointer;
-  width: 17px;
-  height: 17px;
-  min-width: 17px;
-  min-height: 17px;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
   border-radius: 6px;
-  border: 1.5px solid var(--accent-primary);
+  border: 1px solid var(--accent-primary);
   border-radius: 4px;
   background: var(--bg-editor);
   position: relative;
@@ -629,4 +629,8 @@ body.is-dragging * {
 .note-content mark {
   background-color: var(--editor-highlight);
   color: var(--text-main);
+}
+
+.note-count {
+  padding-right: 4px;
 }

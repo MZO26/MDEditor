@@ -11,6 +11,7 @@ import {
   handleImportNote,
   handleSelectNote,
 } from "@/notes/note-actions";
+import { noteStore, settingsStore } from "@/settings/app-state";
 import { createAsyncHandler } from "@/utils/async";
 import { findElement, requireElement } from "@/utils/dom";
 import {
@@ -58,13 +59,53 @@ function initNotesSidebar() {
     },
     "app:create-new-note": () => handleCreateNote(),
     "app:open-global-search": () => searchInput.focus(),
+    "app:exit-selection-mode": () => setSelectionMode(false),
+    "app:delete-selected": () => handleSelectionDelete(),
+    "app:select-all-visible": () => selectAllVisibleNotes(),
   });
 }
 
 let isSelectionMode = false;
 const selectedIds = new Set<string>();
 
-function setSelectionMode(enabled: boolean) {
+function selectAllVisibleNotes() {
+  const visibleIds = noteStore.get("visibleIds") ?? [];
+  selectedIds.clear();
+  for (const id of visibleIds) {
+    selectedIds.add(id);
+  }
+  setSelectionMode(true);
+  updateSelectionUI();
+}
+async function handleSelectionDelete() {
+  const ids = [...selectedIds];
+  if (ids.length === 0) return;
+  const deleteDialogTitle = requireElement<HTMLSpanElement>(
+    ".delete-dialog-title",
+    deleteDialog,
+  );
+  const confirmationEnabled = settingsStore.get("delete-confirmation") === true;
+  if (!confirmationEnabled) {
+    await handleDeleteManyNotes(ids);
+    return;
+  }
+  deleteDialogTitle.textContent =
+    ids.length === 1 ? `Delete this note?` : `Delete ${ids.length} notes?`;
+  const handleClose = async () => {
+    if (deleteDialog.returnValue !== "confirm") {
+      deleteDialogTitle.textContent = "";
+      return;
+    }
+    await handleDeleteManyNotes(ids);
+    setSelectionMode(false);
+    deleteDialogTitle.textContent = "";
+  };
+  deleteDialog.addEventListener("close", handleClose, { once: true });
+  deleteDialog.returnValue = "";
+  deleteDialog.showModal();
+}
+
+export function setSelectionMode(enabled: boolean) {
   const sidebar = getAppItem("sidebar");
   isSelectionMode = enabled;
   sidebar.classList.toggle("selection-mode", enabled);
@@ -119,28 +160,7 @@ function applySidebarListeners(
   searchInput.addEventListener("input", debouncedSearch);
   deleteBtn.addEventListener(
     "click",
-    createAsyncHandler(async () => {
-      const ids = [...selectedIds];
-      if (ids.length === 0) return;
-      const deleteDialogTitle = requireElement<HTMLSpanElement>(
-        ".delete-dialog-title",
-        deleteDialog,
-      );
-      deleteDialogTitle.textContent =
-        ids.length === 1 ? `Delete this note?` : `Delete ${ids.length} notes?`;
-      const handleClose = async () => {
-        if (deleteDialog.returnValue !== "confirm") {
-          deleteDialogTitle.textContent = "";
-          return;
-        }
-        await handleDeleteManyNotes(ids);
-        setSelectionMode(false);
-        deleteDialogTitle.textContent = "";
-      };
-      deleteDialog.addEventListener("close", handleClose, { once: true });
-      deleteDialog.returnValue = "";
-      deleteDialog.showModal();
-    }),
+    createAsyncHandler(async () => handleSelectionDelete()),
   );
   selectionBtn.addEventListener("click", () => {
     setSelectionMode(!isSelectionMode);

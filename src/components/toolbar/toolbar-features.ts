@@ -48,7 +48,7 @@ function initTopToolbar() {
     "app:set-editor-width": () => setEditorWidth(appContainer),
     "app:toggle-read-only": () => editor?.setEditable(!editor.isEditable),
     "app:toggle-focus-mode": () => initFocusMode(),
-    "app:escape": () => {
+    "app:exit-focus-mode": () => {
       if (appContainer.classList.contains("focus")) {
         initFocusMode();
       }

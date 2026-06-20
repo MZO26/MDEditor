@@ -77,17 +77,21 @@
             </button>
             <button
               class="selection-btn"
-              data-tippy-content="Toggle selection mode"
+              data-tippy-content="Toggle Selection"
+              data-shortcut="Shift+S"
             >
               <i data-lucide="square-check"></i>
             </button>
+            <div class="divider"></div>
             <select
               class="view-select"
               data-tippy-content="Filter Notes"
             ></select>
+            <div class="divider"></div>
             <button
               class="delete-btn"
-              data-tippy-content="Delete current view of notes"
+              data-tippy-content="Delete Selection"
+              data-shortcut="Backspace"
             >
               <i data-lucide="trash-2"></i>
             </button>
@@ -242,12 +246,8 @@
           <i data-lucide="file-question" class="empty-state-icon"></i>
           <h2 class="empty-state-title">No note selected</h2>
           <p class="empty-state-description">
-            Create a new note by clicking the
-            <button class="empty-state-add-note-btn">
-              <i data-lucide="plus" class="empty-state-plus-icon"></i>
-            </button>
-            button,<br />
-            or select an existing note from the sidebar.
+            Create a new note with <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> +
+            <kbd>N</kbd>, or select an existing note from the sidebar.
           </p>
         </div>
       </div>

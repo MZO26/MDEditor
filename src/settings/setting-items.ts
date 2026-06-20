@@ -106,7 +106,7 @@ function buildSelects() {
       "Database Settings",
     ),
     selectBuilder(
-      "delete-confirmation",
+      "delete-confirm",
       [
         { value: "true", label: "Enable" },
         { value: "false", label: "Disable" },
