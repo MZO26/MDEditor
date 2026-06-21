@@ -76,13 +76,6 @@
             >
               <i data-lucide="sliders-horizontal"></i>
             </button>
-            <button
-              class="selection-btn"
-              data-tippy-content="Toggle Selection"
-              data-shortcut="Shift+S"
-            >
-              <i data-lucide="square-check"></i>
-            </button>
             <div class="divider"></div>
             <select
               class="view-select"
@@ -202,13 +195,24 @@
     </dialog>
     <dialog class="settings-modal">
       <form method="dialog" novalidate>
-        <button
-          class="open-app-path-btn"
-          type="button"
-          data-tippy-content="Open App Path"
-        >
-          <i data-lucide="folder-cog"></i>
-        </button>
+        <div class="settings-quick-actions">
+          <button
+            class="open-app-path-btn"
+            type="button"
+            data-action="open-path"
+            data-tippy-content="Open App Path"
+          >
+            <i data-lucide="folder-cog"></i>
+          </button>
+          <button
+            class="backup-db-btn"
+            type="button"
+            data-action="backup-db"
+            data-tippy-content="Backup Database"
+          >
+            <i data-lucide="database"></i>
+          </button>
+        </div>
         <button
           class="close-setting-modal-btn"
           value="cancel"

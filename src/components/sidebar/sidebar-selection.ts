@@ -1,5 +1,6 @@
 import {
   exportManyNotes,
+  getAllBackup,
   getManyById,
   pinMany,
   showNotification,
@@ -10,7 +11,7 @@ import { handleDeleteManyNotes } from "@/notes/note-actions";
 import { noteStore, settingsStore, stateStore } from "@/settings/app-state";
 import { findElement, requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
-import { getAppItem, getUIItem, getUIItems } from "@/utils/registry";
+import { getAppItem, getUIItem } from "@/utils/registry";
 import { SELECTION_ACTIONS } from "@shared/constants";
 
 // sidebar footer selection mode
@@ -49,6 +50,8 @@ function initSelectionFooter() {
 
 function getActionLabel(actionId: string, selectedCount: number): string {
   switch (actionId) {
+    case "cancel":
+      return "Cancel selection";
     case "pin":
       return `Pin ${selectedCount} ${selectedCount === 1 ? "note" : "notes"}`;
     case "export":
@@ -67,14 +70,7 @@ function getActionLabel(actionId: string, selectedCount: number): string {
 function updateSelectionFooter() {
   const selectionMode = stateStore.get("selectionMode");
   const selectedCount = stateStore.get("selectedIds").size;
-  const { selectionFooter, selectionBtn } = getUIItems([
-    "selectionFooter",
-    "selectionBtn",
-  ]);
-  const icon = document.createElement("i");
-  icon.setAttribute("data-lucide", selectionMode ? "x" : "square-check");
-  selectionBtn.replaceChildren(icon);
-  renderIcons(selectionBtn);
+  const selectionFooter = getUIItem("selectionFooter");
   selectionFooter.classList.toggle("collapsed", !selectionMode);
   for (const action of SELECTION_ACTIONS) {
     const button = findElement<HTMLButtonElement>(
@@ -84,7 +80,7 @@ function updateSelectionFooter() {
     if (!button) continue;
     const label = getActionLabel(action.id, selectedCount);
     button.setAttribute("data-tippy-content", label);
-    button.disabled = selectedCount === 0;
+    button.disabled = selectedCount === 0 && action.id !== "cancel";
   }
 }
 
@@ -120,10 +116,16 @@ function updateSelectionUI() {
 // selection actions
 
 async function copyMarkdownSelection(selectedIds: string[]) {
-  const result = await getManyById([...selectedIds]);
+  const notes = noteStore.get("notes");
+  const allSelected =
+    selectedIds.length === notes.length &&
+    selectedIds.every((id) => notes.some((note) => note.id === id));
+  const result = allSelected
+    ? await getAllBackup()
+    : await getManyById(selectedIds);
   if (!result.success) {
     console.error(
-      "[copyMarkdownSelection -> getManyById]: Failed to get notes by id:",
+      "[copyMarkdownSelection -> getAllBackup | getManyById]: Failed to get notes by id:",
       result.error,
     );
     return;
@@ -159,16 +161,25 @@ async function copyLinkSelection(selectedIds: string[]) {
 }
 
 async function exportSelection(selectedIds: string[]) {
-  const notes = await getManyById(selectedIds);
-  if (!notes.success) {
+  const notes = noteStore.get("notes");
+  const allSelected =
+    selectedIds.length === notes.length &&
+    selectedIds.every((id) => notes.some((note) => note.id === id));
+  const exportResult = allSelected
+    ? await getAllBackup()
+    : await getManyById(selectedIds);
+  if (!exportResult.success) {
     console.error(
-      "[exportSelection -> getManyById]: Failed to get notes by id:",
-      notes.error,
+      "[exportSelection -> getAllBackup | getManyById]: Failed to get notes by id:",
+      exportResult.error,
     );
     return;
   }
   const exportFormat = settingsStore.get("export-format") ?? "md";
-  const exportContent = await getBatchExportContent(notes.data, exportFormat);
+  const exportContent = await getBatchExportContent(
+    exportResult.data,
+    exportFormat,
+  );
   if (!exportContent.success) {
     console.error(
       "[exportSelection -> getBatchExportContent]: Failed to get export format",
@@ -200,7 +211,6 @@ async function pinSelection(selectedIds: string[]) {
     return;
   }
   const selectedIdSet = new Set(selectedIds);
-  console.log("need reload");
   noteStore.setState((state) => {
     const noteIndex = new Map(state.noteIndex);
     const notes = state.notes.map((note) => {

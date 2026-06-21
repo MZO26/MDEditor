@@ -102,6 +102,10 @@ function setUpNoteMenu(win: BrowserWindow, payload: NoteMenuPayload) {
     },
     { type: "separator" },
     {
+      label: "Select...",
+      click: () => win.webContents.send("note:trigger-select", id),
+    },
+    {
       label: pinned ? "Unpin Note" : "Pin to Top",
       click: () => win.webContents.send("note:trigger-pin", id),
     },

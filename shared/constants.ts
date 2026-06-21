@@ -61,6 +61,7 @@ const VIEWS = [
 ] as const satisfies readonly ViewItem[];
 
 const SELECTION_ACTIONS: SelectionActionConfig[] = [
+  { id: "cancel", icon: "x" },
   { id: "pin", icon: "pin" },
   { id: "export", icon: "download" },
   {

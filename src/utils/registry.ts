@@ -127,7 +127,6 @@ function initializeUIRegistry() {
     readingTime: requireElement<HTMLSpanElement>("#reading-time"),
     metadataContainer: requireElement<HTMLDivElement>(".metadata-container"),
     searchInput: requireElement<HTMLInputElement>(".search-input"),
-    selectionBtn: requireElement<HTMLButtonElement>(".selection-btn"),
     sidebarHeader: requireElement<HTMLDivElement>(".sidebar-header"),
     sidebarFooter: requireElement<HTMLDivElement>(".sidebar-footer"),
     selectionFooter: requireElement<HTMLDivElement>(

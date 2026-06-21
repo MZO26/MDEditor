@@ -110,8 +110,8 @@ async function getViews(
   return invoke(window.noteAPI.getViews(view, id));
 }
 
-async function dbMaintenance(action: string): Promise<Result<number>> {
-  return invoke(window.noteAPI.dbMaintenance(action));
+async function databaseBackup(): Promise<Result<number>> {
+  return invoke(window.noteAPI.databaseBackup());
 }
 
 async function selectAutoExportFolder(): Promise<Result<string>> {
@@ -218,7 +218,7 @@ const updateSettings = (settings: Partial<AppSettings>) => {
 export {
   createManyNotes,
   createNote,
-  dbMaintenance,
+  databaseBackup,
   deleteManyNotes,
   deleteNote,
   exportManyNotes,

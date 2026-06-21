@@ -1,9 +1,4 @@
-import {
-  dbMaintenance,
-  selectAutoExportFolder,
-  showNotification,
-  updateSettings,
-} from "@/api/api";
+import { selectAutoExportFolder, updateSettings } from "@/api/api";
 import { syncNoteStore } from "@/settings/app-state";
 import { applyAppTheme, resolveTheme, setCodeTheme } from "@/settings/theme";
 import { createAsyncHandler } from "@/utils/async";
@@ -224,7 +219,6 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     "#export-format",
     container,
   );
-  const databaseSelect = findElement<HTMLSelectElement>("#database", container);
   const deleteConfirmSelect = findElement<HTMLSelectElement>(
     "#delete-confirm",
     container,
@@ -233,13 +227,7 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     "#auto-export",
     container,
   );
-  if (
-    !exportFormatSelect ||
-    !databaseSelect ||
-    !deleteConfirmSelect ||
-    !autoExportSelect
-  )
-    return;
+  if (!exportFormatSelect || !deleteConfirmSelect || !autoExportSelect) return;
 
   // file backup
 
@@ -254,31 +242,6 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     }),
   );
 
-  // db maintenance
-
-  databaseSelect.value = "";
-  databaseSelect.addEventListener(
-    "change",
-    createAsyncHandler(async (e) => {
-      const target = e.target as HTMLSelectElement | null;
-      if (!target) return;
-      const selectedOpt = target.value;
-      const result = await dbMaintenance(selectedOpt);
-      target.value = "";
-      if (!result.success) {
-        console.error(
-          "[initAppSettings -> dbMaintenance]: Database maintenance failed:",
-          result.error,
-        );
-        return;
-      }
-      if (selectedOpt === "backup-db" && result.success) {
-        await showNotification("Backup saved.", "");
-        return;
-      }
-      await showNotification(`Optimized db in ${result.data} ms.`, "");
-    }),
-  );
   // delete confirmation
   deleteConfirmSelect.value = settings["delete-confirmation"]
     ? "true"
@@ -302,7 +265,8 @@ function initAppSettings(settings: AppSettings, container: HTMLDivElement) {
     "change",
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLSelectElement | null;
-      if (target?.value) {
+      if (!target) return;
+      if (target.value) {
         const enabled = target.value === "true";
         if (enabled) {
           const result = await selectAutoExportFolder();

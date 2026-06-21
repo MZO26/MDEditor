@@ -85,18 +85,4 @@ function validation<T extends z.ZodType>(
   return validate.data;
 }
 
-function measure<T>(fn: () => T) {
-  const start = performance.now();
-  fn();
-  const end = performance.now();
-  return Math.round((end - start) * 100) / 100;
-}
-
-export {
-  checkRateLimit,
-  measure,
-  registerIpc,
-  result,
-  validateSender,
-  validation,
-};
+export { checkRateLimit, registerIpc, result, validateSender, validation };

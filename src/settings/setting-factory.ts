@@ -6,7 +6,6 @@ function selectBuilder(
   id: string,
   options: SelectOption[],
   category: "Appearance" | "Editor" | "App",
-  placeholderText?: string,
 ) {
   const settingsContainer = requireElement<HTMLDivElement>(".settings-content");
   const label = document.createElement("label");
@@ -14,16 +13,6 @@ function selectBuilder(
   label.textContent = id;
   const select = document.createElement("select");
   select.id = id;
-  if (placeholderText) {
-    const placeholder = document.createElement("option");
-    placeholder.value = "";
-    placeholder.textContent = placeholderText;
-    placeholder.disabled = true;
-    placeholder.selected = true;
-    placeholder.hidden = true;
-    select.required = true;
-    select.append(placeholder);
-  }
   const optionNodes = options.map((opt) => new Option(opt.label, opt.value));
   select.append(...optionNodes);
   const row = document.createElement("div");

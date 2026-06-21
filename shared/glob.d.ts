@@ -80,13 +80,14 @@ declare global {
       onTriggerId: (callback: (id: string) => void) => () => void;
       onTriggerDuplicate: (callback: (id: string) => void) => () => void;
       onTriggerPin: (callback: (id: string) => void) => () => void;
+      onTriggerSelect: (callback: (id: string) => void) => () => void;
       pin: (id: string) => Promise<Result<boolean>>;
       pinMany: (ids: string[]) => Promise<Result<boolean>>;
       getViews: (
         view: ViewId,
         id: string | null,
       ) => Promise<Result<Note[] | NoteListItem[]>>;
-      dbMaintenance: (action) => Promise<Result<number>>;
+      databaseBackup: () => Promise<Result<number>>;
       setActiveNote: (id: string | null) => void;
     };
     storeAPI: {

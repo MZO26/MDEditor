@@ -436,12 +436,12 @@ class NoteDB {
     return notes;
   }
 
-  optimizeDb() {
-    this.db.exec(`PRAGMA optimize`);
+  public pragma(source: string, options?: any) {
+    return this.db.pragma(source, options);
   }
 
-  vacuumDb() {
-    this.db.exec("VACUUM");
+  public close() {
+    this.db.close();
   }
 
   async backupDb(destination: string): Promise<DBBackupResult> {

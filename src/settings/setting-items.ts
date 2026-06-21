@@ -95,16 +95,6 @@ function buildSelects() {
       "App",
     ),
     selectBuilder(
-      "database",
-      [
-        { value: "vacuum-db", label: "Free up disk space" },
-        { value: "optimize-db", label: "Optimize database" },
-        { value: "backup-db", label: "Backup database" },
-      ],
-      "App",
-      "Database Settings",
-    ),
-    selectBuilder(
       "delete-confirm",
       [
         { value: "true", label: "Enable" },

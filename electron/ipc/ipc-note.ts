@@ -19,7 +19,6 @@ import { batchImport } from "@electron/fs/fs-import";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import {
   checkRateLimit,
-  measure,
   result,
   validation,
 } from "@electron/ipc/ipc-validation";
@@ -252,26 +251,12 @@ function registerNoteIpc(win: BrowserWindow) {
     });
   });
 
-  ipcMain.handle("db-maintenance", (e, action: unknown) => {
+  ipcMain.handle("db-backup", (e) => {
     return result(e, async () => {
-      if (!checkRateLimit("db-maintenance", LIMITS.WRITE_HEAVY))
+      if (!checkRateLimit("db-backup", LIMITS.WRITE_HEAVY))
         throw new AppBackendError(AppErrorCode.RateLimitError);
-      switch (action) {
-        case "optimize-db":
-          return measure(() => {
-            db.optimizeDb();
-          });
-        case "vacuum-db":
-          return measure(() => {
-            db.vacuumDb();
-          });
-        case "backup-db":
-          const filePath = await handleDBBackupDialog(win);
-          return (await db.backupDb(filePath)).totalPages;
-        default: {
-          throw new AppBackendError(AppErrorCode.InvalidDbAction);
-        }
-      }
+      const filePath = await handleDBBackupDialog(win);
+      return (await db.backupDb(filePath)).totalPages;
     });
   });
 }

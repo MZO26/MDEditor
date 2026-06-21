@@ -204,7 +204,8 @@ function resizeSidebar(
 
 const debouncedSearch = debounce((e: Event) => {
   const target = e.target as HTMLInputElement | null;
-  const value = target?.value.trim();
+  if (!target) return;
+  const value = target.value.trim();
   handleSearchInput(value ?? "");
 }, DEBOUNCE_MS.fast);
 

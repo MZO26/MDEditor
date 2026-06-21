@@ -282,10 +282,13 @@
   right: 3px;
 }
 
-.open-app-path-btn {
+.settings-quick-actions {
   position: absolute;
   top: 10px;
-  left: 5px;
+  left: 10px;
+  gap: 5px;
+  display: flex;
+  flex-direction: row;
 }
 
 .settings-title {

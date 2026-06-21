@@ -119,12 +119,13 @@ function inEditorSearch(editor: Editor) {
 
   replaceInputWrapper.addEventListener("click", (event: Event) => {
     const target = event.target as HTMLElement | null;
-    if (target?.closest(".replace-one")) {
+    if (!target) return;
+    if (target.closest(".replace-one")) {
       event.preventDefault();
       syncQuery();
       editor.commands.replaceNext();
       return;
-    } else if (target?.closest(".replace-all")) {
+    } else if (target.closest(".replace-all")) {
       event.preventDefault();
       syncQuery();
       editor.commands.replaceAll();
@@ -142,7 +143,6 @@ function inEditorSearch(editor: Editor) {
 
   input.addEventListener("keydown", (event) => {
     if (event.repeat) return;
-
     if (event.key === "Enter") {
       event.preventDefault();
       event.stopPropagation();

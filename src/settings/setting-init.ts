@@ -1,4 +1,4 @@
-import { openAppPath } from "@/api/api";
+import { databaseBackup, openAppPath, showNotification } from "@/api/api";
 import { initSettingsDialog } from "@/settings/dialog-init";
 import { createSettingsMenu } from "@/settings/setting-factory";
 import { buildSelects } from "@/settings/setting-items";
@@ -16,10 +16,12 @@ async function initAppSettings(settings: AppSettings) {
   buildSelects();
   setSelectListeners(settings, settingsContainer);
   const openModalBtn = requireElement<HTMLButtonElement>(".settings-btn");
-  const openPathBtn = requireElement<HTMLButtonElement>(".open-app-path-btn");
   const firstActiveBtn = requireElement<HTMLButtonElement>(
     "button:first-child",
     buttonsContainer,
+  );
+  const quickActionsContainer = requireElement<HTMLDivElement>(
+    ".settings-quick-actions",
   );
   if (firstActiveBtn) setActiveItem(firstActiveBtn, buttonsContainer);
   await applyAppTheme(settings["theme"]);
@@ -28,7 +30,7 @@ async function initAppSettings(settings: AppSettings) {
     buttonsContainer,
     settingsContainer,
     settingsDialog,
-    openPathBtn,
+    quickActionsContainer,
   );
   registerAppEvents(document, {
     "app:open-settings": () => settingsDialog.showModal(),
@@ -40,21 +42,48 @@ function applyModalListeners(
   buttonsContainer: HTMLDivElement,
   settingsContainer: HTMLDivElement,
   modal: HTMLDialogElement,
-  openPathBtn: HTMLButtonElement,
+  quickActionsContainer: HTMLDivElement,
 ) {
   openModalBtn.addEventListener("click", () => {
     modal.showModal();
   });
-  openPathBtn.addEventListener(
+  quickActionsContainer.addEventListener(
     "click",
-    createAsyncHandler(async () => {
-      await openAppPath();
+    createAsyncHandler(async (e) => {
+      const target = e.target as HTMLElement | null;
+      if (target === quickActionsContainer || !target) return;
+      const button = target.closest<HTMLButtonElement>("button[data-action]");
+      if (!button) return;
+      const action = button.getAttribute("data-action");
+      switch (action) {
+        case "open-path":
+          const open = await openAppPath();
+          if (!open.success) {
+            console.error(
+              "[quickActions -> open-path]: Failed to open app path:",
+              open.error,
+            );
+            return;
+          }
+          break;
+        case "backup-db":
+          const backup = await databaseBackup();
+          if (!backup.success) {
+            console.error(
+              "[quickActions -> backup-db]: Failed to backup db:",
+              backup.error,
+            );
+            return;
+          }
+          await showNotification("Backup saved.", "");
+          return;
+      }
     }),
   );
   buttonsContainer.addEventListener("click", (e) => {
     const target = e.target as HTMLElement | null;
-    if (target === buttonsContainer) return;
-    const btn = target?.closest<HTMLButtonElement>(".selection-btn");
+    if (target === buttonsContainer || !target) return;
+    const btn = target.closest<HTMLButtonElement>(".selection-btn");
     if (!btn) return;
     const targetTab = btn.dataset["category"];
     if (!targetTab) return;

@@ -112,14 +112,16 @@ contextBridge.exposeInMainWorld("noteAPI", {
   onTriggerPin: (callback: (id: string) => void) => {
     subscribe("note:trigger-pin", callback);
   },
+  onTriggerSelect: (callback: (id: string) => void) => {
+    subscribe("note:trigger-select", callback);
+  },
   getById: (id: string) => ipcRenderer.invoke("note:getById", id),
   getManyById: (ids: string[]) => ipcRenderer.invoke("note:getManyById", ids),
   pin: (id: string) => ipcRenderer.invoke("note:pin", id),
   pinMany: (ids: string[]) => ipcRenderer.invoke("note:pin-many", ids),
   getViews: (view: ViewId, id: string | null) =>
     ipcRenderer.invoke("views:get", view, id),
-  dbMaintenance: (action: string) =>
-    ipcRenderer.invoke("db-maintenance", action),
+  databaseBackup: () => ipcRenderer.invoke("db-backup"),
   setActiveNote: (id: string | null) => ipcRenderer.send("note:set-active", id),
 });
 contextBridge.exposeInMainWorld("storeAPI", {

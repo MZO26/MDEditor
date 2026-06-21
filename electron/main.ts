@@ -1,4 +1,5 @@
 import { setUpEditorMenu } from "@electron/context-menu";
+import db from "@electron/db/database";
 import { setupGlobalErrorHandling } from "@electron/handler/global-error-handler";
 import {
   navigationHandler,
@@ -20,7 +21,6 @@ import {
   ipcMain,
   Menu,
   nativeTheme,
-  powerMonitor,
   type BrowserWindowConstructorOptions,
 } from "electron";
 import path from "node:path";
@@ -103,12 +103,6 @@ function createWindow() {
   } else {
     win.loadFile(path.join(__dirname, "../../dist/index.html"));
   }
-  win.on("focus", () => {
-    if (win && !win.isDestroyed()) {
-      win.webContents.send("app:focus");
-    }
-  });
-
   win.on("close", (e) => {
     if (!isReadyToClose) {
       e.preventDefault();
@@ -130,11 +124,6 @@ app.whenReady().then(async () => {
     isReadyToClose = true;
     win?.close();
   });
-  powerMonitor.on("resume", () => {
-    if (win && !win.isDestroyed()) {
-      win.webContents.send("system-resumed");
-    }
-  });
   createWindow();
   setupLocalImageProtocol();
   setPermissions();
@@ -150,6 +139,11 @@ app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
+});
+
+app.on("will-quit", () => {
+  db.pragma("optimize");
+  db.close();
 });
 
 app.on("window-all-closed", () => {

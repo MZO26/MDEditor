@@ -10,6 +10,7 @@ import {
   Code,
   CodeXml,
   createIcons,
+  Database,
   Download,
   FileCheck,
   FileQuestion,
@@ -45,7 +46,6 @@ import {
   SearchX,
   SeparatorHorizontal,
   SlidersHorizontal,
-  SquareCheck,
   StickyNote,
   Strikethrough,
   Tag,
@@ -59,6 +59,7 @@ import {
 function renderIcons(scope: Document | HTMLElement = document): void {
   createIcons({
     icons: {
+      Database,
       FileSymlink,
       Replace,
       ReplaceAll,
@@ -88,10 +89,10 @@ function renderIcons(scope: Document | HTMLElement = document): void {
       Download,
       Plus,
       Undo2,
+
       Redo2,
       Bold,
       Italic,
-      SquareCheck,
       Strikethrough,
       Underline,
       Heading1,

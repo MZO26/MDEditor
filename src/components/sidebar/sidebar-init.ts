@@ -35,13 +35,11 @@ function initNotesSidebar() {
     "sidebar",
     "sidebarContainer",
   ]);
-  const { searchInput, selectionBtn, selectionFooter, sidebarHeader } =
-    getUIItems([
-      "searchInput",
-      "selectionBtn",
-      "selectionFooter",
-      "sidebarHeader",
-    ]);
+  const { searchInput, selectionFooter, sidebarHeader } = getUIItems([
+    "searchInput",
+    "selectionFooter",
+    "sidebarHeader",
+  ]);
   const deleteBtn = findElement<HTMLButtonElement>(
     ".delete-btn",
     selectionFooter,
@@ -54,7 +52,6 @@ function initNotesSidebar() {
     sidebarHeader,
     searchInput,
     viewSelect,
-    selectionBtn,
     selectionFooter,
   );
   registerAppEvents(document, {
@@ -75,7 +72,6 @@ function applySidebarListeners(
   sidebarHeader: HTMLDivElement,
   searchInput: HTMLInputElement,
   viewSelect: HTMLSelectElement,
-  selectionBtn: HTMLButtonElement,
   selectionFooter: HTMLDivElement,
 ) {
   resizeSidebar(".resizer-sidebar", ".sidebar-container");
@@ -97,20 +93,20 @@ function applySidebarListeners(
     }),
   );
   searchInput.addEventListener("input", debouncedSearch);
-  selectionBtn.addEventListener("click", () => {
-    const selectionMode = stateStore.get("selectionMode");
-    setSelectionMode(!selectionMode);
-  });
   selectionFooter.addEventListener(
     "click",
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLButtonElement | null;
-      const button = target?.closest<HTMLButtonElement>("button[data-action]");
+      if (!target) return;
+      const button = target.closest<HTMLButtonElement>("button[data-action]");
       if (!button) return;
       const selectedIds = stateStore.get("selectedIds");
       const action = button.getAttribute("data-action");
-      if (selectedIds.size === 0) return;
+      if (action !== "cancel" && selectedIds.size === 0) return;
       switch (action) {
+        case "cancel":
+          setSelectionMode(false);
+          break;
         case "pin":
           await pinSelection([...selectedIds]);
           break;

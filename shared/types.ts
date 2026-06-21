@@ -144,7 +144,6 @@ interface UIRegistry {
   readingTime: HTMLSpanElement;
   metadataContainer: HTMLDivElement;
   searchInput: HTMLInputElement;
-  selectionBtn: HTMLButtonElement;
   sidebarHeader: HTMLDivElement;
   sidebarFooter: HTMLDivElement;
   selectionFooter: HTMLDivElement;
@@ -195,6 +194,7 @@ type SearchOptions = {
 type ViewId = (typeof VIEWS)[number]["id"];
 
 type SelectionAction =
+  | "cancel"
   | "pin"
   | "export"
   | "copy-links"
