@@ -38,7 +38,6 @@ class NoteDB {
   private getOldTitleStmt: BetterSqlite.Statement;
   private togglePinStmt: BetterSqlite.Statement;
   private toggleManyPinStmt: BetterSqlite.Statement;
-  private searchByTagStmt: BetterSqlite.Statement;
   constructor() {
     const dbPath = path.join(app.getPath("userData"), "notes.db");
     try {
@@ -51,29 +50,26 @@ class NoteDB {
       // predefined statements to prevent parsing them for every transaction
       this.getAllNotesStmt = this.db.prepare(
         `SELECT * FROM notes 
-        ORDER BY updated_at DESC`,
+      ORDER BY updated_at DESC`,
       );
       this.getNoteByIdStmt = this.db.prepare(
-        "SELECT * FROM notes WHERE id = @id",
+        `SELECT * FROM notes WHERE id = @id`,
       );
       this.getManyNotesByIdStmt = this.db.prepare(`
       SELECT * FROM notes WHERE id IN (SELECT value FROM json_each(@idsList))
     `);
       this.getAllTagsStmt = this.db.prepare(
-        "SELECT note_id, tag_name FROM note_tags",
+        `SELECT note_id, tag_name FROM note_tags`,
       );
       this.getAllLinksStmt = this.db.prepare(
-        "SELECT source_id, target_id FROM note_links",
+        `SELECT source_id, target_id FROM note_links`,
       );
       this.getTagsByIdStmt = this.db.prepare(
-        "SELECT tag_name FROM note_tags WHERE note_id = @id",
+        `SELECT tag_name FROM note_tags WHERE note_id = @id`,
       );
       this.getLinksByIdStmt = this.db.prepare(`
       SELECT target_id AS id, 'out' AS dir FROM note_links WHERE source_id = @id UNION ALL SELECT source_id AS id, 'in' AS dir FROM note_links WHERE target_id = @id
       `);
-      this.getOldTitleStmt = this.db.prepare(
-        `SELECT title FROM notes WHERE id = @id`,
-      );
       this.togglePinStmt = this.db.prepare(`
       UPDATE notes 
       SET pinned = NOT pinned, updated_at = @updated_at
@@ -85,11 +81,10 @@ class NoteDB {
       WHERE id IN (SELECT value FROM json_each(@ids))
       RETURNING id
       `);
-      this.searchByTagStmt = this.db.prepare(`
-      SELECT notes.* 
+      this.getOldTitleStmt = this.db.prepare(`
+      SELECT id, title 
       FROM notes
-      JOIN note_tags as t ON notes.id = t.note_id
-      WHERE t.tag_name = @tag_name
+      WHERE id IN (SELECT value FROM json_each(@ids))
       `);
       console.log(`Database initialized at: ${dbPath}`);
     } catch (error) {
@@ -333,33 +328,17 @@ class NoteDB {
     return rows as Link[];
   }
 
-  public searchByTag(tagName: string): Note[] {
-    const result = this.searchByTagStmt.all({ tag_name: tagName }) as NoteRow[];
-    const tagMap = this.getTagMap() ?? new Map();
-    const linkMap = this.getLinkMap() ?? new Map();
-    return result.map((note) => {
-      return validation(NoteFromDB, {
-        ...note,
-        tags: tagMap.get(note.id) ?? [],
-        links: linkMap.get(note.id) ?? [],
-      });
-    });
-  }
-
   public getOldNotes(
     ids: string[],
   ): Array<{ id: string; title: Note["title"] }> {
-    const notes: Array<{ id: string; title: Note["title"] }> = [];
-    for (const id of ids) {
-      const row = this.getOldTitleStmt.get({ id }) as
-        | { title: Note["title"] }
-        | undefined;
-      if (!row) {
-        throw new AppBackendError(AppErrorCode.DBError);
-      }
-      notes.push({ id, title: row.title });
+    if (ids.length === 0) return [];
+    const rows = this.getOldTitleStmt.all({
+      ids: JSON.stringify(ids),
+    }) as Array<{ id: string; title: Note["title"] }>;
+    if (rows.length !== ids.length) {
+      throw new AppBackendError(AppErrorCode.DBError);
     }
-    return notes;
+    return rows;
   }
 
   public pragma(source: string, options?: any) {

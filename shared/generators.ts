@@ -36,18 +36,18 @@ function titleGenerator(doc: EditorDoc): string {
   if (!doc || !Array.isArray(doc.content) || doc.content.length === 0) {
     return UNTITLED;
   }
-  const firstBlock = doc.content[0];
-  if (
-    firstBlock &&
-    (firstBlock.type === "heading" || firstBlock.type === "paragraph")
-  ) {
-    const text = extractText(firstBlock).trim();
+  const topBlocks = doc.content.slice(0, 3);
+  const firstHeading = topBlocks.find((block) => block.type === "heading");
+  if (firstHeading) {
+    const text = extractText(firstHeading).trim();
     if (text) return truncateTitle(text);
   }
-  for (const block of doc.content) {
-    if (block.type === "paragraph" || block.type === "heading") {
-      const text = extractText(block).trim();
-      if (text) return truncateTitle(text);
+  const firstParagraph = topBlocks.find((block) => block.type === "paragraph");
+  if (firstParagraph) {
+    const text = extractText(firstParagraph).trim();
+    if (text) {
+      const firstSentence = text.split(/[.?!]/)[0]?.trim();
+      if (firstSentence) return truncateTitle(firstSentence);
     }
   }
   return UNTITLED;

@@ -82,10 +82,6 @@ const NoteSchema = NoteTableSchema.extend({
   links: LinksSchema,
 });
 
-const NoteMetaData = NoteSchema.omit({
-  content: true,
-});
-
 // Full Array of Note Objects
 const NotesSchema = z.array(NoteSchema);
 
@@ -96,10 +92,7 @@ const NoteFromDB = NoteSchema.extend({
   links: LinksSchema,
 });
 
-const NoteListItemFromDB = NoteFromDB.omit({ content: true }).extend({
-  plainText: PlainTextSchema,
-});
-
+const NoteListItemFromDB = NoteFromDB.omit({ content: true });
 // Payload Evaluation: Expects content to be stringified and converts booleans to 0 or 1 for DB
 const NoteToDBSchema = NoteSchema.extend({
   id: IdSchema,
@@ -161,7 +154,6 @@ const AutoExportWritePayloadSchema = z.object({
 type NoteListItem = z.infer<typeof NoteListItemFromDB>;
 type AutoExportWritePayload = z.infer<typeof AutoExportWritePayloadSchema>;
 type NoteSearchDoc = z.infer<typeof NoteSearchDoc>;
-type NoteMetaData = z.infer<typeof NoteMetaData>;
 type NoteRow = z.infer<typeof NoteRowSchema>;
 type TagRow = z.infer<typeof TagRowSchema>;
 type LinkRow = z.infer<typeof LinkRowSchema>;
@@ -210,7 +202,6 @@ export {
   type LinkRow,
   type Note,
   type NoteListItem,
-  type NoteMetaData,
   type NoteRow,
   type NoteSearchDoc,
   type Tag,
