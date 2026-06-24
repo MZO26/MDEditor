@@ -17,14 +17,7 @@ import tippy from "tippy.js";
 
 let allTagsMenu: AllTagsMenu | null = null;
 
-function initTopToolbar() {
-  const appContainer = getAppItem("appContainer");
-  const editor = getAppItem("editor");
-  const appPinBtn = requireElement<HTMLButtonElement>(".app-pin-btn");
-  appPinBtn.addEventListener(
-    "click",
-    createAsyncHandler(async () => setWindowTop(appPinBtn)),
-  );
+function initMetadataToolbar() {
   const metadataContainer = getUIItem("metadataContainer");
   metadataContainer.addEventListener("click", (e) => {
     const target = e.target as HTMLElement | null;
@@ -50,6 +43,16 @@ function initTopToolbar() {
   editorWrapper.addEventListener("focusin", () => {
     metadataContainer.classList.add("collapsed");
   });
+}
+
+function initTopToolbar() {
+  const appContainer = getAppItem("appContainer");
+  const editor = getAppItem("editor");
+  const appPinBtn = requireElement<HTMLButtonElement>(".app-pin-btn");
+  appPinBtn.addEventListener(
+    "click",
+    createAsyncHandler(async () => setWindowTop(appPinBtn)),
+  );
   registerAppEvents(document, {
     "app:set-editor-width": () => setEditorWidth(appContainer),
     "app:toggle-read-only": () => editor?.setEditable(!editor.isEditable),
@@ -495,6 +498,7 @@ const TOOLBAR_ACTIONS: ActionMap = {
 };
 
 export {
+  initMetadataToolbar,
   initTopToolbar,
   renderLinks,
   renderTags,

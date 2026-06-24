@@ -86,18 +86,17 @@ function registerNoteIpc(win: BrowserWindow) {
       }
       const validatedData = validation(UpdateNotePayloadSchema, payload);
       const { markdown, ...noteData } = validatedData;
-      const result = db.update(noteData);
       const isAutoExport = store.get("auto-export") === true;
       const targetDir = isAutoExport ? store.get("auto-export-path") : null;
       const oldTitle =
         isAutoExport && targetDir
           ? db.getOldNotes([validatedData.id])
           : undefined;
+      const result = db.update(noteData);
       if (!isAutoExport || !targetDir) return result;
-      if (markdown === undefined)
-        throw new AppBackendError(AppErrorCode.InvalidData);
+      if (markdown === undefined) return result;
       await writeAutoExportFile({
-        id: result.id,
+        created_at: result.created_at,
         fileName: result.title,
         markdown: markdown,
         targetDir: targetDir,

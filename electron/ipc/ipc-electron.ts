@@ -68,8 +68,8 @@ function registerElectronIpc(win: BrowserWindow) {
       if (!targetDir) return null;
       const filePath = getFilePath(targetDir, validatedData);
       try {
-        await fs.access(filePath.absoluteFilePath, fs.constants.R_OK);
-        shell.showItemInFolder(filePath.absoluteFilePath);
+        await fs.access(filePath, fs.constants.R_OK);
+        shell.showItemInFolder(filePath);
         return true;
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
@@ -90,8 +90,8 @@ function registerElectronIpc(win: BrowserWindow) {
       if (!targetDir) return null;
       const filePath = getFilePath(targetDir, validatedData);
       try {
-        await fs.access(filePath.absoluteFilePath, fs.constants.R_OK);
-        return filePath.absoluteFilePath;
+        await fs.access(filePath, fs.constants.R_OK);
+        return filePath;
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
         else throw new AppBackendError(AppErrorCode.InvalidData);

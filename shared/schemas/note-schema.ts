@@ -144,13 +144,14 @@ const NoteSearchDoc = NoteSchema.omit({
 });
 
 const AutoExportWritePayloadSchema = z.object({
-  id: IdSchema,
+  created_at: DateSchema,
   fileName: TitleSchema,
   markdown: PlainTextSchema,
   targetDir: z.string(),
   oldFileName: z.string().optional(),
 });
 
+type TagNameRow = z.infer<typeof TagNameRowSchema>;
 type NoteListItem = z.infer<typeof NoteListItemFromDB>;
 type AutoExportWritePayload = z.infer<typeof AutoExportWritePayloadSchema>;
 type NoteSearchDoc = z.infer<typeof NoteSearchDoc>;
@@ -206,6 +207,7 @@ export {
   type NoteSearchDoc,
   type Tag,
   type TagName,
+  type TagNameRow,
   type TagRow,
   type UpdateNotePayload,
   type UpdateTransaction,

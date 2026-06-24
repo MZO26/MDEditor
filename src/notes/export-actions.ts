@@ -30,7 +30,7 @@ async function getBatchExportContent(
       const isJson = extension === "json";
       for (const note of notes) {
         processedPayloads.push({
-          id: note.id,
+          created_at: note.created_at,
           fileName: note.title,
           content: isJson
             ? JSON.stringify(note.content, null, 2)
@@ -60,7 +60,7 @@ async function getBatchExportContent(
       }
       headlessEditor.commands.setContent(note.content);
       processedPayloads.push({
-        id: note.id,
+        created_at: note.created_at,
         fileName: note.title,
         content: markdown
           ? headlessEditor.getMarkdown()
@@ -135,7 +135,7 @@ async function getExportContent(
         };
     }
     const payload: ExportRequest = {
-      id,
+      created_at: note.created_at,
       extension,
       fileName: titleGenerator(headlessEditor.getJSON()),
       content,

@@ -78,7 +78,7 @@ type ImportedContent = {
 };
 
 type ExportedContent = {
-  id: string;
+  created_at: string;
   fileName: string;
   content: string;
   extension: ExportFormat;
@@ -141,6 +141,7 @@ interface UIRegistry {
   sidebarHeader: HTMLDivElement;
   sidebarFooter: HTMLDivElement;
   selectionFooter: HTMLDivElement;
+  quickActionContainer: HTMLDivElement;
 }
 
 interface TemplateRegistry {
@@ -198,6 +199,14 @@ type SelectionActionConfig = {
   icon: string;
 };
 
+type QuickAction = "open-path" | "backup-db" | "backup-notes" | "vacuum-db";
+
+type QuickActionConfig = {
+  id: QuickAction;
+  icon: string;
+  label: string;
+};
+
 type AllTagsMenu = {
   button: HTMLButtonElement;
   popover: HTMLDivElement;
@@ -228,6 +237,7 @@ export type {
   NativeWindowColors,
   NoteMenuPayload,
   PDFAssets,
+  QuickActionConfig,
   ResizeOptions,
   ResolvedTheme,
   Result,

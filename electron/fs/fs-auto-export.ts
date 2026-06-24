@@ -1,6 +1,6 @@
 import db from "@electron/db/database";
-import { sanitizeExportString } from "@electron/fs/fs-assets";
 import { writeAtomic } from "@electron/fs/fs-atomic-write";
+import { getFilePath, sanitizeExportString } from "@electron/fs/fs-helpers";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import { validation } from "@electron/ipc/ipc-validation";
 import { store } from "@electron/store";
@@ -8,7 +8,6 @@ import { AppErrorCode } from "@shared/errors";
 import { processWithLimit } from "@shared/limiter";
 import {
   DeleteAutoExportRequestSchema,
-  FileNameSchema,
   WriteAutoExportRequestSchema,
   type DeleteAutoExportRequest,
   type WriteAutoExportRequest,
@@ -33,10 +32,10 @@ async function isAutoExport(id: string) {
   if (!targetDir) return false;
   const exportPath = resolveAutoExportPath(targetDir);
   const absoluteFilePath = getFilePath(exportPath, {
+    created_at: note.created_at,
     fileName: note.title,
-    id: note.id,
     extension: "md",
-  }).absoluteFilePath;
+  });
   try {
     if (!!absoluteFilePath && readFileSync(absoluteFilePath)) {
       console.log("[isAutoExport]: This note is on file system.");
@@ -104,24 +103,6 @@ async function safeRename(
   }
 }
 
-function getFilePath(
-  targetDirectory: string,
-  payload: { fileName: string; id: string; extension: string },
-) {
-  const extension = payload.extension ?? "md";
-  const idSuffix = `-${payload.id.slice(0, 11)}.${extension}`;
-  const safeTitle = validation(FileNameSchema, payload.fileName);
-  const newFileName = `${safeTitle}${idSuffix}`;
-  const absoluteFilePath = path.resolve(targetDirectory, newFileName);
-  // security check
-  const relative = path.relative(targetDirectory, absoluteFilePath);
-  const isOutside = relative.startsWith("..") || path.isAbsolute(relative);
-  if (isOutside) {
-    throw new AppBackendError(AppErrorCode.FileWriteError);
-  }
-  return { absoluteFilePath, idSuffix };
-}
-
 function resolveAutoExportPath(targetDir: string) {
   const normalized = path.resolve(targetDir);
   const baseName = path.basename(normalized).toLowerCase();
@@ -134,17 +115,16 @@ async function writeAutoExportFileLogic(
   targetDir: string,
   payload: WriteAutoExportRequest,
 ) {
-  const { id, fileName, oldFileName, extension } = payload;
+  const { created_at, fileName, oldFileName, extension } = payload;
   const exportPath = resolveAutoExportPath(targetDir);
   await mkdir(exportPath, { recursive: true });
-  const { absoluteFilePath } = getFilePath(exportPath, {
+  const absoluteFilePath = getFilePath(exportPath, {
     fileName,
-    id,
+    created_at,
     extension,
   });
   const oldAbsoluteFilePath = oldFileName
-    ? getFilePath(exportPath, { fileName: oldFileName, id, extension })
-        .absoluteFilePath
+    ? getFilePath(exportPath, { fileName: oldFileName, created_at, extension })
     : undefined;
   const userDataPath = app.getPath("userData");
   const imagesFolder = path.join(userDataPath, "editor-images");
@@ -170,14 +150,14 @@ async function writeAutoExportFileLogic(
 }
 
 async function writeAutoExportFile({
-  id,
+  created_at,
   fileName,
   markdown,
   targetDir,
   oldFileName,
 }: AutoExportWritePayload) {
   const writePayload = {
-    id,
+    created_at,
     fileName,
     oldFileName,
     content: markdown,
@@ -188,7 +168,7 @@ async function writeAutoExportFile({
     writePayload,
   );
   console.log("[writeNote]: Looking at file:", {
-    id: validatedFileData.id,
+    created_at: validatedFileData.created_at,
     fileName: validatedFileData.fileName,
     oldFileName,
   });
@@ -208,18 +188,18 @@ async function deleteAutoExportFileLogic(
   payload: DeleteAutoExportRequest,
 ) {
   const exportPath = resolveAutoExportPath(targetDir);
-  const { absoluteFilePath } = getFilePath(exportPath, payload);
+  const absoluteFilePath = getFilePath(exportPath, payload);
   await access(absoluteFilePath, constants.F_OK);
   await shell.trashItem(absoluteFilePath);
 }
 
 async function deleteAutoExportFile(
   targetDir: string,
-  oldNotes: Array<{ id: string; title: Note["title"] }>,
+  oldNotes: Array<{ created_at: string; title: Note["title"] }>,
 ) {
   await processWithLimit(oldNotes, 10, async (note) => {
     const validatedFileData = validation(DeleteAutoExportRequestSchema, {
-      id: note.id,
+      created_at: note.created_at,
       fileName: note.title,
       extension: "md" as const,
     });

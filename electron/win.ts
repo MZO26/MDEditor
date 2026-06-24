@@ -6,7 +6,7 @@ import { StoreSchema } from "@shared/schemas/store-schema";
 import type { ZoomAction } from "@shared/types";
 import { BrowserWindow } from "electron";
 
-function nextZoom(current: number, action: ZoomAction): number {
+function nextZoom(current: number, action: ZoomAction) {
   if (action === "get") return current;
   if (action === "reset") return 1;
   let targetIndex: number;

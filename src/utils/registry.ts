@@ -132,6 +132,9 @@ function initializeUIRegistry() {
     selectionFooter: requireElement<HTMLDivElement>(
       ".sidebar-selection-footer",
     ),
+    quickActionContainer: requireElement<HTMLDivElement>(
+      ".settings-quick-actions",
+    ),
   });
 }
 

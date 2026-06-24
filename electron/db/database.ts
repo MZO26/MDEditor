@@ -15,11 +15,13 @@ import {
   type NoteListItem,
   type NoteRow,
   type Tag,
+  type TagNameRow,
   type TagRow,
   type UpdateNotePayload,
 } from "@shared/schemas/note-schema";
 import type { DBBackupResult } from "@shared/types";
 import type BetterSqlite from "better-sqlite3";
+import type { PragmaOptions } from "better-sqlite3";
 import { app } from "electron";
 import { createRequire } from "module";
 import path from "path";
@@ -82,7 +84,7 @@ class NoteDB {
       RETURNING id
       `);
       this.getOldTitleStmt = this.db.prepare(`
-      SELECT id, title 
+      SELECT created_at, title 
       FROM notes
       WHERE id IN (SELECT value FROM json_each(@ids))
       `);
@@ -174,7 +176,9 @@ class NoteDB {
       updated_at: now,
     };
     const dbContent = validation(CreateTransactionSchema, dbPayload);
-    return this.transactions.safeCreate(dbContent);
+    const result = this.transactions.safeCreate(dbContent);
+    if (!result) throw new AppBackendError(AppErrorCode.DBError);
+    return result;
   }
 
   public createMany(payloads: CreateNotePayload[]): Note[] {
@@ -184,7 +188,7 @@ class NoteDB {
       const id = crypto.randomUUID();
       const { tags, links, content, ...rest } = payload;
       const stringifiedContent = JSON.stringify(content);
-      const uniqueTags = [...new Set(tags)].slice(0, 3);
+      const uniqueTags = [...new Set(tags)].slice(0, 5);
       const uniqueLinks = [...new Set(links)];
       const dbPayload = {
         id,
@@ -197,7 +201,9 @@ class NoteDB {
       };
       dbContents.push(validation(CreateTransactionSchema, dbPayload));
     }
-    return this.transactions.safeCreateMany(dbContents);
+    const result = this.transactions.safeCreateMany(dbContents);
+    if (!result) throw new AppBackendError(AppErrorCode.DBError);
+    return result;
   }
 
   public update(payload: UpdateNotePayload): Note {
@@ -214,17 +220,21 @@ class NoteDB {
       updated_at: now,
     };
     const dbContent = validation(UpdateTransactionSchema, dbPayload);
-    return this.transactions.safeUpdate(dbContent);
+    const result = this.transactions.safeUpdate(dbContent);
+    if (!result) throw new AppBackendError(AppErrorCode.DBError);
+    return result;
   }
 
   public delete(id: string) {
     const result = this.transactions.safeDelete(id);
     if (!result) throw new AppBackendError(AppErrorCode.DBError);
+    return result;
   }
 
   public deleteMany(ids: string[]) {
     const result = this.transactions.safeDeleteMany(ids);
     if (!result) throw new AppBackendError(AppErrorCode.DBError);
+    return result;
   }
 
   public getAll(): NoteListItem[] {
@@ -274,9 +284,6 @@ class NoteDB {
     if (ids.length === 0) return [];
     const params = { idsList: JSON.stringify(ids) };
     const rows = this.getManyNotesByIdStmt.all(params) as NoteRow[];
-    if (!Array.isArray(rows)) {
-      throw new AppBackendError(AppErrorCode.DBError);
-    }
     const tagMap = this.getTagMap() ?? new Map();
     const linkMap = this.getLinkMap() ?? new Map();
     return rows.map((row) => {
@@ -304,44 +311,33 @@ class NoteDB {
       updated_at: now,
       ids: JSON.stringify(ids),
     });
-    if (!result) {
-      throw new AppBackendError(AppErrorCode.DBError);
-    }
     const rows = validation(ToggleManyPinsSchema, result);
     return rows.length > 0;
   }
 
   public getTagsById(id: string): Tag[] {
     const rows = this.getTagsByIdStmt.all({ id });
-    if (!Array.isArray(rows)) {
-      throw new AppBackendError(AppErrorCode.DBError);
-    }
-    const tagArr = rows.map((row) => (row as { tag_name: string }).tag_name);
+    const tagArr = rows.map((row) => (row as TagNameRow).tag_name);
     return tagArr as Tag[];
   }
 
   public getLinksById(id: string): Link[] {
     const rows = this.getLinksByIdStmt.all({ id });
-    if (!Array.isArray(rows)) {
-      throw new AppBackendError(AppErrorCode.DBError);
-    }
     return rows as Link[];
   }
 
-  public getOldNotes(
-    ids: string[],
-  ): Array<{ id: string; title: Note["title"] }> {
+  public getOldNotes(ids: string[]): Pick<Note, "created_at" | "title">[] {
     if (ids.length === 0) return [];
     const rows = this.getOldTitleStmt.all({
       ids: JSON.stringify(ids),
-    }) as Array<{ id: string; title: Note["title"] }>;
+    }) as Pick<Note, "created_at" | "title">[];
     if (rows.length !== ids.length) {
       throw new AppBackendError(AppErrorCode.DBError);
     }
     return rows;
   }
 
-  public pragma(source: string, options?: any) {
+  public pragma(source: string, options?: PragmaOptions) {
     return this.db.pragma(source, options);
   }
 

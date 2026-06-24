@@ -8,6 +8,7 @@ import {
   setupToolbarListeners,
 } from "@/components/toolbar/toolbar-factory";
 import {
+  initMetadataToolbar,
   initTopToolbar,
   TOOLBAR_ACTIONS,
   TOP_TOOLBAR_ACTIONS,
@@ -49,6 +50,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   buildMenu(topToolbar, TOP_TOOLBAR_ACTIONS);
   setupToolbarListeners(topToolbar, TOP_TOOLBAR_ACTIONS);
   initTopToolbar();
+  initMetadataToolbar();
   renderIcons();
   startAppClock();
   initTippyDelegate(getAppItem("editorContainer"));

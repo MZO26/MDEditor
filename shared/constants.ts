@@ -3,6 +3,7 @@ import type { CodeTheme, Theme } from "@shared/schemas/store-schema";
 import type {
   Code,
   ContentType,
+  QuickActionConfig,
   ResolvedTheme,
   SelectionActionConfig,
 } from "@shared/types";
@@ -64,6 +65,17 @@ const SELECTION_ACTIONS: SelectionActionConfig[] = [
     icon: "file-symlink",
   },
   { id: "delete", icon: "trash-2" },
+];
+
+const QUICK_ACTIONS: QuickActionConfig[] = [
+  { id: "open-path", icon: "folder-cog", label: "Open App Path" },
+  { id: "backup-db", icon: "database", label: "Database Backup" },
+  { id: "backup-notes", icon: "download", label: "File Backup" },
+  {
+    id: "vacuum-db",
+    icon: "hard-drive",
+    label: "Compact Database",
+  },
 ];
 
 const THEME_MAP = {
@@ -214,6 +226,7 @@ export {
   MAX_SIZE,
   MIME_TO_EXT,
   PADDING,
+  QUICK_ACTIONS,
   SELECTION_ACTIONS,
   THEME_DATA,
   THEME_MAP,

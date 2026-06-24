@@ -251,11 +251,10 @@ async function handleSelectNote(id: string) {
     console.error("[handleSelectNote]: Failed to fetch note:", result.error);
     return;
   }
-  const note = result.data;
-  editor.commands.setContent(note.content, {
+  editor.commands.setContent(result.data.content, {
     emitUpdate: false,
   });
-  noteStore.setState({ activeNote: note });
+  noteStore.setState({ activeNote: result.data });
   resetEditorHistory(editor);
   requestAnimationFrame(() => {
     editor.commands.focus();

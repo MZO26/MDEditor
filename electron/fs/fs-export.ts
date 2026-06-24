@@ -1,12 +1,12 @@
-import { sanitizeExportString } from "@electron/fs/fs-assets";
 import { writeAtomic } from "@electron/fs/fs-atomic-write";
 import { getFilePath } from "@electron/fs/fs-auto-export";
+import { sanitizeExportString } from "@electron/fs/fs-helpers";
 import { loadPDFAssets, renderPDFCanvas } from "@electron/handler/pdf-handler";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import { createHiddenPdfWindow } from "@electron/win";
 import { AppErrorCode } from "@shared/errors";
 import { processWithLimit } from "@shared/limiter";
-import type { ExportedContent, ExportResult } from "@shared/types";
+import type { ExportedContent } from "@shared/types";
 import type { BrowserWindow, PrintToPDFOptions } from "electron";
 import { app } from "electron";
 import fs from "fs/promises";
@@ -22,47 +22,36 @@ async function singleExport(filePath: string, data: string) {
     imagesFolder,
   );
   await writeAtomic(filePath, portableContent).catch((error) => {
-    console.error("Error writing file:", error);
+    console.error("[singleExport]: Error writing file:", error);
     throw new AppBackendError(AppErrorCode.FileWriteError);
   });
 }
 
-async function batchExport(
-  folder: string,
-  payload: ExportedContent[],
-): Promise<ExportResult[]> {
-  await fs.mkdir(folder, { recursive: true }).catch(() => {
+async function batchExport(folder: string, payload: ExportedContent[]) {
+  await fs.mkdir(folder, { recursive: true }).catch((error) => {
+    console.error("[batchExport]: Failed to create directory:", error);
     throw new AppBackendError(AppErrorCode.FileWriteError);
   });
   const absoluteTargetFolder = path.resolve(folder);
   const userDataPath = app.getPath("userData");
   const imagesFolder = path.join(userDataPath, "editor-images");
-  const exported = await processWithLimit(
-    payload,
-    10,
-    async (item: ExportedContent) => {
-      try {
-        const { absoluteFilePath } = getFilePath(absoluteTargetFolder, item);
-        const portableContent = sanitizeExportString(
-          item.content,
-          absoluteTargetFolder,
-          imagesFolder,
-        );
-        await writeAtomic(absoluteFilePath, portableContent);
-        return {
-          id: item.id,
-          filePath: absoluteFilePath,
-        };
-      } catch (error) {
-        console.error("[batchExport]: Error while exporting:", error);
-        return null;
-      }
-    },
-  );
-  return exported.filter((item): item is ExportResult => item !== null);
+  await processWithLimit(payload, 10, async (item: ExportedContent) => {
+    try {
+      const absoluteFilePath = getFilePath(absoluteTargetFolder, item);
+      const portableContent = sanitizeExportString(
+        item.content,
+        absoluteTargetFolder,
+        imagesFolder,
+      );
+      await writeAtomic(absoluteFilePath, portableContent);
+    } catch (error) {
+      console.error("[batchExport]: Error while exporting:", error);
+      throw new AppBackendError(AppErrorCode.FileWriteError);
+    }
+  });
 }
 
-async function exportPdfNote(params: {
+async function exportPDFNote(params: {
   win: BrowserWindow;
   filePath: string;
   html: string;
@@ -82,18 +71,19 @@ async function exportPdfNote(params: {
   // data:text/html tells chrome parse as html and base64 tells chrome to decode before parsing with the exact html bytes. Base64 is required to load the css correctly because chrome expects URL's to have URL-encoded content.
   const pdfBuffer = await win.webContents.printToPDF(pdfOptions);
   await writeAtomic(filePath, pdfBuffer).catch((error) => {
-    console.error("Error writing PDF file:", error);
+    console.error("[exportPDFNote]: Error writing PDF file:", error);
     throw new AppBackendError(AppErrorCode.FileWriteError);
   });
-  return filePath;
 }
 
 async function singlePDFExport(filePath: string, data: string) {
   const hiddenWin = createHiddenPdfWindow();
   const assets = loadPDFAssets();
   try {
-    await exportPdfNote({ win: hiddenWin, filePath, html: data, assets });
-    return filePath;
+    await exportPDFNote({ win: hiddenWin, filePath, html: data, assets });
+  } catch (error) {
+    console.error("[singlePDFExport]: Error writing PDF file:", error);
+    throw new AppBackendError(AppErrorCode.FileWriteError);
   } finally {
     if (hiddenWin && !hiddenWin.isDestroyed()) {
       hiddenWin.destroy();
@@ -101,31 +91,24 @@ async function singlePDFExport(filePath: string, data: string) {
   }
 }
 
-async function batchPDFExport(
-  folder: string,
-  payload: ExportedContent[],
-): Promise<ExportResult[]> {
-  await fs.mkdir(folder, { recursive: true }).catch(() => {
+async function batchPDFExport(folder: string, payload: ExportedContent[]) {
+  await fs.mkdir(folder, { recursive: true }).catch((error) => {
+    console.error("[batchPDFExport]: Failed to create directory:", error);
     throw new AppBackendError(AppErrorCode.FileWriteError);
   });
   const absoluteTargetFolder = path.resolve(folder);
   const assets = loadPDFAssets();
   let hiddenWin = createHiddenPdfWindow();
   try {
-    const exported = await processWithLimit(payload, 1, async (item) => {
-      const { absoluteFilePath } = getFilePath(absoluteTargetFolder, item);
-      const filePath = await exportPdfNote({
+    await processWithLimit(payload, 1, async (item) => {
+      const absoluteFilePath = getFilePath(absoluteTargetFolder, item);
+      await exportPDFNote({
         win: hiddenWin,
         filePath: absoluteFilePath,
         html: item.content,
         assets,
       });
-      return {
-        id: item.id,
-        filePath,
-      };
     });
-    return exported.filter((item): item is ExportResult => item !== null);
   } catch (error) {
     console.error("[batchPDFExport]: Error while exporting:", error);
     throw new AppBackendError(AppErrorCode.ExportError);

@@ -26,7 +26,7 @@ const normalizeFileName = (val: string): string => {
       .replace(/^\.+/, "")
       .replace(/[. ]+$/g, "")
       .replace(/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\..+)?$/i, "_$1$2"),
-    200,
+    100,
   ).replace(/[. ]+$/g, "");
   return safe || UNTITLED;
 };
@@ -49,7 +49,7 @@ const StringContentSchema = z
   });
 
 const ExportBaseSchema = z.object({
-  id: z.string(),
+  created_at: DateSchema,
   fileName: FileNameSchema,
   content: StringContentSchema,
 });
@@ -107,9 +107,9 @@ const ExportItemSchema = z.discriminatedUnion("extension", [
 const ExportManyRequestSchema = z.array(ExportItemSchema);
 
 const ImportRequestSchema = z.discriminatedUnion("extension", [
-  HtmlSchema.omit({ id: true }),
-  MdSchema.omit({ id: true }),
-  JsonSchema.omit({ id: true }),
+  HtmlSchema.omit({ created_at: true }),
+  MdSchema.omit({ created_at: true }),
+  JsonSchema.omit({ created_at: true }),
 ]);
 
 type OpenAutoExportPathRequest = z.infer<typeof OpenAutoExportPathSchema>;

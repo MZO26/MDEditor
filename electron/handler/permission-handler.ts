@@ -19,7 +19,6 @@ function setPermissions() {
       if (allowedPermissions.includes(permission)) {
         callback(true);
       } else {
-        console.warn(`Blocked unauthorized permission request: ${permission}`);
         callback(false);
       }
     },
@@ -35,7 +34,6 @@ function setPermissions() {
       if (allowedPermissions.includes(permission)) {
         return true;
       }
-      console.warn(`Blocked unauthorized permission check: ${permission}`);
       return false;
     },
   );

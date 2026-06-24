@@ -1,3 +1,4 @@
+import { getSafeLocalDateString } from "@electron/fs/fs-helpers";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import { validation } from "@electron/ipc/ipc-validation";
 import { AppErrorCode } from "@shared/errors";
@@ -30,7 +31,7 @@ async function handleImportDialog(win: BrowserWindow) {
 }
 
 async function handleDBBackupDialog(win: BrowserWindow) {
-  const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+  const timestamp = getSafeLocalDateString(new Date());
   const defaultPath = path.join(
     app.getPath("documents"),
     `db-backup-${timestamp}.sqlite`,
@@ -49,9 +50,14 @@ async function handleDBBackupDialog(win: BrowserWindow) {
 }
 
 async function handleExportDialog(win: BrowserWindow, data: ExportRequest) {
+  const extension = data.extension ?? "md";
+  const creationDate = new Date(data.created_at);
+  const safeDate = getSafeLocalDateString(creationDate);
+  const safeTitle = validation(FileNameSchema, data.fileName);
+  const fileName = `${safeTitle}_${safeDate}.${extension}`;
   const { canceled, filePath } = await dialog.showSaveDialog(win, {
     title: "Export Note",
-    defaultPath: `${validation(FileNameSchema, data.fileName)}-${data.id.slice(0, 11)}.${data.extension}`,
+    defaultPath: fileName,
     filters: [
       { name: data.extension.toUpperCase(), extensions: [data.extension] },
     ],

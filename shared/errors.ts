@@ -11,14 +11,10 @@ enum AppErrorCode {
   RateLimitError = "RATE_LIMIT",
   SenderError = "UNAUTHORIZED_SENDER",
   UnknownError = "UNKNOWN_ERROR",
-  InvalidViewError = "INVALID_VIEW",
   CancelledOperation = "CANCELLED_OPERATION",
   CompressionError = "COMPRESSION_ERROR",
   InvalidImageError = "INVALID_IMAGE_ERROR",
-  InvalidDbAction = "INVALID_ACTION",
   ExportError = "EXPORT_ERROR",
-  AutoSaveError = "AUTOSAVE_ERROR",
-  InvalidDialog = "INVALID_DIALOG",
 }
 
 const ERROR_MESSAGES: Record<AppErrorCode, string> = {
@@ -28,14 +24,10 @@ const ERROR_MESSAGES: Record<AppErrorCode, string> = {
   [AppErrorCode.RateLimitError]: "Too many attempts. Please wait.",
   [AppErrorCode.SenderError]: "Action blocked for security.",
   [AppErrorCode.UnknownError]: "An unexpected error occurred.",
-  [AppErrorCode.InvalidViewError]: "Cannot open this view.",
   [AppErrorCode.CancelledOperation]: "Operation cancelled.",
   [AppErrorCode.CompressionError]: "Failed to compress file.",
   [AppErrorCode.InvalidImageError]: "Unsupported image format.",
-  [AppErrorCode.InvalidDbAction]: "This action is not allowed.",
   [AppErrorCode.ExportError]: "Export failed.",
-  [AppErrorCode.AutoSaveError]: "Autosave failed.",
-  [AppErrorCode.InvalidDialog]: "Unsupported Operation.",
 };
 
 export { AppErrorCode, ERROR_MESSAGES, WorkerErrorCode };

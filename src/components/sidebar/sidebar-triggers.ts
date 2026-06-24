@@ -66,12 +66,8 @@ async function triggerSingleExport(id: string, extension: string) {
   const exported = await exportNote(result.data);
   if (!exported.success) {
     console.error("[exportTrigger]: Failed to write file:", exported.error);
-    await showNotification(
-      exported.error === "CANCELLED_OPERATION"
-        ? "Cancelled Export"
-        : "Export Failed.",
-      "",
-    );
+    if (exported.error === "CANCELLED_OPERATION") return;
+    await showNotification("Export Failed.", "");
     return;
   }
   await showNotification(

@@ -29,7 +29,7 @@ async function ensureNoteSaved(id: string) {
   if (!note || activeId !== note.id) return;
   const editor = getAppItem("editor");
   const autoExportPayload = {
-    id: note.id,
+    created_at: note.created_at,
     fileName: note.title,
     extension: "md" as const,
     updated_at: note.updated_at,
