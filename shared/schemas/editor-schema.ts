@@ -1,7 +1,7 @@
 import type { JSONContent } from "@tiptap/core";
 import z from "zod";
 
-const MAX_CHARS = 250_000;
+const MAX_CHARS = 500_000;
 
 const jsonNode: z.ZodType<JSONContent> = z.lazy(() =>
   z

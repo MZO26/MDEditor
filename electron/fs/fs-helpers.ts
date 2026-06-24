@@ -46,7 +46,6 @@ function sanitizeImportString(
       return `appimg:///${fileName}`;
     },
   );
-
   return internalContent;
 }
 
@@ -79,7 +78,6 @@ function getFilePath(
 function ensureInsideDirectory(baseDir: string, absoluteFilePath: string) {
   const relative = path.relative(baseDir, absoluteFilePath);
   const isOutside = relative.startsWith("..") || path.isAbsolute(relative);
-
   if (isOutside) {
     throw new AppBackendError(AppErrorCode.FileWriteError);
   }

@@ -18,9 +18,10 @@ class Transactions {
   private updateNoteStmt: BetterSqlite.Statement;
   private deleteNoteStmt: BetterSqlite.Statement;
   private deleteTagsStmt: BetterSqlite.Statement;
-  private insertTagsStmt: BetterSqlite.Statement;
   private deleteLinksStmt: BetterSqlite.Statement;
-  private insertLinksStmt: BetterSqlite.Statement;
+  private insertManyTagsStmt: BetterSqlite.Statement;
+  private insertManyLinksStmt: BetterSqlite.Statement;
+  private deleteManyNotesStmt: BetterSqlite.Statement;
   constructor(dbConnection: DatabaseType) {
     this.db = dbConnection;
 
@@ -31,29 +32,35 @@ class Transactions {
       .prepare(`UPDATE notes SET title = @title, content = @content, plainText = @plainText, snippet = @snippet, updated_at = @updated_at WHERE id = @id RETURNING *
     `);
     this.deleteNoteStmt = this.db.prepare("DELETE FROM notes WHERE id = @id");
+    this.deleteManyNotesStmt = this.db.prepare(`
+      DELETE FROM notes 
+      WHERE id IN (SELECT value FROM json_each(@ids))
+    `);
     this.deleteTagsStmt = this.db.prepare(
       "DELETE FROM note_tags WHERE note_id = @note_id",
-    );
-    this.insertTagsStmt = this.db.prepare(
-      "INSERT INTO note_tags (note_id, tag_name) VALUES (@note_id, @tag_name)",
     );
     this.deleteLinksStmt = this.db.prepare(
       "DELETE FROM note_links WHERE source_id = @source_id",
     );
-    this.insertLinksStmt = this.db.prepare(
-      "INSERT INTO note_links (source_id, target_id) SELECT @source_id, @target_id WHERE EXISTS (SELECT 1 FROM notes WHERE id = @target_id)",
-    );
+    this.insertManyTagsStmt = this.db.prepare(`
+      INSERT INTO note_tags (note_id, tag_name)
+      SELECT @note_id, j.value
+      FROM json_each(@tags) j
+    `);
+    this.insertManyLinksStmt = this.db.prepare(`
+      INSERT INTO note_links (source_id, target_id)
+      SELECT @source_id, j.value
+      FROM json_each(@links) j
+      WHERE EXISTS (SELECT 1 FROM notes WHERE id = j.value)
+    `);
   }
 
   private runDeleteManyLogic(ids: string[]): boolean {
-    let deleted = false;
-    for (const id of ids) {
-      const result = this.deleteNoteStmt.run({ id });
-      if (result.changes > 0) {
-        deleted = true;
-      }
-    }
-    return deleted;
+    if (ids.length === 0) return false;
+    const result = this.deleteManyNotesStmt.run({
+      ids: JSON.stringify(ids),
+    });
+    return result.changes > 0;
   }
 
   public safeDeleteMany(ids: string[]): boolean {
@@ -77,14 +84,17 @@ class Transactions {
       if (!result) {
         throw new AppBackendError(AppErrorCode.DBError);
       }
-      for (const targetId of safeLinks) {
-        this.insertLinksStmt.run({
+      if (safeLinks.length > 0) {
+        this.insertManyLinksStmt.run({
           source_id: result.id,
-          target_id: targetId,
+          links: JSON.stringify(safeLinks),
         });
       }
-      for (const tag of safeTags) {
-        this.insertTagsStmt.run({ note_id: result.id, tag_name: tag });
+      if (safeTags.length > 0) {
+        this.insertManyTagsStmt.run({
+          note_id: result.id,
+          tags: JSON.stringify(safeTags),
+        });
       }
       results.push({ row: result, safeTags, safeLinks });
     }
@@ -117,11 +127,17 @@ class Transactions {
     if (!result) {
       throw new AppBackendError(AppErrorCode.DBError);
     }
-    for (const link of safeLinks) {
-      this.insertLinksStmt.run({ source_id: result.id, target_id: link });
+    if (safeLinks.length > 0) {
+      this.insertManyLinksStmt.run({
+        source_id: result.id,
+        links: JSON.stringify(safeLinks ?? []),
+      });
     }
-    for (const tag of safeTags) {
-      this.insertTagsStmt.run({ note_id: result.id, tag_name: tag });
+    if (safeTags.length > 0) {
+      this.insertManyTagsStmt.run({
+        note_id: result.id,
+        tags: JSON.stringify(safeTags ?? []),
+      });
     }
     return result;
   }
@@ -166,11 +182,17 @@ class Transactions {
     }
     this.deleteLinksStmt.run({ source_id: result.id });
     this.deleteTagsStmt.run({ note_id: result.id });
-    for (const link of safeLinks) {
-      this.insertLinksStmt.run({ source_id: result.id, target_id: link });
+    if (safeLinks.length > 0) {
+      this.insertManyLinksStmt.run({
+        source_id: result.id,
+        links: JSON.stringify(safeLinks ?? []),
+      });
     }
-    for (const tag of safeTags) {
-      this.insertTagsStmt.run({ note_id: result.id, tag_name: tag });
+    if (safeTags.length > 0) {
+      this.insertManyTagsStmt.run({
+        note_id: result.id,
+        tags: JSON.stringify(safeTags ?? []),
+      });
     }
     return result;
   }
