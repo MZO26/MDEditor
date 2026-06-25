@@ -290,12 +290,6 @@ function renderLinks(container: HTMLDivElement) {
 }
 
 const TOP_TOOLBAR_ACTIONS: ActionMap = {
-  readOnly: {
-    type: "action",
-    run: (editor) => editor?.setEditable(!editor.isEditable),
-    icon: "glasses",
-    shortcut: "MOD+Shift+R",
-  },
   editorWidth: {
     type: "action",
     run: () => {
@@ -415,7 +409,7 @@ const TOOLBAR_ACTIONS: ActionMap = {
   },
   divider3: { type: "divider" },
   details: {
-    run: (editor) => editor?.chain().focus().insertDetailsBlock().run(),
+    run: (editor) => editor?.chain().focus().toggleDetailsBlock().run(),
     isActive: (editor) => editor?.isActive("detailsBlock"),
     icon: "list-collapse",
     shortcut: "MOD+Shift+D",

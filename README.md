@@ -68,20 +68,19 @@ Shortcuts use `$mod` which maps to `Ctrl` on Windows/Linux and `Cmd` on macOS.
 <summary><b>Click to view all App Shortcuts</b></summary>
 <br>
 
-| Shortcut                                                      | Action                |
-| ------------------------------------------------------------- | --------------------- |
-| <kbd>Mod</kbd> + <kbd>N</kbd>                                 | Create new note       |
-| <kbd>Mod</kbd> + <kbd>G</kbd>                                 | Open global search    |
-| <kbd>Mod</kbd> + <kbd>F</kbd>                                 | Open doc search       |
-| <kbd>Mod</kbd> + <kbd>O</kbd>                                 | Toggle sidebar        |
-| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd>              | Toggle toolbar        |
-| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd>              | Toggle read-only mode |
-| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>W</kbd>              | Set editor width      |
-| <kbd>Mod</kbd> + <kbd>,</kbd>                                 | Open settings         |
-| <kbd>Mod</kbd> + <kbd>+</kbd> / <kbd>Mod</kbd> + <kbd>=</kbd> | Zoom in               |
-| <kbd>Mod</kbd> + <kbd>-</kbd>                                 | Zoom out              |
-| <kbd>Mod</kbd> + <kbd>0</kbd>                                 | Reset zoom            |
-| <kbd>F11</kbd>                                                | Toggle focus mode     |
+| Shortcut                                                      | Action             |
+| ------------------------------------------------------------- | ------------------ |
+| <kbd>Mod</kbd> + <kbd>N</kbd>                                 | Create new note    |
+| <kbd>Mod</kbd> + <kbd>G</kbd>                                 | Open global search |
+| <kbd>Mod</kbd> + <kbd>F</kbd>                                 | Open doc search    |
+| <kbd>Mod</kbd> + <kbd>O</kbd>                                 | Toggle sidebar     |
+| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd>              | Toggle toolbar     |
+| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>W</kbd>              | Set editor width   |
+| <kbd>Mod</kbd> + <kbd>,</kbd>                                 | Open settings      |
+| <kbd>Mod</kbd> + <kbd>+</kbd> / <kbd>Mod</kbd> + <kbd>=</kbd> | Zoom in            |
+| <kbd>Mod</kbd> + <kbd>-</kbd>                                 | Zoom out           |
+| <kbd>Mod</kbd> + <kbd>0</kbd>                                 | Reset zoom         |
+| <kbd>F11</kbd>                                                | Toggle focus mode  |
 
 </details>
 <br>
@@ -102,6 +101,8 @@ Shortcuts use `$mod` which maps to `Ctrl` on Windows/Linux and `Cmd` on macOS.
 | <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>X</kbd>       | `~~text~~`   | Strikethrough            |
 | <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd>       | `==text==`   | Highlight                |
 | <kbd>Mod</kbd> + <kbd>E</kbd>                          | `` `code` `` | Inline code              |
+| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd>       | `^[text]`    | Footnote                 |
+| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd>       | `//text//`   | Annotation               |
 | **Headings & Paragraphs**                              |              |                          |
 | <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>1</kbd>         | `# `         | Heading 1                |
 | <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>2</kbd>         | `## `        | Heading 2                |
@@ -120,6 +121,7 @@ Shortcuts use `$mod` which maps to `Ctrl` on Windows/Linux and `Cmd` on macOS.
 | <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>       | `> `         | Blockquote               |
 | <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>C</kbd>         | ` ``` `      | Code block               |
 | <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>-</kbd>       | `---`        | Horizontal rule          |
+| <kbd>Mod</kbd> + <kbd>Shift</kbd> + <kbd>D</kbd>       |              | Details                  |
 | <kbd>Shift</kbd> + <kbd>Enter</kbd>                    |              | Hard break (`<br>`)      |
 | **Links & Media**                                      |              |                          |
 | <kbd>Mod</kbd> + <kbd>Alt</kbd> + <kbd>Enter</kbd>     |              | Open Link                |

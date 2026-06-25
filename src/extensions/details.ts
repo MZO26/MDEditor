@@ -1,10 +1,12 @@
-import { Node, mergeAttributes } from "@tiptap/core";
+import { Node, mergeAttributes, type CommandProps } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     detailsBlock: {
-      insertDetailsBlock: (summary?: string, open?: boolean) => ReturnType;
+      setDetailsBlock: (summary?: string, open?: boolean) => ReturnType;
+      unsetDetailsBlock: (summary?: string, open?: boolean) => ReturnType;
+      toggleDetailsBlock: (summary?: string, open?: boolean) => ReturnType;
     };
   }
 }
@@ -46,8 +48,23 @@ export const DetailsBlock = Node.create({
   },
 
   addCommands() {
+    const findDetailsBlock = (state: CommandProps["state"]) => {
+      const { $from } = state.selection;
+      for (let depth = $from.depth; depth >= 0; depth--) {
+        const node = $from.node(depth);
+        if (node.type.name === this.name) {
+          return {
+            node,
+            depth,
+            pos: $from.before(depth),
+          };
+        }
+      }
+
+      return null;
+    };
     return {
-      insertDetailsBlock:
+      setDetailsBlock:
         (summary = "Details", open = false) =>
         ({ commands }) =>
           commands.insertContent({
@@ -55,6 +72,30 @@ export const DetailsBlock = Node.create({
             attrs: { summary, open },
             content: [{ type: "paragraph" }],
           }),
+
+      unsetDetailsBlock:
+        () =>
+        ({ state, dispatch }: CommandProps) => {
+          const found = findDetailsBlock(state);
+          if (!found) return false;
+          const from = found.pos;
+          const to = from + found.node.nodeSize;
+          const content = found.node.content;
+          if (dispatch) {
+            dispatch(state.tr.replaceWith(from, to, content));
+          }
+          return true;
+        },
+
+      toggleDetailsBlock:
+        (summary = "Details", open = false) =>
+        ({ state, commands }: CommandProps) => {
+          const found = findDetailsBlock(state);
+          if (found) {
+            return commands.unsetDetailsBlock();
+          }
+          return commands.setDetailsBlock(summary, open);
+        },
     };
   },
 

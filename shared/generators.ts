@@ -58,8 +58,13 @@ function titleGenerator(doc: EditorDoc): string {
   return UNTITLED;
 }
 
-function truncateTitle(text: string): string {
-  return text.length > 50 ? text.slice(0, 47) + "..." : text;
+function truncateTitle(text: string, maxLength: number = 50): string {
+  if (text.length <= maxLength) return text;
+  const targetLength = maxLength - 3;
+  const slice = text.slice(0, targetLength);
+  const lastSpace = slice.lastIndexOf(" ");
+  const safeText = lastSpace > 0 ? slice.slice(0, lastSpace) : slice;
+  return safeText.replace(/[.,:;!\-?]+$/, "").trim() + "...";
 }
 
 function snippetGenerator(doc: EditorDoc | undefined): string {

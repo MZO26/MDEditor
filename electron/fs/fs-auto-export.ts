@@ -44,7 +44,8 @@ async function isAutoExport(id: string) {
     console.log("[isAutoExport]: This note is not on file system yet.");
     return false;
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+    const err = error as NodeJS.ErrnoException;
+    if (err.code === "ENOENT") {
       return false;
     }
     console.error(
@@ -195,7 +196,7 @@ async function deleteAutoExportFileLogic(
 
 async function deleteAutoExportFile(
   targetDir: string,
-  oldNotes: Array<{ created_at: string; title: Note["title"] }>,
+  oldNotes: Pick<Note, "created_at" | "title">[],
 ) {
   await processWithLimit(oldNotes, 10, async (note) => {
     const validatedFileData = validation(DeleteAutoExportRequestSchema, {
@@ -206,7 +207,8 @@ async function deleteAutoExportFile(
     try {
       await deleteAutoExportFileLogic(targetDir, validatedFileData);
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      const err = error as NodeJS.ErrnoException;
+      if (err.code === "ENOENT") {
         return;
       }
       console.error("[deleteFile]: Failed to delete file:", error);
