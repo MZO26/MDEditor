@@ -129,6 +129,7 @@ const NoteRowSchema = z.object({
   id: IdSchema,
   title: TitleSchema,
   content: z.string(),
+  plainText: PlainTextSchema,
   snippet: SnippetSchema,
   pinned: z.union([z.literal(0), z.literal(1)]).default(0),
   created_at: DateSchema,
