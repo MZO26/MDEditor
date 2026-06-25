@@ -20,7 +20,7 @@ function selectBuilder(
   row.className = "settings-row";
   row.dataset["category"] = category;
   row.append(label, select);
-  settingsContainer.append(row);
+  settingsContainer.appendChild(row);
 }
 
 // builds the button palette and wraps it into the button container

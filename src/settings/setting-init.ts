@@ -19,6 +19,7 @@ import { getUIItem, registerAppEvents } from "@/utils/registry";
 import { formatBytes, useDelayedSpinner } from "@/utils/ui";
 import { QUICK_ACTIONS } from "@shared/constants";
 import type { AppSettings } from "@shared/schemas/store-schema";
+import type { SettingsCategory } from "@shared/types";
 
 async function initAppSettings(settings: AppSettings) {
   const { settingsDialog, settingsContainer } = initSettingsDialog();
@@ -48,6 +49,10 @@ async function initAppSettings(settings: AppSettings) {
 
 function initQuickActionContainer() {
   const quickActionContainer = getUIItem("quickActionContainer");
+  const settingsContainer = requireElement<HTMLDivElement>(".settings-content");
+  const row = document.createElement("div");
+  row.className = "settings-row";
+  row.dataset["category"] = "Export" as SettingsCategory;
   const frag = document.createDocumentFragment();
   for (const action of QUICK_ACTIONS) {
     const button = document.createElement("button");
@@ -61,6 +66,8 @@ function initQuickActionContainer() {
     frag.appendChild(button);
   }
   quickActionContainer.appendChild(frag);
+  row.appendChild(quickActionContainer);
+  settingsContainer.appendChild(row);
   renderIcons(quickActionContainer);
   return quickActionContainer;
 }

@@ -286,10 +286,8 @@
 }
 
 .settings-quick-actions {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  gap: 5px;
+  margin-top: 20px;
+  gap: 10px;
   display: flex;
   flex-direction: row;
 }

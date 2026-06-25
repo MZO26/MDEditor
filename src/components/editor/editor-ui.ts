@@ -1,5 +1,6 @@
 import { stateStore } from "@/settings/app-state";
 import { findElement } from "@/utils/dom";
+import { renderIcons } from "@/utils/icons";
 import { getAppItem, getTemplateItem } from "@/utils/registry";
 
 function handleEditorEmptyState() {
@@ -18,6 +19,7 @@ function handleEditorEmptyState() {
     if (!existingEmptyState) {
       const newEmptyState = createEditorEmptyState();
       editorContainer.appendChild(newEmptyState);
+      renderIcons(newEmptyState);
     }
   } else {
     if (existingEmptyState) {
