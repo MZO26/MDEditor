@@ -1,4 +1,5 @@
 import {
+  ArchiveRestore,
   ArrowDownFromLine,
   ArrowLeftFromLine,
   ArrowRight,
@@ -91,7 +92,7 @@ function renderIcons(scope: Document | HTMLElement = document): void {
       Download,
       Plus,
       Undo2,
-
+      ArchiveRestore,
       Redo2,
       Bold,
       Italic,

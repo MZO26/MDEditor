@@ -35,20 +35,26 @@ async function batchExport(folder: string, payload: ExportedContent[]) {
   const absoluteTargetFolder = path.resolve(folder);
   const userDataPath = app.getPath("userData");
   const imagesFolder = path.join(userDataPath, "editor-images");
-  await processWithLimit(payload, 10, async (item: ExportedContent) => {
-    try {
-      const absoluteFilePath = getFilePath(absoluteTargetFolder, item);
-      const portableContent = sanitizeExportString(
-        item.content,
-        absoluteTargetFolder,
-        imagesFolder,
-      );
-      await writeAtomic(absoluteFilePath, portableContent);
-    } catch (error) {
-      console.error("[batchExport]: Error while exporting:", error);
-      throw new AppBackendError(AppErrorCode.FileWriteError);
-    }
-  });
+  const exported = await processWithLimit(
+    payload,
+    10,
+    async (item: ExportedContent) => {
+      try {
+        const absoluteFilePath = getFilePath(absoluteTargetFolder, item);
+        const portableContent = sanitizeExportString(
+          item.content,
+          absoluteTargetFolder,
+          imagesFolder,
+        );
+        await writeAtomic(absoluteFilePath, portableContent);
+        return absoluteFilePath;
+      } catch (error) {
+        console.error("[batchExport]: Error while exporting:", error);
+        throw new AppBackendError(AppErrorCode.FileWriteError);
+      }
+    },
+  );
+  return exported.filter((item) => item !== null);
 }
 
 async function exportPDFNote(params: {
@@ -74,6 +80,7 @@ async function exportPDFNote(params: {
     console.error("[exportPDFNote]: Error writing PDF file:", error);
     throw new AppBackendError(AppErrorCode.FileWriteError);
   });
+  return filePath;
 }
 
 async function singlePDFExport(filePath: string, data: string) {
@@ -100,15 +107,17 @@ async function batchPDFExport(folder: string, payload: ExportedContent[]) {
   const assets = loadPDFAssets();
   let hiddenWin = createHiddenPdfWindow();
   try {
-    await processWithLimit(payload, 1, async (item) => {
+    const exported = await processWithLimit(payload, 1, async (item) => {
       const absoluteFilePath = getFilePath(absoluteTargetFolder, item);
-      await exportPDFNote({
+      const filePath = await exportPDFNote({
         win: hiddenWin,
         filePath: absoluteFilePath,
         html: item.content,
         assets,
       });
+      return filePath;
     });
+    return exported.filter((item) => item !== null);
   } catch (error) {
     console.error("[batchPDFExport]: Error while exporting:", error);
     throw new AppBackendError(AppErrorCode.ExportError);

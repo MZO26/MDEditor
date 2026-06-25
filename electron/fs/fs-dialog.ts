@@ -49,6 +49,19 @@ async function handleDBBackupDialog(win: BrowserWindow) {
   return filePath;
 }
 
+async function handleDBRestoreDialog(win: BrowserWindow) {
+  const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+    title: "Restore database backup",
+    buttonLabel: "Restore",
+    filters: [{ name: "SQLite Database", extensions: ["sqlite", "db"] }],
+    properties: ["openFile"],
+  });
+  if (canceled || filePaths.length === 0) {
+    throw new AppBackendError(AppErrorCode.CancelledOperation);
+  }
+  return filePaths[0];
+}
+
 async function handleExportDialog(win: BrowserWindow, data: ExportRequest) {
   const extension = data.extension ?? "md";
   const creationDate = new Date(data.created_at);
@@ -83,6 +96,7 @@ async function handleExportManyDialog(win: BrowserWindow) {
 
 export {
   handleDBBackupDialog,
+  handleDBRestoreDialog,
   handleExportDialog,
   handleExportManyDialog,
   handleImportDialog,

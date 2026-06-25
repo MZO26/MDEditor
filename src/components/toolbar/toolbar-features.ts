@@ -47,7 +47,6 @@ function initMetadataToolbar() {
 
 function initTopToolbar() {
   const appContainer = getAppItem("appContainer");
-  const editor = getAppItem("editor");
   const appPinBtn = requireElement<HTMLButtonElement>(".app-pin-btn");
   appPinBtn.addEventListener(
     "click",
@@ -55,7 +54,6 @@ function initTopToolbar() {
   );
   registerAppEvents(document, {
     "app:set-editor-width": () => setEditorWidth(appContainer),
-    "app:toggle-read-only": () => editor?.setEditable(!editor.isEditable),
     "app:toggle-focus-mode": () => initFocusMode(),
     "app:exit-focus-mode": () => {
       if (appContainer.classList.contains("focus")) {

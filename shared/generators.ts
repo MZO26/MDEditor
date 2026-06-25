@@ -19,17 +19,22 @@ function extractText(node: JSONContent): string {
       parts.push(n.text);
       return;
     }
+    if (n.type === "detailsBlock" && n.attrs?.["summary"]) {
+      parts.push(n.attrs["summary"]);
+      parts.push(" ");
+    }
     if (n.content) {
       for (const child of n.content) {
         walk(child);
       }
-      if (BLOCK_TYPES.has(n.type!)) {
+
+      if (n.type && BLOCK_TYPES.has(n.type)) {
         parts.push(" ");
       }
     }
   }
   walk(node);
-  return parts.join("").trim();
+  return parts.join("").replace(/\s+/g, " ").trim();
 }
 
 function titleGenerator(doc: EditorDoc): string {

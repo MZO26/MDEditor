@@ -148,7 +148,7 @@ function registerElectronIpc(win: BrowserWindow) {
 
   ipcMain.handle("notification:show", (e, title: string, body: string) => {
     return result(e, async () => {
-      if (!checkRateLimit("notification:show", LIMITS.WRITE_LIGHT))
+      if (!checkRateLimit("notification:show", LIMITS.READ_LIGHT))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       if (Notification.isSupported()) {
         const notif = new Notification({

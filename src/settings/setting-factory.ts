@@ -1,11 +1,11 @@
 import { requireElement } from "@/utils/dom";
-import type { SelectOption } from "@shared/types";
+import type { SelectOption, SettingsCategory } from "@shared/types";
 
 // blueprint for select items and their options for specified categories
 function selectBuilder(
   id: string,
   options: SelectOption[],
-  category: "Appearance" | "Editor" | "Export",
+  category: SettingsCategory,
   labelText: string,
 ) {
   const settingsContainer = requireElement<HTMLDivElement>(".settings-content");

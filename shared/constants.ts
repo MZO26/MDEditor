@@ -76,6 +76,11 @@ const QUICK_ACTIONS: QuickActionConfig[] = [
     icon: "hard-drive",
     label: "Compact Database",
   },
+  {
+    id: "backup-db-restore",
+    icon: "archive-restore",
+    label: "Restore Database from Backup",
+  },
 ];
 
 const THEME_MAP = {
@@ -204,9 +209,21 @@ const EMPTY_DOC = { type: "doc" as const, content: [{ type: "paragraph" }] };
 const BLOCK_TYPES = new Set([
   "paragraph",
   "heading",
-  "listItem",
+  "blockquote",
   "codeBlock",
+  "horizontalRule",
+  "bulletList",
+  "orderedList",
+  "listItem",
+  "taskList",
+  "taskItem",
+  "table",
   "tableRow",
+  "tableHeader",
+  "tableCell",
+  "image",
+  "detailsBlock",
+  "hardBreak",
 ]);
 
 export {

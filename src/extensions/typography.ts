@@ -6,7 +6,6 @@ const Typography = Extension.create({
   addInputRules() {
     return [
       textInputRule({ find: /--$/, replace: "—" }),
-      textInputRule({ find: /\.\.\.$/, replace: "…" }),
       textInputRule({ find: /<-$/, replace: "←" }),
       textInputRule({ find: /->$/, replace: "→" }),
       textInputRule({ find: /<<$/, replace: "«" }),

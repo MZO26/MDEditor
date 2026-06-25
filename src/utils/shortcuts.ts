@@ -46,11 +46,6 @@ function initGlobalShortcuts() {
       document.dispatchEvent(new CustomEvent("app:toggle-sidebar"));
       return;
     }
-    if (isMod && shiftKey && key === "R") {
-      e.preventDefault();
-      document.dispatchEvent(new CustomEvent("app:toggle-read-only"));
-      return;
-    }
     if (isMod && shiftKey && key === "W") {
       e.preventDefault();
       document.dispatchEvent(new CustomEvent("app:set-editor-width"));

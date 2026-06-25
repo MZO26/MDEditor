@@ -22,6 +22,7 @@ import {
 import type { DBBackupResult } from "@shared/types";
 import type BetterSqlite from "better-sqlite3";
 import type { PragmaOptions } from "better-sqlite3";
+import Database from "better-sqlite3";
 import { app } from "electron";
 import { createRequire } from "module";
 import path from "path";
@@ -343,6 +344,28 @@ class NoteDB {
 
   public close() {
     this.db.close();
+  }
+
+  public open(): BetterSqlite.Database {
+    if (this.db) return this.db;
+    const dbPath = this.pathDb();
+    const db = new Database(dbPath, {
+      fileMustExist: true,
+      timeout: 5000,
+    });
+    try {
+      db.pragma("journal_mode = WAL");
+      db.pragma("foreign_keys = ON");
+      const integrity = db.pragma("quick_check", { simple: true });
+      if (integrity !== "ok") {
+        throw new AppBackendError(AppErrorCode.InvalidData);
+      }
+      this.db = db;
+      return db;
+    } catch (error) {
+      db.close();
+      throw error;
+    }
   }
 
   public vacuum() {

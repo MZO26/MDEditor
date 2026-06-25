@@ -1,5 +1,6 @@
 import {
   databaseBackup,
+  databaseBackupRestore,
   databaseVacuum,
   openAppPath,
   showNotification,
@@ -104,8 +105,19 @@ function applyModalListeners(
           }
           await showNotification("Backup saved.", "");
           return;
+        case "backup-db-restore":
+          const restore = await databaseBackupRestore();
+          if (!restore.success) {
+            console.error(
+              "[quickActions -> backup-db-restore]: Failed to restore db:",
+              restore.error,
+            );
+            return;
+          }
+          await showNotification("Backup restored.", "");
+          return;
         case "backup-notes":
-          const allIds = noteStore.get("notes").map((n) => n.id);
+          const allIds = noteStore.get("notes")?.map((n) => n.id);
           await exportSelection(allIds);
           break;
         case "vacuum-db":
@@ -120,10 +132,10 @@ function applyModalListeners(
                   : `Reclaimed ${formatBytes(savedBytes.data)} of space`,
               );
             }
-          } catch (err) {
+          } catch (error) {
             console.error(
               "[quickActions -> vacuum-db]: Failed to vacuum db:",
-              err,
+              error,
             );
             showNotification("Failed to optimize database.", "");
           } finally {

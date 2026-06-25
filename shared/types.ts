@@ -105,6 +105,8 @@ type ZoomAction = "get" | "in" | "out" | "reset";
 
 type DbOptimization = "optimize-db" | "vacuum-db" | "backup-db";
 
+type SettingsCategory = "Appearance" | "Editor" | "Export";
+
 type DBBackupResult = {
   totalPages: number;
   remainingPages: number;
@@ -199,7 +201,12 @@ type SelectionActionConfig = {
   icon: string;
 };
 
-type QuickAction = "open-path" | "backup-db" | "backup-notes" | "vacuum-db";
+type QuickAction =
+  | "open-path"
+  | "backup-db"
+  | "backup-db-restore"
+  | "backup-notes"
+  | "vacuum-db";
 
 type QuickActionConfig = {
   id: QuickAction;
@@ -245,6 +252,7 @@ export type {
   SelectionAction,
   SelectionActionConfig,
   SelectOption,
+  SettingsCategory,
   SidebarChange,
   SnippetCacheValue,
   Success,

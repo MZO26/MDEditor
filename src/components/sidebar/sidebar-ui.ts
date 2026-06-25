@@ -7,7 +7,7 @@ import { getAppItem, getTemplateItem } from "@/utils/registry";
 import type { NoteListItem } from "@shared/schemas/note-schema";
 // sidebar
 
-// element is either appContainer (normal sidebar is bound to grid layout) or infoSidebar itself as it's positioned absolute
+// element is appContainer (sidebar is bound to grid layout)
 
 function setSidebarState(element: HTMLDivElement, collapsed: boolean) {
   const isCollapsed = element.classList.contains("collapsed");

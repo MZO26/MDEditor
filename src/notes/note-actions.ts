@@ -86,9 +86,21 @@ async function handleCreateNote() {
 
 async function handleImportNote() {
   const imported = await importNote();
-  if (!imported.success) return;
+  if (!imported.success) {
+    console.error(
+      "[handleImportNote -> importNote]: Failed to import note:",
+      imported.error,
+    );
+    return;
+  }
   const processedPayloads = await setImportedContent(imported.data);
-  if (!processedPayloads.success) return;
+  if (!processedPayloads.success) {
+    console.error(
+      "[handleImportNote -> setImportedContent]: Failed to process import payload:",
+      processedPayloads.error,
+    );
+    return;
+  }
   const result = await createManyNotes(processedPayloads.data);
   if (!result.success) {
     console.error(

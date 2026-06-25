@@ -22,6 +22,7 @@ import { requireElement } from "@/utils/dom";
 // selection actions
 
 async function copyRichTextSelection(selectedIds: string[]) {
+  if (!Array.isArray(selectedIds) || selectedIds.length === 0) return;
   const notes = noteStore.get("notes");
   const allSelected =
     selectedIds.length === notes.length &&
@@ -70,6 +71,7 @@ async function copyRichTextSelection(selectedIds: string[]) {
 }
 
 async function copyLinkSelection(selectedIds: string[]) {
+  if (!Array.isArray(selectedIds) || selectedIds.length === 0) return;
   try {
     const text = [...selectedIds].join("\n");
     await navigator.clipboard.writeText(text);
@@ -81,6 +83,7 @@ async function copyLinkSelection(selectedIds: string[]) {
 }
 
 async function exportSelection(selectedIds: string[]) {
+  if (!Array.isArray(selectedIds) || selectedIds.length === 0) return;
   const notes = noteStore.get("notes");
   const allSelected =
     selectedIds.length === notes.length &&
@@ -122,6 +125,7 @@ async function exportSelection(selectedIds: string[]) {
 }
 
 async function pinSelection(selectedIds: string[]) {
+  if (!Array.isArray(selectedIds) || selectedIds.length === 0) return;
   const pinned = await pinMany(selectedIds);
   if (!pinned.success) {
     console.error(
@@ -157,7 +161,7 @@ async function pinSelection(selectedIds: string[]) {
 async function deleteSelection() {
   const selectedIds = stateStore.get("selectedIds");
   const ids = [...selectedIds];
-  if (ids.length === 0) return;
+  if (!Array.isArray(ids) || ids.length === 0) return;
   const deleteDialogTitle = requireElement<HTMLSpanElement>(
     ".delete-dialog-title",
     deleteDialog,

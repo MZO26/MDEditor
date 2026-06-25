@@ -5,6 +5,7 @@ import {
 } from "@electron/fs/fs-auto-export";
 import {
   handleDBBackupDialog,
+  handleDBRestoreDialog,
   handleExportDialog,
   handleExportManyDialog,
   handleImportDialog,
@@ -36,7 +37,7 @@ import {
   IdsSchema,
   UpdateNotePayloadSchema,
 } from "@shared/schemas/note-schema";
-import { BrowserWindow, dialog, ipcMain } from "electron";
+import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import fs from "fs/promises";
 
 function registerNoteIpc(win: BrowserWindow) {
@@ -58,7 +59,7 @@ function registerNoteIpc(win: BrowserWindow) {
 
   ipcMain.handle("note:create", (e, payload: unknown) => {
     return result(e, async () => {
-      if (!checkRateLimit("note:create", LIMITS.WRITE_STANDARD))
+      if (!checkRateLimit("note:create", LIMITS.WRITE_LIGHT))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(CreateNotePayloadSchema, payload);
       return db.create(validatedData);
@@ -67,7 +68,7 @@ function registerNoteIpc(win: BrowserWindow) {
 
   ipcMain.handle("note:create-many", (e, payloads: unknown) => {
     return result(e, async () => {
-      if (!checkRateLimit("note:create-many", LIMITS.WRITE_STANDARD))
+      if (!checkRateLimit("note:create-many", LIMITS.WRITE_HEAVY))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(CreateNotesPayloadsSchema, payloads);
       return db.createMany(validatedData);
@@ -147,7 +148,7 @@ function registerNoteIpc(win: BrowserWindow) {
 
   ipcMain.handle("note:getManyById", (e, id: unknown) => {
     return result(e, async () => {
-      if (!checkRateLimit("note:getManyById", LIMITS.READ_LIGHT))
+      if (!checkRateLimit("note:getManyById", LIMITS.READ_HEAVY))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(IdsSchema, id);
       return db.getManyById(validatedData);
@@ -214,7 +215,7 @@ function registerNoteIpc(win: BrowserWindow) {
 
   ipcMain.handle("note:pin", (e, id: unknown) => {
     return result(e, async () => {
-      if (!checkRateLimit("note:pin", LIMITS.READ_LIGHT))
+      if (!checkRateLimit("note:pin", LIMITS.WRITE_LIGHT))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(IdSchema, id);
       return db.togglePin(validatedData);
@@ -223,7 +224,7 @@ function registerNoteIpc(win: BrowserWindow) {
 
   ipcMain.handle("note:pin-many", (e, ids: unknown) => {
     return result(e, async () => {
-      if (!checkRateLimit("note:pin-many", LIMITS.READ_LIGHT))
+      if (!checkRateLimit("note:pin-many", LIMITS.WRITE_STANDARD))
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const validatedData = validation(IdsSchema, ids);
       return db.toggleManyPins(validatedData);
@@ -236,6 +237,35 @@ function registerNoteIpc(win: BrowserWindow) {
         throw new AppBackendError(AppErrorCode.RateLimitError);
       const filePath = await handleDBBackupDialog(win);
       return (await db.backupDb(filePath)).totalPages;
+    });
+  });
+
+  ipcMain.handle("db-backup-restore", (e) => {
+    return result(e, async () => {
+      if (!checkRateLimit("db-backup-restore", LIMITS.WRITE_HEAVY))
+        throw new AppBackendError(AppErrorCode.RateLimitError);
+      const backupPath = await handleDBRestoreDialog(win);
+      if (!backupPath) throw new AppBackendError(AppErrorCode.InvalidData);
+      const stat = await fs.stat(backupPath);
+      // sqlite header is exactly 100 bytes long. If file is smaller than that it isn't a valid sqlite db
+      if (!stat.isFile() || stat.size < 100) {
+        throw new AppBackendError(AppErrorCode.InvalidData);
+      }
+      const dbPath = db.pathDb();
+      const tmpPath = `${dbPath}.${crypto.randomUUID()}.restore-tmp`;
+      db.close();
+      try {
+        await fs.copyFile(backupPath, tmpPath);
+        await fs.rename(tmpPath, dbPath);
+        await fs.rm(`${dbPath}-wal`, { force: true }).catch(() => {});
+        await fs.rm(`${dbPath}-shm`, { force: true }).catch(() => {});
+        app.relaunch();
+        app.exit(0);
+      } catch (error) {
+        await fs.rm(tmpPath, { force: true }).catch(() => {});
+        db.open();
+        throw new AppBackendError(AppErrorCode.FileWriteError);
+      }
     });
   });
 
