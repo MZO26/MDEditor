@@ -1,5 +1,7 @@
 import {
   allTagsMenu,
+  applyTagView,
+  clearActiveTagFilter,
   debouncedSearch,
   renderAllTags,
   resizeSidebar,
@@ -20,7 +22,7 @@ import {
   handleImportNote,
   handleSelectNote,
 } from "@/notes/note-actions";
-import { noteStore, stateStore } from "@/settings/app-state";
+import { noteStore, settingsStore, stateStore } from "@/settings/app-state";
 import { createAsyncHandler } from "@/utils/async";
 import { findElement } from "@/utils/dom";
 import { getAppItems, getUIItems, registerAppEvents } from "@/utils/registry";
@@ -29,6 +31,7 @@ import { initTippyDelegate } from "@/utils/ui";
 // sidebar
 
 function initNotesSidebar() {
+  const activeTag = settingsStore.get("active-tag");
   const { appContainer, sidebar, sidebarContainer } = getAppItems([
     "appContainer",
     "sidebar",
@@ -44,6 +47,12 @@ function initNotesSidebar() {
     selectionFooter,
   );
   if (deleteBtn) deleteBtn.disabled = stateStore.get("selectedIds").size === 0;
+  if (
+    activeTag &&
+    noteStore.get("notes").some((note) => note.tags.includes(activeTag))
+  ) {
+    applyTagView(activeTag);
+  }
   initTippyDelegate(sidebarContainer);
   applySidebarListeners(sidebar, sidebarHeader, searchInput, selectionFooter);
   registerAppEvents(document, {
@@ -149,7 +158,7 @@ function applySidebarListeners(
     createAsyncHandler(async (e) => {
       const target = e.target as HTMLElement | null;
       if (target === sidebar || !target) return;
-      const actionBtn = target?.closest<HTMLButtonElement>(".menu-btn");
+      const actionBtn = target.closest<HTMLButtonElement>(".menu-btn");
       if (actionBtn) {
         e.preventDefault();
         e.stopPropagation();
@@ -163,7 +172,15 @@ function applySidebarListeners(
         });
         return;
       }
-      const noteItem = target?.closest<HTMLDivElement>(".note-item");
+      const clearBtn = target.closest<HTMLElement>(".active-tag-clear-btn");
+      if (clearBtn) {
+        const action = clearBtn.getAttribute("data-action");
+        if (action === "clear-active-tag") {
+          clearActiveTagFilter();
+          return;
+        }
+      }
+      const noteItem = target.closest<HTMLDivElement>(".note-item");
       const id = noteItem?.getAttribute("data-id");
       if (!id) return;
       if (stateStore.get("selectionMode") === true) {

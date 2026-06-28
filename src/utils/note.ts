@@ -1,4 +1,5 @@
 import { findElement } from "@/utils/dom";
+import type { EditorDoc } from "@shared/schemas/editor-schema";
 import type { Note, NoteListItem } from "@shared/schemas/note-schema";
 import { getUIItem } from "./registry";
 
@@ -27,6 +28,35 @@ function compareNotes(a: NoteListItem, b: NoteListItem) {
   return String(b.updated_at).localeCompare(String(a.updated_at));
 }
 
+function addActiveTagToDoc(
+  doc: EditorDoc,
+  activeTag: string | null,
+): EditorDoc {
+  if (!activeTag) return doc;
+  const content = Array.isArray(doc["content"]) ? [...doc["content"]] : [];
+  const alreadyTagged = JSON.stringify(doc).includes(`"id":"${activeTag}"`);
+  if (alreadyTagged) return doc;
+  const tagParagraph = {
+    type: "paragraph" as const,
+    content: [
+      {
+        type: "noteTag" as const,
+        attrs: {
+          id: activeTag,
+          label: activeTag,
+        },
+      },
+      {
+        type: "text" as const,
+        text: " ",
+      },
+    ],
+  };
+  return {
+    ...doc,
+    content: [{ type: "paragraph" as const }, tagParagraph, ...content],
+  };
+}
 function estimateReadingTime(wordCount: number, wpm = 238) {
   const s = Math.round((wordCount / wpm) * 60);
   const m = Math.floor(s / 60);
@@ -47,4 +77,10 @@ function toNoteListItem(note: Note): NoteListItem {
   };
 }
 
-export { compareNotes, estimateReadingTime, toNoteListItem, updateNoteCount };
+export {
+  addActiveTagToDoc,
+  compareNotes,
+  estimateReadingTime,
+  toNoteListItem,
+  updateNoteCount,
+};

@@ -23,6 +23,7 @@ const DEFAULT_STORE: AppSettings = {
   "export-format": "md",
   "note-item-display": "preview",
   "window-bounds": { width: 1100, height: 600 },
+  "active-tag": null,
 };
 
 interface AppState {
@@ -30,6 +31,7 @@ interface AppState {
   searchQuery: string;
   selectionMode: boolean;
   selectedIds: Set<string>;
+  activeTag: string | null;
 }
 
 const STATE_STORE: AppState = {
@@ -37,6 +39,7 @@ const STATE_STORE: AppState = {
   searchQuery: "",
   selectionMode: false,
   selectedIds: new Set<string>(),
+  activeTag: null,
 };
 
 let prevId: string | null = null;

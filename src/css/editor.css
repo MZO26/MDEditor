@@ -51,7 +51,7 @@
   font-size: 2.2em;
   line-height: 1;
   font-weight: 800;
-  margin-top: 1.5em;
+  margin-top: 1.3em;
   margin-bottom: 0.5em;
 }
 
@@ -59,7 +59,7 @@
   font-size: 1.75em;
   line-height: 1.25;
   font-weight: 700;
-  margin-top: 1.5em;
+  margin-top: 1.3em;
   margin-bottom: 0.5em;
   letter-spacing: -0.01em;
 }
@@ -68,7 +68,7 @@
   font-size: 1.35em;
   line-height: 1.4;
   font-weight: 600;
-  margin-top: 1.25em;
+  margin-top: 1.2em;
   margin-bottom: 0.5em;
 }
 
@@ -622,7 +622,8 @@
   line-height: 1.2;
 }
 
-.ProseMirror p.is-editor-empty:first-child::before {
+.ProseMirror p.is-editor-empty:first-child::before,
+.ProseMirror p.is-empty:first-child::before {
   content: attr(data-placeholder);
   color: var(--text-muted);
   opacity: 0.7;

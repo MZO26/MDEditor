@@ -1,5 +1,4 @@
 import { selectAutoExportFolder, updateSettings } from "@/api/api";
-import { renderNoteList } from "@/components/sidebar/sidebar-ui";
 import { noteStore } from "@/settings/app-state";
 import { applyAppTheme, resolveTheme, setCodeTheme } from "@/settings/theme";
 import { createAsyncHandler } from "@/utils/async";
@@ -146,8 +145,7 @@ function initAppearanceSettings(
         "note-item-display": target.value as NoteItemDisplay,
       });
       sidebar.setAttribute("data-noteItem", target.value);
-      const notes = noteStore.get("notes");
-      renderNoteList(notes);
+      noteStore.setState({ sidebarChange: { type: "reload" } });
     }),
   );
 }

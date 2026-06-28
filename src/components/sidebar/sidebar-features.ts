@@ -1,11 +1,11 @@
+import { updateSettings } from "@/api/api";
 import { updateSnippetHighlight } from "@/components/sidebar/sidebar-note-items";
-import { handleTagSearch } from "@/components/toolbar/toolbar-features";
 import { noteStore, searchEngine, stateStore } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
 import { findElement, requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
 import { estimateReadingTime } from "@/utils/note";
-import { getAppItem, getUIItems } from "@/utils/registry";
+import { getAppItem, getUIItem, getUIItems } from "@/utils/registry";
 import { initTippyDelegate } from "@/utils/ui";
 import { DEBOUNCE_MS, MAX_CHARS, PADDING } from "@shared/constants";
 import type { ResizeOptions, SnippetCacheValue } from "@shared/types";
@@ -21,6 +21,7 @@ function showSearchItems(
   noteElements: HTMLDivElement[],
   searchCache: Map<string, SnippetCacheValue>,
 ) {
+  // note index for fast lookup
   const noteIndex = noteStore.get("noteIndex");
   for (const element of noteElements) {
     const noteId = element.getAttribute("data-id");
@@ -39,13 +40,7 @@ function showSearchItems(
   }
 }
 
-function applySearch(searchCache: Map<string, SnippetCacheValue>) {
-  const matchedIds = [...searchCache.keys()];
-  noteStore.setState({
-    visibleIds: matchedIds,
-    sidebarChange: { type: "reload" },
-  });
-}
+// calculates snippet to show for highlight
 
 function search(searchInput: string) {
   const results = searchEngine.search(searchInput);
@@ -97,14 +92,13 @@ function search(searchInput: string) {
   return searchCache; // returns to be highlighted snippets
 }
 
+// 2 branches: # to search for tags or normal fuzzy search -> then show highlights of what was found
+
 function handleSearchInput(searchInput: string) {
   const sidebar = getAppItem("sidebar");
   stateStore.setState({ searchQuery: searchInput });
   if (searchInput === "") {
-    noteStore.setState((state) => ({
-      visibleIds: state.notes.map((n) => n.id),
-      sidebarChange: { type: "reload" },
-    }));
+    restoreSidebarScope();
     return;
   }
   let searchCache = new Map();
@@ -123,6 +117,43 @@ function handleSearchInput(searchInput: string) {
     sidebar.getElementsByClassName("note-item"),
   ) as HTMLDivElement[];
   showSearchItems(noteElements, searchCache);
+}
+
+//------------------------------------------------------------------
+
+// search helpers
+
+// applies the search to the note state to only show searched items or empty state
+
+function applySearch(searchCache: Map<string, SnippetCacheValue>) {
+  const matchedIdSet = new Set(searchCache.keys());
+  const activeTag = stateStore.get("activeTag");
+  const visibleIds = noteStore
+    .get("notes")
+    .filter((note) => {
+      if (!matchedIdSet.has(note.id)) return false;
+      if (activeTag && !note.tags.includes(activeTag)) return false;
+      return true;
+    })
+    .map((note) => note.id);
+  noteStore.setState({
+    visibleIds,
+    sidebarChange: { type: "reload" },
+  });
+}
+
+// removes search scope but stays in activeTag scope if there is one
+
+function restoreSidebarScope() {
+  const activeTag = stateStore.get("activeTag");
+  noteStore.setState((state) => ({
+    visibleIds: activeTag
+      ? state.notes
+          .filter((note) => note.tags.includes(activeTag))
+          .map((note) => note.id)
+      : state.notes.map((note) => note.id),
+    sidebarChange: { type: "reload" },
+  }));
 }
 
 //------------------------------------------------------------
@@ -162,7 +193,7 @@ function createAllTagsPopover(button: HTMLButtonElement) {
     const clickedTag = target.closest(".tag-node") as HTMLElement | null;
     const tagId = clickedTag?.getAttribute("data-tag");
     if (clickedTag && tagId) {
-      handleTagSearch(tagId);
+      applyTagView(tagId);
       return;
     }
   });
@@ -176,6 +207,29 @@ function createAllTagsPopover(button: HTMLButtonElement) {
   initTippyDelegate(popover, popover, "auto", false);
   renderIcons(button);
   return { button, popover, content, tippy: instance };
+}
+
+function applyTagView(tagId: string) {
+  stateStore.setState({ activeTag: tagId });
+  updateSettings({ "active-tag": tagId });
+  noteStore.setState((state) => ({
+    visibleIds: state.notes
+      .filter((note) => note.tags.includes(tagId))
+      .map((note) => note.id),
+    sidebarChange: { type: "reload" },
+  }));
+}
+
+function clearActiveTagFilter() {
+  stateStore.setState({ activeTag: null, searchQuery: "" });
+  const searchInput = getUIItem("searchInput");
+  searchInput.value = "";
+  updateSettings({ "active-tag": null });
+  noteStore.setState((state) => ({
+    visibleIds: state.notes.map((n) => n.id),
+    sidebarChange: { type: "reload" },
+  }));
+  return;
 }
 
 function renderAllTags(button: HTMLButtonElement, tags: string[]) {
@@ -258,6 +312,8 @@ const debouncedSearch = debounce((e: Event) => {
 }, DEBOUNCE_MS.fast);
 
 export {
+  applyTagView,
+  clearActiveTagFilter,
   debouncedSearch,
   handleSearchInput,
   renderAllTags,

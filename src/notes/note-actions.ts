@@ -19,7 +19,7 @@ import {
   stateStore,
 } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
-import { toNoteListItem } from "@/utils/note";
+import { addActiveTagToDoc, toNoteListItem } from "@/utils/note";
 import { getAppItem } from "@/utils/registry";
 import { DEBOUNCE_MS, EMPTY_DOC, UNTITLED } from "@shared/constants";
 import { getMetadata, titleGenerator } from "@shared/generators";
@@ -44,7 +44,8 @@ function isAutoExportEnabled() {
 
 async function handleCreateNote() {
   const editor = getAppItem("editor");
-  const editorContent = EMPTY_DOC;
+  const activeTag = stateStore.get("activeTag");
+  const editorContent = addActiveTagToDoc(EMPTY_DOC, activeTag);
   const metadata = getMetadata(editorContent);
   const payload: CreateNotePayload = {
     content: editorContent,
@@ -64,7 +65,7 @@ async function handleCreateNote() {
     notes: [noteListItem, ...state.notes],
     visibleIds: [noteListItem.id, ...state.visibleIds],
     noteIndex: new Map(state.noteIndex).set(noteListItem.id, noteListItem),
-    sidebarChange: { type: "prepend", noteId: result.data.id },
+    sidebarChange: { type: "add", noteId: result.data.id },
   }));
   searchEngine.upsertNote(noteListItem);
   stateStore.setState({ activeId: result.data.id });
@@ -227,18 +228,38 @@ async function handleSaveNote(
     console.error("[handleSaveNote]: Save failed.", result.error);
     return;
   }
-  const note = result.data;
-  const updatedListItem = toNoteListItem(note);
+  const updatedListItem = toNoteListItem(result.data);
+  const activeTag = stateStore.get("activeTag");
   noteStore.setState((state) => {
     const noteIndex = new Map(state.noteIndex);
     noteIndex.set(updatedListItem.id, updatedListItem);
+    const matchesTag = activeTag
+      ? updatedListItem.tags.includes(activeTag)
+      : true;
+    const alreadyVisible = state.visibleIds.includes(updatedListItem.id);
+    let visibleIds = state.visibleIds;
+    let needsReload = false;
+    if (alreadyVisible && !matchesTag) {
+      visibleIds = state.visibleIds.filter((id) => id !== updatedListItem.id);
+      needsReload = true;
+    } else if (!alreadyVisible && matchesTag) {
+      visibleIds = [updatedListItem.id, ...state.visibleIds];
+      needsReload = true;
+    }
     return {
-      activeNote: state.activeNote?.id === note.id ? note : state.activeNote,
+      activeNote:
+        state.activeNote?.id === result.data.id
+          ? result.data
+          : state.activeNote,
       notes: state.notes.map((n) =>
         n.id === updatedListItem.id ? updatedListItem : n,
       ),
+      visibleIds,
       noteIndex,
-      sidebarChange: { type: "update", noteId: note.id },
+      sidebarChange: {
+        type: needsReload ? "reload" : "update",
+        noteId: result.data.id,
+      },
     };
   });
   searchEngine.upsertNote(updatedListItem);

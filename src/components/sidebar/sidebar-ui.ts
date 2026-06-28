@@ -21,7 +21,7 @@ function setSidebarState(element: HTMLDivElement, collapsed: boolean) {
 
 function handleSidebarEmptyState() {
   const sidebar = getAppItem("sidebar");
-  const { visibleIds } = noteStore.getState();
+  const visibleIds = noteStore.get("visibleIds");
   let shouldShowEmptyState = false;
   if (visibleIds.length === 0) shouldShowEmptyState = true;
   const existingEmptyState = findElement<HTMLDivElement>(
@@ -47,7 +47,7 @@ function handleSidebarEmptyState() {
 }
 
 function updateSidebarEmptyState(emptyState: HTMLDivElement) {
-  const { searchQuery } = stateStore.getState();
+  const searchQuery = stateStore.get("searchQuery");
   const isSearch = Boolean(searchQuery?.trim());
   const titleEl = requireElement<HTMLHeadingElement>(
     ".empty-state-title",
@@ -77,9 +77,25 @@ function updateSidebarEmptyState(emptyState: HTMLDivElement) {
 
 // render note list
 
+function createActiveTagHeader(tag: string): HTMLDivElement {
+  const header = document.createElement("div");
+  header.className = "active-tag-header";
+  const label = document.createElement("span");
+  label.textContent = `#${tag}`;
+  const clearBtn = document.createElement("button");
+  clearBtn.className = "active-tag-clear-btn";
+  clearBtn.setAttribute("data-action", "clear-active-tag");
+  const icon = document.createElement("i");
+  icon.setAttribute("data-lucide", "x");
+  clearBtn.appendChild(icon);
+  header.append(label, clearBtn);
+  renderIcons(clearBtn);
+  return header;
+}
+
 function renderNoteList(notes: NoteListItem[]) {
   const sidebar = getAppItem("sidebar");
-  const activeId = stateStore.get("activeId");
+  const { activeId, activeTag } = stateStore.getState();
   const fragment = document.createDocumentFragment();
   let activeElement: HTMLDivElement | null = null;
   for (const note of [...notes].sort(compareNotes)) {
@@ -89,6 +105,9 @@ function renderNoteList(notes: NoteListItem[]) {
     }
     fragment.appendChild(element);
   }
+  if (activeTag) {
+    fragment.prepend(createActiveTagHeader(activeTag));
+  }
   sidebar.replaceChildren(fragment);
   if (activeElement) {
     setActiveItem(activeElement, sidebar);
@@ -97,10 +116,15 @@ function renderNoteList(notes: NoteListItem[]) {
 
 // create note
 
-function prependNoteToList(note: NoteListItem) {
+function addNoteToList(note: NoteListItem) {
   const sidebar = getAppItem("sidebar");
   const noteElement = createNoteItem(note);
-  sidebar.prepend(noteElement);
+  const tagHeader = findElement(".active-tag-header", sidebar);
+  if (tagHeader) {
+    tagHeader.after(noteElement);
+  } else {
+    sidebar.prepend(noteElement);
+  }
 }
 
 // delete note
@@ -139,8 +163,8 @@ function updateNoteInList(note: NoteListItem) {
 }
 
 export {
+  addNoteToList,
   handleSidebarEmptyState,
-  prependNoteToList,
   removeNoteFromList,
   renderNoteList,
   setSidebarState,

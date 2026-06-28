@@ -502,7 +502,7 @@ label {
 }
 
 .tags-popover {
-  max-width: 170px;
+  max-width: 300px;
 }
 
 .tags-popover-title {
@@ -513,6 +513,17 @@ label {
   font-size: 0.8rem;
   user-select: none;
   -webkit-user-select: none;
+}
+
+.tags-popover-title::after {
+  content: "";
+  flex: 1;
+  margin: 0 10px;
+  justify-self: center;
+  align-self: center;
+  height: 1px;
+  background: var(--border-color);
+  opacity: 0.6;
 }
 
 .tags-popover-content {

@@ -34,13 +34,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializeTemplateRegistry();
   initializeUIRegistry();
   setupEditorListeners(getAppItem("editorWrapper"), getAppItem("editor"));
-  initGlobalShortcuts();
   await initAppSettings(settings);
   initListeners();
-  initNotesSidebar();
-  await syncNoteStore();
-  handleSidebarEmptyState();
-  handleEditorEmptyState();
   const editorContainer = getAppItem("editorContainer");
   const toolbarContainer = requireElement<HTMLDivElement>(
     "#toolbar",
@@ -55,8 +50,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   initMetadataToolbar();
   renderIcons();
   startAppClock();
+  initGlobalShortcuts();
   initTippyDelegate(editorContainer);
   initTippyDelegate(topToolbar, getAppItem("appContainer"));
+  await syncNoteStore();
+  initNotesSidebar();
+  handleSidebarEmptyState();
+  handleEditorEmptyState();
   requestAnimationFrame(() => {
     window.electronAPI.startupReady();
   });

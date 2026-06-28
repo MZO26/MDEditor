@@ -52,7 +52,7 @@ import {
 import { Markdown } from "@tiptap/markdown";
 import StarterKit from "@tiptap/starter-kit";
 import DOMPurify from "dompurify";
-import { handleTagSearch } from "../toolbar/toolbar-features";
+import { applyTagView } from "../sidebar/sidebar-features";
 
 let editor: Editor | null = null;
 
@@ -117,10 +117,6 @@ function initEditor(settings: Partial<AppSettings>): Editor {
         });
         return true;
       },
-    },
-    content: {
-      type: "doc",
-      content: [{ type: "paragraph" }],
     },
     autofocus: true,
   });
@@ -200,7 +196,7 @@ function getNoteEditorExtensions() {
     }),
     NoteTag.configure({
       onClick: (id: string) => {
-        handleTagSearch(id);
+        applyTagView(id);
       },
     }),
     Table.configure({

@@ -1,6 +1,6 @@
 import {
+  addNoteToList,
   handleSidebarEmptyState,
-  prependNoteToList,
   removeNoteFromList,
   renderNoteList,
   updateNoteInList,
@@ -61,14 +61,14 @@ function handleSidebarChange(change: SidebarChange, notes: NoteListItem[]) {
       if (note) updateNoteInList(note);
       break;
     }
-    case "prepend": {
+    case "add": {
       const needsToBeSorted = notes.some((n) => n.pinned);
       if (needsToBeSorted) {
         renderNoteList(notes);
         break;
       }
       const note = notes.find((n) => n.id === change.noteId);
-      if (note) prependNoteToList(note);
+      if (note) addNoteToList(note);
       break;
     }
     case "remove":

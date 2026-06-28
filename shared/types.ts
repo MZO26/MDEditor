@@ -164,7 +164,7 @@ type SnippetCacheValue = {
 type SidebarChange =
   | { type: "reload" }
   | { type: "update"; noteId: string }
-  | { type: "prepend"; noteId: string }
+  | { type: "add"; noteId: string }
   | { type: "remove"; noteId: string };
 
 type ResizeOptions = {

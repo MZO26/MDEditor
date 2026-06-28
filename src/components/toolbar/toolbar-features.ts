@@ -1,5 +1,5 @@
 import { pinWindow, setTheme } from "@/api/api";
-import { handleSearchInput } from "@/components/sidebar/sidebar-features";
+import { applyTagView } from "@/components/sidebar/sidebar-features";
 import { createDivider } from "@/components/toolbar/toolbar-factory";
 import { promptImageUpload } from "@/extensions/image/image";
 import { handleSelectNote } from "@/notes/note-actions";
@@ -28,7 +28,7 @@ function initMetadataToolbar() {
     const clickedTag = target.closest(".tag-node") as HTMLElement | null;
     const tagId = clickedTag?.getAttribute("data-tag");
     if (clickedTag && tagId) {
-      handleTagSearch(tagId);
+      applyTagView(tagId);
       return;
     }
   });
@@ -141,14 +141,6 @@ function createTagElement(
   span.setAttribute("data-tippy-content", text);
   span.textContent = `#${tag}`;
   container.appendChild(span);
-}
-
-function handleTagSearch(tagId: string) {
-  const searchInput = getUIItem("searchInput");
-  const tag = `#${tagId}`;
-  searchInput.value = tag;
-  searchInput.focus();
-  handleSearchInput(tag);
 }
 
 function renderTags(container: HTMLDivElement) {
@@ -309,7 +301,7 @@ const TOOLBAR_ACTIONS: ActionMap = {
       renderLinks(container);
     },
     icon: "git-compare-arrows",
-    shortcut: "[[Note]]",
+    shortcut: "[[Title]]",
   },
   divider1: { type: "divider" },
   bold: {
@@ -450,7 +442,6 @@ const TOOLBAR_ACTIONS: ActionMap = {
 };
 
 export {
-  handleTagSearch,
   initMetadataToolbar,
   initTopToolbar,
   renderLinks,

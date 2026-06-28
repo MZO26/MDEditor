@@ -1,5 +1,7 @@
 import { getNoteEditorExtensions } from "@/components/editor/editor-init";
+import { stateStore } from "@/settings/app-state";
 import { sleep } from "@/utils/async";
+import { addActiveTagToDoc } from "@/utils/note";
 import {
   BATCH_SIZE,
   CONTENT_TYPE_MAP,
@@ -63,11 +65,12 @@ async function setImportedContent(
         headlessEditor.commands.setContent(content, options);
       }
       const json = headlessEditor.getJSON();
+      const updatedJson = addActiveTagToDoc(json, stateStore.get("activeTag"));
       const text = headlessEditor.getText();
-      const metadata = getMetadata(json);
+      const metadata = getMetadata(updatedJson);
       const payload: CreateNotePayload = {
-        title: titleGenerator(json),
-        content: json,
+        title: titleGenerator(updatedJson),
+        content: updatedJson,
         plainText: text,
         ...metadata,
         pinned: false,

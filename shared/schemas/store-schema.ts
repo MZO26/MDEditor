@@ -22,9 +22,11 @@ const StoreSchema = z.object({
       y: z.number().optional(),
     })
     .catch({ width: 1100, height: 600 }),
+  "active-tag": z.string().trim().min(1).nullish().catch(null),
 });
 
 type AppSettings = z.infer<typeof StoreSchema>;
+type ActiveTag = AppSettings["active-tag"];
 type Spellcheck = AppSettings["spellcheck"];
 type AutoExportPath = AppSettings["auto-export-path"];
 type AutoExport = AppSettings["auto-export"];
@@ -43,6 +45,7 @@ type StyleKeys = Extract<
 
 export {
   StoreSchema,
+  type ActiveTag,
   type AppSettings,
   type AutoExport,
   type AutoExportPath,

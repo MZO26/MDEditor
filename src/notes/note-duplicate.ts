@@ -62,7 +62,7 @@ async function handleDuplicateNote(note: Note) {
     notes: [noteListItem, ...state.notes],
     visibleIds: [noteListItem.id, ...state.visibleIds],
     noteIndex: new Map(state.noteIndex).set(noteListItem.id, noteListItem),
-    sidebarChange: { type: "prepend", noteId: result.data.id },
+    sidebarChange: { type: "add", noteId: result.data.id },
   }));
   searchEngine.upsertNote(noteListItem);
   stateStore.setState({ activeId: result.data.id });

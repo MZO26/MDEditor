@@ -299,7 +299,7 @@ select:focus-within {
 }
 
 .tippy-box[data-theme~="preview-theme"] {
-  background-color: var(--bg-editor);
+  background-color: var(--bg-sidebar);
   color: var(--text-main);
   border: 1px solid var(--border-color);
 }

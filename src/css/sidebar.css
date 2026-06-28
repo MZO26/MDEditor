@@ -95,7 +95,7 @@
   justify-content: center;
   white-space: normal;
   overflow-wrap: anywhere;
-  padding: 2em;
+  margin: 0 auto;
   height: 100%;
   animation: fadeSlideIn 0.4s ease-out forwards;
   opacity: 0;
@@ -644,4 +644,43 @@ body.is-dragging * {
 
 .note-count {
   padding-right: 4px;
+}
+
+.active-tag-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.75rem;
+  padding: 0.375rem 0.75rem 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  user-select: none;
+}
+
+.active-tag-header::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+  opacity: 0.6;
+}
+
+.active-tag-clear-btn {
+  padding: 0;
+  border: 0;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  height: 25px;
+  width: 25px;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.active-tag-header:hover,
+.active-tag-header:focus-visible {
+  color: var(--text-muted);
+  opacity: 1;
 }
