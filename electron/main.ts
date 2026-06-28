@@ -63,10 +63,10 @@ function createWindow() {
   const bounds = store.get("window-bounds");
   const windowConfig: BrowserWindowConstructorOptions = {
     show: false,
-    width: Math.max(1100, bounds?.width ?? 1100),
-    height: Math.max(600, bounds?.height ?? 600),
-    minWidth: 1100,
-    minHeight: 600,
+    width: Math.max(800, bounds?.width ?? 800),
+    height: Math.max(500, bounds?.height ?? 500),
+    minWidth: 800,
+    minHeight: 500,
     titleBarStyle: "hidden",
     trafficLightPosition: { x: 15, y: 9 },
     titleBarOverlay: windowTheme.overlayOptions,

@@ -16,12 +16,12 @@ const StoreSchema = z.object({
   "note-item-display": z.enum(["preview", "tags", "minimal"]).catch("preview"),
   "window-bounds": z
     .object({
-      width: z.number().min(1100).catch(1100),
-      height: z.number().min(600).catch(600),
+      width: z.number().min(800).catch(800),
+      height: z.number().min(500).catch(500),
       x: z.number().optional(),
       y: z.number().optional(),
     })
-    .catch({ width: 1100, height: 600 }),
+    .catch({ width: 800, height: 500 }),
   "active-tag": z.string().trim().min(1).nullish().catch(null),
 });
 

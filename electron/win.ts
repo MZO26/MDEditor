@@ -32,8 +32,8 @@ function saveWindowBounds() {
     const preparedBounds = {
       x: bounds.x,
       y: bounds.y,
-      width: Math.max(1100, bounds.width),
-      height: Math.max(600, bounds.height),
+      width: Math.max(800, bounds.width),
+      height: Math.max(500, bounds.height),
     };
     const result = validation(
       StoreSchema.shape["window-bounds"],

@@ -202,7 +202,7 @@ function resizeSidebar(
 ) {
   const {
     minWidth = 0,
-    maxWidth = 450,
+    maxWidth = 420,
     cssVariable = "--sidebar-width",
   } = options;
   const resizer = requireElement<HTMLDivElement>(resizerSelector);
