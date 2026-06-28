@@ -9,7 +9,7 @@ import {
   YIELD_INTERVAL,
 } from "@shared/constants";
 import { AppErrorCode } from "@shared/errors";
-import { getMetadata, titleGenerator } from "@shared/generators";
+import { getMetadata, textConverter, titleGenerator } from "@shared/generators";
 import type { CreateNotePayload } from "@shared/schemas/note-schema";
 import type { ImportedContent, Result } from "@shared/types";
 import { Editor, type Content } from "@tiptap/core";
@@ -35,6 +35,7 @@ function normalizeFileContent(file: ImportedContent): Content | string | null {
     if (extension === "md") {
       return content;
     }
+    if (extension === "txt") return textConverter(content) ?? content;
   }
   //already object
   if (extension === "json") {

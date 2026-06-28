@@ -81,8 +81,9 @@ function processUrl(url: string, preventDefault?: () => void) {
       const requestedPath = path.resolve(fileURLToPath(url));
       // creates absolute path of the apps directory
       const appDir = app.getAppPath();
+      const safeAppDir = appDir.endsWith(path.sep) ? appDir : appDir + path.sep;
       // if requested path doesn't align with app directory, local file gets marked as unsafe and doesn't pass check
-      isSafeLocalFile = requestedPath.startsWith(appDir);
+      isSafeLocalFile = requestedPath.startsWith(safeAppDir);
     }
     if (isWebProtocol && !isLocalhost) {
       if (preventDefault) preventDefault();
@@ -98,7 +99,9 @@ function processUrl(url: string, preventDefault?: () => void) {
       return;
     }
     if (preventDefault) preventDefault();
-    console.warn(`Blocked dangerous protocol: ${parsedUrl.protocol}`);
+    console.warn(
+      `[processUrl]: Blocked dangerous protocol: ${parsedUrl.protocol}`,
+    );
   } catch (error) {
     if (preventDefault) preventDefault();
     console.error(`[processUrl]: Blocked invalid URL: ${url}`);

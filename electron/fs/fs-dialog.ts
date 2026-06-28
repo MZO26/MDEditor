@@ -16,11 +16,12 @@ async function handleImportDialog(win: BrowserWindow) {
     filters: [
       {
         name: "Supported files",
-        extensions: ["md", "html", "json"],
+        extensions: ["md", "html", "json", "txt"],
       },
       { name: "Markdown", extensions: ["md"] },
       { name: "HTML", extensions: ["html"] },
       { name: "JSON", extensions: ["json"] },
+      { name: "Text", extensions: ["txt"] },
     ],
   });
   const hasFiles = filePaths?.length > 0;

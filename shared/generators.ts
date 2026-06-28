@@ -37,6 +37,27 @@ function extractText(node: JSONContent): string {
   return parts.join("").replace(/\s+/g, " ").trim();
 }
 
+function textConverter(plainText: string): JSONContent[] | undefined {
+  if (!plainText) return undefined;
+  const cleanText = plainText.replace(/\r\n?/g, "\n");
+  const lines = cleanText.split("\n");
+  const content: JSONContent[] = [];
+  for (const line of lines) {
+    if (line.trim() === "") {
+      content.push({
+        type: "paragraph",
+      });
+    } else {
+      content.push({
+        type: "paragraph",
+        content: [{ type: "text", text: line }],
+      });
+    }
+  }
+
+  return content;
+}
+
 function titleGenerator(doc: EditorDoc): string {
   if (!doc || !Array.isArray(doc.content) || doc.content.length === 0) {
     return UNTITLED;
@@ -112,7 +133,7 @@ function getTags(doc: EditorDoc) {
   const stack: JSONContent[] = [...doc.content];
   while (stack.length > 0) {
     const node = stack.pop()!;
-    if (node.type === "noteTag" && node.attrs?.["id"]) {
+    if (node.type === "noteTag" && typeof node.attrs?.["id"] === "string") {
       const tagText = node.attrs["id"].trim().toLowerCase();
       if (tagText.length > 0 && tagText.length <= 100) {
         seen.add(tagText);
@@ -128,4 +149,10 @@ function getTags(doc: EditorDoc) {
   return Array.from(seen);
 }
 
-export { extractText, getMetadata, snippetGenerator, titleGenerator };
+export {
+  extractText,
+  getMetadata,
+  snippetGenerator,
+  textConverter,
+  titleGenerator,
+};

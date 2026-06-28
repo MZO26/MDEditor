@@ -35,14 +35,16 @@
   outline: 1px solid transparent;
 }
 
-.ProseMirror.is-editor-empty::before {
+.ProseMirror > *:first-child.is-empty::before {
   content: attr(data-placeholder);
-  position: absolute;
-  top: 0.45em;
-  left: 0;
-  color: #adb5bd;
+  float: left;
+  height: 0;
+  opacity: 0.38;
+  margin: 0;
+  padding: 0;
+  font-style: normal;
+  color: var(--text-muted);
   pointer-events: none;
-  font-style: italic;
   line-height: inherit;
   user-select: none;
 }
@@ -620,22 +622,6 @@
 
 .ProseMirror ul[data-type="taskList"] li p {
   line-height: 1.2;
-}
-
-.ProseMirror p.is-editor-empty:first-child::before,
-.ProseMirror p.is-empty:first-child::before {
-  content: attr(data-placeholder);
-  color: var(--text-muted);
-  opacity: 0.7;
-  float: left;
-  height: 0;
-  pointer-events: none;
-  font-style: italic;
-}
-
-.ProseMirror h1.is-empty::before {
-  opacity: 0.38;
-  font-style: normal;
 }
 
 .ProseMirror .editor-dropcursor {

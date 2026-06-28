@@ -1,6 +1,7 @@
 import { findElement } from "@/utils/dom";
 import type { EditorDoc } from "@shared/schemas/editor-schema";
 import type { Note, NoteListItem } from "@shared/schemas/note-schema";
+import type { JSONContent } from "@tiptap/core";
 import { getUIItem } from "./registry";
 
 function createNoteUpdater() {
@@ -32,10 +33,10 @@ function addActiveTagToDoc(
   doc: EditorDoc,
   activeTag: string | null,
 ): EditorDoc {
-  if (!activeTag) return doc;
-  const content = Array.isArray(doc["content"]) ? [...doc["content"]] : [];
-  const alreadyTagged = JSON.stringify(doc).includes(`"id":"${activeTag}"`);
-  if (alreadyTagged) return doc;
+  const normalizedTag = activeTag?.trim();
+  if (!normalizedTag) return doc;
+  const content = Array.isArray(doc.content) ? [...doc.content] : [];
+  if (hasNoteTag(doc, normalizedTag)) return doc;
   const tagParagraph = {
     type: "paragraph",
     content: [
@@ -59,11 +60,41 @@ function addActiveTagToDoc(
   const hrBlock = {
     type: "horizontalRule",
   };
+  const firstNode = content[0];
+  const hasLeadingHeading = firstNode?.type === "heading";
+  const rest = hasLeadingHeading ? content.slice(1) : content;
+  const restWithoutDuplicateHeading =
+    rest[0]?.type === "heading" ? rest.slice(1) : rest;
   return {
     ...doc,
-    content: [headingBlock, hrBlock, tagParagraph, ...content],
+    content: [
+      hasLeadingHeading ? firstNode : headingBlock,
+      hrBlock,
+      tagParagraph,
+      ...restWithoutDuplicateHeading,
+    ],
   };
 }
+
+function hasNoteTag(doc: EditorDoc, tagId: string): boolean {
+  const normalized = tagId.trim().toLowerCase();
+  if (!normalized || !doc.content) return false;
+  const stack: JSONContent[] = [...doc.content];
+  while (stack.length > 0) {
+    const node = stack.pop()!;
+    if (node.type === "noteTag" && typeof node.attrs?.["id"] === "string") {
+      const id = node.attrs["id"].trim().toLowerCase();
+      if (id === normalized) return true;
+    }
+    if (node.content) {
+      for (const child of node.content) {
+        stack.push(child);
+      }
+    }
+  }
+  return false;
+}
+
 function estimateReadingTime(wordCount: number, wpm = 238) {
   const s = Math.round((wordCount / wpm) * 60);
   const m = Math.floor(s / 60);
@@ -88,6 +119,7 @@ export {
   addActiveTagToDoc,
   compareNotes,
   estimateReadingTime,
+  hasNoteTag,
   toNoteListItem,
   updateNoteCount,
 };

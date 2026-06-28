@@ -110,6 +110,7 @@ const ImportRequestSchema = z.discriminatedUnion("extension", [
   HtmlSchema.omit({ created_at: true }),
   MdSchema.omit({ created_at: true }),
   JsonSchema.omit({ created_at: true }),
+  TxtSchema.omit({ created_at: true }),
 ]);
 
 type OpenAutoExportPathRequest = z.infer<typeof OpenAutoExportPathSchema>;

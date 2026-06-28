@@ -3,35 +3,34 @@ import {
   inEditorSearch,
   resetEditorHistory,
 } from "@/components/editor/editor-features";
+import { applyTagView } from "@/components/sidebar/sidebar-features";
 import { Annotation } from "@/extensions/annotation";
 import { DetailsBlock } from "@/extensions/details";
 import { SearchAndReplace } from "@/extensions/docSearch";
+import { DropHandler } from "@/extensions/editor-handler/dropHandler";
+import { PasteHandler } from "@/extensions/editor-handler/pasteHandler";
 import { MasterShortcuts } from "@/extensions/editor-shortcuts";
 import { Footnote } from "@/extensions/footnote";
-import { CustomHeading } from "@/extensions/headings";
 import { Highlight } from "@/extensions/highlight";
-import { processAndInsertImage } from "@/extensions/image/image";
 import { lowlight } from "@/extensions/lowlight";
+import { CustomHeading } from "@/extensions/overrides/headings";
+import { CustomUnderline } from "@/extensions/overrides/underline";
 import {
   getTableOfContents,
   initTableOfContents,
 } from "@/extensions/tableOfContents";
 import { NoteTag } from "@/extensions/tag";
 import { Typography } from "@/extensions/typography";
-import { CustomUnderline } from "@/extensions/underline";
-import { WikiLinkPreview } from "@/extensions/wikilink-preview";
-import { WikiLink } from "@/extensions/wikilinks";
+import { WikiLinkPreview } from "@/extensions/wikilinks/wikilink-preview";
+import { WikiLink } from "@/extensions/wikilinks/wikilinks";
 import {
   debouncedSaveNote,
   handleSelectNote,
   isAutoExportEnabled,
 } from "@/notes/note-actions";
 import { noteStore, stateStore } from "@/settings/app-state";
-import { sleep } from "@/utils/async";
 import { requireElement } from "@/utils/dom";
-import { useDelayedSpinner } from "@/utils/ui";
-import { ALLOWED_TYPES, DOMPURIFY_CONFIG } from "@shared/constants";
-import { processWithLimit } from "@shared/limiter";
+import { DOMPURIFY_CONFIG } from "@shared/constants";
 import type { AppSettings } from "@shared/schemas/store-schema";
 import { Editor } from "@tiptap/core";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
@@ -52,7 +51,6 @@ import {
 import { Markdown } from "@tiptap/markdown";
 import StarterKit from "@tiptap/starter-kit";
 import DOMPurify from "dompurify";
-import { applyTagView } from "../sidebar/sidebar-features";
 
 let editor: Editor | null = null;
 
@@ -72,50 +70,6 @@ function initEditor(settings: Partial<AppSettings>): Editor {
       },
       transformPastedHTML(html) {
         return DOMPurify.sanitize(html, DOMPURIFY_CONFIG);
-      },
-      handleDrop(view, event, _slice, moved) {
-        if (!editor || !event.dataTransfer?.files?.length || moved)
-          return false;
-        const files = Array.from(event.dataTransfer.files);
-        const images = files.filter((f) => f.type.startsWith("image/"));
-        if (images.length === 0) return false;
-        const unsupportedFiles = files.some(
-          (file) => !ALLOWED_TYPES.includes(file.type),
-        );
-        if (unsupportedFiles) {
-          event.preventDefault();
-          return false;
-        }
-        const coordinates = view.posAtCoords({
-          left: event.clientX,
-          top: event.clientY,
-        });
-        if (coordinates) {
-          editor.commands.setTextSelection(coordinates.pos);
-        }
-        const stopSpinner = useDelayedSpinner();
-        void processWithLimit(images, 1, async (file) => {
-          await sleep(1000);
-          await processAndInsertImage(file, editor);
-        }).finally(() => {
-          if (stopSpinner) stopSpinner();
-        });
-        return true;
-      },
-      handlePaste(_view, event) {
-        if (!editor || !event.clipboardData?.files?.length) return false;
-        const files = Array.from(event.clipboardData.files);
-        const images = files.filter((f) => f.type.startsWith("image/"));
-        if (images.length === 0) return false;
-        event.preventDefault();
-        const stopSpinner = useDelayedSpinner();
-        void processWithLimit(images, 1, async (file) => {
-          await sleep(1000);
-          await processAndInsertImage(file, editor!);
-        }).finally(() => {
-          if (stopSpinner) stopSpinner();
-        });
-        return true;
       },
     },
     autofocus: true,
@@ -140,6 +94,8 @@ function initEditor(settings: Partial<AppSettings>): Editor {
 function getNoteEditorExtensions() {
   return [
     SearchAndReplace,
+    PasteHandler,
+    DropHandler,
     Markdown.configure({ markedOptions: { gfm: true } }),
     MasterShortcuts,
     Typography,
@@ -167,7 +123,12 @@ function getNoteEditorExtensions() {
       mode: "all",
     }),
     Placeholder.configure({
-      placeholder: "Start writing...",
+      placeholder: ({ node }) => {
+        if (node.type.name === "heading") {
+          return "Untitled";
+        }
+        return "Start writing...";
+      },
       emptyEditorClass: "is-editor-empty",
       emptyNodeClass: "is-empty",
       showOnlyWhenEditable: true,

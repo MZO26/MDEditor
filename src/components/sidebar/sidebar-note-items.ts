@@ -85,6 +85,10 @@ function handleSidebarChange(change: SidebarChange, notes: NoteListItem[]) {
 
 // snippet highlighter for note items
 
+function escapeRegExp(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function buildSnippet(
   plainText: string,
   fallbackSnippet: string,
@@ -117,7 +121,7 @@ function buildSnippet(
   start = Math.max(0, end - contentLength);
   let snippet = plainText.slice(start, end);
   const indices: [number, number][] = [];
-  const regex = new RegExp(terms.map(RegExp.escape).join("|"), "gi");
+  const regex = new RegExp(terms.map(escapeRegExp).join("|"), "gi");
   for (const match of snippet.matchAll(regex)) {
     const i = match.index ?? 0;
     indices.push([i, i + match[0].length - 1]);

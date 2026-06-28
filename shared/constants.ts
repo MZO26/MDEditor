@@ -196,13 +196,10 @@ const DOMPURIFY_CONFIG = {
     /^(?:(?:https?|mailto|tel|appimg):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
 };
 
-const MAX_CHARS = 47; // snippet max chars before appending ...
-const PADDING = 15; // padding for highlight snippet to show context
-
 const UNTITLED = "Untitled";
 
 const EMPTY_DOC = {
-  type: "doc",
+  type: "doc" as const,
   content: [
     {
       type: "heading",
@@ -321,11 +318,9 @@ export {
   IPC_TIMERS,
   LIMITS,
   LINE_HEIGHT_SETTINGS,
-  MAX_CHARS,
   MAX_SIZE,
   MIME_TO_EXT,
   NOTE_ITEM_DISPLAY_SETTINGS,
-  PADDING,
   QUICK_ACTIONS,
   SELECTION_ACTIONS,
   SPELLCHECK_SETTINGS,

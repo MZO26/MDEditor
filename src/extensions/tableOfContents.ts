@@ -7,10 +7,13 @@ function getTableOfContents(editor: Editor) {
   editor.state.doc.descendants((node) => {
     if (node.type.name === "detailsBlock") return false;
     if (node.type.name === "heading") {
+      const text = node.textContent.trim();
+      const id = node.attrs["id"];
+      if (!text || !id) return true;
       headings.push({
         id: node.attrs["id"],
         level: node.attrs["level"],
-        text: node.textContent,
+        text,
       });
     }
     return true;
