@@ -1,4 +1,3 @@
-import type { NoteSearchDoc } from "@shared/schemas/note-schema";
 import type {
   AutoExport,
   CodeTheme,
@@ -19,7 +18,6 @@ import type {
   SelectionActionConfig,
   SelectOption,
 } from "@shared/types";
-import type { IFuseOptions } from "fuse.js";
 
 const APP_START_TIME = Date.now();
 
@@ -198,25 +196,20 @@ const DOMPURIFY_CONFIG = {
     /^(?:(?:https?|mailto|tel|appimg):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
 };
 
-const FUSE_OPTIONS: IFuseOptions<NoteSearchDoc> = {
-  useExtendedSearch: true,
-  includeMatches: true,
-  ignoreLocation: true,
-  distance: 100,
-  keys: [
-    { name: "title", weight: 2.0 },
-    { name: "plainText", weight: 1.0 },
-    { name: "tags", weight: 1.5 },
-  ],
-  threshold: 0.2,
-};
-
 const MAX_CHARS = 47; // snippet max chars before appending ...
 const PADDING = 15; // padding for highlight snippet to show context
 
 const UNTITLED = "Untitled";
 
-const EMPTY_DOC = { type: "doc" as const, content: [{ type: "paragraph" }] };
+const EMPTY_DOC = {
+  type: "doc",
+  content: [
+    {
+      type: "heading",
+      attrs: { level: 1 },
+    },
+  ],
+};
 
 const BLOCK_TYPES = new Set([
   "paragraph",
@@ -324,7 +317,6 @@ export {
   EXPORT_FORMAT_SETTINGS,
   FONT_FAMILY_SETTINGS,
   FONT_SIZE_SETTINGS,
-  FUSE_OPTIONS,
   HIGHLIGHT_THEME_SETTINGS,
   IPC_TIMERS,
   LIMITS,

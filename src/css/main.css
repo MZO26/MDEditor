@@ -473,9 +473,11 @@ label {
   transform: translateX(-50%) scale(1);
   width: min(80ch, 100% - 24px);
   align-items: center;
+  flex-wrap: wrap;
   display: flex;
-  height: 50px;
-  padding: 10px 10px 0 10px;
+  max-height: 200px;
+  min-height: 60px;
+  padding: 10px;
   bottom: 10px;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
@@ -484,8 +486,8 @@ label {
   box-shadow: var(--shadow);
   flex-direction: row;
   gap: 5px;
-  overflow-x: scroll;
-  overflow-y: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   z-index: 5;
   opacity: 1;
   transition:
@@ -550,6 +552,7 @@ label {
   white-space: nowrap;
   text-decoration: none;
   user-select: none;
+  padding: 5px 2px;
 }
 
 .link.active-node {

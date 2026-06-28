@@ -1,14 +1,18 @@
 import { updateSettings } from "@/api/api";
-import { updateSnippetHighlight } from "@/components/sidebar/sidebar-note-items";
+import {
+  buildSnippet,
+  updateSnippetHighlight,
+} from "@/components/sidebar/sidebar-note-items";
+import type { SearchMatchResult } from "@/notes/search";
 import { noteStore, searchEngine, stateStore } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
-import { findElement, requireElement } from "@/utils/dom";
+import { requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
 import { estimateReadingTime } from "@/utils/note";
 import { getAppItem, getUIItem, getUIItems } from "@/utils/registry";
 import { initTippyDelegate } from "@/utils/ui";
-import { DEBOUNCE_MS, MAX_CHARS, PADDING } from "@shared/constants";
-import type { ResizeOptions, SnippetCacheValue } from "@shared/types";
+import { DEBOUNCE_MS } from "@shared/constants";
+import type { ResizeOptions } from "@shared/types";
 import tippy from "tippy.js";
 
 // sidebar
@@ -17,123 +21,64 @@ export let allTagsMenu: ReturnType<typeof createAllTagsPopover> | null = null;
 
 // search handled by fuse
 
-function showSearchItems(
-  noteElements: HTMLDivElement[],
-  searchCache: Map<string, SnippetCacheValue>,
-) {
-  // note index for fast lookup
-  const noteIndex = noteStore.get("noteIndex");
-  for (const element of noteElements) {
-    const noteId = element.getAttribute("data-id");
-    if (!noteId) continue;
-    const matchData = searchCache.get(noteId);
-    const contentEl = findElement<HTMLDivElement>(".note-content", element);
-    if (!contentEl) continue;
-    if (matchData) {
-      updateSnippetHighlight(contentEl, matchData.snippet, matchData.indices);
-    } else {
-      const note = noteIndex.get(noteId);
-      if (note && contentEl.textContent !== note.snippet) {
-        contentEl.textContent = note.snippet;
-      }
-    }
-  }
-}
-
-// calculates snippet to show for highlight
-
-function search(searchInput: string) {
-  const results = searchEngine.search(searchInput);
-  // holds id together with highlighted snippet text and indices where the match was found
-  const searchCache = new Map<string, SnippetCacheValue>();
-  // replace symbols
-  const safeTerm = searchInput.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  if (!safeTerm || searchInput.trim().length < 2) {
-    // don't show highlight if search result is < 2. Else too many random matches would be found. Keeps indices array empty
-    for (const { item: note } of results) {
-      searchCache.set(note.id, { snippet: note.snippet, indices: [] });
-    }
-  } else {
-    // case insensitive
-    const exactRegex = new RegExp(safeTerm, "gi");
-    for (const { item: note } of results) {
-      const fullText = note.plainText ?? "";
-      const firstMatch = exactRegex.exec(fullText);
-      exactRegex.lastIndex = 0;
-      if (!firstMatch) {
-        searchCache.set(note.id, { snippet: note.snippet, indices: [] });
-        continue;
-      }
-      const phraseStart = firstMatch.index;
-      // Math.max(0) to prevent negative index if matched word is at the start of the document. PADDING ensures context for the snippet
-      let winStart = Math.max(0, phraseStart - PADDING);
-      let winEnd = winStart + MAX_CHARS;
-      // if character window overshoots total length of the plainText of the document, it recalculates winStart from winEnd backwards 47 chars
-      if (winEnd > fullText.length) {
-        winEnd = fullText.length;
-        winStart = Math.max(0, winEnd - MAX_CHARS);
-      }
-      // creates the snippet from the two variables
-      const snippet =
-        fullText.slice(winStart, winEnd) +
-        (winEnd < fullText.length ? "..." : "");
-      const indices: [number, number][] = [];
-      for (const match of fullText.matchAll(exactRegex)) {
-        const start = match.index;
-        const end = start + match[0].length - 1; // 0-indexed
-        if (start >= winStart && end < winEnd) {
-          // creates indices based on global positions and start of the frame containing 47 chars for the snippet
-          indices.push([start - winStart, end - winStart]);
-        }
-      }
-      searchCache.set(note.id, { snippet, indices });
-    }
-  }
-  return searchCache; // returns to be highlighted snippets
-}
-
-// 2 branches: # to search for tags or normal fuzzy search -> then show highlights of what was found
-
 function handleSearchInput(searchInput: string) {
   const sidebar = getAppItem("sidebar");
-  stateStore.setState({ searchQuery: searchInput });
-  if (searchInput === "") {
+  const nextQuery = searchInput.trim();
+  const prevQuery = stateStore.get("searchQuery");
+  if (nextQuery === prevQuery) return;
+  stateStore.setState({ searchQuery: nextQuery });
+  if (!nextQuery) {
     restoreSidebarScope();
     return;
   }
-  let searchCache = new Map();
-  if (searchInput.startsWith("#")) {
-    const tagToSearch = searchInput.slice(1);
-    // ^ searches for tags that start with what gets typed
-    const rawResults = searchEngine.search({ tags: `^${tagToSearch}` });
-    for (const { item: note } of rawResults) {
-      searchCache.set(note.id, { snippet: note.snippet, indices: [] });
-    }
-  } else {
-    searchCache = search(searchInput);
-  }
-  applySearch(searchCache);
+  const results = nextQuery.startsWith("#")
+    ? searchEngine.searchTags(nextQuery.slice(1))
+    : searchEngine.search(nextQuery);
+  applySearch(results);
   const noteElements = Array.from(
     sidebar.getElementsByClassName("note-item"),
   ) as HTMLDivElement[];
-  showSearchItems(noteElements, searchCache);
+  updateSearchHighlights(noteElements, results);
 }
 
-//------------------------------------------------------------------
-
-// search helpers
+function updateSearchHighlights(
+  noteElements: HTMLDivElement[],
+  results: SearchMatchResult[],
+) {
+  const resultsById = new Map(
+    results.map((result) => [result.item.id, result]),
+  );
+  const noteIndex = noteStore.get("noteIndex");
+  for (const noteElement of noteElements) {
+    const noteId = noteElement.getAttribute("data-id");
+    if (!noteId) continue;
+    const result = resultsById.get(noteId);
+    if (result) {
+      const { snippet, indices } = buildSnippet(
+        result.item.plainText ?? "",
+        result.item.snippet,
+        result.queryTerms,
+      );
+      updateSnippetHighlight(noteElement, snippet, indices);
+      continue;
+    }
+    const note = noteIndex.get(noteId);
+    if (!note) continue;
+    updateSnippetHighlight(noteElement, note.snippet, []);
+  }
+}
 
 // applies the search to the note state to only show searched items or empty state
 
-function applySearch(searchCache: Map<string, SnippetCacheValue>) {
-  const matchedIdSet = new Set(searchCache.keys());
+function applySearch(searchMatches: SearchMatchResult[]) {
+  const matchedIdSet = new Set(searchMatches.map((match) => match.item.id));
   const activeTag = stateStore.get("activeTag");
-  const visibleIds = noteStore
-    .get("notes")
+  const notes = noteStore.get("notes");
+  const visibleIds = notes
     .filter((note) => {
-      if (!matchedIdSet.has(note.id)) return false;
-      if (activeTag && !note.tags.includes(activeTag)) return false;
-      return true;
+      const isSearchMatch = matchedIdSet.has(note.id);
+      const matchesActiveTag = !activeTag || note.tags.includes(activeTag);
+      return isSearchMatch && matchesActiveTag;
     })
     .map((note) => note.id);
   noteStore.setState({

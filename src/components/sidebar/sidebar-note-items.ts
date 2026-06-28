@@ -49,6 +49,10 @@ function createNoteItem(note: NoteListItem) {
   return item;
 }
 
+//-------------------------------------------------------------
+
+// sidebar change handler for note items
+
 function handleSidebarChange(change: SidebarChange, notes: NoteListItem[]) {
   if (!change) return;
   switch (change.type) {
@@ -77,38 +81,84 @@ function handleSidebarChange(change: SidebarChange, notes: NoteListItem[]) {
   }
   handleSidebarEmptyState();
 }
+//-------------------------------------------------------------
 
 // snippet highlighter for note items
 
-function updateSnippetHighlight(
-  element: HTMLDivElement,
-  snippetText: string,
-  indices?: [number, number][],
-) {
-  if (!indices || indices.length === 0) {
-    element.textContent = snippetText;
-    return;
+function buildSnippet(
+  plainText: string,
+  fallbackSnippet: string,
+  queryTerms: readonly string[],
+  maxChars = 50,
+): { snippet: string; indices: [number, number][] } {
+  const terms = [
+    ...new Set(
+      queryTerms.map((term) => term.trim()).filter((term) => term.length >= 2),
+    ),
+  ];
+  const fallback =
+    fallbackSnippet.length > maxChars
+      ? fallbackSnippet.slice(0, maxChars - 3) + "..."
+      : fallbackSnippet;
+  if (!plainText || terms.length === 0) {
+    return { snippet: fallback, indices: [] };
   }
-  const fragment = document.createDocumentFragment();
-  let lastIndex = 0;
-  const sortedIndices = [...indices].sort((a, b) => a[0] - b[0]);
-
-  for (const [start, end] of sortedIndices) {
-    if (start < lastIndex) continue;
-    if (start > lastIndex) {
-      fragment.append(
-        document.createTextNode(snippetText.slice(lastIndex, start)),
-      );
-    }
-    const mark = document.createElement("mark");
-    mark.textContent = snippetText.slice(start, end + 1);
-    fragment.append(mark);
-    lastIndex = end + 1;
+  const lowerText = plainText.toLowerCase();
+  const matchIndex = terms
+    .map((term) => lowerText.indexOf(term.toLowerCase()))
+    .find((index) => index >= 0);
+  if (matchIndex == null || matchIndex < 0) {
+    return { snippet: fallback, indices: [] };
   }
-  if (lastIndex < snippetText.length) {
-    fragment.append(document.createTextNode(snippetText.slice(lastIndex)));
+  const isTruncated = plainText.length > maxChars;
+  const contentLength = isTruncated ? maxChars - 3 : maxChars;
+  let start = Math.max(0, matchIndex - Math.floor(contentLength / 2));
+  let end = Math.min(plainText.length, start + contentLength);
+  start = Math.max(0, end - contentLength);
+  let snippet = plainText.slice(start, end);
+  const indices: [number, number][] = [];
+  const regex = new RegExp(terms.map(RegExp.escape).join("|"), "gi");
+  for (const match of snippet.matchAll(regex)) {
+    const i = match.index ?? 0;
+    indices.push([i, i + match[0].length - 1]);
   }
-  element.replaceChildren(fragment);
+  if (end < plainText.length) {
+    snippet += "...";
+  }
+  return { snippet, indices };
 }
 
-export { createNoteItem, handleSidebarChange, updateSnippetHighlight };
+function updateSnippetHighlight(
+  noteElement: HTMLDivElement,
+  snippet: string,
+  indices: [number, number][],
+) {
+  const contentEl = findElement(".note-content", noteElement);
+  if (!contentEl) return;
+  if (indices.length === 0) {
+    contentEl.textContent = snippet;
+    return;
+  }
+  const nodes: (string | HTMLElement)[] = [];
+  let cursor = 0;
+  for (const [start, end] of indices) {
+    if (start > cursor) {
+      nodes.push(snippet.slice(cursor, start));
+    }
+    const mark = document.createElement("mark");
+    mark.textContent = snippet.slice(start, end + 1);
+    nodes.push(mark);
+    cursor = end + 1;
+  }
+  if (cursor < snippet.length) {
+    nodes.push(snippet.slice(cursor));
+  }
+  contentEl.replaceChildren(...nodes);
+}
+
+export {
+  buildSnippet,
+  createNoteItem,
+  handleSidebarChange,
+  updateSnippetHighlight,
+};

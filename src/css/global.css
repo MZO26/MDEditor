@@ -16,7 +16,7 @@
     ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
     Cambria, serif;
   --current-font: var(--font-system);
-  --sidebar-width: 290px;
+  --sidebar-width: 310px;
 }
 
 :root[data-theme="light"] {

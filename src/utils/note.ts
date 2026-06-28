@@ -37,24 +37,31 @@ function addActiveTagToDoc(
   const alreadyTagged = JSON.stringify(doc).includes(`"id":"${activeTag}"`);
   if (alreadyTagged) return doc;
   const tagParagraph = {
-    type: "paragraph" as const,
+    type: "paragraph",
     content: [
       {
-        type: "noteTag" as const,
+        type: "noteTag",
         attrs: {
           id: activeTag,
           label: activeTag,
         },
       },
       {
-        type: "text" as const,
+        type: "text",
         text: " ",
       },
     ],
   };
+  const headingBlock = {
+    type: "heading",
+    attrs: { level: 1 },
+  };
+  const hrBlock = {
+    type: "horizontalRule",
+  };
   return {
     ...doc,
-    content: [{ type: "paragraph" as const }, tagParagraph, ...content],
+    content: [headingBlock, hrBlock, tagParagraph, ...content],
   };
 }
 function estimateReadingTime(wordCount: number, wpm = 238) {
