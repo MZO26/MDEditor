@@ -22,7 +22,7 @@ const DEFAULT_STORE: AppSettings = {
   "auto-export-path": null,
   "export-format": "md",
   "note-item-display": "preview",
-  "window-bounds": { width: 1100, height: 600 },
+  "window-bounds": { width: 800, height: 500 },
   "active-tag": null,
 };
 

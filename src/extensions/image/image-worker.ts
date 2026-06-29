@@ -3,9 +3,10 @@ import { compressImage } from "@/extensions/image/image-utils";
 import { WorkerErrorCode } from "@shared/errors";
 
 self.onmessage = async (e: MessageEvent) => {
-  const { id, file, maxWidth, quality } = e.data;
+  const { id, buffer, mimeType, maxWidth, quality } = e.data;
   try {
-    const result = await compressImage(file, maxWidth, quality);
+    const blob = new Blob([buffer], { type: mimeType });
+    const result = await compressImage(blob, maxWidth, quality);
     self.postMessage({ id, success: true, data: result }, [result.buffer]);
   } catch (error) {
     self.postMessage({ id, ...handleWorkerError(error) });

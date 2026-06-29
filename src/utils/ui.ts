@@ -1,4 +1,3 @@
-import { findElement } from "@/utils/dom";
 import { delegate, hideAll, type Placement } from "tippy.js";
 import "tippy.js/dist/tippy.css";
 
@@ -31,23 +30,6 @@ function formatShortcut(shortcut?: string) {
     .replace(/shift[-+]?/gi, mac ? "⇧" : "Shift+")
     .replace(/alt[-+]?/gi, mac ? "⌥" : "Alt+")
     .replace(/meta[-+]?/gi, mac ? "⌘" : "Meta+");
-}
-
-function useDelayedSpinner(delay = 100) {
-  const spinner = findElement<HTMLDivElement>(".spinner");
-  if (!spinner) return () => {};
-  const wasAlreadyOpen = spinner.matches(":popover-open");
-  const spinnerTimeout = setTimeout(() => {
-    if (!wasAlreadyOpen && !spinner.matches(":popover-open")) {
-      spinner.showPopover();
-    }
-  }, delay);
-  return function cleanup() {
-    clearTimeout(spinnerTimeout);
-    if (!wasAlreadyOpen && spinner.matches(":popover-open")) {
-      spinner.hidePopover();
-    }
-  };
 }
 
 function initTippyDelegate(
@@ -87,9 +69,4 @@ function formatBytes(bytes: number) {
   return `${(bytes / 1024 ** 2).toFixed(2)} MB`;
 }
 
-export {
-  createTooltipContent,
-  formatBytes,
-  initTippyDelegate,
-  useDelayedSpinner,
-};
+export { createTooltipContent, formatBytes, initTippyDelegate };

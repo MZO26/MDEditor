@@ -19,7 +19,7 @@ declare global {
   interface Window {
     appInfo: Readonly<{ isMac: boolean }>;
     electronAPI: {
-      imageWrite: (payload: ImagePayload) => Promise<Result<ImageSrc>>;
+      imageWriteMany: (payload: ImagePayload[]) => Promise<Result<ImageSrc[]>>;
       startupReady: () => void;
       setTheme: (theme: Theme, focus?: boolean) => Promise<Result<Theme>>;
       windowPin: () => Promise<Result<boolean>>;

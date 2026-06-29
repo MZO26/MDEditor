@@ -20,7 +20,7 @@ import { applyAppTheme } from "@/settings/theme";
 import { createAsyncHandler } from "@/utils/async";
 import { requireElement, setActiveItem } from "@/utils/dom";
 import { registerAppEvents } from "@/utils/registry";
-import { formatBytes, useDelayedSpinner } from "@/utils/ui";
+import { formatBytes } from "@/utils/ui";
 import type { AppSettings } from "@shared/schemas/store-schema";
 
 async function initAppSettings(settings: AppSettings) {
@@ -105,7 +105,6 @@ function applyModalListeners(
           await exportSelection(allIds);
           break;
         case "vacuum-db":
-          const stopSpinner = useDelayedSpinner();
           try {
             const savedBytes = await databaseVacuum();
             if (savedBytes.success) {
@@ -122,8 +121,6 @@ function applyModalListeners(
               error,
             );
             showNotification("Failed to optimize database.", "");
-          } finally {
-            if (stopSpinner) stopSpinner();
           }
           break;
       }

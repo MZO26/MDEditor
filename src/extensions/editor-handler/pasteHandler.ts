@@ -1,7 +1,5 @@
-import { processAndInsertImage } from "@/extensions/image/image";
-import { sleep } from "@/utils/async";
-import { useDelayedSpinner } from "@/utils/ui";
-import { processWithLimit } from "@shared/limiter";
+import { processAndInsertImages } from "@/extensions/image/image";
+import { ALLOWED_TYPES } from "@shared/constants";
 import { Extension } from "@tiptap/core";
 import { Plugin } from "@tiptap/pm/state";
 
@@ -10,21 +8,23 @@ export const PasteHandler = Extension.create({
 
   addProseMirrorPlugins() {
     const editor = this.editor;
+
     return [
       new Plugin({
         props: {
           handlePaste(_view, event) {
             if (!editor || !event.clipboardData) return false;
             const files = Array.from(event.clipboardData.files ?? []);
-            const images = files.filter((f) => f.type.startsWith("image/"));
+            const images = files.filter((f) => ALLOWED_TYPES.includes(f.type));
             if (images.length > 0) {
               event.preventDefault();
-              const stopSpinner = useDelayedSpinner();
-              void processWithLimit(images, 1, async (file) => {
-                await sleep(1000);
-                await processAndInsertImage(file, editor);
-              }).finally(() => {
-                stopSpinner?.();
+              const safeImages = images.slice(0, 20);
+              if (images.length > 20) return;
+              void processAndInsertImages(safeImages, editor).catch((error) => {
+                console.error(
+                  "[PasteHandler]: Failed to process pasted images:",
+                  error,
+                );
               });
               return true;
             }
@@ -34,10 +34,9 @@ export const PasteHandler = Extension.create({
             }
             try {
               const normalized = text.replace(/\r\n?/g, "\n");
-              const handled = editor.commands.insertContent(normalized, {
+              return editor.commands.insertContent(normalized, {
                 contentType: "markdown",
               });
-              return handled;
             } catch {
               return false;
             }

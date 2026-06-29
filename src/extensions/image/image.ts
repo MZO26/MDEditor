@@ -1,6 +1,6 @@
-import { imageWrite } from "@/api/api";
-import { useDelayedSpinner } from "@/utils/ui";
+import { imageWriteMany } from "@/api/api";
 import { ALLOWED_TYPES, MAX_SIZE, MIME_TO_EXT } from "@shared/constants";
+import type { ImagePayload } from "@shared/schemas/image-schema";
 import type { Result } from "@shared/types";
 import type { Editor } from "@tiptap/core";
 
@@ -13,9 +13,10 @@ function compressImageInWorker(
   maxWidth = 1000,
   quality = 0.9,
 ): Promise<Result<Uint8Array>> {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     // uuid for compression job. functions like a tracking number to identify request
     const id = crypto.randomUUID();
+    const arrayBuffer = await file.arrayBuffer();
     const handleMessage = (event: MessageEvent) => {
       if (event.data.id === id) {
         // only if id matches to filter out unrelated messages to this image
@@ -29,48 +30,67 @@ function compressImageInWorker(
       }
     };
     worker.addEventListener("message", handleMessage);
-    worker.postMessage({ id, file, maxWidth, quality });
+    worker.postMessage(
+      { id, buffer: arrayBuffer, mimeType: file.type, maxWidth, quality },
+      [arrayBuffer],
+    );
   });
 }
 
-async function processAndInsertImage(file: File, editor: Editor | null) {
+async function processAndInsertImages(files: File[], editor: Editor | null) {
   if (!editor) return;
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    console.error("[processAndInsertImage]: Invalid file type.");
-    return;
-  }
-  if (file.size > MAX_SIZE) {
-    console.error("[processAndInsertImage]: File size exceeds the limit.");
-    return;
-  }
+  const validFiles = files.filter(
+    (file) =>
+      ALLOWED_TYPES.includes(file.type) &&
+      file.size <= MAX_SIZE &&
+      file.type.startsWith("image/"),
+  );
+  if (validFiles.length === 0) return;
+  const pos = editor.state.selection.to;
   try {
-    const result = await compressImageInWorker(file);
+    const compressedResults = await Promise.all(
+      validFiles.map(async (file) => {
+        const result = await compressImageInWorker(file);
+        if (!result.success) {
+          console.error(
+            "[processAndInsertImages]: Image compression failed:",
+            result.error,
+          );
+          return null;
+        }
+        const extension =
+          MIME_TO_EXT[file.type as keyof typeof MIME_TO_EXT] ?? "jpeg";
+        return {
+          extension,
+          imageData: result.data,
+        };
+      }),
+    );
+    const payload = compressedResults.filter(
+      (item): item is ImagePayload => item !== null,
+    );
+    const result = await imageWriteMany(payload);
     if (!result.success) {
       console.error(
-        "[processAndInsertImage]: Image compression failed:",
+        "[processAndInsertImages -> imageWriteMany]: Failed to save image:",
         result.error,
       );
       return;
     }
-    const extension =
-      MIME_TO_EXT[file.type as keyof typeof MIME_TO_EXT] ?? "jpeg";
-    const saved = await imageWrite({ imageData: result.data, extension });
-    if (!saved.success) {
-      console.error("[imageWrite]: Failed to save image:", saved.error);
-      return;
-    }
-    const currentPos = editor?.state.selection.to;
+    const content = result.data.flatMap((src) => [
+      { type: "image", attrs: { src } },
+      { type: "paragraph" },
+    ]);
     editor
       .chain()
       .focus()
-      .insertContentAt(currentPos, {
-        type: "image",
-        attrs: { src: saved.data.imageSrc },
+      .insertContentAt(pos, content, {
+        updateSelection: true,
       })
       .run();
   } catch (error) {
     console.error(
-      "[processAndInsertImage]: Unknown Error. Failed to process and insert image:",
+      "[processAndInsertImages]: Unknown Error. Failed to process and insert image:",
       error,
     );
   }
@@ -81,16 +101,15 @@ async function promptImageUpload(editor: Editor | null) {
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "image/jpeg,image/png,image/gif,image/webp";
+  input.multiple = true;
   input.onchange = async (event: Event) => {
     const target = event.target as HTMLInputElement | null;
-    const file = target?.files?.[0];
-    if (!file) return;
-    const stopSpinner = useDelayedSpinner();
-    await processAndInsertImage(file, editor).finally(() => {
-      if (stopSpinner) stopSpinner();
-    });
+    if (!target) return;
+    const files = target.files;
+    if (!files) return;
+    await processAndInsertImages(Array.from(files), editor);
   };
   input.click();
 }
 
-export { compressImageInWorker, processAndInsertImage, promptImageUpload };
+export { compressImageInWorker, processAndInsertImages, promptImageUpload };

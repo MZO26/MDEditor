@@ -19,8 +19,6 @@ import tippy from "tippy.js";
 
 export let allTagsMenu: ReturnType<typeof createAllTagsPopover> | null = null;
 
-// search handled by fuse
-
 function handleSearchInput(searchInput: string) {
   const sidebar = getAppItem("sidebar");
   const nextQuery = searchInput.trim();
@@ -178,7 +176,7 @@ function clearActiveTagFilter() {
 }
 
 function renderAllTags(button: HTMLButtonElement, tags: string[]) {
-  const menu = allTagsMenu ?? (allTagsMenu = createAllTagsPopover(button));
+  const menu = (allTagsMenu ??= createAllTagsPopover(button));
   const frag = document.createDocumentFragment();
   for (const tag of [...new Set(tags)]) {
     const item = document.createElement("span");

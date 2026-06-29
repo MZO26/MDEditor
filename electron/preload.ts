@@ -40,8 +40,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   setTheme: (theme: Theme, focus?: boolean) =>
     ipcRenderer.invoke("theme:set", theme, focus),
   windowPin: () => ipcRenderer.invoke("app:pin"),
-  imageWrite: (payload: ImagePayload) =>
-    ipcRenderer.invoke("image:write", payload),
+  imageWriteMany: (payload: ImagePayload[]) =>
+    ipcRenderer.invoke("image:write-many", payload),
   onThemeChanged: (
     callback: (resolvedTheme: Extract<Theme, "dark" | "light">) => void,
   ) => {

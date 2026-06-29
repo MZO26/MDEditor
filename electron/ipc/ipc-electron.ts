@@ -1,6 +1,6 @@
 import { setUpNoteMenu, setUpTableMenu } from "@electron/context-menu";
 import { getFilePath } from "@electron/fs/fs-auto-export";
-import { handleImageWrite } from "@electron/fs/fs-image";
+import { handleImageWriteMany } from "@electron/fs/fs-image";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import {
   checkRateLimit,
@@ -13,7 +13,7 @@ import { LIMITS } from "@shared/constants";
 import { AppErrorCode } from "@shared/errors";
 import { ExternalUrlSchema } from "@shared/schemas/editor-schema";
 import { OpenAutoExportPathSchema } from "@shared/schemas/export-schema";
-import { ImagePayloadSchema } from "@shared/schemas/image-schema";
+import { ImagePayloadsSchema } from "@shared/schemas/image-schema";
 import { type Theme } from "@shared/schemas/store-schema";
 import type { MenuType, NoteMenuPayload } from "@shared/types";
 import {
@@ -161,12 +161,13 @@ function registerElectronIpc(win: BrowserWindow) {
       }
     });
   });
-  ipcMain.handle("image:write", (e, payload: unknown) => {
+
+  ipcMain.handle("image:write-many", (e, payload: unknown) => {
     return result(e, async () => {
-      if (!checkRateLimit("image:write", LIMITS.WRITE_HEAVY))
+      if (!checkRateLimit("image:write-many", LIMITS.WRITE_HEAVY))
         throw new AppBackendError(AppErrorCode.RateLimitError);
-      const validatedData = validation(ImagePayloadSchema, payload);
-      return await handleImageWrite(validatedData);
+      const validatedData = validation(ImagePayloadsSchema, payload);
+      return await handleImageWriteMany(validatedData);
     });
   });
 }

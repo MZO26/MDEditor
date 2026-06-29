@@ -7,7 +7,7 @@ Built with Electron, TypeScript, Better SQLite3, and TipTap.
 ## Features
 
 - Local-first note storage with SQLite
-- Fast in-memory fuzzy search with fuse.js
+- Fast note-search with minisearch
 - Markdown-focused editing with TipTap
 - Connect and organize notes with links and tags
 - Export notes to Markdown, Plain Text, HTML, JSON and PDF
@@ -24,7 +24,7 @@ Built with Electron, TypeScript, Better SQLite3, and TipTap.
 - TypeScript
 - Better SQLite 3
 - TipTap / ProseMirror
-- fuse.js
+- minisearch
 - electron-vite
 - Vite
 - DOMPurify

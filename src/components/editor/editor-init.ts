@@ -198,20 +198,16 @@ function getNoteEditorExtensions() {
           target: "_blank",
           rel: "noopener noreferrer",
         },
-        validate: (href) => {
-          const protocolMatch = href.match(/^([a-zA-Z0-9\+\-\.]+):/);
+        isAllowedUri: (url, ctx) => {
+          if (!ctx.defaultValidate(url)) {
+            return false;
+          }
+          const protocolMatch = url.match(/^([a-zA-Z0-9+.-]+):/);
           if (!protocolMatch) {
             return true;
           }
-          const protocol = protocolMatch[0].toLowerCase();
-          const allowedProtocols = [
-            "http:",
-            "https:",
-            "mailto:",
-            "tel:",
-            "appimg:",
-          ];
-          return allowedProtocols.includes(protocol);
+          const protocol = protocolMatch[1]?.toLowerCase();
+          return protocol === "https" || protocol === "appimg";
         },
       },
       dropcursor: {

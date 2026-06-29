@@ -16,7 +16,7 @@ async function singleExport(filePath: string, data: string) {
   const absoluteTargetFolder = path.dirname(filePath);
   const userDataPath = app.getPath("userData");
   const imagesFolder = path.join(userDataPath, "editor-images");
-  const portableContent = sanitizeExportString(
+  const portableContent = await sanitizeExportString(
     data,
     absoluteTargetFolder,
     imagesFolder,
@@ -41,7 +41,7 @@ async function batchExport(folder: string, payload: ExportedContent[]) {
     async (item: ExportedContent) => {
       try {
         const absoluteFilePath = getFilePath(absoluteTargetFolder, item);
-        const portableContent = sanitizeExportString(
+        const portableContent = await sanitizeExportString(
           item.content,
           absoluteTargetFolder,
           imagesFolder,

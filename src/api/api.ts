@@ -156,8 +156,10 @@ async function showNotification(
   return invoke(window.electronAPI.showNotification(title, body));
 }
 
-async function imageWrite(payload: ImagePayload): Promise<Result<ImageSrc>> {
-  return invoke(window.electronAPI.imageWrite(payload));
+async function imageWriteMany(
+  payload: ImagePayload[],
+): Promise<Result<ImageSrc[]>> {
+  return invoke(window.electronAPI.imageWriteMany(payload));
 }
 
 async function handleZoom(action: ZoomAction): Promise<Result<ZoomAction>> {
@@ -203,8 +205,8 @@ const debouncedSetSettings = debounce(
         );
         return;
       }
-    } catch (err) {
-      console.error("[setSettings]: Unknown error", err);
+    } catch (error: unknown) {
+      console.error("[setSettings]: Unknown error", error);
     }
   },
   DEBOUNCE_MS.fast,
@@ -233,7 +235,7 @@ export {
   getNoteById,
   getSettings,
   handleZoom,
-  imageWrite,
+  imageWriteMany,
   importNote,
   openAppPath,
   openAutoExportFolder,

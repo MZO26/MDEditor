@@ -1,51 +1,77 @@
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import { validation } from "@electron/ipc/ipc-validation";
 import { AppErrorCode } from "@shared/errors";
+import { processWithLimit } from "@shared/limiter";
 import { FileNameSchema } from "@shared/schemas/export-schema";
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 
-function sanitizeExportString(
+const EXPORT_REGEX = /appimg:\/\/\/([^"' )>\s]+)/g;
+const IMPORT_REGEX = /(?:\.\/)?assets\/([^"' )>\s]+)/g;
+
+async function sanitizeExportString(
   content: string,
   exportDir: string,
   internalImgDir: string,
 ) {
   const assetsDir = path.join(exportDir, "assets");
-  const regex = /appimg:\/\/\/([^"' )>\s]+)/g;
-  const portableContent = content.replace(regex, (_fullMatch, fileName) => {
-    if (!fs.existsSync(assetsDir)) {
-      fs.mkdirSync(assetsDir, { recursive: true });
-    }
-    const internalPath = path.join(internalImgDir, fileName);
-    const exportPath = path.join(assetsDir, fileName);
-    if (fs.existsSync(internalPath)) {
-      fs.copyFileSync(internalPath, exportPath);
-    }
+  const fileNames = new Set<string>();
+  const portableContent = content.replace(EXPORT_REGEX, (_match, fileName) => {
+    fileNames.add(fileName);
     return `assets/${fileName}`;
   });
+  if (fileNames.size > 0) {
+    await fs.mkdir(assetsDir, { recursive: true });
+    await processWithLimit([...fileNames], 100, async (fileName) => {
+      const internalPath = path.join(internalImgDir, fileName);
+      const exportPath = path.join(assetsDir, fileName);
+      try {
+        await fs.copyFile(internalPath, exportPath);
+      } catch (error: unknown) {
+        const err = error as NodeJS.ErrnoException;
+        if (err.code !== "ENOENT") {
+          console.error(
+            "[sanitizeExportString]: Failed to copy file",
+            err.code,
+          );
+        }
+      }
+    });
+  }
   return portableContent;
 }
 
-function sanitizeImportString(
+async function sanitizeImportString(
   importedContent: string,
   importedFileDir: string,
   internalImgDir: string,
 ) {
-  const regex = /(?:\.\/)?assets\/([^"' )>\s]+)/g;
+  const fileNames = new Set<string>();
   const internalContent = importedContent.replace(
-    regex,
-    (_fullMatch, fileName) => {
-      const sourceImagePath = path.join(importedFileDir, "assets", fileName);
-      const destImagePath = path.join(internalImgDir, fileName);
-      if (!fs.existsSync(internalImgDir)) {
-        fs.mkdirSync(internalImgDir, { recursive: true });
-      }
-      if (fs.existsSync(sourceImagePath)) {
-        fs.copyFileSync(sourceImagePath, destImagePath);
-      }
+    IMPORT_REGEX,
+    (_match, fileName) => {
+      fileNames.add(fileName);
       return `appimg:///${fileName}`;
     },
   );
+  if (fileNames.size > 0) {
+    await fs.mkdir(internalImgDir, { recursive: true });
+    await processWithLimit([...fileNames], 100, async (fileName) => {
+      const sourceImagePath = path.join(importedFileDir, "assets", fileName);
+      const destImagePath = path.join(internalImgDir, fileName);
+      try {
+        await fs.copyFile(sourceImagePath, destImagePath);
+      } catch (error: unknown) {
+        const err = error as NodeJS.ErrnoException;
+        if (err.code !== "ENOENT")
+          console.error(
+            "[sanitizeImportString]: Failed to copy file:",
+            err.code,
+          );
+      }
+    });
+  }
+
   return internalContent;
 }
 

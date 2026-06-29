@@ -193,7 +193,7 @@ const DOMPURIFY_CONFIG = {
   ALLOW_ONLY_SAFE_URI_ATTRIBUTES: true,
   FORCE_BODY: true,
   ALLOWED_URI_REGEXP:
-    /^(?:(?:https?|mailto|tel|appimg):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    /^(?:(?:https|appimg):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
 };
 
 const UNTITLED = "Untitled";

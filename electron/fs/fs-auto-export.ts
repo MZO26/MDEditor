@@ -25,15 +25,16 @@ import path from "path";
 
 async function isAutoExport(id: string) {
   const validatedData = validation(IdSchema, id);
-  const note = db.getById(validatedData);
+  const note = db.getOldNotes([validatedData]);
+  if (!note[0]) return;
   const enabled = store.get("auto-export") ?? false;
   if (!enabled) return false;
   const targetDir = (enabled && store.get("auto-export-path")) ?? null;
   if (!targetDir) return false;
   const exportPath = resolveAutoExportPath(targetDir);
   const absoluteFilePath = getFilePath(exportPath, {
-    created_at: note.created_at,
-    fileName: note.title,
+    created_at: note[0].created_at,
+    fileName: note[0].title,
     extension: "md",
   });
   try {
@@ -129,7 +130,7 @@ async function writeAutoExportFileLogic(
     : undefined;
   const userDataPath = app.getPath("userData");
   const imagesFolder = path.join(userDataPath, "editor-images");
-  const portableContent = sanitizeExportString(
+  const portableContent = await sanitizeExportString(
     payload.content,
     exportPath,
     imagesFolder,

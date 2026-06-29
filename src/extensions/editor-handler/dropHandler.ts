@@ -1,9 +1,12 @@
-import { processAndInsertImage } from "@/extensions/image/image";
-import { sleep } from "@/utils/async";
-import { useDelayedSpinner } from "@/utils/ui";
-import { CONTENT_TYPE_MAP } from "@shared/constants";
+import { processAndInsertImages } from "@/extensions/image/image";
+import {
+  ALLOWED_TYPES,
+  CONTENT_TYPE_MAP,
+  DOMPURIFY_CONFIG,
+} from "@shared/constants";
 import { Extension } from "@tiptap/core";
 import { Plugin } from "@tiptap/pm/state";
+import DOMPurify from "dompurify";
 
 function getExtension(name: string) {
   const index = name.lastIndexOf(".");
@@ -28,41 +31,42 @@ export const DropHandler = Extension.create({
               top: event.clientY,
             });
             if (!coords) return false;
-            const supportedFiles = files.filter((file) => {
-              if (file.type.startsWith("image/")) return true;
+            const safeFiles = files.slice(0, 20);
+            const supportedFiles = safeFiles.filter((file) => {
+              if (ALLOWED_TYPES.includes(file.type)) return true;
               const ext = getExtension(file.name);
               return ext === "txt" || ext in CONTENT_TYPE_MAP;
             });
             if (supportedFiles.length === 0) return false;
             event.preventDefault();
-            const stopSpinner = useDelayedSpinner();
             void (async () => {
               try {
                 editor.chain().focus().setTextSelection(coords.pos).run();
-                for (const file of supportedFiles) {
+                const imageFiles = supportedFiles.filter((file) =>
+                  ALLOWED_TYPES.includes(file.type),
+                );
+                if (imageFiles.length > 0) {
+                  await processAndInsertImages(imageFiles, editor);
+                }
+                const nonImageFiles = supportedFiles.filter(
+                  (file) => !ALLOWED_TYPES.includes(file.type),
+                );
+                for (const file of nonImageFiles) {
                   try {
-                    if (file.type.startsWith("image/")) {
-                      await sleep(1000);
-                      await processAndInsertImage(file, editor);
-                      continue;
-                    }
+                    editor.chain().focus().setTextSelection(coords.pos).run();
                     const ext = getExtension(file.name);
                     const text = await file.text();
                     const contentType =
                       ext === "txt" ? "txt" : CONTENT_TYPE_MAP[ext];
                     if (contentType === "txt") {
-                      editor.commands.command(({ tr, dispatch }) => {
-                        if (dispatch) {
-                          tr.insertText(text);
-                        }
-                        return true;
-                      });
+                      editor.commands.insertContent(text);
                     } else if (contentType === "markdown") {
                       editor.commands.insertContent(text, {
                         contentType: "markdown",
                       });
                     } else if (contentType === "html") {
-                      editor.commands.insertContent(text, {
+                      const safe = DOMPurify.sanitize(text, DOMPURIFY_CONFIG);
+                      editor.commands.insertContent(safe, {
                         parseOptions: { preserveWhitespace: "full" },
                       });
                     } else if (contentType === "json") {
@@ -70,15 +74,19 @@ export const DropHandler = Extension.create({
                     }
                   } catch (error) {
                     console.error(
-                      `Failed to process dropped file: ${file.name}`,
+                      "[DropHandler]: Failed to process dropped file:",
                       error,
                     );
                   }
                 }
-              } finally {
-                if (stopSpinner) stopSpinner();
+              } catch (error) {
+                console.error(
+                  "[DropHandler]: Failed to process dropped file:",
+                  error,
+                );
               }
             })();
+
             return true;
           },
         },

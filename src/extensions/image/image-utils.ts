@@ -15,12 +15,12 @@ function getScaledSize(
 }
 
 async function compressImage(
-  file: File,
+  blob: Blob,
   maxWidth = 1000,
   quality = 0.9,
 ): Promise<Uint8Array> {
   // decodes the image file into a drawable ImageBitmap object, ready to be drawn onto a canvas
-  const bitmap = await createImageBitmap(file).catch(() => {
+  const bitmap = await createImageBitmap(blob).catch(() => {
     throw new WorkerTaskError(WorkerErrorCode.InvalidImageError);
   });
   // starts with original image dimensions. If image is wider than maxWidth it recalculates height so the aspect ratio stays the same, while width gets set to maxWidth
@@ -36,14 +36,13 @@ async function compressImage(
   ctx.drawImage(bitmap, 0, 0, width, height); // ctx represents the drawing interface
   bitmap.close();
   // encode canvas pixels into compressed webp file. the blob holds the fully compressed file data, but hides the bytes behind an unreadable interface
-  const blob = await canvas
+  const outputBlob = await canvas
     .convertToBlob({ type: "image/webp", quality })
     .catch(() => {
       throw new WorkerTaskError(WorkerErrorCode.CompressionError);
     });
-  console.log(blob.type);
   // because you can't access bytes inside blob, it gets turned into an arrayBuffer. (blob contains metadata and acts as a reference, arrayBuffer is the actual memory)
-  const buffer = await blob.arrayBuffer();
+  const buffer = await outputBlob.arrayBuffer();
   canvas.width = 0;
   canvas.height = 0;
   // reaturn as Uint8Array, which is perfect for sending data over the IPC bridge. It enables reading of the buffer byte-by-byte

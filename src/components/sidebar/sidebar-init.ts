@@ -135,6 +135,7 @@ function applySidebarListeners(
   sidebar.addEventListener("contextmenu", (e) => {
     if (stateStore.get("selectionMode") === true) return;
     const target = e.target as HTMLElement | null;
+    if (!target) return;
     const isEmptySidebar =
       sidebar.childElementCount === 1 &&
       sidebar.firstElementChild?.classList.contains("sidebar-empty-state");
@@ -143,7 +144,7 @@ function applySidebarListeners(
       return;
     }
     e.preventDefault();
-    const noteElement = target?.closest<HTMLDivElement>(".note-item");
+    const noteElement = target.closest<HTMLDivElement>(".note-item");
     const id = noteElement?.getAttribute("data-id");
     if (!id) return;
     const isPinned = noteElement?.getAttribute("data-pinned") === "true";
