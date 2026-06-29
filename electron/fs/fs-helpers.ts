@@ -22,7 +22,7 @@ async function sanitizeExportString(
   });
   if (fileNames.size > 0) {
     await fs.mkdir(assetsDir, { recursive: true });
-    await processWithLimit([...fileNames], 100, async (fileName) => {
+    await processWithLimit([...fileNames], 20, async (fileName) => {
       const internalPath = path.join(internalImgDir, fileName);
       const exportPath = path.join(assetsDir, fileName);
       try {
@@ -56,7 +56,7 @@ async function sanitizeImportString(
   );
   if (fileNames.size > 0) {
     await fs.mkdir(internalImgDir, { recursive: true });
-    await processWithLimit([...fileNames], 100, async (fileName) => {
+    await processWithLimit([...fileNames], 20, async (fileName) => {
       const sourceImagePath = path.join(importedFileDir, "assets", fileName);
       const destImagePath = path.join(internalImgDir, fileName);
       try {

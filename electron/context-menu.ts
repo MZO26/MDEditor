@@ -92,9 +92,7 @@ async function setUpNoteMenu(win: BrowserWindow, payload: NoteMenuPayload) {
             store.get("auto-export") === true &&
             hasAutoExportedFile,
           visible: store.get("auto-export") === true,
-          click: async () => {
-            win.webContents.send("note:trigger-copy-path", id);
-          },
+          click: () => win.webContents.send("note:trigger-copy-path", id),
         },
       ],
     },
@@ -145,9 +143,7 @@ async function setUpNoteMenu(win: BrowserWindow, payload: NoteMenuPayload) {
         store.get("auto-export") === true &&
         hasAutoExportedFile,
       visible: store.get("auto-export") === true,
-      click: async () => {
-        win.webContents.send("note:trigger-path", id);
-      },
+      click: () => win.webContents.send("note:trigger-path", id),
     },
     { type: "separator" },
     {

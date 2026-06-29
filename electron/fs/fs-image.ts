@@ -36,7 +36,7 @@ async function handleImageWriteMany(validatedData: ImagePayload[]) {
   }
   await processWithLimit(
     [...uniqueWrites.values()],
-    100,
+    20,
     async ({ filePath, imageBuffer }) => {
       try {
         await fs.writeFile(filePath, imageBuffer, { flag: "wx" });

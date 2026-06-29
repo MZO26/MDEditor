@@ -156,11 +156,6 @@ type ImageSrc = {
 
 type ThemeResult = { theme: Theme; codeTheme: CodeTheme };
 
-type SnippetCacheValue = {
-  snippet: string;
-  indices: [number, number][];
-};
-
 type SidebarChange =
   | { type: "reload" }
   | { type: "update"; noteId: string }
@@ -239,7 +234,6 @@ export type {
   SelectOption,
   SettingsCategory,
   SidebarChange,
-  SnippetCacheValue,
   Success,
   TemplateRegistry,
   ThemeResult,

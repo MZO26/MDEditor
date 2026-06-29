@@ -26,7 +26,7 @@ import path from "path";
 async function isAutoExport(id: string) {
   const validatedData = validation(IdSchema, id);
   const note = db.getOldNotes([validatedData]);
-  if (!note[0]) return;
+  if (!note[0]) return false;
   const enabled = store.get("auto-export") ?? false;
   if (!enabled) return false;
   const targetDir = (enabled && store.get("auto-export-path")) ?? null;
@@ -199,7 +199,7 @@ async function deleteAutoExportFile(
   targetDir: string,
   oldNotes: Pick<Note, "created_at" | "title">[],
 ) {
-  await processWithLimit(oldNotes, 10, async (note) => {
+  await processWithLimit(oldNotes, 20, async (note) => {
     const validatedFileData = validation(DeleteAutoExportRequestSchema, {
       created_at: note.created_at,
       fileName: note.title,
