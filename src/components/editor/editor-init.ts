@@ -14,19 +14,12 @@ import { Highlight } from "@/extensions/highlight";
 import { lowlight } from "@/extensions/lowlight";
 import { CustomHeading } from "@/extensions/overrides/headings";
 import { CustomUnderline } from "@/extensions/overrides/underline";
-import {
-  getTableOfContents,
-  initTableOfContents,
-} from "@/extensions/tableOfContents";
+import { initTableOfContents } from "@/extensions/tableOfContents";
 import { NoteTag } from "@/extensions/tag";
 import { Typography } from "@/extensions/typography";
 import { WikiLinkPreview } from "@/extensions/wikilinks/wikilink-preview";
 import { WikiLink } from "@/extensions/wikilinks/wikilinks";
-import {
-  debouncedSaveNote,
-  handleSelectNote,
-  isAutoExportEnabled,
-} from "@/notes/note-actions";
+import { debouncedSaveNote, handleSelectNote } from "@/notes/note-actions";
 import { noteStore, stateStore } from "@/settings/app-state";
 import { requireElement } from "@/utils/dom";
 import { DOMPURIFY_CONFIG } from "@shared/constants";
@@ -73,19 +66,12 @@ function initEditor(settings: Partial<AppSettings>): Editor {
     },
     autofocus: true,
   });
-  editor.on("update", ({ editor, transaction }) => {
+  editor.on("update", ({ transaction }) => {
     if (!transaction.docChanged) return;
     const activeId = stateStore.get("activeId");
-    const activeNote = noteStore.get("activeNote");
-    if (!activeId || !activeNote) return;
-    const content = editor.getJSON();
-    const text = editor.getText();
-    const markdown = isAutoExportEnabled() ? editor.getMarkdown() : undefined;
-    debouncedSaveNote(activeId, content, text, markdown, false);
-    const currentHeadings = getTableOfContents(editor);
-    updateToc(currentHeadings);
+    if (!activeId) return;
+    debouncedSaveNote(activeId, false);
   });
-
   inEditorSearch(editor);
   return editor;
 }

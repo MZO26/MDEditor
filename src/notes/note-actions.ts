@@ -25,7 +25,6 @@ import { DEBOUNCE_MS, EMPTY_DOC, UNTITLED } from "@shared/constants";
 import { getMetadata, titleGenerator } from "@shared/generators";
 import {
   type CreateNotePayload,
-  type Note,
   type NoteListItem,
   type UpdateNotePayload,
 } from "@shared/schemas/note-schema";
@@ -201,13 +200,14 @@ async function handleDeleteNote(id: string) {
 
 // update
 
-async function handleSaveNote(
-  id: string,
-  content: Note["content"],
-  plainText: Note["plainText"],
-  markdown?: string,
-  flush: boolean = false,
-) {
+async function handleSaveNote(id: string, flush: boolean = false) {
+  if (stateStore.get("activeId") !== id) return;
+  const activeNote = noteStore.get("activeNote");
+  if (!activeNote) return;
+  const editor = getAppItem("editor");
+  const content = editor.getJSON();
+  const plainText = editor.getText();
+  const markdown = isAutoExportEnabled() ? editor.getMarkdown() : undefined;
   const metaData = getMetadata(content);
   const newTitle = titleGenerator(content);
   const autoExportEnabled = isAutoExportEnabled();
@@ -224,6 +224,7 @@ async function handleSaveNote(
     console.error("[handleSaveNote]: Save failed.", result.error);
     return;
   }
+  if (stateStore.get("activeId") !== id) return;
   const updatedListItem = toNoteListItem(result.data);
   const activeTag = stateStore.get("activeTag");
   noteStore.setState((state) => {
@@ -260,6 +261,8 @@ async function handleSaveNote(
   });
   searchEngine.upsertNote(updatedListItem);
   updateStats();
+  const currentHeadings = getTableOfContents(editor);
+  updateToc(currentHeadings);
 }
 
 const debouncedSaveNote = debounce(handleSaveNote, DEBOUNCE_MS.slow);

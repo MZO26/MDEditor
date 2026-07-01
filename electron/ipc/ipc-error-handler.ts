@@ -1,6 +1,6 @@
 import { AppErrorCode } from "@shared/errors";
 import type { Failure } from "@shared/types";
-import z, { ZodError } from "zod";
+import { ZodError } from "zod";
 
 class AppBackendError extends Error {
   constructor(
@@ -20,10 +20,7 @@ function handleIpcError(err: unknown): Failure {
     };
   }
   if (err instanceof ZodError) {
-    console.error(
-      "[IPC Validation]:",
-      JSON.stringify(z.treeifyError(err), null, 2),
-    );
+    console.error("[IPC Validation]:", JSON.stringify(err, null, 2));
     return {
       success: false,
       error: AppErrorCode.InvalidData,

@@ -27,7 +27,6 @@ function extractText(node: JSONContent): string {
       for (const child of n.content) {
         walk(child);
       }
-
       if (n.type && BLOCK_TYPES.has(n.type)) {
         parts.push(" ");
       }
@@ -54,7 +53,6 @@ function textConverter(plainText: string): JSONContent[] | undefined {
       });
     }
   }
-
   return content;
 }
 
