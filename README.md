@@ -7,6 +7,7 @@ Built with Electron, TypeScript, Better SQLite3, and TipTap.
 ## Features
 
 - Local-first note storage with SQLite
+- Optional auto-export to markdown files
 - Fast note-search with minisearch
 - Markdown-focused editing with TipTap
 - Connect and organize notes with links and tags
