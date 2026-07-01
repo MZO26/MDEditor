@@ -19,6 +19,11 @@ const tagAutocompleteKey = new PluginKey<TagAutocompleteState>(
 );
 const tagClickHandlerKey = new PluginKey<null>("tagClickHandler");
 
+const normalizeTagId = (value: unknown) =>
+  String(value ?? "")
+    .trim()
+    .toLowerCase();
+
 const NoteTag = Node.create<NoteTagOptions>({
   name: "noteTag",
   group: "inline",
@@ -33,16 +38,16 @@ const NoteTag = Node.create<NoteTagOptions>({
   addAttributes: () => ({
     id: {
       default: null,
-      parseHTML: (el) => el.getAttribute("data-id"),
+      parseHTML: (el) => normalizeTagId(el.getAttribute("data-id")),
       renderHTML: (attrs) => ({
-        "data-id": attrs["id"],
+        "data-id": normalizeTagId(attrs["id"]),
       }),
     },
   }),
   parseHTML: () => [{ tag: 'span[data-type="noteTag"]' }],
 
   renderHTML({ node, HTMLAttributes }) {
-    const id = node.attrs?.["id"] ?? "";
+    const id = normalizeTagId(node.attrs?.["id"] ?? "");
     return [
       "span",
       mergeAttributes(HTMLAttributes, {
@@ -54,7 +59,7 @@ const NoteTag = Node.create<NoteTagOptions>({
   },
 
   renderText({ node }) {
-    const id = String(node.attrs?.["id"] ?? "").trim();
+    const id = normalizeTagId(node.attrs?.["id"] ?? "");
     return id ? `#${id}` : "";
   },
 
@@ -73,7 +78,7 @@ const NoteTag = Node.create<NoteTagOptions>({
   },
 
   parseMarkdown(token, helpers) {
-    const id = String(token.text ?? "").trim();
+    const id = normalizeTagId(token.text ?? "");
     if (!id) {
       return helpers.createTextNode(token.raw ?? "");
     }
@@ -81,7 +86,7 @@ const NoteTag = Node.create<NoteTagOptions>({
   },
 
   renderMarkdown(node) {
-    const id = String(node.attrs?.["id"] ?? "").trim();
+    const id = normalizeTagId(node.attrs?.["id"] ?? "");
     return id ? `#${id}` : "";
   },
 
@@ -96,7 +101,7 @@ const NoteTag = Node.create<NoteTagOptions>({
           // match[0] is the full text
           // match[1] is the text without the #
           const matchString = match[0];
-          const tagText = match[1];
+          const tagText = normalizeTagId(match[1]);
           const prefixSpace = matchString.match(/^\s/) ? 1 : 0;
           const node = this.type.create({ id: tagText });
           tr.replaceWith(start + prefixSpace, end, node).insertText(" ");
@@ -115,7 +120,7 @@ const NoteTag = Node.create<NoteTagOptions>({
           .insertContentAt({ from: state.from, to: state.to }, [
             {
               type: this.name,
-              attrs: { id: state.tagId },
+              attrs: { id: normalizeTagId(state.tagId) },
             },
             {
               type: "text",

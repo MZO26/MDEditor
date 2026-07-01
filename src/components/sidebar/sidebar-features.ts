@@ -153,11 +153,13 @@ function createAllTagsPopover(button: HTMLButtonElement) {
 }
 
 function applyTagView(tagId: string) {
-  stateStore.setState({ activeTag: tagId });
-  updateSettings({ "active-tag": tagId });
+  const normalizedTag = tagId.trim().toLowerCase();
+  if (!normalizedTag) return;
+  stateStore.setState({ activeTag: normalizedTag });
+  updateSettings({ "active-tag": normalizedTag });
   noteStore.setState((state) => ({
     visibleIds: state.notes
-      .filter((note) => note.tags.includes(tagId))
+      .filter((note) => note.tags.includes(normalizedTag))
       .map((note) => note.id),
     sidebarChange: { type: "reload" },
   }));
