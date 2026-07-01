@@ -2,7 +2,6 @@ import { UNTITLED } from "@shared/constants";
 import {
   AutoExportWritePayloadSchema,
   DateSchema,
-  TitleSchema,
 } from "@shared/schemas/note-schema";
 import z from "zod";
 
@@ -87,7 +86,7 @@ const ExportRequestSchema = z.discriminatedUnion("extension", [
 ]);
 
 const WriteAutoExportRequestSchema = MdSchema.extend({
-  oldFileName: TitleSchema.optional(),
+  oldFileName: FileNameSchema.optional(),
 });
 
 const DeleteAutoExportRequestSchema = MdSchema.omit({

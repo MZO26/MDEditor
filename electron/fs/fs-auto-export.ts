@@ -169,7 +169,7 @@ async function writeAutoExportFile({
     WriteAutoExportRequestSchema,
     writePayload,
   );
-  console.log("[writeNote]: Looking at file:", {
+  console.log("[writeAutoExportFile]: Looking at file:", {
     created_at: validatedFileData.created_at,
     fileName: validatedFileData.fileName,
     oldFileName,
@@ -180,7 +180,7 @@ async function writeAutoExportFile({
       oldFileName,
     });
   } catch (error) {
-    console.error("[writeMirroredNote]: Failed to write file:", error);
+    console.error("[writeAutoExportFile]: Failed to write file:", error);
     throw new AppBackendError(AppErrorCode.FileWriteError);
   }
 }
@@ -212,7 +212,7 @@ async function deleteAutoExportFile(
       if (err.code === "ENOENT") {
         return;
       }
-      console.error("[deleteFile]: Failed to delete file:", error);
+      console.error("[deleteAutoExportFile]: Failed to delete file:", error);
       throw new AppBackendError(AppErrorCode.FileWriteError);
     }
   });

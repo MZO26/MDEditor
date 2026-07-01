@@ -22,6 +22,7 @@ async function checkSyncState(
   });
   let markdown: string | null = null;
   try {
+    await fs.mkdir(autoExportPath, { recursive: true });
     const fsStat = await fs.stat(absoluteFilePath);
     if (!fsStat) {
       console.log("MISSING");

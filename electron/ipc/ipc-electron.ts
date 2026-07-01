@@ -1,5 +1,8 @@
 import { setUpNoteMenu, setUpTableMenu } from "@electron/context-menu";
-import { getFilePath } from "@electron/fs/fs-auto-export";
+import {
+  getFilePath,
+  resolveAutoExportPath,
+} from "@electron/fs/fs-auto-export";
 import { handleImageWriteMany } from "@electron/fs/fs-image";
 import { AppBackendError } from "@electron/ipc/ipc-error-handler";
 import {
@@ -69,7 +72,9 @@ function registerElectronIpc(win: BrowserWindow) {
       if (!validatedData.updated_at) return null;
       const targetDir = store.get("auto-export-path");
       if (!targetDir) return null;
-      const filePath = getFilePath(targetDir, validatedData);
+      const autoExportPath = resolveAutoExportPath(targetDir);
+      await fs.mkdir(autoExportPath, { recursive: true });
+      const filePath = getFilePath(autoExportPath, validatedData);
       try {
         await fs.access(filePath, fs.constants.R_OK);
         shell.showItemInFolder(filePath);
@@ -92,7 +97,9 @@ function registerElectronIpc(win: BrowserWindow) {
       if (!validatedData.updated_at) return null;
       const targetDir = store.get("auto-export-path");
       if (!targetDir) return null;
-      const filePath = getFilePath(targetDir, validatedData);
+      const autoExportPath = resolveAutoExportPath(targetDir);
+      await fs.mkdir(autoExportPath, { recursive: true });
+      const filePath = getFilePath(autoExportPath, validatedData);
       try {
         await fs.access(filePath, fs.constants.R_OK);
         return filePath;
