@@ -12,8 +12,6 @@ enum AppErrorCode {
   SenderError = "UNAUTHORIZED_SENDER",
   UnknownError = "UNKNOWN_ERROR",
   CancelledOperation = "CANCELLED_OPERATION",
-  CompressionError = "COMPRESSION_ERROR",
-  InvalidImageError = "INVALID_IMAGE_ERROR",
   ExportError = "EXPORT_ERROR",
 }
 
@@ -25,8 +23,6 @@ const ERROR_MESSAGES: Record<AppErrorCode, string> = {
   [AppErrorCode.SenderError]: "Action blocked for security.",
   [AppErrorCode.UnknownError]: "An unexpected error occurred.",
   [AppErrorCode.CancelledOperation]: "Operation cancelled.",
-  [AppErrorCode.CompressionError]: "Failed to compress file.",
-  [AppErrorCode.InvalidImageError]: "Unsupported image format.",
   [AppErrorCode.ExportError]: "Export failed.",
 };
 
