@@ -28,6 +28,7 @@ import {
   type NoteListItem,
   type UpdateNotePayload,
 } from "@shared/schemas/note-schema";
+import type { FilePathRequest } from "@shared/schemas/request-schema";
 
 // helpers
 
@@ -84,8 +85,12 @@ async function handleCreateNote() {
 
 // import + create many
 
-async function handleImportNote() {
-  const imported = await importNote();
+async function handleImportNote(request: FilePathRequest) {
+  const imported = await importNote(
+    request.source === "dialog"
+      ? request
+      : { source: "external", filePaths: request.filePaths },
+  );
   if (!imported.success) {
     console.error(
       "[handleImportNote -> importNote]: Failed to import note:",

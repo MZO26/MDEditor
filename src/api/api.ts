@@ -11,6 +11,7 @@ import type {
 } from "@shared/schemas/note-schema";
 import type {
   ExportRequest,
+  FilePathRequest,
   ImportRequest,
   OpenAutoExportPathRequest,
   SyncRequestPayload,
@@ -92,8 +93,10 @@ async function exportManyNotes(
   return invoke(window.noteAPI.noteExportMany(payload));
 }
 
-async function importNote(): Promise<Result<ImportRequest[]>> {
-  return invoke(window.noteAPI.noteImport());
+async function importNote(
+  payload: FilePathRequest,
+): Promise<Result<ImportRequest[]>> {
+  return invoke(window.noteAPI.noteImport(payload));
 }
 
 async function pin(id: string): Promise<Result<boolean>> {

@@ -4,7 +4,7 @@ import type {
   ExportFormat,
   Theme,
 } from "@shared/schemas/store-schema";
-import type { Content, Editor } from "@tiptap/core";
+import type { Content, Editor, SetContentOptions } from "@tiptap/core";
 
 type NativeWindowColors = {
   backgroundColor: string;
@@ -93,11 +93,13 @@ type FileContent = {
 
 type PDFAssets = { template: string; css: string };
 
-type ContentType = "markdown" | "html" | "json";
+type ContentType = "markdown" | "html" | "json" | "text";
 
 type ZoomAction = "get" | "in" | "out" | "reset";
 
 type DbOptimization = "optimize-db" | "vacuum-db" | "backup-db";
+
+type EditorContentType = NonNullable<SetContentOptions["contentType"]>;
 
 type SettingsCategory = "Appearance" | "Editor" | "General";
 
@@ -221,6 +223,7 @@ export type {
   CoreRegistry,
   DBBackupResult,
   DbOptimization,
+  EditorContentType,
   ErrorHandlerOptions,
   ExportedContent,
   ExportFormat,

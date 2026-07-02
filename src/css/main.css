@@ -1103,4 +1103,9 @@ svg.empty-state-icon {
     width: 500px;
     height: 380px;
   }
+
+  .input-wrapper-editor,
+  .input-wrapper-editor-replace {
+    width: 210px;
+  }
 }

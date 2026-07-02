@@ -101,6 +101,11 @@ function estimateReadingTime(wordCount: number, wpm = 238) {
   return s < 30 ? "< 1 min read" : s < 60 ? "1 min read" : `${m} min read`;
 }
 
+function getExtension(name: string) {
+  const index = name.lastIndexOf(".");
+  return index > 0 ? name.slice(index + 1).toLowerCase() : "";
+}
+
 function toNoteListItem(note: Note): NoteListItem {
   return {
     id: note.id,
@@ -119,6 +124,7 @@ export {
   addActiveTagToDoc,
   compareNotes,
   estimateReadingTime,
+  getExtension,
   hasNoteTag,
   toNoteListItem,
   updateNoteCount,

@@ -116,6 +116,16 @@ const ImportRequestSchema = z.discriminatedUnion("extension", [
   TxtSchema.omit({ created_at: true }),
 ]);
 
+const FilePathRequestSchema = z.discriminatedUnion("source", [
+  z.object({
+    source: z.literal("external"),
+    filePaths: z.array(z.string().min(1)).min(1),
+  }),
+  z.object({
+    source: z.literal("dialog"),
+  }),
+]);
+
 const NotificationSchema = z.object({
   title: z.string().trim().min(1).max(50),
   body: z.string().trim().max(100).default(""),
@@ -125,6 +135,7 @@ const SyncRequestPayloadSchema = AutoExportWritePayloadSchema.extend({
   updated_at: DateSchema,
 });
 
+type FilePathRequest = z.infer<typeof FilePathRequestSchema>;
 type SyncRequestPayload = z.infer<typeof SyncRequestPayloadSchema>;
 type OpenAutoExportPathRequest = z.infer<typeof OpenAutoExportPathSchema>;
 type AutoExportRequest = z.infer<typeof AutoExportRequestSchema>;
@@ -140,6 +151,7 @@ export {
   ExportManyRequestSchema,
   ExportRequestSchema,
   FileNameSchema,
+  FilePathRequestSchema,
   ImportRequestSchema,
   NotificationSchema,
   OpenAutoExportPathSchema,
@@ -150,6 +162,7 @@ export {
   type DeleteAutoExportRequest,
   type ExportManyRequest,
   type ExportRequest,
+  type FilePathRequest,
   type ImportRequest,
   type OpenAutoExportPathRequest,
   type SyncRequestPayload,

@@ -15,7 +15,6 @@ import {
 import { debouncedSaveNote, handleSaveNote } from "@/notes/note-actions";
 import { noteStore, settingsStore, stateStore } from "@/settings/app-state";
 import { initDeleteDialog, initSyncDialog } from "@/settings/dialog-init";
-import { getAppItem } from "@/utils/registry";
 import type { NoteMenuPayload } from "@shared/types";
 
 //-------------------------------------------------------
@@ -29,12 +28,8 @@ async function ensureNoteSaved(id: string) {
   const note = noteStore.get("notes").find((n) => n.id === id);
   if (!note) return;
   if (stateStore.get("activeId") !== id) return;
-  const editor = getAppItem("editor");
-  const json = editor.getJSON();
-  const markdown = editor.getMarkdown();
-  const plainText = editor.getText();
   debouncedSaveNote.cancel();
-  await handleSaveNote(id, json, plainText, markdown, true);
+  await handleSaveNote(id, true);
   if (stateStore.get("activeId") !== id) return;
   const savedNote = noteStore.get("notes").find((n) => n.id === id);
   if (!savedNote) return;

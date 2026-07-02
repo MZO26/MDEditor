@@ -6,12 +6,18 @@ import type {
 import type {
   ExportManyRequest,
   ExportRequest,
+  FilePathRequest,
   OpenAutoExportPathRequest,
   SyncRequestPayload,
 } from "@shared/schemas/request-schema";
 import type { AppSettings, Theme } from "@shared/schemas/store-schema";
 import type { MenuType, NoteMenuPayload, ZoomAction } from "@shared/types";
-import { contextBridge, ipcRenderer, type IpcRendererEvent } from "electron";
+import {
+  contextBridge,
+  ipcRenderer,
+  webUtils,
+  type IpcRendererEvent,
+} from "electron";
 
 function subscribe<T extends unknown[]>(
   channel: string,
@@ -35,6 +41,7 @@ contextBridge.exposeInMainWorld(
   }),
 );
 contextBridge.exposeInMainWorld("electronAPI", {
+  getPathForFile: (file: File) => webUtils.getPathForFile(file),
   startupReady: () => ipcRenderer.send("app:start-ready"),
   showNotification: (title: string, body: string) =>
     ipcRenderer.invoke("notification:show", title, body),
@@ -83,7 +90,8 @@ contextBridge.exposeInMainWorld("noteAPI", {
     ipcRenderer.invoke("note:export", payload),
   noteExportMany: (payload: ExportManyRequest) =>
     ipcRenderer.invoke("note:export-many", payload),
-  noteImport: () => ipcRenderer.invoke("note:import"),
+  noteImport: (payload: FilePathRequest) =>
+    ipcRenderer.invoke("note:import", payload),
   onTriggerExport: (callback: (id: string, extension: string) => void) => {
     subscribe("note:trigger-export", callback);
   },

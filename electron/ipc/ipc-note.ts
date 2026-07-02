@@ -37,6 +37,7 @@ import {
 import {
   ExportManyRequestSchema,
   ExportRequestSchema,
+  FilePathRequestSchema,
   SyncRequestPayloadSchema,
 } from "@shared/schemas/request-schema";
 import { app, BrowserWindow, dialog, ipcMain } from "electron";
@@ -186,11 +187,20 @@ function registerNoteIpc(win: BrowserWindow) {
     });
   });
 
-  ipcMain.handle("note:import", (e) => {
+  ipcMain.handle("note:import", (e, payload: unknown) => {
     return result(e, async () => {
       if (!checkRateLimit("note:import", LIMITS.WRITE_HEAVY))
         throw new AppBackendError(AppErrorCode.RateLimitError);
-      const filePaths = await handleImportDialog(win);
+      const validatedData = validation(FilePathRequestSchema, payload);
+      const filePaths =
+        validatedData.source === "dialog"
+          ? await handleImportDialog(win)
+          : validatedData.source === "external"
+            ? validatedData.filePaths
+            : [];
+      if (filePaths.length === 0) {
+        throw new AppBackendError(AppErrorCode.CancelledOperation);
+      }
       return await batchImport(filePaths);
     });
   });

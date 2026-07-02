@@ -10,12 +10,36 @@
   container-name: sidebar;
 }
 
+.notes-container.is-drop-target {
+  background: color-mix(
+    in srgb,
+    var(--tag-bg) 18%,
+    var(--background-color, transparent)
+  );
+}
+
+.notes-container.is-drop-target::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 2px dashed var(--tag-bg);
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.notes-container.is-drop-target .sidebar-header,
+.notes-container.is-drop-target .sidebar-footer {
+  opacity: 0.45;
+}
+
 .notes-container {
   min-width: 200px;
   width: 100%;
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  position: relative;
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
   contain: content;
@@ -166,6 +190,7 @@ body.is-dragging * {
 .info-span {
   font-size: 0.85rem;
   color: var(--text-muted);
+  user-select: none;
 }
 
 .input-wrapper,
@@ -268,6 +293,19 @@ body.is-dragging * {
   height: 25px;
   width: 25px;
   cursor: pointer;
+}
+
+:is(
+  .input-wrapper-chevron,
+  .replace-one,
+  .replace-all,
+  .search-prev,
+  .search-next
+):is(:hover, :active, :focus, :focus-within, .is-active, :focus-visible) {
+  background: transparent;
+  outline: none;
+  box-shadow: none;
+  border: 1px solid transparent;
 }
 
 .input-wrapper-chevron.open i,

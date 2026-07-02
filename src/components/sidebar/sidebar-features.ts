@@ -1,17 +1,23 @@
-import { updateSettings } from "@/api/api";
+import { showNotification, updateSettings } from "@/api/api";
 import {
   buildSnippet,
   updateSnippetHighlight,
 } from "@/components/sidebar/sidebar-note-items";
+import { handleImportNote } from "@/notes/note-actions";
 import type { SearchMatchResult } from "@/notes/search";
 import { noteStore, searchEngine, stateStore } from "@/settings/app-state";
 import { debounce } from "@/utils/async";
 import { requireElement } from "@/utils/dom";
 import { renderIcons } from "@/utils/icons";
-import { estimateReadingTime } from "@/utils/note";
+import { estimateReadingTime, getExtension } from "@/utils/note";
 import { getAppItem, getUIItem, getUIItems } from "@/utils/registry";
 import { initTippyDelegate } from "@/utils/ui";
-import { DEBOUNCE_MS } from "@shared/constants";
+import {
+  CONTENT_TYPE_MAP,
+  DEBOUNCE_MS,
+  MAX_FILE_DROPS,
+} from "@shared/constants";
+import type { FilePathRequest } from "@shared/schemas/request-schema";
 import type { ResizeOptions } from "@shared/types";
 import tippy from "tippy.js";
 
@@ -245,6 +251,69 @@ function resizeSidebar(
   });
 }
 
+//---------------------------------------------------------
+
+// file drop logic
+
+function setupSidebarFileDrop(sidebar: HTMLDivElement) {
+  const setActive = (active: boolean) => {
+    sidebar.classList.toggle("is-drop-target", active);
+  };
+
+  const hasFiles = (event: DragEvent) =>
+    event.dataTransfer?.types.includes("Files") ?? false;
+
+  const handleDragOver = (event: DragEvent) => {
+    if (!hasFiles(event)) return;
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = "copy";
+    }
+    setActive(true);
+  };
+
+  const handleDragLeave = (event: DragEvent) => {
+    if (!hasFiles(event)) return;
+    event.preventDefault();
+    const relatedTarget = event.relatedTarget as Node | null;
+    if (!sidebar.contains(relatedTarget)) {
+      setActive(false);
+    }
+  };
+
+  const handleDrop = async (event: DragEvent) => {
+    if (!hasFiles(event)) return;
+    event.preventDefault();
+    setActive(false);
+    const files = Array.from(event.dataTransfer?.files ?? []);
+    if (files.length > MAX_FILE_DROPS) {
+      await showNotification(
+        "File Drop Limit Exceeded",
+        `You can only drop up to ${MAX_FILE_DROPS} files at once.`,
+      );
+      return;
+    }
+    const validFilePaths = files.flatMap((file) => {
+      const extension = getExtension(file.name);
+      if (!(extension in CONTENT_TYPE_MAP) && !(extension === "txt")) {
+        return [];
+      }
+      const filePath = window.electronAPI?.getPathForFile?.(file);
+      return filePath ? [filePath] : [];
+    });
+    if (validFilePaths.length === 0) return;
+    const request: FilePathRequest = {
+      source: "external",
+      filePaths: validFilePaths,
+    };
+    await handleImportNote(request);
+  };
+
+  sidebar.addEventListener("dragover", handleDragOver);
+  sidebar.addEventListener("drop", handleDrop);
+  sidebar.addEventListener("dragleave", handleDragLeave);
+}
+
 //------------------------------------------------------------
 
 // debounced functions
@@ -263,5 +332,6 @@ export {
   handleSearchInput,
   renderAllTags,
   resizeSidebar,
+  setupSidebarFileDrop,
   updateStats,
 };

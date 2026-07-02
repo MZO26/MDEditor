@@ -1,15 +1,12 @@
 import { sanitizeImportString } from "@electron/fs/fs-helpers";
 import { validation } from "@electron/ipc/ipc-validation";
 import { processWithLimit } from "@shared/limiter";
-import {
-  ImportRequestSchema,
-  type ImportRequest,
-} from "@shared/schemas/request-schema";
+import { ImportRequestSchema } from "@shared/schemas/request-schema";
 import { app } from "electron";
 import fs from "fs/promises";
 import path from "path";
 
-async function batchImport(filePaths: string[]): Promise<ImportRequest[]> {
+async function batchImport(filePaths: string[]) {
   const userDataPath = app.getPath("userData");
   const imagesFolder = path.join(userDataPath, "editor-images");
   const imported = await processWithLimit(filePaths, 20, async (file) => {

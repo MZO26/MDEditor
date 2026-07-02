@@ -1,4 +1,5 @@
 import { processAndInsertImages } from "@/extensions/image/image";
+import { getExtension } from "@/utils/note";
 import {
   ALLOWED_TYPES,
   CONTENT_TYPE_MAP,
@@ -7,11 +8,6 @@ import {
 import { Extension } from "@tiptap/core";
 import { Plugin, Selection } from "@tiptap/pm/state";
 import DOMPurify from "dompurify";
-
-function getExtension(name: string) {
-  const index = name.lastIndexOf(".");
-  return index > 0 ? name.slice(index + 1).toLowerCase() : "";
-}
 
 export const DropHandler = Extension.create({
   name: "dropHandler",

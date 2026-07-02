@@ -12,7 +12,7 @@ import type {
 } from "@shared/schemas/store-schema";
 import type {
   Code,
-  ContentType,
+  EditorContentType,
   QuickActionConfig,
   ResolvedTheme,
   SelectionActionConfig,
@@ -27,9 +27,11 @@ const YIELD_INTERVAL = 0;
 
 const BATCH_SIZE = 5;
 
+const MAX_FILE_DROPS = 50;
+
 const ZOOMS = [1, 1.1, 1.25] as const;
 
-const CONTENT_TYPE_MAP: Record<string, ContentType> = {
+const CONTENT_TYPE_MAP: Record<string, EditorContentType> = {
   md: "markdown",
   html: "html",
   json: "json",
@@ -320,6 +322,7 @@ export {
   IPC_TIMERS,
   LIMITS,
   LINE_HEIGHT_SETTINGS,
+  MAX_FILE_DROPS,
   MAX_SIZE,
   MIME_TO_EXT,
   NOTE_ITEM_DISPLAY_SETTINGS,

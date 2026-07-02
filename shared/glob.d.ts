@@ -23,6 +23,7 @@ declare global {
   interface Window {
     appInfo: Readonly<{ isMac: boolean }>;
     electronAPI: {
+      getPathForFile(file: File): string;
       imageWriteMany: (payload: ImagePayload[]) => Promise<Result<ImageSrc[]>>;
       startupReady: () => void;
       setTheme: (theme: Theme, focus?: boolean) => Promise<Result<Theme>>;
@@ -74,7 +75,9 @@ declare global {
       noteExportMany: (
         payload: ExportedContent[],
       ) => Promise<Result<ExportedContent[]>>;
-      noteImport: () => Promise<Result<ImportRequest[]>>;
+      noteImport: (
+        payload: FilePathRequest,
+      ) => Promise<Result<ImportRequest[]>>;
       onTriggerDelete: (callback: (id: string) => void) => () => void;
       onTriggerId: (callback: (id: string) => void) => () => void;
       onTriggerDuplicate: (callback: (id: string) => void) => () => void;

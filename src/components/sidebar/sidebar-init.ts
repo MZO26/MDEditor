@@ -5,6 +5,7 @@ import {
   debouncedSearch,
   renderAllTags,
   resizeSidebar,
+  setupSidebarFileDrop,
 } from "@/components/sidebar/sidebar-features";
 import {
   copyLinkSelection,
@@ -27,6 +28,7 @@ import { createAsyncHandler } from "@/utils/async";
 import { findElement } from "@/utils/dom";
 import { getAppItems, getUIItems, registerAppEvents } from "@/utils/registry";
 import { initTippyDelegate } from "@/utils/ui";
+import type { FilePathRequest } from "@shared/schemas/request-schema";
 
 // sidebar
 
@@ -55,6 +57,7 @@ function initNotesSidebar() {
   }
   initTippyDelegate(sidebarContainer);
   applySidebarListeners(sidebar, sidebarHeader, searchInput, selectionFooter);
+  setupSidebarFileDrop(sidebar);
   registerAppEvents(document, {
     "app:toggle-sidebar": () => {
       const collapsed = appContainer.classList.contains("collapsed");
@@ -94,7 +97,8 @@ function applySidebarListeners(
       }
       const importBtn = target.closest<HTMLButtonElement>(".import-btn");
       if (importBtn) {
-        await handleImportNote();
+        const request: FilePathRequest = { source: "dialog" };
+        await handleImportNote(request);
         return;
       }
     }),

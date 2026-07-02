@@ -96,6 +96,7 @@ function createWindow() {
   }
   win = new BrowserWindow(windowConfig);
   navigationHandler(win);
+  win.webContents.openDevTools();
   win.setMenuBarVisibility(false);
   if (process.env["ELECTRON_RENDERER_URL"]) {
     win.loadURL(process.env["ELECTRON_RENDERER_URL"]);
@@ -126,8 +127,10 @@ app.whenReady().then(async () => {
   createWindow();
   setupLocalImageProtocol();
   setPermissions();
-  registerIpc(win as BrowserWindow);
-  setUpEditorMenu(win as BrowserWindow);
+  if (win) {
+    registerIpc(win);
+    setUpEditorMenu(win);
+  }
 });
 
 nativeTheme.on("updated", () => {

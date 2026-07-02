@@ -12,7 +12,7 @@ Built with Electron, TypeScript, Better SQLite3, and TipTap.
 - Markdown-focused editing with TipTap
 - Connect and organize notes with links and tags
 - Export notes to Markdown, Plain Text, HTML, JSON and PDF
-- Import notes from Markdown, HTML and JSON
+- Import notes from Markdown, Plain Text, HTML and JSON
 - Focus Mode and adjustable editor width (Ultrawide support)
 - Light and dark theme support
 - Persistent settings with electron-store
