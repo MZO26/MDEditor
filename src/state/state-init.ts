@@ -12,6 +12,7 @@ import {
   updateSelection,
 } from "@/state/state-actions";
 import { setActiveItem } from "@/utils/dom";
+import { APP_EVENTS } from "@shared/shared-constants";
 
 function initSubscriptions(sidebar: HTMLDivElement) {
   stateStore.subscribeSel(
@@ -105,7 +106,7 @@ function initSubscriptions(sidebar: HTMLDivElement) {
         try {
           setToolbarCollapsed(collapsed);
         } finally {
-          document.dispatchEvent(new CustomEvent("app:refresh-toolbar"));
+          document.dispatchEvent(new CustomEvent(APP_EVENTS.REFRESH_TOOLBAR));
           rendererLogger.devLog("Dispatched toolbar refresh");
         }
       }

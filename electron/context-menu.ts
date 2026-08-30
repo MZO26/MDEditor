@@ -57,7 +57,11 @@ function setUpEditorMenu(win: BrowserWindow) {
     const hasSelection = params.selectionText?.trim().length > 0;
     const isImage = params.mediaType === "image";
     const hasLink = !!params.linkURL;
-    if (!params.isEditable && !hasSelection && !isImage && !hasLink) return;
+    mainLogger.devLog(params.isEditable);
+    if (!params.isEditable && !isImage && !hasLink) {
+      mainLogger.devLog("Early return");
+      return;
+    }
     if (params.isEditable) {
       addAction(params.editFlags.canCut, "Cut", "cut", items, win);
       addAction(params.editFlags.canCopy, "Copy", "copy", items, win);
