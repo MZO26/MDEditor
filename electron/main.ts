@@ -1,5 +1,6 @@
 import { setUpEditorMenu } from "@electron/context-menu";
 import db from "@electron/db/database";
+import { removeUnusedImages } from "@electron/fs/fs-image";
 import { setupGlobalErrorHandling } from "@electron/handler/global-handler";
 import {
   navigationHandler,
@@ -11,6 +12,7 @@ import {
   setPermissions,
 } from "@electron/handler/permission-handler";
 import { settingsService } from "@electron/handler/settings-handler";
+import { IPC_CHANNELS } from "@electron/ipc/ipc-channels";
 import { registerIpc } from "@electron/ipc/ipc-validation";
 import {
   getTitleBarOverlay,
@@ -32,7 +34,6 @@ import {
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
-import { IPC_CHANNELS } from "./ipc/ipc-channels";
 
 export let win: BrowserWindow | null = null;
 
@@ -141,6 +142,15 @@ async function createWindow() {
   });
   win.webContents.on("did-finish-load", () => {
     win?.webContents.setZoomFactor(1.1);
+    setTimeout(async () => {
+      try {
+        mainLogger.devLog("Starting post-load asset cleanup...");
+        const usedImages = db.getUsedImagesFromDatabase();
+        await removeUnusedImages(usedImages);
+      } catch (error) {
+        mainLogger.appError("Failed to clean up assets", error);
+      }
+    }, 5000);
   });
 }
 

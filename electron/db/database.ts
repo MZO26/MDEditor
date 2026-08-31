@@ -55,6 +55,7 @@ class AppDB {
   private getManyTagsStmt!: StatementSync;
   private getManyLinksStmt!: StatementSync;
   private getOldTitleStmt!: StatementSync;
+  private getImagesStmt!: StatementSync;
   private togglePinStmt!: StatementSync;
   private toggleManyPinStmt!: StatementSync;
   private updateStoreStmt!: StatementSync;
@@ -150,6 +151,11 @@ class AppDB {
       FROM notes
       WHERE id IN (SELECT value FROM json_each($ids))
       `);
+    this.getImagesStmt = db.prepare(`
+      SELECT content 
+      FROM notes 
+      WHERE content LIKE '%appimg:///%'
+    `);
     this.updateStoreStmt = db.prepare(`
       UPDATE store SET
       "theme" = $theme,
@@ -525,6 +531,22 @@ class AppDB {
       throw new AppBackendError(AppErrorCode.DBError);
     }
     return validation(OldNoteSchema, rows);
+  }
+
+  public getUsedImagesFromDatabase(): string[] {
+    const EXPORT_REGEX = /appimg:\/\/\/([^"' )>\s]+)/g;
+    const usedImages = new Set<string>();
+    for (const row of this.getImagesStmt.iterate()) {
+      const text =
+        typeof row["content"] === "string"
+          ? row["content"]
+          : JSON.stringify(row["content"]);
+      let match;
+      while ((match = EXPORT_REGEX.exec(text)) !== null) {
+        if (match[1]) usedImages.add(match[1]);
+      }
+    }
+    return Array.from(usedImages);
   }
 
   public getSearch(): NotesSearch {
